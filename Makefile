@@ -50,26 +50,4 @@ install-dashboard:
 install-heapster:
 	@kubectl create -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/monitoring-standalone/v1.2.0.yaml
 
-# https://github.com/kubernetes/kubernetes/tree/master/examples/mysql-wordpress-pd
-# https://github.com/kubernetes/kops/pull/906
-# https://github.com/jenkinsci/kubernetes-plugin
-# https://wiki.jenkins-ci.org/display/JENKINS/GitHub+OAuth+Plugin
-# https://jenkins.io/solutions/pipeline/
-# https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
-# ingress controller: https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes/blob/master/jenkins/k8s/lb/ingress.yaml
-#                     http://kubernetes.io/docs/user-guide/ingress/
-# http://blog.couchbase.com/2016/july/stateful-containers-kubernetes-amazon-ebs
-
-# https://github.com/kubernetes/kubernetes/tree/master/examples/newrelic (useful for github-authorized-keys reference)
-# https://github.com/kubernetes/kubernetes/blob/master/examples/volumes/aws_ebs/aws-ebs-web.yaml
-# https://github.com/kubernetes/kubernetes/tree/master/examples/volumes/nfs
-
-# helm charts: https://github.com/kubernetes/charts
-# https://github.com/kubernetes/charts/tree/master/stable/jenkins
-# openvpn
-# https://github.com/carlossg/kubernetes-jenkins
-# https://github.com/offlinehacker/openvpn-k8s
-# https://github.com/redspread/kube-openvpn
-# https://github.com/pieterlange/kube-openvpn
-# https://github.com/djenriquez/vault-ui
 

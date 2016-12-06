@@ -1,0 +1,27 @@
+export AWS_PROFILE ?= cloudposse-ops-session
+export AWS_DEFAULT_PROFILE ?= $(AWS_PROFILE)
+
+OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
+
+KOPS_DNS_ZONE ?= dev.cloudposse.com
+KOPS_NAME ?= foobar.$(KOPS_DNS_ZONE)
+
+KOPS_STATE ?= s3://cloudposse-shared-state
+
+KOPS_CLOUD ?= aws
+KOPS_ZONES ?= us-west-2a
+
+KOPS_MASTER_SIZE ?= t2.small
+KOPS_MASTER_ZONES ?= $(KOPS_ZONES)
+
+KOPS_NODE_SIZE ?= t2.medium
+KOPS_NODE_COUNT ?= 3
+
+KOPS_KUBERNETES_VERSION ?= 1.4.4
+
+KOPS_DOWNLOAD_URL ?= https://github.com/kubernetes/kops/releases/download/v1.4.1/kops-darwin-amd64
+KOPS_BIN ?= bin/kops
+
+KOPS_ASSOCIATE_PUBLIC_IP ?= true
+
+KOPS_ADMIN_ACCESS ?= $(shell curl -s http://whatismyip.akamai.com)/32

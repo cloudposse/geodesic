@@ -19,7 +19,7 @@ KOPS_NODE_COUNT ?= 3
 
 KOPS_KUBERNETES_VERSION ?= 1.4.4
 
-KOPS_DOWNLOAD_URL ?= https://github.com/kubernetes/kops/releases/download/v1.4.1/kops-darwin-amd64
+KOPS_DOWNLOAD_URL ?= https://github.com/kubernetes/kops/releases/download/v1.4.1/kops-$(OS)-amd64
 KOPS_BIN ?= bin/kops
 
 KOPS_ASSOCIATE_PUBLIC_IP ?= true

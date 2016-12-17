@@ -1,2 +1,2 @@
 # This is the only setting that is required to be changed.
-#KOPS_NAME = foobar.$(KOPS_DNS_ZONE)
+#export KOPS_NAME = foobar.$(KOPS_DNS_ZONE)

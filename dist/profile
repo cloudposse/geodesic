@@ -1,0 +1,6 @@
+alias make='make -C /geodesic'
+mkdir -p $(dirname ${TF_STATE_FILE})
+mkdir -p $(dirname ${KUBECONFIG})
+mkdir -p $(dirname ${AWS_SHARED_CREDENTIALS_FILE})
+mkdir -p $(dirname ${AWS_CONFIG_FILE})
+. /usr/local/bin/profile

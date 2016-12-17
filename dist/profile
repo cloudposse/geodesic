@@ -19,4 +19,6 @@ mkdir -p $(dirname ${TF_STATE_FILE})
 mkdir -p $(dirname ${KUBECONFIG})
 mkdir -p $(dirname ${AWS_SHARED_CREDENTIALS_FILE})
 mkdir -p $(dirname ${AWS_CONFIG_FILE})
+mkdir -p ${AWS_DATA_PATH}
+ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
 . /usr/local/bin/profile

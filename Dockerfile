@@ -44,6 +44,7 @@ RUN curl -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
 ENV BOOTSTRAP=true
 ENV HOME=/geodesic
 ENV KUBECONFIG=/geodesic/config/kubernetes/kubeconfig
+ENV AWS_DATA_PATH=/geodesic/config/aws/
 ENV AWS_SHARED_CREDENTIALS_FILE=/geodesic/config/aws/credentials
 ENV AWS_CONFIG_FILE=/geodesic/config/aws/config
 ENV TF_STATE_FILE=/geodesic/config/terraform/terraform.tfstate

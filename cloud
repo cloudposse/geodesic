@@ -2,13 +2,9 @@
 GEODESIC_DIR=/geodesic
 
 cd "$GEODESIC_DIR"
-if [ $# -eq 0 ]; then
-  make help
-  exit 1
-fi
-
 while true; do
   arg=$1
+
 	if [ -d "$arg" ]; then
     set -- "${@:2}"
     cd "$arg"

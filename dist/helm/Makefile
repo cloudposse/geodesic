@@ -1,3 +1,6 @@
+help:
+	@echo "Helm Help!"
+
 init:
 	helm init
 

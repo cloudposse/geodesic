@@ -55,6 +55,7 @@ VOLUME ["/geodesic/config"]
 
 ADD dist /geodesic
 ADD aws-assumed-role/profile /usr/local/bin/profile
+ADD cloud /usr/local/bin/cloud
 
 WORKDIR /geodesic
 

@@ -1,5 +1,7 @@
 include Makefile.*
 
+default: help
+
 up:
 	make -C kops $@
 
@@ -9,4 +11,5 @@ down:
 ssh:
 	make -C kops $@
 
-
+help:
+	@echo Help!

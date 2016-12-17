@@ -1,11 +1,12 @@
-DOCKER_IMAGE ?= cloudposse/geodesic
-DOCKER_TAG ?= dev
+IMAGE ?= cloudposse/geodesic
+TAG ?= dev
 
 deps:
-	git submodule update --recursive --remote
+	git submodule update --remote
 
-build:
-	docker build -t $(DOCKER_IMAGE):$(DOCKER_TAG) .
+build: 
+	docker build -t $(IMAGE):$(TAG) .
 
-install: deps
-	cp -a contrib/geodesic /usr/local/bin
+install:
+	docker run --tty $(IMAGE):$(TAG) > /usr/local/bin/geodesic
+	chmod 755 /usr/local/bin/geodesic 

@@ -2,24 +2,37 @@ include ../Makefile.helpers
 include Makefile.*
 
 ## Resolve dependencies
-deps: 
+deps: validate
 	@aws s3 mb $(KOPS_STATE)
 
 ## Export kubeconfig
-export:
+export: validate
 	$(KOPS_BIN) export kubecfg \
       --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME)
 
 ## Apply pending changes to the cluster
-update:
+update: validate
 	@$(KOPS_BIN) update cluster \
       --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME) \
       --yes
 
+validate:
+	$(call assert-set,KOPS_NAME)
+	$(call assert-set,KOPS_ZONES)
+	$(call assert-set,KOPS_DNS_ZONE)
+	$(call assert-set,KOPS_ASSOCIATE_PUBLIC_IP)
+	$(call assert-set,KOPS_ADMIN_ACCESS)
+	$(call assert-set,KOPS_NODE_COUNT)
+	$(call assert-set,KOPS_NODE_SIZE)
+	$(call assert-set,KOPS_MASTER_SIZE)
+	$(call assert-set,KOPS_MASTER_ZONES)
+	$(call assert-set,KOPS_KUBERNETES_VERSION)
+	$(call assert-set,KOPS_KOPS_STATE)
+
 ## Bring up a new cluster
-up: deps
+up: deps validate
 	@echo "Creating cluster $(KOPS_NAME)..."
 	@$(KOPS_BIN) create cluster \
 			--cloud=$(KOPS_CLOUD) \
@@ -37,7 +50,7 @@ up: deps
       --yes
 
 ## Export terraform configuration
-tf:
+tf: validate
 	@$(KOPS_BIN) update cluster \
       --out=terraform/ \
       --target=terraform \
@@ -45,12 +58,12 @@ tf:
       --name=$(KOPS_NAME)
 
 ## Tear down an existing cluster
-down:
+down: validate
 	@$(KOPS_BIN) delete cluster \
       --name=$(KOPS_NAME) \
       --state=$(KOPS_STATE) \
       --yes
 
 ## Connect to the cluster using SSH
-ssh:
+ssh: validate
 	@ssh admin@api.$(KOPS_NAME) || true

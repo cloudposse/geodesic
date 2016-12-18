@@ -1,7 +1,5 @@
-
-## Display this help!
-help:
-	@echo "Helm Help!"
+include ../Makefile.helpers
+include Makefile.*
 
 ## Init the client & server
 init:

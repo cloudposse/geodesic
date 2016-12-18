@@ -5,10 +5,10 @@ export OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 export KOPS_REGION ?= us-west-2
 
-export KOPS_DNS_ZONE ?= dev.cloudposse.com
-export KOPS_NAME ?= foobar.$(KOPS_DNS_ZONE)
+#export KOPS_DNS_ZONE ?= dev.cloudposse.com
+#export KOPS_NAME ?= foobar.$(KOPS_DNS_ZONE)
 
-export KOPS_STATE ?= s3://cloudposse-shared-state
+export KOPS_STATE ?= s3://config.$(KOPS_NAME)
 
 export KOPS_CLOUD ?= aws
 export KOPS_ZONES ?= us-west-2a
@@ -18,14 +18,6 @@ export KOPS_MASTER_ZONES ?= $(KOPS_ZONES)
 
 export KOPS_NODE_SIZE ?= t2.medium
 export KOPS_NODE_COUNT ?= 3
-
-export KOPS_KUBERNETES_VERSION ?= 1.5.1
-
-export KOPS_VERSION ?= 1.4.3
-
-export KOPS_DOWNLOAD_URL ?= https://github.com/kubernetes/kops/releases/download/v$(KOPS_VERSION)/kops-$(OS)-amd64
-
-export KOPS_BIN ?= ./bin/kops-$(KOPS_VERSION)
 
 export KOPS_ASSOCIATE_PUBLIC_IP ?= true
 

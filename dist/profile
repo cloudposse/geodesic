@@ -14,11 +14,28 @@ exit 0
 fi
 
 echo "Entering the geodesic shell..."
-alias make='make -C /geodesic'
+
+# Create directories
 mkdir -p $(dirname ${TF_STATE_FILE})
 mkdir -p $(dirname ${KUBECONFIG})
 mkdir -p $(dirname ${AWS_SHARED_CREDENTIALS_FILE})
 mkdir -p $(dirname ${AWS_CONFIG_FILE})
 mkdir -p ${AWS_DATA_PATH}
+
+# Workaround for aws-cli which does not respect AWS_DATA_PATH
 ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
+
+# Import aws-assumed-role
 . /usr/local/bin/profile
+
+# Define our own prompt
+function geodesic-prompt() {
+  if [ -f /geodesic/config/env ]; then
+		set -o allexport
+		. /geodesic/config/env
+		set +o allexport
+  fi
+  console-prompt
+}
+
+export PROMPT_COMMAND=geodesic-prompt

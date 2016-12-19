@@ -71,6 +71,9 @@ function geodesic-prompt() {
 		set +o allexport
   fi
   console-prompt
+  if [ -n "${CLUSTER_NAME}" ]; then
+    PS1="[${CLUSTER_NAME}]\n$PS1"
+  fi
 }
 
 export PROMPT_COMMAND=geodesic-prompt

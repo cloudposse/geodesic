@@ -2,8 +2,8 @@ include ../Makefile.helpers
 include Makefile.*
 
 ## Resolve dependencies
-deps: validate
-	@aws s3 mb $(KOPS_STATE)
+deps: create-bucket
+
 
 ## Export kubeconfig
 export: validate
@@ -19,6 +19,8 @@ update: validate
       --yes
 
 validate:
+	$(call assert-set,AWS_PROFILE)
+	$(call assert-set,AWS_DEFAULT_PROFILE)
 	$(call assert-set,KOPS_NAME)
 	$(call assert-set,KOPS_ZONES)
 	$(call assert-set,KOPS_DNS_ZONE)

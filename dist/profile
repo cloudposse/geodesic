@@ -30,9 +30,9 @@ ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
 
 # Define our own prompt
 function geodesic-prompt() {
-  if [ -f /geodesic/config/env ]; then
+  if [ -f "${CLOUD_CONFIG}" ]; then
 		set -o allexport
-		. /geodesic/config/env
+		. "${CLOUD_CONFIG}"
 		set +o allexport
   fi
   console-prompt

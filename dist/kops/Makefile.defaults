@@ -1,14 +1,9 @@
-export AWS_PROFILE ?= cloudposse-ops-session
-export AWS_DEFAULT_PROFILE ?= $(AWS_PROFILE)
-
-export OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
-
 export KOPS_REGION ?= us-west-2
 
-#export KOPS_DNS_ZONE ?= dev.cloudposse.com
-#export KOPS_NAME ?= foobar.$(KOPS_DNS_ZONE)
+export KOPS_DNS_ZONE ?= $(CLUSTER_DNS_ZONE)
+export KOPS_NAME ?= $(CLSUTER_NAME).$(KOPS_DNS_ZONE)
 
-export KOPS_STATE ?= s3://config.$(KOPS_NAME)
+export KOPS_STATE ?= s3://$(CLUSTER_STATE_BUCKET)
 
 export KOPS_CLOUD ?= aws
 export KOPS_ZONES ?= us-west-2a

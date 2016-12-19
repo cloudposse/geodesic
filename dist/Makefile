@@ -1,5 +1,9 @@
 include Makefile.*
 
+## Setup environment
+deps:
+	@cloud config create-bucket
+
 ## Bring up a new cluster
 up:
 	make -C kops $@
@@ -11,6 +15,11 @@ down:
 ## Connect to the cluster via SSH
 ssh:
 	make -C kops $@
+
+.PHONY: config
+## Manage configuration
+config: 
+	@make -C $@
 
 .PHONY: deploy
 ## Deploy distributions

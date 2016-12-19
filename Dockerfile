@@ -50,6 +50,7 @@ ENV AWS_CONFIG_FILE=/geodesic/config/aws/config
 ENV TF_STATE_FILE=/geodesic/config/terraform/terraform.tfstate
 ENV HELM_HOME=/geodesic/config/helm/
 ENV HISTFILE=/geodesic/config/history
+ENV CLOUD_CONFIG=/geodesic/config/env
 
 VOLUME ["/geodesic/config"]
 

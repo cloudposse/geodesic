@@ -12,7 +12,7 @@ Run the geodesic shell:
 geodesic
 ```
 
-Configure your AWS credentials in `/geodesic/config/aws`
+Configure your AWS credentials in `/geodesic/state/aws`
 
 Run `assume-role $role` where $role is the one you configured in your AWS configuration.
 

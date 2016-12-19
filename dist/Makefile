@@ -21,6 +21,10 @@ ssh:
 config: 
 	@make -C $@
 
+## Configure cloud
+configure:
+	@cloud config edit
+
 .PHONY: deploy
 ## Deploy distributions
 deploy: 

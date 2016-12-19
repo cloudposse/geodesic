@@ -43,16 +43,18 @@ RUN curl -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
 
 ENV BOOTSTRAP=true
 ENV HOME=/geodesic
-ENV KUBECONFIG=/geodesic/config/kubernetes/kubeconfig
-ENV AWS_DATA_PATH=/geodesic/config/aws/
-ENV AWS_SHARED_CREDENTIALS_FILE=/geodesic/config/aws/credentials
-ENV AWS_CONFIG_FILE=/geodesic/config/aws/config
-ENV TF_STATE_FILE=/geodesic/config/terraform/terraform.tfstate
-ENV HELM_HOME=/geodesic/config/helm/
-ENV HISTFILE=/geodesic/config/history
-ENV CLOUD_CONFIG=/geodesic/config/env
+ENV KUBECONFIG=/geodesic/state/kubernetes/kubeconfig
+ENV AWS_DATA_PATH=/geodesic/state/aws/
+ENV AWS_SHARED_CREDENTIALS_FILE=/geodesic/state/aws/credentials
+ENV AWS_CONFIG_FILE=/geodesic/state/aws/config
+ENV TF_STATE_FILE=/geodesic/state/terraform/terraform.tfstate
+ENV HELM_HOME=/geodesic/state/helm/
+ENV HISTFILE=/geodesic/state/history
+ENV CLOUD_STATE_PATH=/geodesic/state
+ENV CLOUD_CONFIG=/geodesic/state/env
+ENV GEODESIC_PATH=/geodesic
 
-VOLUME ["/geodesic/config"]
+VOLUME ["/geodesic/state"]
 
 ADD dist /geodesic
 ADD aws-assumed-role/profile /usr/local/bin/profile

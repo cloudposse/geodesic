@@ -2,7 +2,6 @@
 cd "$GEODESIC_PATH"
 while true; do
   arg=$1
-
 	if [ -d "$arg" ]; then
     set -- "${@:2}"
     cd "$arg"

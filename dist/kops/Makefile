@@ -2,8 +2,8 @@ include ../Makefile.helpers
 include Makefile.*
 
 ## Resolve dependencies
-deps: create-bucket
-
+deps:
+	@mkdir -p $(KOPS_STATE_PATH)
 
 ## Export kubeconfig
 export: validate
@@ -16,11 +16,13 @@ update: validate
 	@$(KOPS_BIN) update cluster \
       --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME) \
+      --ssh-public-key=$(KOPS_SSH_PUBLIC_KEY) \
       --yes
 
 validate:
 	$(call assert-set,AWS_PROFILE)
 	$(call assert-set,AWS_DEFAULT_PROFILE)
+	$(call assert-set,KUBERNETES_VERSION)
 	$(call assert-set,KOPS_NAME)
 	$(call assert-set,KOPS_ZONES)
 	$(call assert-set,KOPS_DNS_ZONE)
@@ -30,8 +32,7 @@ validate:
 	$(call assert-set,KOPS_NODE_SIZE)
 	$(call assert-set,KOPS_MASTER_SIZE)
 	$(call assert-set,KOPS_MASTER_ZONES)
-	$(call assert-set,KOPS_KUBERNETES_VERSION)
-	$(call assert-set,KOPS_KOPS_STATE)
+	$(call assert-set,KOPS_STATE)
 
 ## Bring up a new cluster
 up: deps validate
@@ -49,6 +50,7 @@ up: deps validate
       --kubernetes-version=$(KUBERNETES_VERSION) \
       --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME) \
+      --ssh-public-key=$(KOPS_SSH_PUBLIC_KEY) \
       --yes
 
 ## Export terraform configuration
@@ -66,6 +68,30 @@ down: validate
       --state=$(KOPS_STATE) \
       --yes
 
+## Delete SSH key pair for this deployment
+delete-ssh-key: validate
+	@rm -f "$(KOPS_SSH_PRIVATE_KEY)" "$(KOPS_SSH_PUBLIC_KEY)"
+
+## Create a unique SSH key for this deployment
+create-ssh-key: deps validate 
+	@if [ -f "$(KOPS_SSH_PRIVATE_KEY)" ]; then \
+    echo "SSH key $(KOPS_SSH_PRIVATE_KEY) already exists"; \
+  else \
+		ssh-keygen -t rsa -N '' -b 8192 -C "$(KOPS_NAME)"  -f "$(KOPS_SSH_PRIVATE_KEY)"; \
+    rm -f "$(KOPS_SSH_PUBLIC_KEY)"; \
+	fi
+	@if [ -f "$(KOPS_SSH_PUBLIC_KEY)" ]; then \
+	  echo "SSH pub key $(KOPS_SSH_PUBLIC_KEY) already exists"; \
+	else \
+	  ssh-keygen -y -f "$(KOPS_SSH_PRIVATE_KEY)" | tr -d "\n" > "$(KOPS_SSH_PUBLIC_KEY)" ; \
+	fi
+# Ensure perms are always correct
+	@chmod 600 "$(KOPS_SSH_PRIVATE_KEY)"
+
 ## Connect to the cluster using SSH
+ssh-as-admin: validate
+	@ssh -i $(KOPS_SSH_PRIVATE_KEY) admin@api.$(KOPS_NAME) || true
+
 ssh: validate
-	@ssh admin@api.$(KOPS_NAME) || true
+	$(call assert-set,GITHUB_USERNAME)
+	@ssh $(GITHUB_USERNAME)@api.$(KOPS_NAME) || true

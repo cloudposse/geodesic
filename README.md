@@ -34,3 +34,9 @@ cloud ssh
 cloud down
 ```
 
+### Pulling down an existing cluster
+```
+cloud config pull \
+  CLUSTER_STATE_BUCKET=config.demo.dev.cloudposse.com \
+  CLUSTER_STATE_BUCKET_REGION=us-east-1
+```

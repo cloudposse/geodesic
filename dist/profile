@@ -8,7 +8,35 @@ DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
 DOCKER_TAG=${DOCKER_TAG:-dev}
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 mkdir -p ${STATE_DIR}
-docker run --env BOOTSTRAP=false --env LS_COLORS --env TERM --env TERM_COLOR --env SSH_AUTH_SOCK --rm -it --volume ${STATE_DIR}:/geodesic/state ${DOCKER_IMAGE}:${DOCKER_TAG} $*
+if [ -t 1 ]; then
+  # Running in terminal 
+  DOCKER_ARGS=(-it --env LS_COLORS --env TERM --env TERM_COLOR)
+
+  if [ -n "$SSH_AUTH_SOCK" ]; then
+    if [ `uname -s` == 'Darwin' ]; then
+      # Run our own SSH agent
+      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                     --volume "${HOME}/.ssh:/geodesic/.ssh" )
+    else
+      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                     --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 
+                     --env SSH_AUTH_SOCK
+                     --env SSH_CLIENT
+                     --env SSH_CONNECTION
+                     --env SSH_TTY 
+                     --env USER)
+    fi
+  fi
+else
+  DOCKER_ARGS=()
+fi
+
+DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+              --rm 
+              --env BOOTSTRAP=false
+              --volume ${STATE_DIR}:/geodesic/state)
+
+docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE}:${DOCKER_TAG} $*
 __EOF__
 exit 0
 fi
@@ -25,6 +53,13 @@ mkdir -p ${AWS_DATA_PATH}
 # Workaround for aws-cli which does not respect AWS_DATA_PATH
 ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
 
+if [ -z "${SSH_AUTH_SOCK}" ]; then
+  eval $(ssh-agent)
+  if [ -f "${GEODESIC_PATH}/state/kops/id_rsa" ]; then
+	  ssh-add "${GEODESIC_PATH}/state/kops/id_rsa"
+  fi 
+fi
+
 # Import aws-assumed-role
 . /usr/local/bin/profile
 
@@ -39,3 +74,7 @@ function geodesic-prompt() {
 }
 
 export PROMPT_COMMAND=geodesic-prompt
+
+if [ -f "${GEODESIC_PATH}/motd" ]; then
+  cat "${GEODESIC_PATH}/motd"
+fi

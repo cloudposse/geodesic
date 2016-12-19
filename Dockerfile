@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN apk update \
-		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill
+		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git
 
 USER root
 
@@ -15,8 +15,8 @@ RUN curl -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/t
     && mv terraform /usr/local/bin
 
 # Install kubectl
-ENV K8S_VERSION 1.5.1
-RUN curl -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${K8S_VERSION}/bin/linux/amd64/kubectl \
+ENV KUBERNETES_VERSION 1.5.1
+RUN curl -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl
 

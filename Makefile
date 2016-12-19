@@ -1,6 +1,8 @@
 IMAGE ?= cloudposse/geodesic
 TAG ?= dev
 
+default: build
+
 deps:
 	git submodule update --remote
 

@@ -1,44 +1,9 @@
 #!/bin/bash
 
 if [ "${BOOTSTRAP}" == "true" ]; then
-stty -onlcr
-cat<<"__EOF__"
-# Please run the following commands to start the geodesic shell (modify as necessary)
-DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
-DOCKER_TAG=${DOCKER_TAG:-dev}
-STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
-mkdir -p ${STATE_DIR}
-if [ -t 1 ]; then
-  # Running in terminal 
-  DOCKER_ARGS=(-it --env LS_COLORS --env TERM --env TERM_COLOR)
-
-  if [ -n "$SSH_AUTH_SOCK" ]; then
-    if [ `uname -s` == 'Darwin' ]; then
-      # Run our own SSH agent
-      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                     --volume "${HOME}/.ssh:/geodesic/.ssh" )
-    else
-      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                     --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 
-                     --env SSH_AUTH_SOCK
-                     --env SSH_CLIENT
-                     --env SSH_CONNECTION
-                     --env SSH_TTY 
-                     --env USER)
-    fi
-  fi
-else
-  DOCKER_ARGS=()
-fi
-
-DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-              --rm 
-              --env BOOTSTRAP=false
-              --volume ${STATE_DIR}:/geodesic/state)
-
-docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE}:${DOCKER_TAG} $*
-__EOF__
-exit 0
+  stty -onlcr
+  cat contrib/geodesic
+  exit 0
 fi
 
 echo "Entering the geodesic shell..."

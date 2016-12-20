@@ -1,0 +1,26 @@
+export KOPS_BIN ?= kops
+
+export KOPS_REGION ?= us-west-2
+
+export KOPS_DNS_ZONE ?= $(CLUSTER_DNS_ZONE)
+export KOPS_NAME ?= $(CLUSTER_NAME)
+
+export KOPS_STATE ?= s3://$(CLUSTER_STATE_BUCKET)
+
+export KOPS_CLOUD ?= aws
+export KOPS_ZONES ?= us-west-2a
+
+export KOPS_MASTER_SIZE ?= t2.small
+export KOPS_MASTER_ZONES ?= $(KOPS_ZONES)
+
+export KOPS_NODE_SIZE ?= t2.medium
+export KOPS_NODE_COUNT ?= 3
+
+export KOPS_ASSOCIATE_PUBLIC_IP ?= true
+
+export KOPS_ADMIN_ACCESS ?= $(shell curl -s http://whatismyip.akamai.com)/32
+
+export KOPS_STATE_PATH ?= $(CLOUD_STATE_PATH)/kops
+export KOPS_SSH_PRIVATE_KEY ?= $(KOPS_STATE_PATH)/id_rsa
+export KOPS_SSH_PUBLIC_KEY ?= $(KOPS_SSH_PRIVATE_KEY).pub
+

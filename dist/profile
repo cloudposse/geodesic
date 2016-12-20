@@ -1,0 +1,48 @@
+#!/bin/bash
+
+if [ "${BOOTSTRAP}" == "true" ]; then
+  stty -onlcr
+  cat contrib/geodesic
+  exit 0
+fi
+
+echo "Entering the geodesic shell..."
+
+# Create directories
+mkdir -p $(dirname ${TF_STATE_FILE})
+mkdir -p $(dirname ${KUBECONFIG})
+mkdir -p $(dirname ${AWS_SHARED_CREDENTIALS_FILE})
+mkdir -p $(dirname ${AWS_CONFIG_FILE})
+mkdir -p ${AWS_DATA_PATH}
+
+# Workaround for aws-cli which does not respect AWS_DATA_PATH
+ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
+
+if [ -z "${SSH_AUTH_SOCK}" ]; then
+  eval $(ssh-agent)
+  if [ -f "${GEODESIC_PATH}/state/kops/id_rsa" ]; then
+	  ssh-add "${GEODESIC_PATH}/state/kops/id_rsa"
+  fi 
+fi
+
+# Import aws-assumed-role
+. /usr/local/bin/profile
+
+# Define our own prompt
+function geodesic-prompt() {
+  if [ -f "${CLOUD_CONFIG}" ]; then
+		set -o allexport
+		. "${CLOUD_CONFIG}"
+		set +o allexport
+  fi
+  console-prompt
+  if [ -n "${CLUSTER_NAME}" ]; then
+    PS1="[${CLUSTER_NAME}]\n$PS1"
+  fi
+}
+
+export PROMPT_COMMAND=geodesic-prompt
+
+if [ -f "${GEODESIC_PATH}/motd" ]; then
+  cat "${GEODESIC_PATH}/motd"
+fi

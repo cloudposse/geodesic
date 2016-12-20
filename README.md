@@ -4,7 +4,7 @@
 
 Install the geodesic client:
 ```
-make install
+curl geodesic.sh | bash
 ```
 
 Run the geodesic shell:

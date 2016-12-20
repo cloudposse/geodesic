@@ -6,15 +6,15 @@ deps:
 
 ## Bring up a new cluster
 up:
-	make -C kops $@
+	@make -C kops $@
 
 ## Tear down an existing cluster
 down:
-	make -C kops $@
+	@make -C kops $@
 
 ## Connect to the cluster via SSH
 ssh:
-	make -C kops $@
+	@make -C kops $@
 
 .PHONY: config
 ## Manage configuration

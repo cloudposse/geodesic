@@ -30,8 +30,10 @@ fi
 
 if [ "${OS}" == "Darwin" ]; then
   # Run in privleged mode to enable time synchronization of system clock with hardware clock
+  # Implement DNS fix related to https://github.com/docker/docker/issues/24344
   DOCKER_ARGS=("${DOCKER_ARGS[@]}"
                 --privileged
+                --dns=8.8.8.8
               )
 fi
 

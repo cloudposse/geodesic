@@ -3,24 +3,27 @@ include Makefile.*
 
 ## Resolve dependencies
 deps:
-	@mkdir -p $(KOPS_STATE_PATH)
+	@mkdir -p $(KOPS_STATE_STORE_PATH)
 
 ## Export kubeconfig
-export: validate
+export-kubecfg: validate
 	$(KOPS_BIN) export kubecfg \
-      --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME)
+
+## Export kops configuration
+save-config: validate
+	@echo "Writing configuration to $(KOPS_CONFIG)"
+	$(KOPS_BIN) get cluster -o yaml --full \
+      --name=$(KOPS_NAME) > $(KOPS_CONFIG)
 
 ## Edit cluster configuration
 edit: validate
 	@$(KOPS_BIN) edit cluster \
-      --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME)
 
 ## Upgrade cluster or apply configuration updates
 upgrade: validate
 	@$(KOPS_BIN) upgrade cluster \
-      --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME) \
 	    --yes
 	@cloud kops update
@@ -28,7 +31,6 @@ upgrade: validate
 ## Apply pending changes to the cluster
 update: validate
 	@$(KOPS_BIN) update cluster \
-      --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME) \
       --yes
 
@@ -45,7 +47,7 @@ validate:
 	$(call assert-set,KOPS_NODE_SIZE)
 	$(call assert-set,KOPS_MASTER_SIZE)
 	$(call assert-set,KOPS_MASTER_ZONES)
-	$(call assert-set,KOPS_STATE)
+	$(call assert-set,KOPS_STATE_STORE)
 
 ## Bring up a new cluster
 up: deps validate
@@ -61,7 +63,6 @@ up: deps validate
       --master-size=$(KOPS_MASTER_SIZE) \
       --master-zones=$(KOPS_MASTER_ZONES) \
       --kubernetes-version=$(KUBERNETES_VERSION) \
-      --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME) \
       --ssh-public-key=$(KOPS_SSH_PUBLIC_KEY) \
       --yes
@@ -80,14 +81,12 @@ tf: validate
 	@$(KOPS_BIN) update cluster \
       --out=terraform/ \
       --target=terraform \
-      --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME)
 
 ## Tear down an existing cluster
 down: validate
 	@$(KOPS_BIN) delete cluster \
       --name=$(KOPS_NAME) \
-      --state=$(KOPS_STATE) \
       --yes
 
 ## Delete SSH key pair for this deployment
@@ -111,14 +110,20 @@ create-ssh-key: deps validate
 	@chmod 600 "$(KOPS_SSH_PRIVATE_KEY)"
 
 ## Rotate SSH key for deployment
-rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key
+rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key update
+
+## List secrets
+describe-secrets:
+	@kops describe secrets \
+      --name=$(KOPS_NAME)
 
 ## Upload SSH key to deployment
 configure-ssh-key: validate
 	@echo "Configuring public ssh key"
-	@kops create secret sshpublickey admin -i $(KOPS_SSH_PUBLIC_KEY) \
-      --name=$(KOPS_NAME) \
-      --state=$(KOPS_STATE) 
+	@kops delete secret SSHPublicKey admin \
+      --name=$(KOPS_NAME) || true
+	@kops create secret sshpublickey admin --pubkey=$(KOPS_SSH_PUBLIC_KEY) \
+      --name=$(KOPS_NAME)
 
 ## Connect to the cluster using SSH
 ssh-as-admin: validate

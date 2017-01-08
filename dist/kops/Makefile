@@ -11,12 +11,25 @@ export: validate
       --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME)
 
+## Edit cluster configuration
+edit: validate
+	@$(KOPS_BIN) edit cluster \
+      --state=$(KOPS_STATE) \
+      --name=$(KOPS_NAME)
+
+## Upgrade cluster or apply configuration updates
+upgrade: validate
+	@$(KOPS_BIN) upgrade cluster \
+      --state=$(KOPS_STATE) \
+      --name=$(KOPS_NAME) \
+	    --yes
+	@cloud kops update
+
 ## Apply pending changes to the cluster
 update: validate
 	@$(KOPS_BIN) update cluster \
       --state=$(KOPS_STATE) \
       --name=$(KOPS_NAME) \
-      --ssh-public-key=$(KOPS_SSH_PUBLIC_KEY) \
       --yes
 
 validate:
@@ -52,6 +65,15 @@ up: deps validate
       --name=$(KOPS_NAME) \
       --ssh-public-key=$(KOPS_SSH_PUBLIC_KEY) \
       --yes
+
+## Wait until cluster online
+wait-until-ready: validate
+	@echo -n "Waiting until $(KOPS_DNS_ZONE) online"
+	@until kubectl api-versions 2>/dev/null; do \
+    echo -n .; \
+    sleep 1;\
+  done
+	@echo
 
 ## Export terraform configuration
 tf: validate
@@ -92,6 +114,7 @@ create-ssh-key: deps validate
 ssh-as-admin: validate
 	@ssh -i $(KOPS_SSH_PRIVATE_KEY) admin@api.$(KOPS_NAME) || true
 
-ssh: validate
+ssh:
 	$(call assert-set,GITHUB_USERNAME)
+	$(call assert-set,KOPS_NAME)
 	@ssh $(GITHUB_USERNAME)@api.$(KOPS_NAME) || true

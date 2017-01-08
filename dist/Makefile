@@ -6,7 +6,7 @@ deps:
 
 ## Bring up a new cluster
 up:
-	@make -C kops $@
+	@make -C kops $@ wait-until-ready
 
 ## Tear down an existing cluster
 down:

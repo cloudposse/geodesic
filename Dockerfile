@@ -27,7 +27,7 @@ RUN curl -sSL -O https://github.com/kubernetes/kops/releases/download/v${KOPS_VE
     && chmod +x /usr/local/bin/kops
 
 # Install helm
-ENV HELM_VERSION 2.0.2
+ENV HELM_VERSION 2.1.3
 RUN curl -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin/helm \
@@ -43,6 +43,7 @@ RUN curl -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
 
 ENV BOOTSTRAP=true
 ENV HOME=/geodesic
+ENV KOPS_STATE_PATH=/geodesic/state/kops
 ENV KUBECONFIG=/geodesic/state/kubernetes/kubeconfig
 ENV AWS_DATA_PATH=/geodesic/state/aws/
 ENV AWS_SHARED_CREDENTIALS_FILE=/geodesic/state/aws/credentials

@@ -3,11 +3,16 @@ include ../Makefile.helpers
 
 ## Init the client & server
 init:
-	helm init
+	@helm init
 
 ## Init the helm client
 init-client:
-	helm init --client-only
+	@helm init --client-only
+
+## Init the repositories
+init-repos:
+	@helm repo add cloudposse-stable https://charts.cloudposse.com/stable
+	@helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator
 
 ## Upgrade tiller
 upgrade:

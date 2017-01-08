@@ -3,6 +3,7 @@
 DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
 DOCKER_TAG=${DOCKER_TAG:-dev}
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
+OS=$(uname -s)
 mkdir -p ${STATE_DIR}
 if [ -t 1 ]; then
   # Running in terminal 
@@ -25,6 +26,15 @@ if [ -t 1 ]; then
   fi
 else
   DOCKER_ARGS=()
+fi
+
+if [ "${OS}" == "Darwin" ]; then
+  # Run in privleged mode to enable time synchronization of system clock with hardware clock
+  # Implement DNS fix related to https://github.com/docker/docker/issues/24344
+  DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                --privileged
+                --dns=8.8.8.8
+              )
 fi
 
 DOCKER_ARGS=("${DOCKER_ARGS[@]}"

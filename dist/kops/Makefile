@@ -110,6 +110,16 @@ create-ssh-key: deps validate
 # Ensure perms are always correct
 	@chmod 600 "$(KOPS_SSH_PRIVATE_KEY)"
 
+## Rotate SSH key for deployment
+rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key
+
+## Upload SSH key to deployment
+configure-ssh-key: validate
+	@echo "Configuring public ssh key"
+	@kops create secret sshpublickey admin -i $(KOPS_SSH_PUBLIC_KEY) \
+      --name=$(KOPS_NAME) \
+      --state=$(KOPS_STATE) 
+
 ## Connect to the cluster using SSH
 ssh-as-admin: validate
 	@ssh -i $(KOPS_SSH_PRIVATE_KEY) admin@api.$(KOPS_NAME) || true

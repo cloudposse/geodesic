@@ -7,32 +7,39 @@ deps:
 
 ## Export kubeconfig
 export-kubecfg: validate
-	$(KOPS_BIN) export kubecfg \
-      --name=$(KOPS_NAME)
+	$(KOPS_BIN) export kubecfg
 
 ## Export kops configuration
-save-config: validate
+backup-config: validate
 	@echo "Writing configuration to $(KOPS_CONFIG)"
-	$(KOPS_BIN) get cluster -o yaml --full \
-      --name=$(KOPS_NAME) > $(KOPS_CONFIG)
+	$(KOPS_BIN) get cluster -o yaml --full > $(KOPS_STATE_STORE_PATH)/kops.yaml
 
 ## Edit cluster configuration
 edit: validate
-	@$(KOPS_BIN) edit cluster \
-      --name=$(KOPS_NAME)
+	@$(KOPS_BIN) edit cluster
 
 ## Upgrade cluster or apply configuration updates
 upgrade: validate
 	@$(KOPS_BIN) upgrade cluster \
-      --name=$(KOPS_NAME) \
 	    --yes
-	@cloud kops update
+	@cloud kops apply
 
-## Apply pending changes to the cluster
+## Apply pending changes to the cluster's autoscaling group configuration (does not modify running instances)
 update: validate
 	@$(KOPS_BIN) update cluster \
-      --name=$(KOPS_NAME) \
       --yes
+
+## Rolling rebuild of all instances
+rolling-update: validate
+	@$(KOPS_BIN) rolling-update cluster \
+      --yes
+
+## Show pending changes
+plan: validate
+	@$(KOPS_BIN) rolling-update cluster
+
+## Update configuration and perform a rolling-update of all instances
+apply: update rolling-update
 
 validate:
 	$(call assert-set,AWS_PROFILE)
@@ -80,13 +87,11 @@ wait-until-ready: validate
 tf: validate
 	@$(KOPS_BIN) update cluster \
       --out=terraform/ \
-      --target=terraform \
-      --name=$(KOPS_NAME)
+      --target=terraform
 
 ## Tear down an existing cluster
 down: validate
 	@$(KOPS_BIN) delete cluster \
-      --name=$(KOPS_NAME) \
       --yes
 
 ## Delete SSH key pair for this deployment
@@ -110,20 +115,17 @@ create-ssh-key: deps validate
 	@chmod 600 "$(KOPS_SSH_PRIVATE_KEY)"
 
 ## Rotate SSH key for deployment
-rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key update
+rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key apply wait-until-ready
 
 ## List secrets
 describe-secrets:
-	@kops describe secrets \
-      --name=$(KOPS_NAME)
+	@kops describe secrets
 
 ## Upload SSH key to deployment
 configure-ssh-key: validate
 	@echo "Configuring public ssh key"
-	@kops delete secret SSHPublicKey admin \
-      --name=$(KOPS_NAME) || true
-	@kops create secret sshpublickey admin --pubkey=$(KOPS_SSH_PUBLIC_KEY) \
-      --name=$(KOPS_NAME)
+	@kops delete secret sshpublickey admin || true
+	@kops create secret sshpublickey admin --pubkey=$(KOPS_SSH_PUBLIC_KEY)
 
 ## Connect to the cluster using SSH
 ssh-as-admin: validate

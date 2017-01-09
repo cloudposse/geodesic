@@ -21,7 +21,7 @@ RUN curl -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KU
     && chmod +x /usr/local/bin/kubectl
 
 # Install kops
-ENV KOPS_VERSION 1.4.3
+ENV KOPS_VERSION 1.4.4
 RUN curl -sSL -O https://github.com/kubernetes/kops/releases/download/v${KOPS_VERSION}/kops-linux-amd64 \
     && mv kops-linux-amd64 /usr/local/bin/kops \
     && chmod +x /usr/local/bin/kops

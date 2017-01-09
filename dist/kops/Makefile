@@ -10,16 +10,16 @@ export-kubecfg: validate
 	$(KOPS_BIN) export kubecfg
 
 ## Export kops configuration
-backup-config: validate
-	@echo "Writing configuration to $(KOPS_CONFIG)"
-	$(KOPS_BIN) get cluster -o yaml --full > $(KOPS_STATE_STORE_PATH)/kops.yaml
+backup-config: validate deps
+	@echo "Writing configuration to $(KOPS_STATE_STORE_PATH)/kops.yaml"
+	@$(KOPS_BIN) get cluster -o yaml --full > $(KOPS_STATE_STORE_PATH)/kops.yaml
 
 ## Edit cluster configuration
 edit: validate
 	@$(KOPS_BIN) edit cluster
 
 ## Upgrade cluster or apply configuration updates
-upgrade: validate
+upgrade: validate 
 	@$(KOPS_BIN) upgrade cluster \
 	    --yes
 	@cloud kops apply
@@ -40,6 +40,7 @@ plan: validate
 
 ## Update configuration and perform a rolling-update of all instances
 apply: update rolling-update
+	@cloud config push
 
 validate:
 	$(call assert-set,AWS_PROFILE)
@@ -55,6 +56,8 @@ validate:
 	$(call assert-set,KOPS_MASTER_SIZE)
 	$(call assert-set,KOPS_MASTER_ZONES)
 	$(call assert-set,KOPS_STATE_STORE)
+	$(call assert-set,KOPS_STATE_STORE_PATH)
+	$(call assert-set,KOPS_CONFIG)
 
 ## Bring up a new cluster
 up: deps validate

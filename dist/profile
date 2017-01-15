@@ -39,7 +39,7 @@ if [ -z "${SSH_AUTH_SOCK}" ]; then
   eval $(ssh-agent)
   if [ -f "${KOPS_STATE_PATH}/id_rsa" ]; then
     chmod 600 "${KOPS_STATE_PATH}/id_rsa"
-	  ssh-add "${KOPS_STATE_PATH}/id_rsa"
+    ssh-add "${KOPS_STATE_PATH}/id_rsa"
   fi 
 fi
 

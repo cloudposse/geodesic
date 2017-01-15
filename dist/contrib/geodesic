@@ -33,6 +33,7 @@ if [ "${OS}" == "Darwin" ]; then
   # Implement DNS fix related to https://github.com/docker/docker/issues/24344
   DOCKER_ARGS=("${DOCKER_ARGS[@]}"
                 --privileged
+                --publish 8001:8001
                 --dns=8.8.8.8
               )
 fi

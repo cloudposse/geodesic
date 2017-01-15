@@ -27,6 +27,10 @@ endef
 
 default: help
 
+.PHONY : confirm
+confirm:
+	@confirm CLUSTER_NAME
+
 .PHONY : help
 ## This help screen
 help:

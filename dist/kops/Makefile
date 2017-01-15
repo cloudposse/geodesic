@@ -5,6 +5,7 @@ include Makefile.*
 deps:
 	@mkdir -p $(KOPS_STATE_STORE_PATH)
 
+
 ## Export kubeconfig
 export-kubecfg: validate
 	$(KOPS_BIN) export kubecfg
@@ -19,18 +20,18 @@ edit: validate
 	@$(KOPS_BIN) edit cluster
 
 ## Upgrade cluster or apply configuration updates
-upgrade: validate 
+upgrade: validate confirm
 	@$(KOPS_BIN) upgrade cluster \
 	    --yes
 	@cloud kops apply
 
 ## Apply pending changes to the cluster's autoscaling group configuration (does not modify running instances)
-update: validate
+update: validate confirm
 	@$(KOPS_BIN) update cluster \
 	  --yes
 
 ## Rolling rebuild of all instances
-rolling-update: validate
+rolling-update: validate confirm
 	@$(KOPS_BIN) rolling-update cluster \
 	  --yes
 
@@ -39,7 +40,7 @@ plan: validate
 	@$(KOPS_BIN) rolling-update cluster
 
 ## Update configuration and perform a rolling-update of all instances
-apply: update rolling-update
+apply: confirm update rolling-update
 	@cloud config push
 
 validate:
@@ -94,11 +95,13 @@ tf: validate
 
 ## Tear down an existing cluster
 down: validate
+	@confirm CLUSTER_NAME
 	@$(KOPS_BIN) delete cluster \
 	  --yes
 
 ## Delete SSH key pair for this deployment
 delete-ssh-key: validate
+	@confirm CLUSTER_NAME
 	@rm -f "$(KOPS_SSH_PRIVATE_KEY)" "$(KOPS_SSH_PUBLIC_KEY)"
 
 ## Create a unique SSH key for this deployment

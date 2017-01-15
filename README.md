@@ -1,10 +1,13 @@
 # Geodesic
 
+*definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
+
 ## Quickstart
 
-Install the geodesic client:
+Install the geodesic client, if you haven't already:
 ```
-curl geodesic.sh | bash
+docker run -it cloudposse/geodesic:latest > /usr/local/bin/geodesic && \
+  chmod 755 /usr/local/bin/geodesic
 ```
 
 Run the geodesic shell:
@@ -21,7 +24,7 @@ Run `assume-role $role` where $role is the one you configured in your AWS config
 ```
 cloud configure
 cloud up
-cloud deploy demo
+cloud init
 ```
 
 ### Connecting to the cluster

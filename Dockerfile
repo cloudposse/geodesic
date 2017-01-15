@@ -54,6 +54,7 @@ ENV HISTFILE=/geodesic/state/history
 ENV CLOUD_STATE_PATH=/geodesic/state
 ENV CLOUD_CONFIG=/geodesic/state/env
 ENV GEODESIC_PATH=/geodesic
+ENV HELM_VALUES_PATH=/geodesic/state/helm/values
 
 VOLUME ["/geodesic/state"]
 

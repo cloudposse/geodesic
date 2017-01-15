@@ -24,6 +24,7 @@ mkdir -p $(dirname ${AWS_SHARED_CREDENTIALS_FILE})
 mkdir -p $(dirname ${AWS_CONFIG_FILE})
 mkdir -p ${KOPS_STATE_PATH}
 mkdir -p ${AWS_DATA_PATH}
+mkdir -p ${GEODESIC_PATH}/state/ssh
 
 if [ ! -d "${HELM_HOME}" ]; then
   cloud helm init-client

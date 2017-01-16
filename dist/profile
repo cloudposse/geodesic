@@ -32,7 +32,7 @@ mkdir -p $(dirname ${AWS_SHARED_CREDENTIALS_FILE})
 mkdir -p $(dirname ${AWS_CONFIG_FILE})
 mkdir -p ${KOPS_STATE_PATH}
 mkdir -p ${AWS_DATA_PATH}
-mkdir -p ${GEODESIC_PATH}/state/ssh
+mkdir -p ${CLOUD_STATE_PATH}/ssh
 
 if [ ! -d "${HELM_HOME}" ]; then
   cloud helm init-client
@@ -66,7 +66,7 @@ function geodesic-prompt() {
 		set +o allexport
   fi
   console-prompt
-  local GIT_STATE=$(git -C ${GEODESIC_PATH}/state/ status -s)
+  local GIT_STATE=$(git -C ${CLOUD_STATE_PATH} status -s)
   local STATUS="[clean]";
   if [ -n "${GIT_STATE}" ]; then
     STATUS="[unsaved changes]"

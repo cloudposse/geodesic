@@ -22,6 +22,25 @@ validate:
 	$(call assert-set,CLUSTER_STATE_BUCKET)
 	$(call assert-set,CLUSTER_STATE_BUCKET_REGION)
 
+init-serial: validate confirm
+	@date +'%Y%m%d%H%M%S' > $(CLOUD_STATE_PATH)/serial
+	@cat $(CLOUD_STATE_PATH)/serial
+	@aws s3 cp $(CLOUD_STATE_PATH)/serial s3://$(CLUSTER_STATE_BUCKET)/state/serial --region=$(CLUSTER_STATE_BUCKET_REGION);
+
+## Verify the local serial matches remote serial (that your configuration matches the remote)
+verify-serial: validate
+	@aws s3 cp s3://$(CLUSTER_STATE_BUCKET)/state/serial /tmp/serial --region=$(CLUSTER_STATE_BUCKET_REGION) >/dev/null;
+	@REMOTE_SERIAL=`cat /tmp/serial`; \
+	LOCAL_SERIAL=`cat $(CLOUD_STATE_PATH)/serial`; \
+	if [ "$$REMOTE_SERIAL" == "$$LOCAL_SERIAL" ]; then \
+	  echo "Serial up to date: $$LOCAL_SERIAL"; \
+	  exit 0; \
+	else \
+	  echo "Remote Serial: $$REMOTE_SERIAL"; \
+	  echo "Local Serial:  $$LOCAL_SERIAL"; \
+	  exit 1; \
+	fi
+
 ## Create state bucket
 create-bucket: validate
 	@aws s3 mb s3://$(CLUSTER_STATE_BUCKET) --region=$(CLUSTER_STATE_BUCKET_REGION)
@@ -53,11 +72,12 @@ destroy-bucket: validate
     --force
 
 ## Push state to S3
-push: validate
+push: validate verify-serial
+	@date +'%Y%m%d%H%M%S' > $(CLOUD_STATE_PATH)/serial
+	@git -C ${CLOUD_STATE_PATH} add .
 	@git -C ${CLOUD_STATE_PATH} commit -a --message "Backup `date`"
 	@aws s3 sync ${CLOUD_STATE_PATH} s3://$(CLUSTER_STATE_BUCKET)/state/ \
       --region $(CLUSTER_STATE_BUCKET_REGION) \
-      --exclude ".git/*" \
       --exclude "*.swp" \
       --exclude "aws/*" \
       --exclude "history" \
@@ -69,7 +89,6 @@ push: validate
 pull: validate
 	@aws s3 sync s3://$(CLUSTER_STATE_BUCKET)/state/ $(CLOUD_STATE_PATH) \
       --region ${CLUSTER_STATE_BUCKET_REGION} \
-      --exclude ".git/*" \
       --exclude "*.swp" \
       --exclude "aws/*" \
       --exclude "history" \

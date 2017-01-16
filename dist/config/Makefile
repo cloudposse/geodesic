@@ -54,6 +54,7 @@ destroy-bucket: validate
 
 ## Push state to S3
 push: validate
+	@git -C ${CLOUD_STATE_PATH} commit -a --message "Backup `date`"
 	@aws s3 sync ${CLOUD_STATE_PATH} s3://$(CLUSTER_STATE_BUCKET)/state/ \
       --region $(CLUSTER_STATE_BUCKET_REGION) \
       --exclude ".git/*" \

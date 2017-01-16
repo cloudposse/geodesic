@@ -17,6 +17,14 @@ if [ $? -ne 0 ]; then
   echo "Warning: unable to sync system time from hardware clock; you may encounter problems with signed requests as a result of time drift."
 fi
 
+# Git defaults
+if [ ! -f "${XDG_CONFIG_HOME}/git/config" ]; then
+  mkdir -p "${XDG_CONFIG_HOME}/git";
+  touch "${XDG_CONFIG_HOME}/git/config"
+  git config --global user.email ops@cloudposse.com
+  git config --global user.name geodesic
+fi
+
 # Create directories
 mkdir -p $(dirname ${TF_STATE_FILE})
 mkdir -p $(dirname ${KUBECONFIG})
@@ -58,8 +66,13 @@ function geodesic-prompt() {
 		set +o allexport
   fi
   console-prompt
+  local GIT_STATE=$(git -C ${GEODESIC_PATH}/state/ status -s)
+  local STATUS="[clean]";
+  if [ -n "${GIT_STATE}" ]; then
+    STATUS="[unsaved changes]"
+  fi
   if [ -n "${CLUSTER_NAME}" ]; then
-    PS1="[${CLUSTER_NAME}]\n$PS1"
+    PS1="[${CLUSTER_NAME}]\n$STATUS $PS1"
   fi
 }
 

@@ -17,14 +17,6 @@ if [ $? -ne 0 ]; then
   echo "Warning: unable to sync system time from hardware clock; you may encounter problems with signed requests as a result of time drift."
 fi
 
-# Git defaults
-if [ ! -f "${XDG_CONFIG_HOME}/git/config" ]; then
-  mkdir -p "${XDG_CONFIG_HOME}/git";
-  touch "${XDG_CONFIG_HOME}/git/config"
-  git config --global user.email ops@cloudposse.com
-  git config --global user.name geodesic
-fi
-
 # Create directories
 mkdir -p $(dirname ${TF_STATE_FILE})
 mkdir -p $(dirname ${KUBECONFIG})
@@ -33,6 +25,20 @@ mkdir -p $(dirname ${AWS_CONFIG_FILE})
 mkdir -p ${KOPS_STATE_PATH}
 mkdir -p ${AWS_DATA_PATH}
 mkdir -p ${CLOUD_STATE_PATH}/ssh
+
+# Git defaults
+if [ ! -f "${XDG_CONFIG_HOME}/git/config" ]; then
+  mkdir -p "${XDG_CONFIG_HOME}/git";
+  touch "${XDG_CONFIG_HOME}/git/config"
+  git config --global user.email ops@cloudposse.com
+  git config --global user.name geodesic
+fi
+
+# Initialize git 
+if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then
+  git -C ${CLOUD_STATE_PATH} init
+  git -C  ${CLOUD_STATE_PATH} add .
+fi
 
 if [ ! -d "${HELM_HOME}" ]; then
   cloud helm init-client

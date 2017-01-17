@@ -44,3 +44,10 @@ cloud config pull \
   CLUSTER_STATE_BUCKET=config.demo.dev.cloudposse.com \
   CLUSTER_STATE_BUCKET_REGION=us-east-1
 ```
+
+### Using `kubectl` outside of geodesic
+
+Have `kubectl installed on your local machine? Then after setting up `geodesic`, you can export the `KUBECONFIG` environment variable to point to the one in `geodesic`. Note, `kubectl` does not support `~` in for the `HOME` directory.
+```
+export KUBECONFIG="${HOME}/.geodesic/kubernetes/kubeconfig" 
+```

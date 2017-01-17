@@ -14,8 +14,11 @@ echo "Entering the geodesic shell..."
 #        Signature expired: 20170103T233357Z is now earlier than 20170104T042623Z (20170104T044123Z - 15 min.)
 hwclock -s 2>/dev/null
 if [ $? -ne 0 ]; then
-  echo "Warning: unable to sync system time from hardware clock; you may encounter problems with signed requests as a result of time drift."
+  echo "WARNING: unable to sync system time from hardware clock; you may encounter problems with signed requests as a result of time drift."
 fi
+
+# Setup some default envs
+CLUSTER_STATE_BUCKET_REGION=${CLUSTER_STATE_BUCKET_REGION:-us-west-2}
 
 # Create directories
 mkdir -p $(dirname ${TF_STATE_FILE})
@@ -53,9 +56,15 @@ if [ -z "${SSH_AUTH_SOCK}" ]; then
   eval $(ssh-agent)
   if [ -f "${KOPS_STATE_PATH}/id_rsa" ]; then
     chmod 600 "${KOPS_STATE_PATH}/id_rsa"
-    ssh-add "${KOPS_STATE_PATH}/id_rsa"
   fi 
 fi
+
+if ssh-add -l | grep -q "$(ssh-keygen -lf "${KOPS_STATE_PATH}/id_rsa" | awk '{print $2}')"; then
+	echo "SSH key already added to agent"
+else 
+  ssh-add "${KOPS_STATE_PATH}/id_rsa"
+fi
+
 
 # Import aws-assumed-role
 . /usr/local/bin/profile

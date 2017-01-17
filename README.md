@@ -6,7 +6,8 @@
 
 Install the geodesic client, if you haven't already:
 ```
-docker run -it cloudposse/geodesic:latest > /usr/local/bin/geodesic && \
+sudo bash
+docker run --rm -it cloudposse/geodesic:latest > /usr/local/bin/geodesic && \
   chmod 755 /usr/local/bin/geodesic
 ```
 

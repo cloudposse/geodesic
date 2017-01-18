@@ -79,8 +79,14 @@ up: deps validate
 			--yes
 
 is-online:
-	@kubectl api-versions >/dev/null 2>&1 || echo "$(KOPS_NAME) is offline"
-	@echo "$(KOPS_NAME) is online  "
+	@kubectl api-versions >/dev/null 2>&1; \
+  if [ $$? -eq 0 ]; then \
+	  echo "$(KOPS_NAME) is online  "; \
+    exit 0; \
+  else \
+    echo "$(KOPS_NAME) is offline"; \
+    exit 1; \
+  fi
 
 ## Wait until cluster online
 wait-until-ready: validate
@@ -96,6 +102,7 @@ tf: validate
 down: validate
 	@confirm CLUSTER_NAME
 	@$(KOPS_BIN) delete cluster \
+    --name=$(KOPS_NAME) \
 	  --yes
 
 ## Delete SSH key pair for this deployment

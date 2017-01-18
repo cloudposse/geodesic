@@ -9,7 +9,7 @@ COLOR_RESET="\033[0m"
 
 while true; do
   printf "\r%b%c%b " ${COLOR_GREEN} ${SPINNER_TEMPLATE:$i} ${COLOR_RESET};
-  $* 2>/dev/null | tr -d '\n'
+  ($* 2>/dev/null | grep -v '^Makefile') | tr -d '\n'
   EXIT_CODE=$?
   if [ $EXIT_CODE -eq 0 ]; then
     break;

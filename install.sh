@@ -4,9 +4,7 @@ DOCKER_TAG=${DOCKER_TAG:-latest}
 APP_NAME=${APP_NAME:-geodesic}
 INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
-REQUIRE_SUDO=${REQUIRE_SUDO:-true}
 REQUIRE_PULL=${REQUIRE_PULL:-true}
-TEE_CMD="sudo tee"
 
 which docker >/dev/null
 if [ $? -ne 0 ]; then
@@ -20,14 +18,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-if [ "${REQUIRE_SUDO}" == "true" ]; then
-  sudo true
-  if [ $? -ne 0 ]; then
-    echo "Sudo required to install ${APP_NAME}"
-    exit 1
-  fi
-else
-  TEE_CMD="tee"
+if [ ! -w "${INSTALL_PATH}" ]; then
+  echo "Cannot write to ${INSTALL_PATH}. Please retry using sudo."
+  exit 1
 fi
 
 echo "# Installing ${APP_NAME} from ${DOCKER_IMAGE}:${DOCKER_TAG}..."
@@ -35,7 +28,7 @@ if [ "${REQUIRE_PULL}" == "true" ]; then
   docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
 fi 
 
-(docker run --name "${APP_NAME}-install" --rm -it "${DOCKER_IMAGE}:${DOCKER_TAG}" | ${TEE_CMD} "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
+(docker run --name "${APP_NAME}-install" --rm -it "${DOCKER_IMAGE}:${DOCKER_TAG}" | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
   chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 
 if [ $? -eq 0 ]; then

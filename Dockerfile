@@ -63,6 +63,7 @@ ADD dist /geodesic
 ADD aws-assumed-role/profile /usr/local/bin/profile
 ADD cloud /usr/local/bin/cloud
 ADD confirm /usr/local/bin/confirm
+ADD watch /usr/local/bin/watch
 
 WORKDIR /geodesic
 

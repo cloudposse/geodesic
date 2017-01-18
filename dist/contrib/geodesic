@@ -2,6 +2,7 @@
 # Please run the following commands to start the geodesic shell (modify as necessary)
 DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
 DOCKER_TAG=${DOCKER_TAG:-latest}
+DOCKER_NAME=${DOCKER_NAME:-geodesic}
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
 mkdir -p ${STATE_DIR}
@@ -13,7 +14,7 @@ fi
 
 if [ -t 1 ]; then
   # Running in terminal 
-  DOCKER_ARGS=(-it --env LS_COLORS --env TERM --env TERM_COLOR)
+  DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}-bootstrap" --env LS_COLORS --env TERM --env TERM_COLOR)
 
   if [ -n "$SSH_AUTH_SOCK" ]; then
     if [ `uname -s` == 'Darwin' ]; then
@@ -45,8 +46,19 @@ fi
 DOCKER_ARGS=("${DOCKER_ARGS[@]}"
               --privileged
               --publish 8001:8001
+              --name "${DOCKER_NAME}"
               --rm 
               --env BOOTSTRAP=false
               --volume ${STATE_DIR}:/geodesic/state)
 
-docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE}:${DOCKER_TAG} $*
+docker inspect geodesic >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo "# Attaching to existing ${DOCKER_NAME} session"
+  if [ $# -eq 0 ]; then
+    set -- "/bin/bash" "--rcfile" "/geodesic/profile" "$@"
+  fi
+  docker exec -it "${DOCKER_NAME}" $*
+else
+  echo "# Starting new ${DOCKER_NAME} session"
+  docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE}:${DOCKER_TAG} $*
+fi

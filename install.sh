@@ -5,6 +5,7 @@ APP_NAME=${APP_NAME:-geodesic}
 INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
 REQUIRE_SUDO=${REQUIRE_SUDO:-true}
+REQUIRE_PULL=${REQUIRE_PULL:-true}
 TEE_CMD="sudo tee"
 
 which docker >/dev/null
@@ -30,8 +31,11 @@ else
 fi
 
 echo "# Installing ${APP_NAME} from ${DOCKER_IMAGE}:${DOCKER_TAG}..."
-docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}" && \
-  (docker run --name "${APP_NAME}-install" --rm -it "${DOCKER_IMAGE}:${DOCKER_TAG}" | ${TEE_CMD} "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
+if [ "${REQUIRE_PULL}" == "true" ]; then
+  docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
+fi 
+
+(docker run --name "${APP_NAME}-install" --rm -it "${DOCKER_IMAGE}:${DOCKER_TAG}" | ${TEE_CMD} "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
   chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 
 if [ $? -eq 0 ]; then

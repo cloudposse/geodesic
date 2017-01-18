@@ -78,14 +78,13 @@ up: deps validate
 			--ssh-public-key=$(KOPS_SSH_PUBLIC_KEY) \
 			--yes
 
+is-online:
+	@kubectl api-versions >/dev/null 2>&1 || echo "$(KOPS_NAME) is offline"
+	@echo "$(KOPS_NAME) is online  "
+
 ## Wait until cluster online
 wait-until-ready: validate
-	@echo -n "Waiting until $(KOPS_NAME) online"
-	@until kubectl api-versions 2>/dev/null; do \
-	  echo -n .; \
-	  sleep 1;\
-	  done
-	@echo
+	@watch cloud kops is-online
 
 ## Export terraform configuration
 tf: validate

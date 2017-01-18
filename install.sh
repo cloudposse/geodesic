@@ -36,6 +36,6 @@ if [ $? -eq 0 ]; then
   exit 0
 else
   echo "# Failed to install ${APP_NAME}"
-  echo "# Please let us know! Send an email to hello@cloudposse.com"
+  echo "# Please let us know! Send an email to < hello@cloudposse.com > with what went wrong."
   exit 1
 fi

@@ -18,3 +18,37 @@ script:
 
 after_success:
 - make travis:docker-tag-and-push
+
+deploy:
+  # Deploy to dev (branch)
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: $DEV_BUCKET
+    skip_cleanup: true
+    upload-dir: $TRAVIS_BRANCH
+    local-dir: public
+    on:
+      all_branches: true
+
+  # Deploy to dev (tag)
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: $DEV_BUCKET
+    skip_cleanup: true
+    upload-dir: $TRAVIS_TAG
+    local-dir: public
+    on:
+      tags: true
+
+  # Deploy to master
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: $MASTER_BUCKET
+    skip_cleanup: true
+    upload-dir: /
+    local-dir: public
+    on:
+      branch: master

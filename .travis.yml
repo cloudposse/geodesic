@@ -7,6 +7,7 @@ addons:
     - curl
 env:
   - DOCKER_IMAGE_NAME=cloudposse/geodesic
+  - AWS_REGION=us-west-2
 services:
 - docker
 install:

@@ -7,6 +7,7 @@ addons:
     - curl
 env:
   - geodesic
+  - DOCKER_IMAGE_NAME=cloudposse/geodesic
 services:
 - docker
 install:

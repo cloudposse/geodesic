@@ -1,4 +1,4 @@
-DOCKER_IMAGE_NAME ?= cloudposse/geodesic
+IMAGE ?= cloudposse/geodesic
 TAG ?= dev
 
 SHELL = /bin/bash
@@ -6,7 +6,10 @@ export BUILD_HARNESS_PATH ?= $(shell until [ -d "build-harness" ] || [ "`pwd`" =
 -include $(BUILD_HARNESS_PATH)/Makefile
 
 deps:
-	@make --no-print-directory git\:submodules-update
+	@make --no-print-directory git:submodules-update
+
+build:
+	@make --no-print-directory docker:build
 
 install:
 	@DOCKER_TAG=$(TAG) REQUIRE_PULL=false ./install.sh

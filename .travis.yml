@@ -1,0 +1,20 @@
+sudo: required
+addons:
+  apt:
+    packages:
+    - git
+    - make
+    - curl
+env:
+  - geodesic
+services:
+- docker
+install:
+- make init
+- make docker:login
+
+script:
+- make docker:build
+
+after_success:
+- make travis:docker-tag-and-push

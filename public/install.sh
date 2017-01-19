@@ -28,7 +28,7 @@ if [ "${REQUIRE_PULL}" == "true" ]; then
   docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
 fi 
 
-(docker run --name "${APP_NAME}-install" --rm -it "${DOCKER_IMAGE}:${DOCKER_TAG}" | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
+(docker run --name "${APP_NAME}-install" --rm --tty "${DOCKER_IMAGE}:${DOCKER_TAG}" | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
   chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 
 if [ $? -eq 0 ]; then

@@ -14,28 +14,64 @@ echo "Entering the geodesic shell..."
 #        Signature expired: 20170103T233357Z is now earlier than 20170104T042623Z (20170104T044123Z - 15 min.)
 hwclock -s 2>/dev/null
 if [ $? -ne 0 ]; then
-  echo "Warning: unable to sync system time from hardware clock; you may encounter problems with signed requests as a result of time drift."
+  echo "WARNING: unable to sync system time from hardware clock; you may encounter problems with signed requests as a result of time drift."
 fi
+
+# Setup some default envs
+CLUSTER_STATE_BUCKET_REGION=${CLUSTER_STATE_BUCKET_REGION:-us-west-2}
 
 # Create directories
 mkdir -p $(dirname ${TF_STATE_FILE})
 mkdir -p $(dirname ${KUBECONFIG})
 mkdir -p $(dirname ${AWS_SHARED_CREDENTIALS_FILE})
 mkdir -p $(dirname ${AWS_CONFIG_FILE})
+mkdir -p ${KOPS_STATE_PATH}
 mkdir -p ${AWS_DATA_PATH}
+mkdir -p ${CLOUD_STATE_PATH}/ssh
+
+# Git defaults
+if [ ! -f "${XDG_CONFIG_HOME}/git/config" ]; then
+  mkdir -p "${XDG_CONFIG_HOME}/git";
+  touch "${XDG_CONFIG_HOME}/git/config"
+  git config --global user.email ops@cloudposse.com
+  git config --global user.name geodesic
+fi
+
+# Initialize git 
+if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then
+  git -C ${CLOUD_STATE_PATH} init
+  git -C  ${CLOUD_STATE_PATH} add .
+fi
+
+if [ ! -d "${HELM_HOME}" ]; then
+  cloud helm init-client
+  cloud helm init-repos
+fi
 
 # Workaround for aws-cli which does not respect AWS_DATA_PATH
 ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
 
+
 if [ -z "${SSH_AUTH_SOCK}" ]; then
   eval $(ssh-agent)
-  if [ -f "${GEODESIC_PATH}/state/kops/id_rsa" ]; then
-	  ssh-add "${GEODESIC_PATH}/state/kops/id_rsa"
+  if [ -f "${KOPS_STATE_PATH}/id_rsa" ]; then
+    chmod 600 "${KOPS_STATE_PATH}/id_rsa"
   fi 
 fi
 
+if ssh-add -l | grep -q "$(ssh-keygen -lf "${KOPS_STATE_PATH}/id_rsa" | awk '{print $2}')"; then
+	echo "SSH key already added to agent"
+else 
+  ssh-add "${KOPS_STATE_PATH}/id_rsa"
+fi
+
+
 # Import aws-assumed-role
 . /usr/local/bin/profile
+
+# Setup some handy aliases
+alias kube-system='kubectl --namespace=kube-system'
+alias default='kubectl --namespace=default'
 
 # Define our own prompt
 function geodesic-prompt() {
@@ -45,8 +81,13 @@ function geodesic-prompt() {
 		set +o allexport
   fi
   console-prompt
+  local GIT_STATE=$(git -C ${CLOUD_STATE_PATH} status -s)
+  local STATUS="[clean]";
+  if [ -n "${GIT_STATE}" ]; then
+    STATUS="[unsaved changes]"
+  fi
   if [ -n "${CLUSTER_NAME}" ]; then
-    PS1="[${CLUSTER_NAME}]\n$PS1"
+    PS1="[${CLUSTER_NAME}]\n$STATUS $PS1"
   fi
 }
 

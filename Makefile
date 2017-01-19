@@ -10,5 +10,4 @@ build:
 	docker build -t $(IMAGE):$(TAG) .
 
 install:
-	docker run --tty $(IMAGE):$(TAG) > /usr/local/bin/geodesic
-	chmod 755 /usr/local/bin/geodesic 
+	@DOCKER_TAG=$(TAG) REQUIRE_PULL=false ./install.sh

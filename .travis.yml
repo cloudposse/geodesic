@@ -7,7 +7,6 @@ addons:
     - curl
 env:
   - DOCKER_IMAGE_NAME=cloudposse/geodesic
-  - AWS_REGION=us-west-2
 services:
 - docker
 install:
@@ -29,6 +28,7 @@ deploy:
     skip_cleanup: true
     upload-dir: $TRAVIS_BRANCH
     local-dir: public
+    region: us-west-2
     on:
       all_branches: true
 
@@ -40,6 +40,7 @@ deploy:
     skip_cleanup: true
     upload-dir: $TRAVIS_TAG
     local-dir: public
+    region: us-west-2
     on:
       tags: true
 
@@ -51,5 +52,6 @@ deploy:
     skip_cleanup: true
     upload-dir: /
     local-dir: public
+    region: us-west-2
     on:
       branch: master

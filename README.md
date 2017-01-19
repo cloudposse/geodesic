@@ -6,7 +6,7 @@
 
 Install the geodesic client, if you haven't already:
 ```
-./install.sh 
+curl https://geodesic.sh | bash
 ```
 
 Run the geodesic shell:

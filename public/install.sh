@@ -12,6 +12,12 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+docker ps >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
+  exit 1
+fi
+
 which tee >/dev/null
 if [ $? -ne 0 ]; then
   echo "Tee is requried to install ${APP_NAME}"

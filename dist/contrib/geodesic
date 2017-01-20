@@ -12,6 +12,12 @@ if ! which docker > /dev/null; then
   exit 1
 fi
 
+docker ps >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
+  exit 1
+fi
+
 if [ -t 1 ]; then
   # Running in terminal 
   DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}-bootstrap" --env LS_COLORS --env TERM --env TERM_COLOR)

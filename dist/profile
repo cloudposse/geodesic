@@ -59,11 +59,7 @@ if [ -z "${SSH_AUTH_SOCK}" ]; then
   fi 
 fi
 
-if ssh-add -l | grep -q "$(ssh-keygen -lf "${KOPS_STATE_PATH}/id_rsa" | awk '{print $2}')"; then
-	echo "SSH key already added to agent"
-else 
-  ssh-add "${KOPS_STATE_PATH}/id_rsa"
-fi
+cloud kops add-ssh-key
 
 
 # Import aws-assumed-role

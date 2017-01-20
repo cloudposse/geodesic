@@ -1,0 +1,10 @@
+#image:
+#  repository: "gcr.io/google_containers/heapster"
+#  tag: "v1.2.0"
+#  pullPolicy: "Always"
+#source: "kubernetes"
+#service:
+#  type: ClusterIP
+#  externalPort: 80
+#  internalPort: 8082
+

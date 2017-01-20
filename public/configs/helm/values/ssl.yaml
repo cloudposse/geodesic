@@ -1,0 +1,8 @@
+#replicaCount: 1
+#image:
+#  repository: jetstack/kube-lego
+#  tag: 0.1.3
+#  pullPolicy: IfNotPresent
+#lego:
+#  email: "ops@example.com"
+#  prod: false

@@ -131,10 +131,10 @@ rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key apply wait-until
 
 ## Add ssh key to agent
 add-ssh-key:
-	@if ssh-add -l | grep -q "$$(ssh-keygen -lf "$${KOPS_STATE_PATH}/id_rsa" | awk '{print $$2}')"; then
-		echo "SSH key already added to agent"
-	else 
-	  ssh-add "$${KOPS_STATE_PATH}/id_rsa"
+	@if ssh-add -l | grep -q "$$(ssh-keygen -lf "$${KOPS_STATE_PATH}/id_rsa" | awk '{print $$2}')"; then \
+		echo "SSH key already added to agent"; \
+	else \
+	  ssh-add "$${KOPS_STATE_PATH}/id_rsa"; \
 	fi
 
 

@@ -16,6 +16,9 @@ build:
 install:
 	@REQUIRE_PULL=false public/install.sh
 
+run:
+	@geodesic
+
 .PHONY : init
 ## Init build-harness
 init:

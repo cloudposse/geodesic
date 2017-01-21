@@ -28,6 +28,9 @@ if [ "${REQUIRE_PULL}" == "true" ]; then
   docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
 fi 
 
+# Sometimes docker might not exit cleanly 
+docker rm "${APP_NAME}-install" >/dev/null 2>&1
+
 (docker run --name "${APP_NAME}-install" --rm --tty "${DOCKER_IMAGE}:${DOCKER_TAG}" | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
   chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 

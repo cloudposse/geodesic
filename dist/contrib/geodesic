@@ -1,8 +1,9 @@
 #!/bin/bash
 # Please run the following commands to start the geodesic shell (modify as necessary)
-DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
-DOCKER_TAG=${DOCKER_TAG:-latest}
-DOCKER_NAME=${DOCKER_NAME:-geodesic}
+export DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
+export DOCKER_TAG=${DOCKER_TAG:-latest}
+export DOCKER_NAME=${DOCKER_NAME:-geodesic}
+
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
 mkdir -p ${STATE_DIR}
@@ -10,6 +11,17 @@ mkdir -p ${STATE_DIR}
 if ! which docker > /dev/null; then
   echo "Cannot find docker installed on this system. Please install and try again."
   exit 1
+fi
+
+if [ "$1" == "update" ]; then
+  curl --silent --fail https://geodesic.sh | bash
+  if [ $? -eq 0 ]; then
+    echo "# ${DOCKER_NAME}:${DOCKER_TAG} has been updated."
+    exit 0
+  else
+    echo "Failed to update geodesic"
+    exit 1
+  fi
 fi
 
 if [ -t 1 ]; then

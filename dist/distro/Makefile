@@ -1,9 +1,10 @@
 include ../Makefile.helpers
 
-## Install demo distro
-demo:
+## Install default distro
+default:
 	@make -C $@
 
 ## Install kube-system distro
 kube-system:
 	@make -C $@
+

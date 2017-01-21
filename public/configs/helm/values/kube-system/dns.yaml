@@ -1,8 +1,0 @@
-ingress_service_selector: k8s-addon=ingress-nginx.addons.k8s.io,role=entrypoint
-dns_record_type: CNAME
-dns_record_ttl: 300
-replicaCount: 1
-image:
-  repository: cloudposse/route53-kubernetes
-  tag: latest
-  pullPolicy: Always

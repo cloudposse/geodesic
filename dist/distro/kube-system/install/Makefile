@@ -35,5 +35,5 @@ metrics:
 
 ## Install Data Dog
 dd:
-	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml cloudposse-jenkins/datadog
+	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml stable/datadog
 

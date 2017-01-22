@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN apk update \
-		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git coreutils
+		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git coreutils less
 
 USER root
 

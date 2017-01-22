@@ -1,22 +1,7 @@
 #!/bin/bash
 export GEODESIC_SHELL=true
 
-if [ "${BOOTSTRAP}" == "true" ]; then
-  # Output the bootstrap script
-  stty -onlcr
-  cat contrib/geodesic
-  exit 0
-fi
-
 echo "Entering the geodesic shell..."
-
-# Sync Docker VM's hardware clock which can drift when host machine sleeps
-#   e.g. An error occurred (SignatureDoesNotMatch) when calling the AssumeRole operation: 
-#        Signature expired: 20170103T233357Z is now earlier than 20170104T042623Z (20170104T044123Z - 15 min.)
-hwclock -s 2>/dev/null
-if [ $? -ne 0 ]; then
-  echo "WARNING: unable to sync system time from hardware clock; you may encounter problems with signed requests as a result of time drift."
-fi
 
 # Setup some default envs
 CLUSTER_STATE_BUCKET_REGION=${CLUSTER_STATE_BUCKET_REGION:-us-west-2}
@@ -30,20 +15,6 @@ mkdir -p ${KOPS_STATE_PATH}
 mkdir -p ${AWS_DATA_PATH}
 mkdir -p ${CLOUD_STATE_PATH}/ssh
 
-# Git defaults
-if [ ! -f "${XDG_CONFIG_HOME}/git/config" ]; then
-  mkdir -p "${XDG_CONFIG_HOME}/git";
-  touch "${XDG_CONFIG_HOME}/git/config"
-  git config --global user.email ops@cloudposse.com
-  git config --global user.name geodesic
-fi
-
-# Initialize git 
-if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then
-  git -C ${CLOUD_STATE_PATH} init
-  git -C  ${CLOUD_STATE_PATH} add .
-fi
-
 if [ ! -d "${HELM_HOME}" ]; then
   cloud helm init-client
   cloud helm init-repos
@@ -51,7 +22,6 @@ fi
 
 # Workaround for aws-cli which does not respect AWS_DATA_PATH
 ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
-
 
 if [ -z "${SSH_AUTH_SOCK}" ]; then
   eval $(ssh-agent)
@@ -62,34 +32,3 @@ fi
 
 cloud kops add-ssh-key
 
-# Setup some handy aliases
-alias kube-system='kubectl --namespace=kube-system'
-alias default='kubectl --namespace=default'
-
-# Define our own prompt
-function geodesic-prompt() {
-  if [ -f "${CLOUD_CONFIG}" ]; then
-		set -o allexport
-		. "${CLOUD_CONFIG}"
-		set +o allexport
-  fi
-  console-prompt
-  local GIT_STATE=$(git -C ${CLOUD_STATE_PATH} status -s)
-  local STATUS="[clean]";
-  if [ -n "${GIT_STATE}" ]; then
-    STATUS="[unsaved changes]"
-  fi
-  if [ -n "${CLUSTER_NAME}" ]; then
-    PS1="[${CLUSTER_NAME}]\n$STATUS $PS1"
-  fi
-}
-
-export PROMPT_COMMAND=geodesic-prompt
-
-if [ -f "/etc/motd" ]; then
-  cat "/etc/motd"
-fi
-
-if [ -n "${MOTD_URL}" ]; then
-  curl --fail --connect-timeout 1 --max-time 1 --silent "${MOTD_URL}"
-fi

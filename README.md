@@ -3,13 +3,31 @@
 *definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
 
 The geodesic shell is the fastest way to get up and running with a rock solid cloud platform. 
-It takes an opinionated approach to cloud architecture, which therefore allows many assumptions on how it works to be made. 
+
+It takes an opinionated approach to cloud architecture, which therefore allows many assumptions to be made on how it works. 
+
+The end result is a highly consistent, turnkey cloud platform that follows best practices while at the same time packs almost everything a typical 
+startup needs to get up and running in record time.  
+
+Since we run in `docker`, the barrier to entry is very low. Users don't need to download & configure all of the dependencies. Just install docker, and run the installer to get up and going. 
+
+## Technologies
+
+This shell bundles multiple tools to facilitate cloud adminstration.
+
+* `kops` for kubernetes cluster orchestration
+* `aws-cli` for interacting directly with the AWS APIs
+* `helm` for installing packages on the kubernetes cluster
+* `terraform` for provisioning miscellaneous resources 
+* `kubectl` for controlling kubernetes
+
+NOTE: we currently only support running the docker shell on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well.
 
 ## Quickstart
 
-Install the geodesic client, if you haven't already:
+Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)
 ```
-curl https://geodesic.sh | bash
+curl -s https://geodesic.sh | bash
 ```
 
 Run the geodesic shell:
@@ -55,7 +73,15 @@ cloud config checkout demo.dev.cloudposse.com CLUSTER_STATE_BUCKET_REGION=us-wes
 ## Extending the Geodesic Shell
 
 You can easily extend the Geodesic shell by creating your own repo with a `Dockerfile`. We suggest you have it inherit `FROM geodeisc:latest` or some specific build.
-In side your container, you can replace any of our code with your own to make it behave exactly as you wish. 
+In side your container, you can replace any of our code with your own to make it behave exactly as you wish. You could even create one dedicated shell per cluster with 
+logic tailored specifically for that cluster.
+
+Here are some other tips. Most of our modules do an `-include Makefile.*`, which means, we'll include other `Makefiles` in that directory. To add additional functionality,
+simply drop-in your `Makefile.something` in that module directory.
+
+Want to add additional aliases or affect the shell? Drop your script in `/etc/profile.d` and it will be loaded automatically when the shell starts. 
+
+As you can see, you can easily change almost any aspect of how the shell works simply by extending it.
 
 ## Usage Examples
 

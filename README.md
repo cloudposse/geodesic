@@ -23,6 +23,11 @@ This shell bundles multiple tools to facilitate cloud adminstration.
 
 NOTE: we currently only support running the docker shell on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well.
 
+## Caveats
+
+* While the underlying tools support multiple cloud providers, we are currently only testing with AWS. Pull Requests welcome.
+
+
 ## Quickstart
 
 Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)

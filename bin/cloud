@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "$GEODESIC_PATH"
+cd "$GEODESIC_PATH/modules"
 while true; do
   arg=$1
 	if [ -d "$arg" ]; then

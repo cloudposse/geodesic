@@ -1,4 +1,5 @@
 #!/bin/bash
+export GEODESIC_SHELL=true
 
 if [ "${BOOTSTRAP}" == "true" ]; then
   # Output the bootstrap script
@@ -61,10 +62,6 @@ fi
 
 cloud kops add-ssh-key
 
-
-# Import aws-assumed-role
-. /usr/local/bin/profile
-
 # Setup some handy aliases
 alias kube-system='kubectl --namespace=kube-system'
 alias default='kubectl --namespace=default'
@@ -89,8 +86,8 @@ function geodesic-prompt() {
 
 export PROMPT_COMMAND=geodesic-prompt
 
-if [ -f "${GEODESIC_PATH}/motd" ]; then
-  cat "${GEODESIC_PATH}/motd"
+if [ -f "/etc/motd" ]; then
+  cat "/etc/motd"
 fi
 
 if [ -n "${MOTD_URL}" ]; then

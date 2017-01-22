@@ -6,6 +6,12 @@ export DOCKER_NAME=${DOCKER_NAME:-geodesic}
 
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
+
+if [ "${GEODESIC_SHELL}" == "true" ]; then
+  echo "Cannot run while in a geodesic shell"
+  exit 1
+fi
+
 mkdir -p ${STATE_DIR}
 
 if ! which docker > /dev/null; then

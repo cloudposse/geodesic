@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/bin/bash
 
 NO_COLOR="`echo -e "\033[0m"`"
 PROMPT_COLOR="`echo -e "\033[32;01m"`"
@@ -24,19 +24,20 @@ fi
 
 if [ -f "$1" ]; then
   input=$1
+  output="$input.new"
   source $input
-  output="$1.new"
   rm -f "$output"
-  for env in `cat $1 | cut -d= -f1`; do
+  for env in `cat $1 | grep -v '^#' | cut -d= -f1`; do
     desc=`grep "^$env=" $1|cut -d'#' -f2 | sed -E 's/^ +| +$//'`
     prompt "$env" ">>> $desc"
     printf '%s=%s\n' "$env" "${!env}" | xargs -I'{}' printf '%-60s # %s\n' '{}' "$desc" >> $output
     echo
   done
   cat $output
-  Y="yes" ./confirm Y "Do you want to overwrite $input with these values?"
-  mv -f $source "$source~"
-  mv -f $output $source
+  echo
+  Y="yes" confirm Y "Do you want to overwrite $input with these values?"
+  mv -f "$input" "$input~"
+  mv -f "$output" "$input"
 else
   echo "Cannot configure $1"
 fi

@@ -154,6 +154,6 @@ ssh-as-admin: validate
 	@ssh -i $(KOPS_SSH_PRIVATE_KEY) admin@api.$(KOPS_NAME) || true
 
 ssh:
-	$(call assert-set,GITHUB_USERNAME)
+	$(call assert-set,SSH_USERNAME)
 	$(call assert-set,KOPS_NAME)
-	@ssh $(GITHUB_USERNAME)@api.$(KOPS_NAME) || true
+	@ssh $(SSH_USERNAME)@api.$(KOPS_NAME) || true

@@ -9,7 +9,7 @@ deps:
 
 ## Edit configuration
 edit: deps
-	@vim $(CLOUD_CONFIG)
+	@configure-env $(CLOUD_CONFIG)
 
 ## View current configuration
 view:

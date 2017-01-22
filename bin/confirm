@@ -17,7 +17,7 @@ ASSERT_MSG=${2:-Are you sure you wish to modify \"${!ASSERT_ENV}\"?}
 
 echo "${ASSERT_MSG}"
 until [[ ${CONFIRMATION} == ${!ASSERT_ENV} ]]; do 
-  echo "Enter \"${!ASSERT_ENV}\" to continue"
+  echo "Enter \"${!ASSERT_ENV}\" to continue, or ^C to abort"
   echo -n "> ";
   read CONFIRMATION
 done

@@ -1,7 +1,7 @@
+CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/config/env.sample
+
 include ../Makefile.helpers
 -include Makefile.*
-
-CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/config/env.sample
 
 ## Initialize environment
 deps:

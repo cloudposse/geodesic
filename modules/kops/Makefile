@@ -1,5 +1,5 @@
 include ../Makefile.helpers
-include Makefile.*
+-include Makefile.*
 
 ## Resolve dependencies
 deps:

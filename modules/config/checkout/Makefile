@@ -1,5 +1,7 @@
 DEFAULT_CONFIGS ?= https://geodesic.sh/default-configs.tar.gz
 
+-include Makefile.*
+
 .PHONY : default
 ## Checkout default configs
 default:

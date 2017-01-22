@@ -1,4 +1,4 @@
-include Makefile.*
+-include Makefile.*
 
 ## Setup environment
 deps:

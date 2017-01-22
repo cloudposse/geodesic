@@ -1,4 +1,5 @@
 include ../Makefile.helpers
+-include Makefile.*
 
 ## Install default distro
 default:

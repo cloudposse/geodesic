@@ -1,4 +1,5 @@
 include ../Makefile.helpers
+-include Makefile.*
 
 demo:
 	@cloud helm install

@@ -42,6 +42,7 @@ RUN curl -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && rm -rf awscli-bundle
 
 ENV BOOTSTRAP=true
+ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/geodesic
 ENV KOPS_STATE_PATH=/geodesic/state/kops
 ENV KUBECONFIG=/geodesic/state/kubernetes/kubeconfig

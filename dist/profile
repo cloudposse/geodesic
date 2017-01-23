@@ -96,3 +96,7 @@ export PROMPT_COMMAND=geodesic-prompt
 if [ -f "${GEODESIC_PATH}/motd" ]; then
   cat "${GEODESIC_PATH}/motd"
 fi
+
+if [ -n "${MOTD_URL}" ]; then
+  curl --fail --connect-timeout 1 --max-time 1 --silent "${MOTD_URL}"
+fi

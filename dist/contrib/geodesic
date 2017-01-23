@@ -55,6 +55,16 @@ if [ "${OS}" == "Darwin" ]; then
               )
 fi
 
+if [ -n "${HOME}" ]; then
+  if [ "${HOME}" == "/geodesic" ]; then
+    echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"
+  else
+    DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                  --volume=${HOME}:${HOME}
+                )
+  fi
+fi
+
 DOCKER_ARGS=("${DOCKER_ARGS[@]}"
               --privileged
               --publish 8001:8001

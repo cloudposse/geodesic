@@ -26,6 +26,10 @@ fi
 echo "# Installing ${APP_NAME} from ${DOCKER_IMAGE}:${DOCKER_TAG}..."
 if [ "${REQUIRE_PULL}" == "true" ]; then
   docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
+  if [ $? -ne 0 ]; then
+    echo "Failed to pull down ${DOCKER_IMAGE}:${DOCKER_TAG}"
+    exit 1
+  fi
 fi 
 
 # Sometimes docker might not exit cleanly 

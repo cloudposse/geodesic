@@ -10,4 +10,5 @@ default:
 %:
 	@[ ! -f ${CLOUD_CONFIG} ] || cloud config push
 	@cloud config pull CLUSTER_STATE_BUCKET=config.$@
+	@cloud kops add-ssh-key
 

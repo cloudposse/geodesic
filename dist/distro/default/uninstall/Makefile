@@ -1,12 +1,11 @@
 include ../../../Makefile.helpers
-
-NAMESPACE ?= $(shell basename `pwd`)
+include ../../Makefile.uninstall
 
 ## Uninstall Ingress Load Balancer
-lb:
+lb: confirm
 	@helm delete $@ --purge
 
 ## Uninstall CI/CD
-ci:
+ci: confirm
 	@helm delete $@ --purge
 

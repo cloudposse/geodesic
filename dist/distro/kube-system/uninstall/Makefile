@@ -1,4 +1,5 @@
 include ../../../Makefile.helpers
+include ../../Makefile.uninstall
 
 ## Uninstall DNS
 dns:
@@ -26,6 +27,10 @@ logs:
 
 ## Uninstall monitoring
 monitoring:
+	@helm delete $@ --purge
+
+## Uninstall metrics
+metrics:
 	@helm delete $@ --purge
 
 ## Uninstall Data Dog

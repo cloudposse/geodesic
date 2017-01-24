@@ -28,11 +28,12 @@ configure:
 ## Initialize the system
 init:
 	@[ ! -f $(GEODESIC_PATH)/state/.initialized ] || (echo "Cluster already initialized"; exit 1)
-	@cloud kubernetes set-dockercfg    # Set the Docker Registry secret
-	@cloud helm init                   # Initalize helm for packages
-	@cloud distro install kube-system  # Install essential k8s services
-	@cloud distro install default      # Install default namespace
-	@cloud config push                 # Save the configuration
+	@cloud kubernetes set-dockercfg        # Set the Docker Registry secret
+	@cloud helm init                       # Initalize helm for packages
+	@cloud helm init-repos                 # Initalize helm for packages
+	@cloud distro kube-system config all   # Configure essential k8s services
+	@cloud distro default config all       # Configure default namespace
+	@cloud config push                     # Save the configuration
 	@touch $(GEODESIC_PATH)/state/.initialized
 
 .PHONY: deploy

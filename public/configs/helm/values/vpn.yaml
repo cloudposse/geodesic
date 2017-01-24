@@ -1,8 +1,0 @@
-#host: vpn.dev.example.com
-#github_team: cloudposse/ssh
-#ui:
-#  enabled: true
-#  ssl:
-#    enabled: true
-#    prod: false
-#    email: ops@example.com

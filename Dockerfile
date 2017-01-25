@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN apk update \
-		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git coreutils less
+		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git coreutils less groff
 
 USER root
 
@@ -58,6 +58,7 @@ ENV GEODESIC_PATH=/geodesic
 ENV HELM_VALUES_PATH=/geodesic/state/helm/values
 ENV XDG_CONFIG_HOME=/geodesic/state
 ENV SHELL=/bin/bash
+ENV LESS=-Xr
 
 VOLUME ["/geodesic/state"]
 ADD aws-assumed-role/profile /etc/profile.d/aws-assume-role.sh

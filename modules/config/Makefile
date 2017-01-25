@@ -11,6 +11,12 @@ deps:
 edit: deps
 	@configure-env $(CLOUD_CONFIG)
 
+## Reset local state
+reset:
+	@find $(CLOUD_STATE_PATH) -type d '!' -path '*/aws' -mindepth 1 -maxdepth 1  -exec rm -rf {} \;
+	@rm -f $(CLOUD_STATE_PATH)/serial $(CLOUD_STATE_PATH)/env $(CLOUD_STATE_PATH)/history
+	@echo "Reset local state"
+
 ## View current configuration
 view:
 	@cat "$(CLOUD_CONFIG)"

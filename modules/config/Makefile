@@ -77,23 +77,24 @@ push: validate verify-serial
 	@git -C ${CLOUD_STATE_PATH} add .
 	@git -C ${CLOUD_STATE_PATH} commit -a --message "Backup `date`"
 	@aws s3 sync ${CLOUD_STATE_PATH} s3://$(CLUSTER_STATE_BUCKET)/state/ \
-      --region $(CLUSTER_STATE_BUCKET_REGION) \
-      --exclude "*.swp" \
-      --exclude "aws/*" \
-      --exclude "history" \
-      --no-follow-symlinks \
-      --delete \
-      --acl private
+		--region $(CLUSTER_STATE_BUCKET_REGION) \
+		--exclude "*.swp" \
+		--exclude "aws/*" \
+		--exclude "history" \
+		--no-follow-symlinks \
+		--exact-timestamps \
+		--delete \
+		--acl private
 
 ## Pull state from S3
 pull: validate
 	@aws s3 sync s3://$(CLUSTER_STATE_BUCKET)/state/ $(CLOUD_STATE_PATH) \
-      --region ${CLUSTER_STATE_BUCKET_REGION} \
-      --exclude "*.swp" \
-      --exclude "aws/*" \
-      --exclude "history" \
-      --no-follow-symlinks \
-      --exact-timestamps \
-      --delete
+		--region ${CLUSTER_STATE_BUCKET_REGION} \
+		--exclude "*.swp" \
+		--exclude "aws/*" \
+		--exclude "history" \
+		--no-follow-symlinks \
+		--exact-timestamps \
+		--delete
 
 

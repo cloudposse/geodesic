@@ -9,9 +9,7 @@ function geodesic-prompt() {
 
   # Reprocess defaults
   if [ -f "/etc/profile.d/defaults.sh" ]; then
-    set -o allexport
     . "/etc/profile.d/defaults.sh"
-    set +o allexport
   fi
 
   # Run the aws-assume-role prompt

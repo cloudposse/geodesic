@@ -25,10 +25,7 @@ ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
 
 if [ -z "${SSH_AUTH_SOCK}" ]; then
   eval $(ssh-agent)
-  if [ -f "${KOPS_STATE_PATH}/id_rsa" ]; then
-    chmod 600 "${KOPS_STATE_PATH}/id_rsa"
-  fi 
 fi
 
-cloud kops add-ssh-key
+[ -f "${KOPS_STATE_PATH}/id_rsa" ] && cloud kops add-ssh-key
 

@@ -1,4 +1,4 @@
-CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/config/env.sample
+CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/modules/config/env.sample
 
 include ../Makefile.helpers
 -include Makefile.*

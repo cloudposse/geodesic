@@ -129,3 +129,5 @@ Have `kubectl installed on your local machine? Then after setting up `geodesic`,
 ```
 export KUBECONFIG="${HOME}/.geodesic/kubernetes/kubeconfig" 
 ```
+
+

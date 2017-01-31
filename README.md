@@ -39,19 +39,19 @@ Docker can be installed following the guidelines below:
 
 ## Quickstart
 
-Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)
+1. Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)
 ```
 curl -s https://geodesic.sh | bash
 ```
 
-Run the geodesic shell:
+2. Run the geodesic shell:
 ```
 geodesic
 ```
 
-Configure your AWS credentials in `/geodesic/state/aws`
+3. Configure your AWS credentials by running `setup-role`
 
-Run `assume-role $role` where $role is the one you configured in your AWS configuration.
+4. Run `assume-role $role` where $role is the one you configured in your AWS configuration.
 
 ## Design Decisions
 

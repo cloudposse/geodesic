@@ -4,11 +4,34 @@ include ../Makefile.helpers
 -include Makefile.*
 
 ## Initialize environment
-deps:
+init: init-git
 	@[ -f $(CLOUD_STATE_PATH)/env ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(CLOUD_STATE_PATH)/env
+	@mkdir -p $(dir $(TF_STATE_FILE))
+	@mkdir -p $(dir $(KUBECONFIG))
+	@mkdir -p $(dir $(AWS_SHARED_CREDENTIALS_FILE))
+	@mkdir -p $(dir $(AWS_CONFIG_FILE))
+	@mkdir -p $(KOPS_STATE_PATH)
+	@mkdir -p $(AWS_DATA_PATH)
+	@mkdir -p $(CLOUD_STATE_PATH)/ssh
+# Workaround for aws-cli which does not respect AWS_DATA_PATH
+	@ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
+
+## Initialize local git repo
+init-git:
+	@if [ ! -f "${XDG_CONFIG_HOME}/git/config" ]; then \
+    mkdir -p "${XDG_CONFIG_HOME}/git"; \
+    touch "${XDG_CONFIG_HOME}/git/config"; \
+    git config --global user.email ops@cloudposse.com; \
+    git config --global user.name geodesic; \
+  fi
+	@if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then \
+    git -C ${CLOUD_STATE_PATH} init; \
+    git -C  ${CLOUD_STATE_PATH} add .; \
+  fi
+
 
 ## Edit configuration
-edit: deps
+edit: init
 	@configure-env $(CLOUD_CONFIG)
 
 ## Reset local state
@@ -28,6 +51,7 @@ validate:
 	$(call assert-set,CLUSTER_STATE_BUCKET)
 	$(call assert-set,CLUSTER_STATE_BUCKET_REGION)
 
+## Initialize serial for optimistic-locking
 init-serial: validate confirm
 	@date +'%Y%m%d%H%M%S' > $(CLOUD_STATE_PATH)/serial
 	@cat $(CLOUD_STATE_PATH)/serial

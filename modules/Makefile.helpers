@@ -35,7 +35,7 @@ confirm:
 ## This help screen
 help:
 	@printf "Available targets:\n\n"
-	@awk '/^[a-zA-Z\-\_0-9%:\\]+:/ { \
+	@awk '/^[a-zA-Z0-9%:\\_-]+:/ { \
 	  helpMessage = match(lastLine, /^## (.*)/); \
 	  if (helpMessage) { \
 	    helpCommand = $$1; \
@@ -45,6 +45,6 @@ help:
 	    printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, helpMessage; \
 	  } \
 	} \
-	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
+	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 	@printf "\n"
 

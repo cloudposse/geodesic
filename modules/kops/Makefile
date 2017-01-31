@@ -5,7 +5,6 @@ include ../Makefile.helpers
 deps:
 	@mkdir -p $(KOPS_STATE_STORE_PATH)
 
-
 ## Export kubeconfig
 export-kubecfg: validate
 	$(KOPS_BIN) export kubecfg
@@ -153,10 +152,11 @@ configure-ssh-key: validate
 	@kops delete secret sshpublickey admin || true
 	@kops create secret sshpublickey admin --pubkey=$(KOPS_SSH_PUBLIC_KEY)
 
-## Connect to the cluster using SSH
+## Connect to the cluster using SSH as admin
 ssh-as-admin: validate
 	@ssh -i $(KOPS_SSH_PRIVATE_KEY) admin@api.$(KOPS_NAME) || true
 
+## Connect to the cluster using SSH with your SSH_USERNAME
 ssh:
 	$(call assert-set,SSH_USERNAME)
 	$(call assert-set,KOPS_NAME)

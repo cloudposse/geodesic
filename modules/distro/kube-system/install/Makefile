@@ -1,5 +1,11 @@
+# Install the kube-system namespace; order of targets in this file is the order in which they will get installed
+
 include ../../../Makefile.helpers
 include ../../Makefile.install
+
+## Install Etcd Operator
+etcd-operator:
+	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml stable/etcd-operator
 
 ## Install DNS
 dns:
@@ -8,7 +14,7 @@ dns:
 ## Install SSL
 ssl:
 	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml cloudposse-incubator/kube-lego
-
+  
 ## Install SSH
 ssh:
 	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml cloudposse-incubator/github-authorized-keys
@@ -16,10 +22,6 @@ ssh:
 ## Install UI
 ui:
 	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml cloudposse-incubator/kubernetes-dashboard
-
-## Install Etcd Operator
-etcd-operator:
-	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml stable/etcd-operator
 
 ## Install log aggregation
 logs:

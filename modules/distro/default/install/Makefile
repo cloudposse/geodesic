@@ -1,3 +1,5 @@
+# Install the default namespace; order of targets in this file is the order in which they will get installed
+
 include ../../../Makefile.helpers
 include ../../Makefile.install
 

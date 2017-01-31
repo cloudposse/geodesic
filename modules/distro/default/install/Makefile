@@ -7,5 +7,5 @@ lb:
 
 ## Install CI/CD
 ci:
-	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml cloudposse-jenkins/jenkins
+	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml cloudposse-incubator/jenkins
 

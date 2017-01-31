@@ -27,6 +27,15 @@ NOTE: we currently only support running the docker shell on Linux and OSX. If yo
 
 * While the underlying tools support multiple cloud providers, we are currently only testing with AWS. Pull Requests welcome.
 
+## Prerequisites
+
+### Installing Docker
+
+Docker can be installed following the guidelines below:
+
+* for [Linux](https://docs.docker.com/linux/step_one/), you can run  `curl -fsSL https://get.docker.com/ | sh` on your command line and everything is done automatically (if you have `curl` installed, which is normally the case),
+* for [Windows](https://docs.docker.com/windows/step_one/)
+* for [Mac OS](https://docs.docker.com/mac/step_one/)
 
 ## Quickstart
 

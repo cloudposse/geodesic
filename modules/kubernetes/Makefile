@@ -15,6 +15,7 @@ validate:
 
 ## Set the docker-registry secret (See: https://kubernetes.io/docs/user-guide/images/)
 set-dockercfg: validate
+	@kubectl delete secret docker-registry dockercfg >/dev/null 2>&1 || true
 	@kubectl create secret docker-registry dockercfg \
 	  --docker-server=$(DOCKER_REGISTRY_SERVER) \
 	  --docker-username=$(DOCKER_USER) \

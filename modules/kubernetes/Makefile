@@ -14,13 +14,16 @@ validate:
 #	kubectl config set-context demo --namespace=demo
 
 ## Set the docker-registry secret (See: https://kubernetes.io/docs/user-guide/images/)
-set-dockercfg: validate
-	@kubectl delete secret docker-registry dockercfg >/dev/null 2>&1 || true
+create-dockercfg: validate delete-dockercfg
 	@kubectl create secret docker-registry dockercfg \
 	  --docker-server=$(DOCKER_REGISTRY_SERVER) \
 	  --docker-username=$(DOCKER_USER) \
 	  --docker-password=$(DOCKER_PASSWORD) \
 	  --docker-email=$(DOCKER_EMAIL)
+
+## Delete the docker-registry secret (if it exists)
+delete-dockercfg:
+	@kubectl delete secret docker-registry dockercfg >/dev/null 2>&1 || true
 
 ## Setup API tunnel to localhost
 proxy:

@@ -1,5 +1,0 @@
-NAMESPACE ?= $(shell basename $(abspath $(shell pwd)/../))
-PACKAGES ?= $(shell find $(HELM_VALUES_PATH)/$(NAMESPACE) -type f -name '*.yaml' | xargs -n 1 -I '{}' basename {} .yaml)
-
-## Install configured packages for this namespace
-all: $(PACKAGES)

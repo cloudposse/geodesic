@@ -69,5 +69,5 @@ ADD bin /usr/local/bin
 
 WORKDIR /geodesic
 
-ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile"]
+ENTRYPOINT ["/bin/bash", "-l"]
 

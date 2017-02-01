@@ -1,6 +1,8 @@
 include ../Makefile.helpers
 -include Makefile.*
 
+KUBERNETES_API_PORT ?= 8001
+
 ## Validate environment is setup correctly
 validate:
 	$(call assert-set,DOCKER_REGISTRY_SERVER)
@@ -27,8 +29,8 @@ delete-dockercfg:
 
 ## Setup API tunnel to localhost
 proxy:
-	@echo "Kubernetes API exposed on http://127.0.0.1:8001/"
-	@kubectl proxy --address=0.0.0.0 --port 8001 || true
+	@echo "Kubernetes API exposed on http://127.0.0.1:$(KUBERNETES_API_PORT)/"
+	@kubectl proxy --address=0.0.0.0 --port $(KUBERNETES_API_PORT) || true
 
 
 

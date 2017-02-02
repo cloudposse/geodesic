@@ -29,13 +29,13 @@ NOTE: we currently only support running the docker shell on Linux and OSX. If yo
 
 ## Prerequisites
 
-### Installing Docker
+### Install Docker
 
-Docker can be installed following the guidelines below:
+Docker can be easily installed by following the instructions for your OS:
 
-* for [Linux](https://docs.docker.com/linux/step_one/), you can run  `curl -fsSL https://get.docker.com/ | sh` on your command line and everything is done automatically (if you have `curl` installed, which is normally the case),
-* for [Windows](https://docs.docker.com/windows/step_one/)
-* for [Mac OS](https://docs.docker.com/mac/step_one/)
+* [Linux](https://docs.docker.com/linux/step_one/), you can run  `curl -fsSL https://get.docker.com/ | sh` on your command line and everything is done automatically (if you have `curl` installed, which is normally the case),
+* [Windows](https://docs.docker.com/windows/step_one/)
+* [Mac OS](https://docs.docker.com/mac/step_one/)
 
 ## Quickstart
 
@@ -52,6 +52,54 @@ geodesic
 3. Configure your AWS credentials by running `setup-role`
 
 4. Run `assume-role $role` where $role is the one you configured in your AWS configuration.
+
+## Usage Examples
+
+First, make sure you've followed the *Quickstart* up above.
+
+### Bringing up a cluster
+
+```shell
+cloud configure
+cloud up
+cloud init
+```
+
+### Connecting to the cluster
+
+```shell
+cloud ssh
+```
+
+### Destroying a cluster
+
+```shell
+cloud down
+```shell
+
+### Pulling down an existing cluster
+
+```shell
+cloud config checkout config.demo.dev.cloudposse.com
+```
+
+### Save your current cloud configuration state
+Note: 
+* if multiple people are administering the same cluster, we suggest you coordinate before push changes. 
+* We use a simple optimistic locking approach that involves a `serial` file stored on S3. If your serial matches the upstream, we presume nothing has changed and allow you to push your files. If not, you'll need to manually reconcile what has changed.
+
+```shell
+cloud config push
+```
+
+
+### Using `kubectl` outside of geodesic
+
+Do you have `kubectl` installed on your local machine? Then after setting up `geodesic`, you can export the `KUBECONFIG` environment variable to point to the one in `geodesic`. Note, `kubectl` does not support `~` in for the `HOME` directory.
+
+```shell
+export KUBECONFIG="${HOME}/.geodesic/kubernetes/kubeconfig" 
+```
 
 ## Design Decisions
 
@@ -72,7 +120,7 @@ Since we use `make`, you can add all your ENVs at the end of the command. Think 
 For example, we can pass `CLUSTER_STATE_BUCKET_REGION` to affect where the S3 bucket is pulled from. We believe using ENVs this way is both consistent
 with the "cloud" way of doing this as well as a clear way of communicating what values are being passed. Additionally, you can set & forget these ENVs in your shell.
 
-```
+```shell
 cloud config checkout demo.dev.cloudposse.com CLUSTER_STATE_BUCKET_REGION=us-west-2
 ```
 
@@ -96,47 +144,5 @@ simply drop-in your `Makefile.something` in that module directory.
 Want to add additional aliases or affect the shell? Drop your script in `/etc/profile.d` and it will be loaded automatically when the shell starts. 
 
 As you can see, you can easily change almost any aspect of how the shell works simply by extending it.
-
-## Usage Examples
-
-### Bringing up a cluster
-
-```
-cloud configure
-cloud up
-cloud init
-```
-
-### Connecting to the cluster
-```
-cloud ssh
-```
-
-### Destroying a cluster
-```
-cloud down
-```
-
-### Pulling down an existing cluster
-```
-cloud config checkout config.demo.dev.cloudposse.com
-```
-
-### Save your current cloud configuration state
-Note: 
-* if multiple people are administering the same cluster, we suggest you coordinate before push changes. 
-* We use a simple optimistic locking approach that involves a `serial` file stored on S3. If your serial matches the upstream, we presume nothing has changed and allow you to push your files. If not, you'll need to manually reconcile what has changed.
-
-```
-cloud config push
-```
-
-
-### Using `kubectl` outside of geodesic
-
-Have `kubectl installed on your local machine? Then after setting up `geodesic`, you can export the `KUBECONFIG` environment variable to point to the one in `geodesic`. Note, `kubectl` does not support `~` in for the `HOME` directory.
-```
-export KUBECONFIG="${HOME}/.geodesic/kubernetes/kubeconfig" 
-```
 
 

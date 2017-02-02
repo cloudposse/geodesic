@@ -13,7 +13,7 @@ Since we run in `docker`, the barrier to entry is very low. Users don't need to 
 
 ## Technologies
 
-This shell bundles multiple tools to facilitate cloud adminstration.
+This shell bundles multiple tools to facilitate cloud fabrication and adminstration.
 
 * `kops` for kubernetes cluster orchestration
 * `aws-cli` for interacting directly with the AWS APIs
@@ -63,6 +63,26 @@ First, make sure you've followed the *Quickstart* up above.
 cloud configure
 cloud up
 cloud init
+```
+
+Now you'll want to edit the configuration files that were generated for the `kube-system` namespace.
+
+```shell
+cloud distro kube-system list-configs
+```
+
+
+Then edit the configuration files that were generated for the `default` namespace.
+```shell
+cloud distro default list-configs
+```
+
+If there's something you don't want, just delete the file.
+
+To deploy the apps, now run:
+```shell
+cloud distro kube-system install all
+cloud distro default install all
 ```
 
 ### Connecting to the cluster

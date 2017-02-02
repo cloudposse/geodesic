@@ -19,15 +19,16 @@ init: init-git
 ## Initialize local git repo
 init-git:
 	@if [ ! -f "${XDG_CONFIG_HOME}/git/config" ]; then \
-    mkdir -p "${XDG_CONFIG_HOME}/git"; \
-    touch "${XDG_CONFIG_HOME}/git/config"; \
-    git config --global user.email ops@cloudposse.com; \
-    git config --global user.name geodesic; \
-  fi
+		mkdir -p "${XDG_CONFIG_HOME}/git"; \
+		touch "${XDG_CONFIG_HOME}/git/config"; \
+		git config --global user.email ops@cloudposse.com; \
+		git config --global user.name geodesic; \
+	fi
 	@if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then \
-    git -C ${CLOUD_STATE_PATH} init; \
-    git -C  ${CLOUD_STATE_PATH} add .; \
-  fi
+		git -C ${CLOUD_STATE_PATH} init; \
+		echo "aws/*" > ${CLOUD_STATE_PATH}/.gitignore; \
+		git -C  ${CLOUD_STATE_PATH} add .; \
+	fi
 
 
 ## Edit configuration

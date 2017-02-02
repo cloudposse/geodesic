@@ -33,8 +33,9 @@ init:
 	@cloud helm init-repos                 # Initalize helm for packages
 	@cloud distro kube-system config all   # Configure essential k8s services
 	@cloud distro default config all       # Configure default namespace
-	@cloud config push                     # Save the configuration
+	@cloud config init-serial              # Initialize the optimistic locking mechanism
 	@touch $(GEODESIC_PATH)/state/.initialized
+	@cloud config push                     # Save the configuration
 
 .PHONY: deploy
 ## Deploy distributions

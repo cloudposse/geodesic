@@ -60,7 +60,7 @@ validate:
 	$(call assert-set,KOPS_CONFIG)
 
 ## Bring up a new cluster
-up: deps validate
+up: deps validate create-ssh-key
 	@echo "Creating cluster $(KOPS_NAME)..."
 	@$(KOPS_BIN) create cluster \
 			--cloud=$(KOPS_CLOUD) \

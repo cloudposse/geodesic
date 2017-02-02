@@ -13,10 +13,15 @@ list-available: validate
 	@echo "Packages configured in the $(NAMESPACE) namespace:"
 	@echo $(PACKAGES) | xargs -n 1 printf -- ' - %s\n'
 
+## List installed packages for this namespace
 list-installed: validate
-	@echo "Packages configured and installed in $(NAMESPACE) "
+	@echo "Packages configured and installed in $(NAMESPACE)"
 	@helm list `echo $(PACKAGES) | xargs -n 1 printf -- '%s\n' | paste -s -d\| - | xargs printf '^(%s)$$'`
 
+## List configurations for this namespace
+list-configs: validate
+	@echo "Configurations for $(NAMESPACE)"
+	@find $(HELM_VALUES_PATH)/$(NAMESPACE) -type f -name '*.yaml' | xargs -n 1 printf ' - %s\n'
 
 ## Install packages for this namespace
 install: 

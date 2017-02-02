@@ -31,6 +31,7 @@ init:
 	@cloud kubernetes create-dockercfg        # Set the Docker Registry secret
 	@cloud helm init                       # Initalize helm for packages
 	@cloud helm init-repos                 # Initalize helm for packages
+	@cloud helm update		               # Update repo index
 	@cloud distro kube-system config all   # Configure essential k8s services
 	@cloud distro default config all       # Configure default namespace
 	@cloud config init-serial              # Initialize the optimistic locking mechanism

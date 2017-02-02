@@ -14,6 +14,10 @@ init-repos:
 	@helm repo add cloudposse-stable https://charts.cloudposse.com/stable
 	@helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator
 
+## Update repo indexes
+update:
+	@helm repo update
+
 ## Upgrade tiller
 upgrade:
 	kubectl --namespace=kube-system set image deployments/tiller-deploy tiller=gcr.io/kubernetes-helm/tiller:v$(HELM_VERSION)

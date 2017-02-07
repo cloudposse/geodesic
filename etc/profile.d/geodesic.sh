@@ -1,10 +1,4 @@
-#!/bin/bash
 export GEODESIC_SHELL=true
-
-echo "Entering the geodesic shell..."
-
-# Setup some default envs
-CLUSTER_STATE_BUCKET_REGION=${CLUSTER_STATE_BUCKET_REGION:-us-west-2}
 
 cloud config init
 
@@ -18,4 +12,3 @@ if [ -z "${SSH_AUTH_SOCK}" ]; then
 fi
 
 [ -f "${KOPS_STATE_PATH}/id_rsa" ] && cloud kops add-ssh-key
-

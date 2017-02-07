@@ -1,3 +1,5 @@
+# Setup some default envs
+
 if [ -n "${CLUSTER_PREFIX}" ] && [ -n "${CLUSTER_DNS_ZONE}" ]; then
   export CLUSTER_NAME=${CLUSTER_PREFIX}.${CLUSTER_DNS_ZONE}  # Full name of cluster
   export CLUSTER_STATE_BUCKET=config.${CLUSTER_NAME}         # Bucket to store cluster state

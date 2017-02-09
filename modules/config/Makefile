@@ -131,4 +131,7 @@ pull: validate
 		--exact-timestamps \
 		--delete
 
+## Show what configurations have been modified
+status:
+	@git -C ${CLOUD_STATE_PATH} status
 

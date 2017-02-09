@@ -1,5 +1,5 @@
 include ../../../Makefile.helpers
-include ../../Makefile.config
+include ../../helpers/Makefile.config
 
 ## Configure Ingress Load Balancer
 lb:

@@ -1,2 +1,2 @@
 include ../../Makefile.helpers
-include ../Makefile.distro
+include ../helpers/Makefile.distro

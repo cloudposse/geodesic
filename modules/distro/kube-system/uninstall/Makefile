@@ -1,5 +1,5 @@
 include ../../../Makefile.helpers
-include ../../Makefile.uninstall
+include ../../helpers/Makefile.uninstall
 
 ## Uninstall DNS
 dns:

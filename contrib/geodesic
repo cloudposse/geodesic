@@ -99,7 +99,7 @@ docker inspect geodesic >/dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo "# Attaching to existing ${DOCKER_NAME} session"
   if [ $# -eq 0 ]; then
-    set -- "/bin/bash" "--rcfile" "/geodesic/profile" "$@"
+    set -- "/bin/bash" "-l" "$@"
   fi
   docker exec -it "${DOCKER_NAME}" $*
 else

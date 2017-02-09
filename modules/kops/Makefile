@@ -79,30 +79,30 @@ up: deps validate create-ssh-key
 
 is-online:
 	@kubectl api-versions >/dev/null 2>&1; \
-  if [ $$? -eq 0 ]; then \
-	  echo "$(KOPS_NAME) is online  "; \
-    exit 0; \
-  else \
-    echo "$(KOPS_NAME) is offline"; \
+	if [ $$? -eq 0 ]; then \
+		echo "$(KOPS_NAME) is online  "; \
+		exit 0; \
+	else \
+		echo "$(KOPS_NAME) is offline"; \
     exit 1; \
   fi
 
 ## Wait until cluster online
 wait-until-ready: validate
-	@watch cloud kops is-online
+	@twiddle cloud kops is-online
 
 ## Export terraform configuration
 tf: validate
 	@$(KOPS_BIN) update cluster \
-	  --out=terraform/ \
-	  --target=terraform
+		--out=terraform/ \
+		--target=terraform
 
 ## Tear down an existing cluster
 down: validate
 	@confirm CLUSTER_NAME
 	@$(KOPS_BIN) delete cluster \
-    --name=$(KOPS_NAME) \
-	  --yes
+		--name=$(KOPS_NAME) \
+		--yes
 
 ## Delete SSH key pair for this deployment
 delete-ssh-key: validate
@@ -112,15 +112,15 @@ delete-ssh-key: validate
 ## Create a unique SSH key for this deployment
 create-ssh-key: deps validate 
 	@if [ -f "$(KOPS_SSH_PRIVATE_KEY)" ]; then \
-	  echo "SSH key $(KOPS_SSH_PRIVATE_KEY) already exists"; \
-	  else \
+		echo "SSH key $(KOPS_SSH_PRIVATE_KEY) already exists"; \
+		else \
 		ssh-keygen -t rsa -N '' -b 8192 -C "$(KOPS_NAME)"  -f "$(KOPS_SSH_PRIVATE_KEY)"; \
 		rm -f "$(KOPS_SSH_PUBLIC_KEY)"; \
 	fi
 	@if [ -f "$(KOPS_SSH_PUBLIC_KEY)" ]; then \
-	  echo "SSH pub key $(KOPS_SSH_PUBLIC_KEY) already exists"; \
+		echo "SSH pub key $(KOPS_SSH_PUBLIC_KEY) already exists"; \
 	else \
-	  ssh-keygen -y -f "$(KOPS_SSH_PRIVATE_KEY)" | tr -d "\n" > "$(KOPS_SSH_PUBLIC_KEY)" ; \
+		ssh-keygen -y -f "$(KOPS_SSH_PRIVATE_KEY)" | tr -d "\n" > "$(KOPS_SSH_PUBLIC_KEY)" ; \
 	fi
 # Ensure perms are always correct
 	@chmod 600 "$(KOPS_SSH_PRIVATE_KEY)"

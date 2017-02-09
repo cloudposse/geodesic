@@ -25,17 +25,18 @@ config:
 configure:
 	@cloud config edit
 
-## Initialize the system
-init:
-	@[ ! -f $(GEODESIC_PATH)/state/.initialized ] || (echo "Cluster already initialized"; exit 1)
-	@cloud kubernetes create-dockercfg        # Set the Docker Registry secret
+## Bootstrap the overall system
+bootstrap:
+	@cloud kops is-online || (echo "Cluster is unavilable. Did you run 'make up'?"; exit 1)
+	@[ ! -f $(GEODESIC_PATH)/state/.bootstrapped ] || (echo "Cluster already bootstraped"; exit 1)
+	@cloud kubernetes create-dockercfg     # Set the Docker Registry secret
 	@cloud helm init                       # Initalize helm for packages
 	@cloud helm init-repos                 # Initalize helm for packages
 	@cloud helm update		               # Update repo index
 	@cloud distro kube-system config all   # Configure essential k8s services
 	@cloud distro default config all       # Configure default namespace
 	@cloud config init-serial              # Initialize the optimistic locking mechanism
-	@touch $(GEODESIC_PATH)/state/.initialized
+	@touch $(GEODESIC_PATH)/state/.bootstrapped
 	@cloud config push                     # Save the configuration
 
 .PHONY: deploy

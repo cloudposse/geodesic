@@ -24,11 +24,11 @@ list-configs: validate
 	@find $(HELM_VALUES_PATH)/$(NAMESPACE) -type f -name '*.yaml' | xargs -n 1 printf ' - %s\n'
 
 ## Install packages for this namespace
-install: 
+install: module
 
 ## Uninstall packages for this namespace
-uninstall:
+uninstall: module
 
 ## Configure packages for this namespace
-config:
+config: module
 

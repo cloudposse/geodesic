@@ -3,6 +3,9 @@ CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/modules/config/env.sample
 include ../Makefile.helpers
 -include Makefile.*
 
+## Checkout an existing cluster
+checkout: module
+
 ## Initialize environment
 init: init-git
 	@[ -f $(CLOUD_STATE_PATH)/env ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(CLOUD_STATE_PATH)/env
@@ -46,9 +49,7 @@ view:
 	@cat "$(CLOUD_CONFIG)"
 
 ## Validate configuration
-validate:
-	$(call assert-set,AWS_PROFILE)
-	$(call assert-set,AWS_DEFAULT_PROFILE)
+validate: require-aws-profile
 	$(call assert-set,CLUSTER_STATE_BUCKET)
 	$(call assert-set,CLUSTER_STATE_BUCKET_REGION)
 
@@ -76,31 +77,31 @@ verify-serial: validate
 create-bucket: validate
 	@aws s3 mb s3://$(CLUSTER_STATE_BUCKET) --region=$(CLUSTER_STATE_BUCKET_REGION)
 	@aws s3api put-bucket-versioning \
-    --bucket $(CLUSTER_STATE_BUCKET) \
-    --region=$(CLUSTER_STATE_BUCKET_REGION) \
-    --versioning-configuration Status=Enabled
+		--bucket $(CLUSTER_STATE_BUCKET) \
+		--region=$(CLUSTER_STATE_BUCKET_REGION) \
+		--versioning-configuration Status=Enabled
 
 ## List bucket versions
 list-bucket-versions:
 	@aws s3api list-object-versions \
-    --bucket $(CLUSTER_STATE_BUCKET) \
-    --region $(CLUSTER_STATE_BUCKET_REGION) | \
-      jq -M '{Objects: [.["Versions","DeleteMarkers"][] | {Key:.Key, VersionId : .VersionId}], Quiet: true}'
+		--bucket $(CLUSTER_STATE_BUCKET) \
+		--region $(CLUSTER_STATE_BUCKET_REGION) | \
+			jq -M '{Objects: [.["Versions","DeleteMarkers"][] | {Key:.Key, VersionId : .VersionId}], Quiet: true}'
 
 ## Destroy state bucket
 destroy-bucket: validate
 	@echo -e "Destroying s3://$(CLUSTER_STATE_BUCKET)"
 	@aws s3 rm s3://$(CLUSTER_STATE_BUCKET)/ --recursive --region=$(CLUSTER_STATE_BUCKET_REGION)
 	@BUCKET_VERSIONS=`make list-bucket-versions`; \
-   if [ -n "$$BUCKET_VERSIONS" ]; then \
-    aws s3api delete-objects \
-      --bucket $(CLUSTER_STATE_BUCKET) \
-      --region $(CLUSTER_STATE_BUCKET_REGION) \
-      --delete "$$BUCKET_VERSIONS"; \
-   fi
+	if [ -n "$$BUCKET_VERSIONS" ]; then \
+		aws s3api delete-objects \
+			--bucket $(CLUSTER_STATE_BUCKET) \
+			--region $(CLUSTER_STATE_BUCKET_REGION) \
+			--delete "$$BUCKET_VERSIONS"; \
+	fi
 	@aws s3 rb s3://$(CLUSTER_STATE_BUCKET) \
-    --region $(CLUSTER_STATE_BUCKET_REGION) \
-    --force
+		--region $(CLUSTER_STATE_BUCKET_REGION) \
+		--force
 
 ## Push state to S3
 push: validate verify-serial

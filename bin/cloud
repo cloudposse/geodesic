@@ -1,12 +1,17 @@
 #!/bin/bash
 cd "$GEODESIC_PATH/modules"
+
+set -o pipefail
+
 while true; do
   arg=$1
-	if [ -d "$arg" ]; then
+  if [ -d "$arg" ]; then
     set -- "${@:2}"
     cd "$arg"
   else
-    make --no-print-directory $*
-    exit
+    make --no-print-directory $* | \
+      sed -E 's/^Makefile[.a-z]*:\d+/cloud/' | \
+      grep -v "cloud: recipe for target 'require-"
+    exit $?
   fi
 done

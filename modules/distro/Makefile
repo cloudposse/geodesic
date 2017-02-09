@@ -2,10 +2,8 @@ include ../Makefile.helpers
 -include Makefile.*
 
 ## Install default distro
-default:
-	@make -C $@
+default: module
 
 ## Install kube-system distro
-kube-system:
-	@make -C $@
+kube-system: module
 

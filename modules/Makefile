@@ -1,32 +1,37 @@
 -include Makefile.*
 
+.PHONY : deps
 ## Setup environment
 deps:
 	@cloud config create-bucket
 
+.PHONY : up
 ## Bring up a new cluster
 up:
-	@make -C kops $@ wait-until-ready
+	@cloud kops $@ wait-until-ready
 
+.PHONY : down
 ## Tear down an existing cluster
 down:
-	@make -C kops $@
+	@cloud kops $@
 
+.PHONY : ssh
 ## Connect to the cluster via SSH
 ssh:
-	@make -C kops $@
+	@cloud kops $@
 
 .PHONY: config
 ## Manage configuration
-config: 
-	@make -C $@
+config: module
 
 ## Configure cloud
+.PHONY : configure
 configure:
 	@cloud config edit
 
 ## Bootstrap the overall system
-bootstrap:
+.PHONY : bootstrap
+bootstrap: require-aws-profile require-cluster-online
 	@cloud kops is-online || (echo "Cluster is unavilable. Did you run 'make up'?"; exit 1)
 	@[ ! -f $(GEODESIC_PATH)/state/.bootstrapped ] || (echo "Cluster already bootstraped"; exit 1)
 	@cloud kubernetes create-dockercfg     # Set the Docker Registry secret
@@ -39,32 +44,22 @@ bootstrap:
 	@touch $(GEODESIC_PATH)/state/.bootstrapped
 	@cloud config push                     # Save the configuration
 
-.PHONY: deploy
-## Deploy distributions
-deploy: 
-	@make -C $@
-
 .PHONY: distro
-## Manage the distribution
-distro:
-	@make -C $@
+## Manage distributions
+distro: module
 
 .PHONY: kops
 ## Manage kops
-kops:
-	@make -C $@
+kops: module
 
 .PHONY: kubernetes
 ## Manage kubernetes
-kubernetes:
-	@make -C $@
+kubernetes: module
   
 .PHONY: helm
 ## Manage helm
-helm:
-	@make -C $@
+helm: module
 
 .PHONY: terraform
 ## Manage terraform
-terraform:
-	@make -C $@
+terraform: module

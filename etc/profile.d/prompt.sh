@@ -18,14 +18,14 @@ function geodesic-prompt() {
   # Augment prompt (PS1) with some geodesic state information
   if [ -d "${CLOUD_STATE_PATH}/.git" ]; then
     GIT_STATE=$(git -C ${CLOUD_STATE_PATH} status -s)
-    STATUS="[clean]";
+    STATUS="✅";
     if [ -n "${GIT_STATE}" ]; then
-      STATUS="[unsaved changes]"
+      STATUS="❌"
     fi
   fi
 
   if [ -n "${CLUSTER_NAME}" ]; then
-    PS1="[${CLUSTER_NAME}]\n$STATUS $PS1"
+    PS1="[${CLUSTER_NAME}]\n$STATUS  $ROLE_PROMPT \W ﹥"
   fi
 }
 

@@ -43,8 +43,8 @@ apply: confirm update rolling-update
 	@cloud config push
 
 validate:
-	$(call assert-set,AWS_PROFILE)
-	$(call assert-set,AWS_DEFAULT_PROFILE)
+	$(call assert-set,AWS_PROFILE,Run `assume-role` first)
+	$(call assert-set,AWS_DEFAULT_PROFILE,Run `assume-role` first)
 	$(call assert-set,KUBERNETES_VERSION)
 	$(call assert-set,KOPS_NAME)
 	$(call assert-set,KOPS_ZONES)

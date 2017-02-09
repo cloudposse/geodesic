@@ -25,7 +25,7 @@ function geodesic-prompt() {
   fi
 
   if [ -n "${CLUSTER_NAME}" ]; then
-    PS1="[${CLUSTER_NAME}]\n$STATUS  $ROLE_PROMPT \W ﹥"
+    PS1=" ⧉ ${CLUSTER_NAME}\n$STATUS  $ROLE_PROMPT \W ➤ "
   fi
 }
 

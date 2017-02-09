@@ -2,13 +2,21 @@
 
 .PHONY : deps
 ## Setup environment
-deps:
+deps: require-aws-profile
 	@cloud config create-bucket
+
+## Initialize cluster
+init:
+	@cloud config init
+	@cloud kops init
+	@cloud helm init-client
+	@cloud helm init-repos
 
 .PHONY : up
 ## Bring up a new cluster
 up:
-	@cloud kops $@ wait-until-ready
+	@cloud kops $@ wait-for-kubernetes
+	@cloud bootstrap
 
 .PHONY : down
 ## Tear down an existing cluster
@@ -37,10 +45,9 @@ bootstrap: require-aws-profile require-cluster-online
 	@cloud kubernetes create-dockercfg     # Set the Docker Registry secret
 	@cloud helm init                       # Initalize helm for packages
 	@cloud helm init-repos                 # Initalize helm for packages
-	@cloud helm update		               # Update repo index
+	@cloud helm update                     # Update repo index
 	@cloud distro kube-system config all   # Configure essential k8s services
 	@cloud distro default config all       # Configure default namespace
-	@cloud config init-serial              # Initialize the optimistic locking mechanism
 	@touch $(GEODESIC_PATH)/state/.bootstrapped
 	@cloud config push                     # Save the configuration
 

@@ -1,8 +1,8 @@
 include ../Makefile.helpers
 -include Makefile.*
 
-## Resolve dependencies
-deps:
+## Initialze module
+init:
 	@mkdir -p $(KOPS_STATE_STORE_PATH)
 
 ## Export kubeconfig
@@ -10,7 +10,7 @@ export-kubecfg: validate
 	$(KOPS_BIN) export kubecfg --name $(KOPS_NAME)
 
 ## Export kops configuration
-backup-config: validate deps
+backup-config: validate init
 	@echo "Writing configuration to $(KOPS_STATE_STORE_PATH)/kops.yaml"
 	@$(KOPS_BIN) get cluster -o yaml --full > $(KOPS_STATE_STORE_PATH)/kops.yaml
 
@@ -60,7 +60,7 @@ validate:
 	$(call assert-set,KOPS_CONFIG)
 
 ## Bring up a new cluster
-up: deps validate create-ssh-key
+up: init validate create-ssh-key
 	@echo "Creating cluster $(KOPS_NAME)..."
 	@$(KOPS_BIN) create cluster \
 			--cloud=$(KOPS_CLOUD) \
@@ -77,18 +77,19 @@ up: deps validate create-ssh-key
 			--ssh-public-key=$(KOPS_SSH_PUBLIC_KEY) \
 			--yes
 
+## Checks if kubernetes is online
 is-online:
-	@kubectl api-versions >/dev/null 2>&1; \
+	@kubectl get nodes >/dev/null 2>&1; \
 	if [ $$? -eq 0 ]; then \
-		echo "$(KOPS_NAME) is online  "; \
+		echo "$(KOPS_NAME) kubernetes is available"; \
 		exit 0; \
 	else \
-		echo "$(KOPS_NAME) is offline"; \
+		echo "$(KOPS_NAME) kubernetes is not ready"; \
     exit 1; \
   fi
 
 ## Wait until cluster online
-wait-until-ready: validate
+wait-for-kubernetes: validate
 	@twiddle cloud kops is-online
 
 ## Export terraform configuration
@@ -110,7 +111,7 @@ delete-ssh-key: validate
 	@rm -f "$(KOPS_SSH_PRIVATE_KEY)" "$(KOPS_SSH_PUBLIC_KEY)"
 
 ## Create a unique SSH key for this deployment
-create-ssh-key: deps validate 
+create-ssh-key: init validate 
 	@if [ -f "$(KOPS_SSH_PRIVATE_KEY)" ]; then \
 		echo "SSH key $(KOPS_SSH_PRIVATE_KEY) already exists"; \
 		else \
@@ -126,7 +127,7 @@ create-ssh-key: deps validate
 	@chmod 600 "$(KOPS_SSH_PRIVATE_KEY)"
 
 ## Rotate SSH key for deployment
-rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key apply wait-until-ready
+rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key apply wait-for-kubernetes
 
 ## Add ssh key to agent
 add-ssh-key:

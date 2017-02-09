@@ -1,11 +1,6 @@
 export GEODESIC_SHELL=true
 
-cloud config init
-
-if [ ! -d "${HELM_HOME}" ]; then
-  cloud helm init-client
-  cloud helm init-repos
-fi
+cloud init
 
 if [ -z "${SSH_AUTH_SOCK}" ]; then
   eval $(ssh-agent)

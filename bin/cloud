@@ -9,9 +9,7 @@ while true; do
     set -- "${@:2}"
     cd "$arg"
   else
-    make --no-print-directory $* | \
-      sed -E 's/^Makefile[.a-z]*:\d+/cloud/' | \
-      grep -v "cloud: recipe for target 'require-"
+    make --no-print-directory $*
     exit $?
   fi
 done

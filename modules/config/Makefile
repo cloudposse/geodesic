@@ -30,6 +30,7 @@ init-git:
 	@if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then \
 		git -C ${CLOUD_STATE_PATH} init; \
 		echo "aws/*" > ${CLOUD_STATE_PATH}/.gitignore; \
+		echo "history" >> ${CLOUD_STATE_PATH}/.gitignore; \
 		git -C  ${CLOUD_STATE_PATH} add .; \
 	fi
 
@@ -41,7 +42,8 @@ edit: init
 ## Reset local state
 reset:
 	@find $(CLOUD_STATE_PATH) -type d '!' -path '*/aws' -mindepth 1 -maxdepth 1  -exec rm -rf {} \;
-	@rm -f $(CLOUD_STATE_PATH)/serial $(CLOUD_STATE_PATH)/env $(CLOUD_STATE_PATH)/history
+	@rm -f $(CLOUD_STATE_PATH)/serial $(CLOUD_STATE_PATH)/env $(CLOUD_STATE_PATH)/history $(CLOUD_STATE_PATH)/.bootstrapped
+	@cloud config init
 	@echo "Reset local state"
 
 ## View current configuration

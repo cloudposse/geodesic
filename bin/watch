@@ -13,7 +13,7 @@ while true; do
   if [ $EXIT_CODE -eq 0 ]; then
     break;
   else
-    printf "\r%b%c%b %-100s" ${COLOR_GREEN} ${SPINNER_TEMPLATE:$i} ${COLOR_RESET} ${OUTPUT};
+    printf "\r%b%c%b %-100s" ${COLOR_GREEN} ${SPINNER_TEMPLATE:$i} ${COLOR_RESET} "${OUTPUT}";
     sleep ${SLEEP}
   fi
   i=$(( (i+1)%4 ))

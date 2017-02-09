@@ -7,7 +7,7 @@ deps:
 
 ## Export kubeconfig
 export-kubecfg: validate
-	$(KOPS_BIN) export kubecfg
+	$(KOPS_BIN) export kubecfg --name $(KOPS_NAME)
 
 ## Export kops configuration
 backup-config: validate deps

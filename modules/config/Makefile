@@ -92,7 +92,7 @@ mount: validate
 	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(MOUNT_PATH) \
 		-o iam_role=$(AWS_DEFAULT_PROFILE).json,nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_cache=/var/tmp/
 	@sleep 1
-	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; exit 1)
+	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(MOUNT_PATH); exit 1)
 	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(MOUNT_PATH)"
 
 unmount:

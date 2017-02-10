@@ -43,6 +43,20 @@ RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && rm awscli-bundle.zip \
     && rm -rf awscli-bundle
 
+# Install S3FS
+ENV S3FS_VERSION 1.80
+RUN apk --update add fuse libxml2 mailcap && \
+    apk --virtual .build-deps add alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev && \
+	git clone https://github.com/s3fs-fuse/s3fs-fuse.git && \
+    cd s3fs-fuse && \
+    git checkout tags/v${S3FS_VERSION} && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr && \
+    sed -i -E 's!http://169.254.169.254.*?/!file:///geodesic/state/aws/cli/cache/!g' src/curl.cpp && \
+    make && \
+    make install && \
+    apk del .build-deps
+
 ENV BOOTSTRAP=true
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/geodesic

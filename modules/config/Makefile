@@ -1,4 +1,5 @@
 CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/modules/config/env.sample
+MOUNT_PATH ?= /s3
 
 include helpers
 include all
@@ -42,7 +43,7 @@ edit: init
 ## Reset local state
 reset:
 	@find $(CLOUD_STATE_PATH) -type d '!' -path '*/aws' -mindepth 1 -maxdepth 1  -exec rm -rf {} \;
-	@rm -f $(CLOUD_STATE_PATH)/serial $(CLOUD_STATE_PATH)/env $(CLOUD_STATE_PATH)/history $(CLOUD_STATE_PATH)/.bootstrapped
+	@rm -f $(CLOUD_STATE_PATH)/env $(CLOUD_STATE_PATH)/history $(CLOUD_STATE_PATH)/.bootstrapped
 	@cloud config init
 	@echo "Reset local state"
 
@@ -54,26 +55,6 @@ view:
 validate: require-aws-profile
 	$(call assert-set,CLUSTER_STATE_BUCKET)
 	$(call assert-set,CLUSTER_STATE_BUCKET_REGION)
-
-## Initialize serial for optimistic-locking
-init-serial: validate confirm
-	@date +'%Y%m%d%H%M%S' > $(CLOUD_STATE_PATH)/serial
-	@cat $(CLOUD_STATE_PATH)/serial
-	@aws s3 cp $(CLOUD_STATE_PATH)/serial s3://$(CLUSTER_STATE_BUCKET)/state/serial --region=$(CLUSTER_STATE_BUCKET_REGION);
-
-## Verify the local serial matches remote serial (that your configuration matches the remote)
-verify-serial: validate
-	@aws s3 cp s3://$(CLUSTER_STATE_BUCKET)/state/serial /tmp/serial --region=$(CLUSTER_STATE_BUCKET_REGION) >/dev/null;
-	@REMOTE_SERIAL=`cat /tmp/serial`; \
-	LOCAL_SERIAL=`cat $(CLOUD_STATE_PATH)/serial`; \
-	if [ "$$REMOTE_SERIAL" == "$$LOCAL_SERIAL" ]; then \
-	  echo "Serial up to date: $$LOCAL_SERIAL"; \
-	  exit 0; \
-	else \
-	  echo "Remote Serial: $$REMOTE_SERIAL"; \
-	  echo "Local Serial:  $$LOCAL_SERIAL"; \
-	  exit 1; \
-	fi
 
 ## Create state bucket
 create-bucket: validate
@@ -105,31 +86,19 @@ destroy-bucket: validate
 		--region $(CLUSTER_STATE_BUCKET_REGION) \
 		--force
 
-## Push state to S3
-push: validate verify-serial
-	@date +'%Y%m%d%H%M%S' > $(CLOUD_STATE_PATH)/serial
-	@git -C ${CLOUD_STATE_PATH} add .
-	@git -C ${CLOUD_STATE_PATH} commit -a --message "Backup `date`"
-	@aws s3 sync ${CLOUD_STATE_PATH} s3://$(CLUSTER_STATE_BUCKET)/state/ \
-		--region $(CLUSTER_STATE_BUCKET_REGION) \
-		--exclude "*.swp" \
-		--exclude "aws/*" \
-		--exclude "history" \
-		--no-follow-symlinks \
-		--exact-timestamps \
-		--delete \
-		--acl private
+mount: validate 
+	@mkdir -p $(MOUNT_PATH)
+	@jq '.Credentials' < $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE)--*.json > $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE).json
+	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(MOUNT_PATH) \
+		-o iam_role=$(AWS_DEFAULT_PROFILE).json,nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_cache=/var/tmp/
+	@sleep 1
+	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; exit 1)
+	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(MOUNT_PATH)"
 
-## Pull state from S3
-pull: validate
-	@aws s3 sync s3://$(CLUSTER_STATE_BUCKET)/state/ $(CLOUD_STATE_PATH) \
-		--region ${CLUSTER_STATE_BUCKET_REGION} \
-		--exclude "*.swp" \
-		--exclude "aws/*" \
-		--exclude "history" \
-		--no-follow-symlinks \
-		--exact-timestamps \
-		--delete
+unmount:
+	@/bin/umount $(MOUNT_PATH)
+	@rmdir $(MOUNT_PATH)
+	@echo "Unmounted $(CLUSTER_STATE_BUCKET)"
 
 ## Show what configurations have been modified
 status:

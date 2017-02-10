@@ -104,7 +104,7 @@ down: validate
 	@$(KOPS_BIN) delete cluster \
 		--name=$(KOPS_NAME) \
 		--yes
-	@rm -f 
+	@rm -f $(CLOUD_STATE_PATH)/.bootstrapped
 
 ## Delete SSH key pair for this deployment
 delete-ssh-key: validate

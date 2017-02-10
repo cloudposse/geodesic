@@ -104,6 +104,7 @@ down: validate
 	@$(KOPS_BIN) delete cluster \
 		--name=$(KOPS_NAME) \
 		--yes
+	@rm -f 
 
 ## Delete SSH key pair for this deployment
 delete-ssh-key: validate

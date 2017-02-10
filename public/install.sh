@@ -6,29 +6,39 @@ INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
 REQUIRE_PULL=${REQUIRE_PULL:-true}
 
+if [ "${GEODESIC_SHELL}" == "true" ]; then
+  echo "Installer cannot be run from inside a geodesic shell"
+  exit 1
+fi
+
+# Check if docker is installed
 which docker >/dev/null
 if [ $? -ne 0 ]; then
   echo "Docker is requried to run ${APP_NAME}"
   exit 1
 fi
 
+# Check that we can connect to docker
 docker ps >/dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
   exit 1
 fi
 
+# Check if tee is installed
 which tee >/dev/null
 if [ $? -ne 0 ]; then
   echo "Tee is requried to install ${APP_NAME}"
   exit 1
 fi
 
+# Check that we can write to install path
 if [ ! -w "${INSTALL_PATH}" ]; then
   echo "Cannot write to ${INSTALL_PATH}. Please retry using sudo."
   exit 1
 fi
 
+# Proceed with installation
 echo "# Installing ${APP_NAME} from ${DOCKER_IMAGE}:${DOCKER_TAG}..."
 if [ "${REQUIRE_PULL}" == "true" ]; then
   docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"

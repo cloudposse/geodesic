@@ -1,0 +1,43 @@
+#!/bin/bash
+
+NO_COLOR="`echo -e "\033[0m"`"
+PROMPT_COLOR="`echo -e "\033[32;01m"`"
+
+if [ "${BASH_VERSINFO}" -lt 4 ]; then
+  echo "Bash Version >= 4 required (${BASH_VERSINFO} installed)"
+  exit 1
+fi
+
+function prompt() {
+  if [ -n "$2" ]; then
+    echo "$2"
+  fi
+  echo -n "${PROMPT_COLOR}$1${NO_COLOR}"
+  read -e -i "${!1}" -p ": " $1
+  export $1
+}
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 [env-file]"
+  exit 1
+fi
+
+if [ -f "$1" ]; then
+  input=$1
+  output="$input.new"
+  source $input
+  rm -f "$output"
+  for env in `cat $1 | grep -v '^#' | cut -d= -f1`; do
+    desc=`grep "^$env=" $1|cut -d'#' -f2 | sed -E 's/^ +| +$//'`
+    prompt "$env" ">>> $desc"
+    printf '%s=%s\n' "$env" "${!env}" | xargs -I'{}' printf '%-60s # %s\n' '{}' "$desc" >> $output
+    echo
+  done
+  cat $output
+  echo
+  Y="yes" confirm Y "Do you want to overwrite $input with these values?"
+  mv -f "$input" "$input~"
+  mv -f "$output" "$input"
+else
+  echo "Cannot configure $1"
+fi

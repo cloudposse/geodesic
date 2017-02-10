@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 RUN apk update \
-		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git coreutils
+		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git coreutils less groff
 
 USER root
 
@@ -57,16 +57,17 @@ ENV CLOUD_CONFIG=/geodesic/state/env
 ENV GEODESIC_PATH=/geodesic
 ENV HELM_VALUES_PATH=/geodesic/state/helm/values
 ENV XDG_CONFIG_HOME=/geodesic/state
+ENV SHELL=/bin/bash
+ENV LESS=-Xr
 
 VOLUME ["/geodesic/state"]
-
-ADD dist /geodesic
-ADD aws-assumed-role/profile /usr/local/bin/profile
-ADD cloud /usr/local/bin/cloud
-ADD confirm /usr/local/bin/confirm
-ADD watch /usr/local/bin/watch
+ADD aws-assumed-role/profile /etc/profile.d/aws-assume-role.sh
+ADD contrib /geodesic/contrib
+ADD modules /geodesic/modules
+ADD etc /etc
+ADD bin /usr/local/bin
 
 WORKDIR /geodesic
 
-ENTRYPOINT ["/bin/bash", "--rcfile", "/geodesic/profile"]
+ENTRYPOINT ["/bin/bash", "-l"]
 

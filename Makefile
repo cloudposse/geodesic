@@ -11,6 +11,12 @@ export BUILD_HARNESS_PATH ?= $(shell until [ -d "build-harness" ] || [ "`pwd`" =
 
 all: init deps build install run
 
+lint:
+	@LINT=true \
+	 find modules -type f -name 'Makefile*' -exec \
+			 /bin/sh -c 'echo "==> {}">/dev/stderr; make -I include/ --just-print --dry-run --recon --no-print-directory --quiet --silent -f {}' \; > /dev/null
+	@make bash:lint
+
 deps:
 	@make --no-print-directory git:submodules-update
 

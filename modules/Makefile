@@ -38,7 +38,7 @@ configure:
 
 .PHONY : bootstrap
 ## Bootstrap the overall system
-bootstrap: require-aws-profile require-cluster-online
+bootstrap: require-aws-profile require-cluster-mounted require-cluster-online 
 	@[ ! -f $(REMOTE_STATE)/.bootstrapped ] || (echo "Cluster already bootstraped"; exit 1)
 	@cloud kubernetes create-dockercfg     # Set the Docker Registry secret
 	@cloud helm init                       # Initalize helm for packages

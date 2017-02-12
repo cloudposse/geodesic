@@ -30,7 +30,7 @@ update: validate confirm
 		--yes
 
 ## Rolling rebuild of all instances
-rolling-update: validate confirm
+rolling-update: validate  confirm
 	@$(KOPS_BIN) rolling-update cluster \
 		--yes
 
@@ -42,7 +42,7 @@ plan: validate
 apply: confirm update rolling-update
 	@cloud config push
 
-validate:
+validate: require-cluster-mounted
 	$(call assert-set,AWS_PROFILE,Run `assume-role` first)
 	$(call assert-set,AWS_DEFAULT_PROFILE,Run `assume-role` first)
 	$(call assert-set,KUBERNETES_VERSION)
@@ -79,7 +79,7 @@ up: init validate create-ssh-key
 			--yes
 
 ## Checks if kubernetes is online
-is-online:
+is-online: validate
 	@kubectl get nodes >/dev/null 2>&1; \
 	if [ $$? -eq 0 ]; then \
 		echo "$(KOPS_NAME) kubernetes is available"; \
@@ -130,7 +130,7 @@ create-ssh-key: init validate
 	@chmod 600 "$(KOPS_SSH_PRIVATE_KEY)"
 
 ## Rotate SSH key for deployment
-rotate-ssh-key: delete-ssh-key create-ssh-key configure-ssh-key apply wait-for-kubernetes
+rotate-ssh-key: validate delete-ssh-key create-ssh-key configure-ssh-key apply wait-for-kubernetes
 
 ## Add ssh key to agent
 add-ssh-key:
@@ -147,7 +147,7 @@ add-ssh-key:
 	fi
 
 ## List secrets
-describe-secrets:
+describe-secrets: validate
 	@kops describe secrets
 
 ## Upload SSH key to deployment
@@ -158,7 +158,7 @@ configure-ssh-key: validate
 
 ## Connect to the cluster using SSH as admin
 ssh-as-admin: validate
-	@ssh -i $(KOPS_SSH_PRIVATE_KEY) admin@api.$(KOPS_NAME) || true
+	@ssh -i $(KOPS_SSH_PRIVATE_KEY) $(SSH_USERNAME)@api.$(KOPS_NAME) || true
 
 ## Connect to the cluster using SSH with your SSH_USERNAME
 ssh:

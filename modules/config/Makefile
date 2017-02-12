@@ -32,18 +32,18 @@ init-git:
 
 
 ## Edit configuration
-edit: init
+edit: init require-cluster-mounted
 	@configure-env $(CLOUD_CONFIG)
 
 ## Reset local state
-reset:
+reset: require-cluster-mounted
 	@rf -rf $(REMOTE_STATE)/* $(REMOTE_STATE)/.bootstrapped
 	@rm -f $(LOCAL_STATE)/history
 	@cloud config init
 	@echo "Reset local state"
 
 ## View current configuration
-view:
+view: require-cluster-mounted
 	@cat "$(CLOUD_CONFIG)"
 
 ## Validate configuration
@@ -84,10 +84,8 @@ destroy-bucket: validate
 ## Mount remote cluster state bucket
 mount: validate 
 	@mkdir -p $(REMOTE_MOUNT_POINT)
-	@jq '.Credentials' < $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE)--*.json \
-		> $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE).json
 	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(REMOTE_MOUNT_POINT) \
-		-o iam_role=$(AWS_DEFAULT_PROFILE).json,nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/var/tmp/
+		-o iam_role=$(AWS_DEFAULT_PROFILE),nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/var/tmp/
 	@sleep 1
 	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
 	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
@@ -98,6 +96,7 @@ mount: validate
 
 ## Unmount remote cluster state bucket
 unmount:
+	@[ -d $(REMOTE_MOUNT_POINT) ] || (echo "Nothing mounted"; exit 1)
 	@/bin/umount $(REMOTE_MOUNT_POINT)
 	@rmdir $(REMOTE_MOUNT_POINT)
 	@echo "Unmounted $(CLUSTER_STATE_BUCKET)"

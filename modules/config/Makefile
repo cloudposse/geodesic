@@ -1,7 +1,7 @@
 CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/modules/config/env.sample
 
-include ../Makefile.helpers
--include Makefile.*
+include helpers
+include all
 
 ## Checkout an existing cluster
 checkout: module

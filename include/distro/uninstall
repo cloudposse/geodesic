@@ -1,6 +1,11 @@
 NAMESPACE ?= $(shell basename $(abspath $(shell pwd)/../))
 PACKAGES ?= $(shell helm list --short | xargs -n1 -I'{}' sh -c '[ -f $(HELM_VALUES_PATH)/$(NAMESPACE)/{}.yaml ] && echo {}')
 
+define chart-uninstall
+	@helm delete $@ --purge
+endef
+
+
 ## Uninstall configured packages for this namespace
 all: $(PACKAGES)
 

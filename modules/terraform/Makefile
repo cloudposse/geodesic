@@ -1,5 +1,5 @@
-include ../Makefile.helpers
--include Makefile.*
+include helpers
+include all
 
 export TF_VAR_dns_zone_id ?= Z2TNGI2B6LNBQN
 export TF_VAR_kubernetes_cluster ?= $(KOPS_NAME)

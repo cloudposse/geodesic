@@ -1,5 +1,5 @@
-include ../Makefile.helpers
--include Makefile.*
+include helpers
+include all
 
 ## Init the client & server
 init:

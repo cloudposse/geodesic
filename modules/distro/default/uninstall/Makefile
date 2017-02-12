@@ -1,5 +1,5 @@
-include ../../../Makefile.helpers
-include ../../helpers/Makefile.uninstall
+include helpers
+include distro/uninstall
 
 ## Uninstall Ingress Load Balancer
 lb: confirm

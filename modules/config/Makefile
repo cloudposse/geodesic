@@ -3,19 +3,15 @@ CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/modules/config/env.sample
 include helpers
 include all
 
-## Checkout an existing cluster
-checkout: module
+## Use an existing cluster
+use: module
 
 ## Initialize environment
 init: init-git
-	@[ -f $(CLOUD_STATE_PATH)/env ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(CLOUD_STATE_PATH)/env
 	@mkdir -p $(dir $(TF_STATE_FILE))
-	@mkdir -p $(dir $(KUBECONFIG))
 	@mkdir -p $(dir $(AWS_SHARED_CREDENTIALS_FILE))
 	@mkdir -p $(dir $(AWS_CONFIG_FILE))
-	@mkdir -p $(KOPS_STATE_PATH)
 	@mkdir -p $(AWS_DATA_PATH)
-	@mkdir -p $(CLOUD_STATE_PATH)/ssh
 # Workaround for aws-cli which does not respect AWS_DATA_PATH
 	@ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
 
@@ -27,53 +23,33 @@ init-git:
 		git config --global user.email ops@cloudposse.com; \
 		git config --global user.name geodesic; \
 	fi
-	@if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then \
-		git -C ${CLOUD_STATE_PATH} init; \
-		echo "aws/*" > ${CLOUD_STATE_PATH}/.gitignore; \
-		echo "history" >> ${CLOUD_STATE_PATH}/.gitignore; \
-		git -C  ${CLOUD_STATE_PATH} add .; \
+	@if [ ! -d ${LOCAL_STATE}/.git ]; then \
+		git -C ${LOCAL_STATE} init; \
+		echo "aws/*" > ${LOCAL_STATE}/.gitignore; \
+		echo "history" >> ${LOCAL_STATE}/.gitignore; \
+		git -C  ${LOCAL_STATE} add .; \
 	fi
 
 
 ## Edit configuration
-edit: init
+edit: init require-cluster-mounted
 	@configure-env $(CLOUD_CONFIG)
 
 ## Reset local state
-reset:
-	@find $(CLOUD_STATE_PATH) -type d '!' -path '*/aws' -mindepth 1 -maxdepth 1  -exec rm -rf {} \;
-	@rm -f $(CLOUD_STATE_PATH)/serial $(CLOUD_STATE_PATH)/env $(CLOUD_STATE_PATH)/history $(CLOUD_STATE_PATH)/.bootstrapped
+reset: require-cluster-mounted
+	@rf -rf $(REMOTE_STATE)/* $(REMOTE_STATE)/.bootstrapped
+	@rm -f $(LOCAL_STATE)/history
 	@cloud config init
 	@echo "Reset local state"
 
 ## View current configuration
-view:
+view: require-cluster-mounted
 	@cat "$(CLOUD_CONFIG)"
 
 ## Validate configuration
 validate: require-aws-profile
 	$(call assert-set,CLUSTER_STATE_BUCKET)
 	$(call assert-set,CLUSTER_STATE_BUCKET_REGION)
-
-## Initialize serial for optimistic-locking
-init-serial: validate confirm
-	@date +'%Y%m%d%H%M%S' > $(CLOUD_STATE_PATH)/serial
-	@cat $(CLOUD_STATE_PATH)/serial
-	@aws s3 cp $(CLOUD_STATE_PATH)/serial s3://$(CLUSTER_STATE_BUCKET)/state/serial --region=$(CLUSTER_STATE_BUCKET_REGION);
-
-## Verify the local serial matches remote serial (that your configuration matches the remote)
-verify-serial: validate
-	@aws s3 cp s3://$(CLUSTER_STATE_BUCKET)/state/serial /tmp/serial --region=$(CLUSTER_STATE_BUCKET_REGION) >/dev/null;
-	@REMOTE_SERIAL=`cat /tmp/serial`; \
-	LOCAL_SERIAL=`cat $(CLOUD_STATE_PATH)/serial`; \
-	if [ "$$REMOTE_SERIAL" == "$$LOCAL_SERIAL" ]; then \
-	  echo "Serial up to date: $$LOCAL_SERIAL"; \
-	  exit 0; \
-	else \
-	  echo "Remote Serial: $$REMOTE_SERIAL"; \
-	  echo "Local Serial:  $$LOCAL_SERIAL"; \
-	  exit 1; \
-	fi
 
 ## Create state bucket
 create-bucket: validate
@@ -105,33 +81,27 @@ destroy-bucket: validate
 		--region $(CLUSTER_STATE_BUCKET_REGION) \
 		--force
 
-## Push state to S3
-push: validate verify-serial
-	@date +'%Y%m%d%H%M%S' > $(CLOUD_STATE_PATH)/serial
-	@git -C ${CLOUD_STATE_PATH} add .
-	@git -C ${CLOUD_STATE_PATH} commit -a --message "Backup `date`"
-	@aws s3 sync ${CLOUD_STATE_PATH} s3://$(CLUSTER_STATE_BUCKET)/state/ \
-		--region $(CLUSTER_STATE_BUCKET_REGION) \
-		--exclude "*.swp" \
-		--exclude "aws/*" \
-		--exclude "history" \
-		--no-follow-symlinks \
-		--exact-timestamps \
-		--delete \
-		--acl private
+## Mount remote cluster state bucket
+mount: validate 
+	@mkdir -p $(REMOTE_MOUNT_POINT)
+	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(REMOTE_MOUNT_POINT) \
+		-o iam_role=$(AWS_DEFAULT_PROFILE),nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/var/tmp/
+	@sleep 1
+	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
+	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
+	@mkdir -p $(REMOTE_STATE)
+	@[ -f $(REMOTE_STATE)/env ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(REMOTE_STATE)/env
+	@mkdir -p $(dir $(KUBECONFIG))
+	@mkdir -p $(KOPS_STATE_PATH)
 
-## Pull state from S3
-pull: validate
-	@aws s3 sync s3://$(CLUSTER_STATE_BUCKET)/state/ $(CLOUD_STATE_PATH) \
-		--region ${CLUSTER_STATE_BUCKET_REGION} \
-		--exclude "*.swp" \
-		--exclude "aws/*" \
-		--exclude "history" \
-		--no-follow-symlinks \
-		--exact-timestamps \
-		--delete
+## Unmount remote cluster state bucket
+unmount:
+	@[ -d $(REMOTE_MOUNT_POINT) ] || (echo "Nothing mounted"; exit 1)
+	@/bin/umount $(REMOTE_MOUNT_POINT)
+	@rmdir $(REMOTE_MOUNT_POINT)
+	@echo "Unmounted $(CLUSTER_STATE_BUCKET)"
 
 ## Show what configurations have been modified
 status:
-	@git -C ${CLOUD_STATE_PATH} status
+	@git -C ${LOCAL_STATE} status
 

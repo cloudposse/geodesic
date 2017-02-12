@@ -104,14 +104,9 @@ cloud config checkout config.demo.dev.cloudposse.com
 ```
 
 ### Save your current cloud configuration state
-Note: 
-* if multiple people are administering the same cluster, we suggest you coordinate before push changes. 
-* We use a simple optimistic locking approach that involves a `serial` file stored on S3. If your serial matches the upstream, we presume nothing has changed and allow you to push your files. If not, you'll need to manually reconcile what has changed.
 
-```shell
-cloud config push
-```
-
+* Changes are saved to S3 in real-time
+* if multiple people are administering the same cluster, we suggest you coordinate to ensure you're not stepping on each other's changes
 
 ### Using `kubectl` outside of geodesic
 
@@ -144,6 +139,24 @@ with the "cloud" way of doing this as well as a clear way of communicating what 
 cloud config checkout demo.dev.cloudposse.com CLUSTER_STATE_BUCKET_REGION=us-west-2
 ```
 
+## FAQ
+
+1. Cannot list directory
+
+```
+$ ls /s3
+ls: reading directory '.': I/O error
+```
+
+This means your AWS credentials have expired. Re-run `assume-role`.
+
+2. Cannot unmount folder
+```bash
+$ cloud config unmount
+umount: can't unmount /s3: Resource busy
+```
+
+This means some process (maybe you) is in the directory. Try running `cd /` and rerun the unmount.
 
 ## Layout Inside of the Geodesic Shell
 

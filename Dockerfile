@@ -43,26 +43,35 @@ RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && rm awscli-bundle.zip \
     && rm -rf awscli-bundle
 
+# Install S3FS
+# Overrride path for AWS Metadata API so we can run outside of AWS
+ENV S3FS_VERSION 1.80
+RUN apk --update add fuse libxml2 mailcap && \
+    apk --virtual .build-deps add alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev && \
+	git clone https://github.com/s3fs-fuse/s3fs-fuse.git && \
+    cd s3fs-fuse && \
+    git checkout tags/v${S3FS_VERSION} && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr && \
+    sed -i -E 's!http://169.254.169.254.*?/!file:///mnt/local/aws/cli/cache/!g' src/curl.cpp && \
+    make && \
+    make install && \
+    apk del .build-deps
+
 ENV BOOTSTRAP=true
+
+# Where to store state
+ENV LOCAL_MOUNT_POINT=/mnt/local
+ENV LOCAL_STATE=/mnt/local
+ENV REMOTE_MOUNT_POINT=/mnt/remote
+ENV REMOTE_STATE=/mnt/remote/geodesic
+
+ENV GEODESIC_PATH=/geodesic
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/geodesic
-ENV KOPS_STATE_PATH=/geodesic/state/kops
-ENV KUBECONFIG=/geodesic/state/kubernetes/kubeconfig
-ENV AWS_DATA_PATH=/geodesic/state/aws/
-ENV AWS_SHARED_CREDENTIALS_FILE=/geodesic/state/aws/credentials
-ENV AWS_CONFIG_FILE=/geodesic/state/aws/config
-ENV TF_STATE_FILE=/geodesic/state/terraform/terraform.tfstate
-ENV HELM_HOME=/geodesic/state/helm/
-ENV HISTFILE=/geodesic/state/history
-ENV CLOUD_STATE_PATH=/geodesic/state
-ENV CLOUD_CONFIG=/geodesic/state/env
-ENV GEODESIC_PATH=/geodesic
-ENV HELM_VALUES_PATH=/geodesic/state/helm/values
-ENV XDG_CONFIG_HOME=/geodesic/state
-ENV SHELL=/bin/bash
-ENV LESS=-Xr
 
-VOLUME ["/geodesic/state"]
+VOLUME ["/mnt/local"]
+
 ADD aws-assumed-role/profile /etc/profile.d/aws-assume-role.sh
 ADD contrib /geodesic/contrib
 ADD modules /geodesic/modules

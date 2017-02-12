@@ -49,6 +49,9 @@ require-aws-profile:
 require-cluster-online:
 	@cloud kops is-online || (echo 'Cluster is unavilable. Did you run `cloud up`?'; exit 1)
 
+require-cluster-mounted:
+	@[ -f "${REMOTE_STATE}/env" ] || (echo 'Cluster not mounted. Did you run `cloud config use $$cluster`?'; exit 1)
+
 .PHONY : help
 ## This help screen
 help:

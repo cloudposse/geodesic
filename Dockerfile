@@ -1,7 +1,10 @@
 FROM alpine:latest
 
 RUN apk update \
-		&& apk add unzip curl tar python make bash vim jq openssl openssh-client iputils drill git coreutils less groff bash-completion
+    && apk add unzip curl tar \
+          python make bash vim jq \
+          openssl openssh-client iputils drill \
+          git coreutils less groff bash-completion hub hub-bash-completion
 
 USER root
 

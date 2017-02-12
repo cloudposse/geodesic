@@ -9,7 +9,7 @@ SHELL = /bin/bash
 export BUILD_HARNESS_PATH ?= $(shell until [ -d "build-harness" ] || [ "`pwd`" == '/' ]; do cd ..; done; pwd)/build-harness
 -include $(BUILD_HARNESS_PATH)/Makefile
 
-all: init deps build install run
+all: init deps lint build install run
 
 lint:
 	@LINT=true \

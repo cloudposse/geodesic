@@ -1,14 +1,23 @@
 #!/bin/bash
-cd "$GEODESIC_PATH/modules"
 
 set -o pipefail
 
+# If a cluster module is defined, it takes presedence 
+if [ -n "$1" ] && [ -d "${LOCAL_STATE}/clusters/${CLUSTER_NAME}/$1" ]; then
+  cd "${LOCAL_STATE}/clusters/${CLUSTER_NAME}"
+else
+  cd "$GEODESIC_PATH/modules"
+fi
+
+# Iterate over arguments
 while true; do
   arg=$1
+  # If it's a directory, we assume it's a module
   if [ -d "$arg" ]; then
     set -- "${@:2}"
     cd "$arg"
   else
+	# Otherwise it's a target of a module (or possibly an ENV)
     make --no-print-directory $*
     exit $?
   fi

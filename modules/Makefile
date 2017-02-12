@@ -1,5 +1,6 @@
 include helpers
 include all
+include cluster
 
 .PHONY : deps
 ## Setup environment
@@ -9,6 +10,14 @@ deps: require-aws-profile
 ## Initialize cluster
 init:
 	@cloud config init
+
+## Create a new cluster
+create:
+	# require assume role
+	# run `cloud configure`
+	# create bucket
+	# move config to bucket
+	# initialize git repo
 
 .PHONY : up
 ## Bring up a new cluster

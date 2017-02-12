@@ -3,20 +3,20 @@ include all
 
 ## Init the client & server
 init:
-	@helm init
+	@$(HELM) init
 
 ## Init the helm client
 init-client:
-	@helm init --client-only
+	@$(HELM) init --client-only
 
 ## Init the repositories
 init-repos:
-	@helm repo add cloudposse-stable https://charts.cloudposse.com/stable
-	@helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator
+	@$(HELM) repo add cloudposse-stable https://charts.cloudposse.com/stable
+	@$(HELM) repo add cloudposse-incubator https://charts.cloudposse.com/incubator
 
 ## Update repo indexes
 update:
-	@helm repo update
+	@$(HELM) repo update
 
 ## Upgrade tiller
 upgrade:

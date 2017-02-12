@@ -26,3 +26,6 @@ export KOPS_SSH_PRIVATE_KEY ?= $(KOPS_STATE_STORE_PATH)/id_rsa
 export KOPS_SSH_PUBLIC_KEY ?= $(KOPS_SSH_PRIVATE_KEY).pub
 
 export KOPS_CONFIG ?= $(HOME)/.kops.yaml
+
+dummy: 
+	exit 0

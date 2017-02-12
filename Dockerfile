@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.4
 
 RUN apk update \
     && apk add unzip curl tar \

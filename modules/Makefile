@@ -22,6 +22,7 @@ up:
 ## Tear down an existing cluster
 down:
 	@cloud kops $@
+	@rm -f ${CLOUD_STATE_PATH}/.bootstrapped
 
 .PHONY : ssh
 ## Connect to the cluster via SSH

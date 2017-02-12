@@ -93,7 +93,7 @@ DOCKER_ARGS=("${DOCKER_ARGS[@]}"
               --rm 
               --env BOOTSTRAP=false
               --env KUBERNETES_API_PORT=${GEODESIC_PORT}
-              --volume ${STATE_DIR}:/geodesic/state)
+              --volume ${STATE_DIR}:/mnt/local)
 
 docker inspect geodesic >/dev/null 2>&1
 if [ $? -eq 0 ]; then

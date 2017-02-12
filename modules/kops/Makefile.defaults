@@ -21,8 +21,8 @@ export KOPS_ASSOCIATE_PUBLIC_IP ?= true
 
 export KOPS_ADMIN_ACCESS ?= $(shell curl -s http://whatismyip.akamai.com)/32
 
-export KOPS_STATE_STORE_PATH ?= $(CLOUD_STATE_PATH)/kops
-export KOPS_SSH_PRIVATE_KEY ?= $(KOPS_STATE_PATH)/id_rsa
+export KOPS_STATE_STORE_PATH ?= $(REMOTE_STATE)/kops
+export KOPS_SSH_PRIVATE_KEY ?= $(KOPS_STATE_STORE_PATHE)/id_rsa
 export KOPS_SSH_PUBLIC_KEY ?= $(KOPS_SSH_PRIVATE_KEY).pub
 
 export KOPS_CONFIG ?= $(HOME)/.kops.yaml

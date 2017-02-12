@@ -1,22 +1,17 @@
 CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/modules/config/env.sample
-MOUNT_PATH ?= /s3
 
 include helpers
 include all
 
-## Checkout an existing cluster
-checkout: module
+## Use an existing cluster
+use: module
 
 ## Initialize environment
 init: init-git
-	@[ -f $(CLOUD_STATE_PATH)/env ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(CLOUD_STATE_PATH)/env
 	@mkdir -p $(dir $(TF_STATE_FILE))
-	@mkdir -p $(dir $(KUBECONFIG))
 	@mkdir -p $(dir $(AWS_SHARED_CREDENTIALS_FILE))
 	@mkdir -p $(dir $(AWS_CONFIG_FILE))
-	@mkdir -p $(KOPS_STATE_PATH)
 	@mkdir -p $(AWS_DATA_PATH)
-	@mkdir -p $(CLOUD_STATE_PATH)/ssh
 # Workaround for aws-cli which does not respect AWS_DATA_PATH
 	@ln -sf ${AWS_DATA_PATH} ${HOME}/.aws
 
@@ -28,11 +23,11 @@ init-git:
 		git config --global user.email ops@cloudposse.com; \
 		git config --global user.name geodesic; \
 	fi
-	@if [ ! -d ${CLOUD_STATE_PATH}/.git ]; then \
-		git -C ${CLOUD_STATE_PATH} init; \
-		echo "aws/*" > ${CLOUD_STATE_PATH}/.gitignore; \
-		echo "history" >> ${CLOUD_STATE_PATH}/.gitignore; \
-		git -C  ${CLOUD_STATE_PATH} add .; \
+	@if [ ! -d ${LOCAL_STATE}/.git ]; then \
+		git -C ${LOCAL_STATE} init; \
+		echo "aws/*" > ${LOCAL_STATE}/.gitignore; \
+		echo "history" >> ${LOCAL_STATE}/.gitignore; \
+		git -C  ${LOCAL_STATE} add .; \
 	fi
 
 
@@ -42,8 +37,8 @@ edit: init
 
 ## Reset local state
 reset:
-	@find $(CLOUD_STATE_PATH) -type d '!' -path '*/aws' -mindepth 1 -maxdepth 1  -exec rm -rf {} \;
-	@rm -f $(CLOUD_STATE_PATH)/env $(CLOUD_STATE_PATH)/history $(CLOUD_STATE_PATH)/.bootstrapped
+	@rf -rf $(REMOTE_STATE)/* $(REMOTE_STATE)/.bootstrapped
+	@rm -f $(LOCAL_STATE)/history
 	@cloud config init
 	@echo "Reset local state"
 
@@ -86,21 +81,28 @@ destroy-bucket: validate
 		--region $(CLUSTER_STATE_BUCKET_REGION) \
 		--force
 
+## Mount remote cluster state bucket
 mount: validate 
-	@mkdir -p $(MOUNT_PATH)
-	@jq '.Credentials' < $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE)--*.json > $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE).json
-	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(MOUNT_PATH) \
-		-o iam_role=$(AWS_DEFAULT_PROFILE).json,nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_cache=/var/tmp/
+	@mkdir -p $(REMOTE_MOUNT_POINT)
+	@jq '.Credentials' < $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE)--*.json \
+		> $(AWS_DATA_PATH)/cli/cache/$(AWS_DEFAULT_PROFILE).json
+	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(REMOTE_MOUNT_POINT) \
+		-o iam_role=$(AWS_DEFAULT_PROFILE).json,nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/var/tmp/
 	@sleep 1
-	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(MOUNT_PATH); exit 1)
-	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(MOUNT_PATH)"
+	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
+	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
+	@mkdir -p $(REMOTE_STATE)
+	@[ -f $(REMOTE_STATE)/env ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(REMOTE_STATE)/env
+	@mkdir -p $(dir $(KUBECONFIG))
+	@mkdir -p $(KOPS_STATE_PATH)
 
+## Unmount remote cluster state bucket
 unmount:
-	@/bin/umount $(MOUNT_PATH)
-	@rmdir $(MOUNT_PATH)
+	@/bin/umount $(REMOTE_MOUNT_POINT)
+	@rmdir $(REMOTE_MOUNT_POINT)
 	@echo "Unmounted $(CLUSTER_STATE_BUCKET)"
 
 ## Show what configurations have been modified
 status:
-	@git -C ${CLOUD_STATE_PATH} status
+	@git -C ${LOCAL_STATE} status
 

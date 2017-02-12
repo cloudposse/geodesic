@@ -1,4 +1,5 @@
 # Setup some default envs
+export LESS=-Xr
 
 if [ -n "${CLUSTER_PREFIX}" ] && [ -n "${CLUSTER_DNS_ZONE}" ]; then
   export CLUSTER_NAME=${CLUSTER_PREFIX}.${CLUSTER_DNS_ZONE}  # Full name of cluster
@@ -10,6 +11,58 @@ if [ -z "${CLUSTER_STATE_BUCKET_REGION}" ]; then
   export CLUSTER_STATE_BUCKET_REGION=us-east-1               # Primary region of bucket
 fi
 
+
+#
+# SSH
+#
 if [ -z "${SSH_USERNAME}" ]; then
   export SSH_USERNAME=admin                                  # Username to use for connecting to cluster
 fi
+
+
+#
+# Helm
+#
+export HELM_HOME=${REMOTE_STATE}/helm/
+export HELM_VALUES_PATH=${REMOTE_STATE}/helm/values
+
+#
+# AWS
+#
+export AWS_DATA_PATH=${LOCAL_STATE}/aws/
+export AWS_SHARED_CREDENTIALS_FILE=${LOCAL_STATE}/aws/credentials
+export AWS_CONFIG_FILE=${LOCAL_STATE}/aws/config
+
+#
+# Shell
+#
+
+export HISTFILE=${LOCAL_STATE}/history
+export SHELL=/bin/bash
+
+#
+# Git
+#
+export XDG_CONFIG_HOME=${LOCAL_STATE}
+
+#
+# Kops
+#
+export KOPS_STATE_PATH=${REMOTE_STATE}/kops
+
+#
+# Kubernetes
+#
+export KUBECONFIG=${REMOTE_STATE}/kubernetes/kubeconfig
+
+
+#
+# Terraform
+#
+export TF_STATE_FILE=${LOCAL_STATE}/terraform/terraform.tfstate
+
+#
+# Geodesic
+#
+export CLOUD_CONFIG=${REMOTE_STATE}/env
+

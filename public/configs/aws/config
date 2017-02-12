@@ -1,5 +1,0 @@
-[profile example-ops]
-region = us-east-1
-role_arn = arn:aws:iam::000000000000:role/ops
-mfa_serial = arn:aws:iam::000000000000:mfa/example-user
-source_profile = example

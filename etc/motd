@@ -8,7 +8,7 @@
 [0m
 
 IMPORTANT:
-* Only files in /geodesic/state are saved
+* Only files in /mnt/local, and /mnt/remote are saved
 * Type "cloud help" for a list of available commands
 
 

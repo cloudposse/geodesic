@@ -62,6 +62,7 @@ validate:
 ## Bring up a new cluster
 up: init validate create-ssh-key
 	@echo "Creating cluster $(KOPS_NAME)..."
+	@rm -f $(REMOTE_PATH)/.bootstrapped
 	@$(KOPS_BIN) create cluster \
 			--cloud=$(KOPS_CLOUD) \
 			--zones=$(KOPS_ZONES) \
@@ -105,7 +106,7 @@ down: validate
 		--name=$(KOPS_NAME) \
 		--region=$(AWS_REGION) \
 		--yes
-	@rm -f $(CLOUD_STATE_PATH)/.bootstrapped
+	@rm -f $(REMOTE_PATH)/.bootstrapped
 
 ## Delete SSH key pair for this deployment
 delete-ssh-key: validate

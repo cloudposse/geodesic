@@ -36,10 +36,9 @@ config: module
 configure:
 	@cloud config edit
 
-## Bootstrap the overall system
 .PHONY : bootstrap
+## Bootstrap the overall system
 bootstrap: require-aws-profile require-cluster-online
-	@cloud kops is-online || (echo "Cluster is unavilable. Did you run 'make up'?"; exit 1)
 	@[ ! -f $(REMOTE_STATE)/.bootstrapped ] || (echo "Cluster already bootstraped"; exit 1)
 	@cloud kubernetes create-dockercfg     # Set the Docker Registry secret
 	@cloud helm init                       # Initalize helm for packages
@@ -47,8 +46,7 @@ bootstrap: require-aws-profile require-cluster-online
 	@cloud helm update                     # Update repo index
 	@cloud distro kube-system config all   # Configure essential k8s services
 	@cloud distro default config all       # Configure default namespace
-	@touch $(REMOTE_STATE)/.bootstrapped
-	@cloud config push                     # Save the configuration
+	@touch $(REMOTE_STATE)/.bootstrapped   # Record that this target has run
 
 .PHONY: distro
 ## Manage distributions

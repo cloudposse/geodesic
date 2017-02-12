@@ -1,5 +1,9 @@
 NAMESPACE ?= $(shell basename $(abspath $(shell pwd)/../))
 PACKAGES ?= $(shell find $(HELM_VALUES_PATH)/$(NAMESPACE) -type f -name '*.yaml' | xargs -n 1 -I '{}' basename {} .yaml)
 
+define chart-install
+	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml $(1)
+endef
+
 ## Install configured packages for this namespace
 all: $(PACKAGES)

@@ -68,6 +68,7 @@ ADD contrib /geodesic/contrib
 ADD modules /geodesic/modules
 ADD etc /etc
 ADD bin /usr/local/bin
+ADD include /usr/local/include
 
 WORKDIR /geodesic
 

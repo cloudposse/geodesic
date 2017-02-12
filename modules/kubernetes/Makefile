@@ -1,5 +1,5 @@
-include ../Makefile.helpers
--include Makefile.*
+include helpers
+include all
 
 KUBERNETES_API_PORT ?= 8001
 

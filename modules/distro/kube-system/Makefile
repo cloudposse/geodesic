@@ -1,2 +1,3 @@
-include ../../Makefile.helpers
-include ../helpers/Makefile.distro
+include helpers
+include distro/base
+include all

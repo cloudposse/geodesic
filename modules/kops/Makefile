@@ -1,5 +1,5 @@
-include ../Makefile.helpers
--include Makefile.*
+include helpers
+include all
 
 ## Initialze module
 init:
@@ -21,18 +21,18 @@ edit: validate
 ## Upgrade cluster or apply configuration updates
 upgrade: validate confirm
 	@$(KOPS_BIN) upgrade cluster \
-	    --yes
+		--yes
 	@cloud kops apply
 
 ## Apply pending changes to the cluster's autoscaling group configuration (does not modify running instances)
 update: validate confirm
 	@$(KOPS_BIN) update cluster \
-	  --yes
+		--yes
 
 ## Rolling rebuild of all instances
 rolling-update: validate confirm
 	@$(KOPS_BIN) rolling-update cluster \
-	  --yes
+		--yes
 
 ## Show pending changes
 plan: validate
@@ -103,6 +103,7 @@ down: validate
 	@confirm CLUSTER_NAME
 	@$(KOPS_BIN) delete cluster \
 		--name=$(KOPS_NAME) \
+		--region=$(AWS_REGION) \
 		--yes
 	@rm -f $(CLOUD_STATE_PATH)/.bootstrapped
 
@@ -162,4 +163,4 @@ ssh-as-admin: validate
 ssh:
 	$(call assert-set,SSH_USERNAME)
 	$(call assert-set,KOPS_NAME)
-	@ssh $(SSH_USERNAME)@api.$(KOPS_NAME) || true
+	@ssh -A $(SSH_USERNAME)@api.$(KOPS_NAME) || true

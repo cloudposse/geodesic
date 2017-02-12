@@ -1,4 +1,5 @@
--include Makefile.*
+include helpers
+include all
 
 .PHONY : deps
 ## Setup environment

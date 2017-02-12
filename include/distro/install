@@ -4,7 +4,7 @@ PACKAGES ?= $(shell find $(HELM_VALUES_PATH)/$(NAMESPACE) -type f -name '*.yaml'
 endif
 
 define chart-install
-	@$(HELM) install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml $(1)
+	@helm install --namespace $(NAMESPACE) --name $@ --values $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml $(1)
 endef
 
 ## Install configured packages for this namespace

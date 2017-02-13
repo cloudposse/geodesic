@@ -78,6 +78,9 @@ else
   cd "$GEODESIC_PATH/modules"
 fi
 
+# set a default target of help
+[[ $targets ]] || targets=("help")
+
 # Iterate over arguments
 while [[ $targets ]]; do
   arg=${targets[0]}

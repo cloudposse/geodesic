@@ -31,7 +31,7 @@ init-git:
 
 ## Edit configuration
 edit: init require-cluster-mounted
-	@configure-env $(CLOUD_CONFIG)
+	@configure-env $(CLOUD_CONFIG) 1>&2
 
 ## Reset local state
 reset: require-cluster-mounted

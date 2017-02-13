@@ -2,7 +2,9 @@ include helpers
 include all
 
 CLUSTER_REPO_PATH ?= $(LOCAL_STATE)/clusters/$(CLUSTER_NAME)
-MESSAGE ?= "Automatic commit"
+MESSAGE ?= Automatic commit
+REMOTE ?= origin
+BRANCH ?= master
 
 validate:
 	$(call assert-set,CLUSTER_NAME)
@@ -16,12 +18,13 @@ create: validate test
 
 ## Clone an existing cluster repo
 clone: validate test
-	@git -C $(CLUSTER_REPO_PATH) clone 
+	$(call assert-set,GITHUB_ORG)
+	@git clone -b $(BRANCH) git@github.com:$(GITHUB_ORG)/$(CLUSTER_NAME) $(CLUSTER_REPO_PATH)
 	@cloud hub pull
 
 ## Update local cluster repo 
 update:
-	if [ -d "$(CLUSTER_REPO_PATH)" ]; then \
+	@if [ -d "$(CLUSTER_REPO_PATH)" ]; then \
 		cloud hub pull; \
 	else \
 		cloud hub clone; \
@@ -29,15 +32,15 @@ update:
 
 ## Pull down updates
 pull: validate test
-	@git -C $(CLUSTER_REPO_PATH) pull origin
+	@git -C $(CLUSTER_REPO_PATH) pull $(REMOTE) $(BRANCH)
 	@git -C $(CLUSTER_REPO_PATH) submodule update --init --remote
 
 ## Push changes to github
 push: validate test
-	@git -C $(CLUSTER_REPO_PATH) push origin
+	@git -C $(CLUSTER_REPO_PATH) push $(REMOTE) $(BRANCH)
 
 ## Commit changes 
-commit: test
+commit:
 	@git -C $(CLUSTER_REPO_PATH) commit -a --message "$(MESSAGE)"
 
 ## Show status of cluster repo

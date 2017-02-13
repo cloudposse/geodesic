@@ -73,6 +73,10 @@ kubernetes: module
 ## Manage helm
 helm: module
 
+.PHONY: hub
+## Manage cluster github repo
+hub: module
+
 .PHONY: terraform
 ## Manage terraform
 terraform: module

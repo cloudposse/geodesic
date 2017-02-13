@@ -2,23 +2,94 @@
 
 set -o pipefail
 
+export options=()
+export envs=()
+export targets=()
+
+function options_to_env() {
+  local kv
+  local k
+  local v
+
+  for option in ${options[@]}; do
+    kv=(${option/=/ })
+    k=${kv[0]}  # Take first element as key
+    k=${k#--}   # Strip leading --
+    k=${k//-/_} # Convert dashes to underscores
+    k=${k^^}    # Convert to uppercase
+
+    v=${kv[1]}  # Treat second element as value
+    env="$k=$v"
+    envs+=("$env")
+  done
+}
+
+function debug() {
+  if [ "${VERBOSE}" == "true" ]; then
+    echo "[DEBUG] $*"
+  fi
+}
+
+while [[ $1 ]]
+do
+  case "$1" in
+    -h | --help)
+      targets+=("help")
+      shift
+      ;;
+    -v | --verbose)
+      envs+=("VERBOSE=true")
+      export VERBOSE=true
+      shift
+      ;;
+    --*)
+      options+=("${1}")
+      shift
+      ;;
+    --) # End of all options
+      shift
+      break;
+      ;;
+    -*)
+      echo "Error: Unknown option: $1" >&2
+      exit 1
+      ;;
+    *=*)
+      envs+=("${1}")
+      shift
+      ;;
+    *)
+      targets+=("${1}")
+      shift
+      ;;
+  esac
+done
+
+options_to_env
+
+debug "options:[${options[@]}]"
+debug "envs:[${envs[@]}]"
+debug "targets:[${targets[@]}]"
+
 # If a cluster module is defined, it takes presedence 
-if [ -n "$1" ] && [ -d "${LOCAL_STATE}/clusters/${CLUSTER_NAME}/$1" ]; then
+if [ -n "${targets[0]}" ] && [ -d "${LOCAL_STATE}/clusters/${CLUSTER_NAME}/${targets[0]}" ]; then
   cd "${LOCAL_STATE}/clusters/${CLUSTER_NAME}"
 else
   cd "$GEODESIC_PATH/modules"
 fi
 
 # Iterate over arguments
-while true; do
-  arg=$1
+while [[ $targets ]]; do
+  arg=${targets[0]}
   # If it's a directory, we assume it's a module
   if [ -d "$arg" ]; then
-    set -- "${@:2}"
+    targets=("${targets[@]:1}")
     cd "$arg"
   else
-	# Otherwise it's a target of a module (or possibly an ENV)
-    make --no-print-directory $*
+    # Otherwise it's a target of a module (or possibly an ENV)
+    command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
+    debug "command: ${command[@]}; pwd: `pwd`"
+    ${command[@]}
     exit $?
   fi
 done

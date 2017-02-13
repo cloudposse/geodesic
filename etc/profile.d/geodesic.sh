@@ -15,3 +15,5 @@ if [ -z "${SSH_AUTH_SOCK}" ] || ! [ -e "${SSH_AUTH_SOCK}" ]; then
 fi
 
 [ -f "${KOPS_STATE_PATH}/id_rsa" ] && cloud kops add-ssh-key
+
+[ -f "${HOME}/.bashrc" ] && source "${HOME}/.bashrc"

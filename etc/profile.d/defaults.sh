@@ -5,6 +5,12 @@ if [ -n "${CLUSTER_PREFIX}" ] && [ -n "${CLUSTER_DNS_ZONE}" ]; then
   export CLUSTER_NAME=${CLUSTER_PREFIX}.${CLUSTER_DNS_ZONE}  # Full name of cluster
   export CLUSTER_STATE_BUCKET=config.${CLUSTER_NAME}         # Bucket to store cluster state
   export KOPS_STATE_STORE=s3://${CLUSTER_STATE_BUCKET}       # S3 bucket to store cluster state for kops
+  export CLUSTER_REPO_PATH=${LOCAL_STATE}/clusters/${CLUSTER_NAME}
+else
+  unset CLUSTER_NAME
+  unset CLUSTER_STATE_BUCKET
+  unset KOPS_STATE_STORE
+  unset CLUSTER_REPO_PATH
 fi
 
 if [ -z "${CLUSTER_STATE_BUCKET_REGION}" ]; then
@@ -65,4 +71,5 @@ export TF_STATE_FILE=${LOCAL_STATE}/terraform/terraform.tfstate
 # Geodesic
 #
 export CLOUD_CONFIG=${REMOTE_STATE}/env
+export CLOUD_CONFIG_SAMPLE=${GEODESIC_PATH}/modules/config/env.sample
 

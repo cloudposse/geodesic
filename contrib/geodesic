@@ -52,7 +52,7 @@ if [ -t 1 ]; then
     if [ `uname -s` == 'Darwin' ]; then
       # Run our own SSH agent
       DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                     --volume "${HOME}/.ssh:/geodesic/.ssh" )
+                     --volume "${HOME}/.ssh:/mnt/local/.ssh" )
     else
       DOCKER_ARGS=("${DOCKER_ARGS[@]}"
                      --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 

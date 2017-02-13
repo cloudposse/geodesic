@@ -77,7 +77,7 @@ ENV REMOTE_STATE=/mnt/remote/geodesic
 
 ENV GEODESIC_PATH=/geodesic
 ENV MOTD_URL=http://geodesic.sh/motd
-ENV HOME=/geodesic
+ENV HOME=/mnt/local
 
 VOLUME ["/mnt/local"]
 
@@ -88,7 +88,7 @@ ADD etc /etc
 ADD bin /usr/local/bin
 ADD include /usr/local/include
 
-WORKDIR /geodesic
+WORKDIR /mnt/local
 
 ENTRYPOINT ["/bin/bash", "-l"]
 

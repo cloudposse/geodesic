@@ -26,6 +26,12 @@ if ! which docker > /dev/null; then
   exit 1
 fi
 
+docker ps >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
+  exit 1
+fi
+
 if [ "$1" == "update" ]; then
   echo "# Installing the latest version of geodesic from ${GEODESIC_INSTALLER_URL}"
   curl --silent --fail ${GEODESIC_INSTALLER_URL} | bash
@@ -36,12 +42,8 @@ if [ "$1" == "update" ]; then
     echo "Failed to update geodesic"
     exit 1
   fi
-fi
-
-docker ps >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
-  exit 1
+elif [ "$1" == "stop" ]; then
+  exec docker kill ${DOCKER_NAME}
 fi
 
 if [ -t 1 ]; then

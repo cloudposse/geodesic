@@ -7,7 +7,8 @@ define chart-values
 	else \
 		echo "Fetching config for $@ from $(1)"; \
 		mkdir -p  $(HELM_VALUES_PATH)/$(NAMESPACE); \
-		helm inspect values $(1) | sed 's/^/#/' > $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml; \
+		helm inspect values $(1) > $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml; \
+		configure-yaml $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml
 	fi
 endef
 
@@ -18,3 +19,7 @@ all: $(PACKAGES)
 list:
 	@echo "# Configs in $(HELM_VALUES_PATH)/$(NAMESPACE)"
 	@find $(HELM_VALUES_PATH)/$(NAMESPACE) -type f -name '*.yaml' | xargs ls -l
+
+## Delete left-over packages
+clean:
+  @rm -f *.tgz

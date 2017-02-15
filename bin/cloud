@@ -13,12 +13,14 @@ function options_to_env() {
 
   for option in ${options[@]}; do
     kv=(${option/=/ })
-    k=${kv[0]}  # Take first element as key
-    k=${k#--}   # Strip leading --
-    k=${k//-/_} # Convert dashes to underscores
-    k=${k^^}    # Convert to uppercase
+    k=${kv[0]}    # Take first element as key
+    k=${k#--}     # Strip leading --
+    k=${k//-/_}   # Convert dashes to underscores
+    k=${k^^}      # Convert to uppercase
 
-    v=${kv[1]}  # Treat second element as value
+    v=${kv[1]}    # Treat second element as value
+    v=${kv:-true} # Set it to true for boolean flags
+
     env="$k=$v"
     envs+=("$env")
   done

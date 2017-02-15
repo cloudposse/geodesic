@@ -1,10 +1,14 @@
 #!/bin/bash
 DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
-DOCKER_TAG=${DOCKER_TAG:-latest}
+DOCKER_TAG=${DOCKER_TAG:-$1}
 APP_NAME=${APP_NAME:-geodesic}
 INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
 REQUIRE_PULL=${REQUIRE_PULL:-true}
+
+if [ -z "${DOCKER_TAG}" ]; then
+  DOCKER_TAG=latest
+fi
 
 if [ "${GEODESIC_SHELL}" == "true" ]; then
   echo "Installer cannot be run from inside a geodesic shell"

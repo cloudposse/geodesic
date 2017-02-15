@@ -29,7 +29,7 @@ RUN curl --fail -sSL -O https://github.com/kubernetes/kops/releases/download/${K
     && chmod 755 /etc/profile.d/kops.sh
 
 # Install helm
-ENV HELM_VERSION 2.1.3
+ENV HELM_VERSION 2.2.0
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin/helm \

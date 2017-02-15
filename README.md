@@ -21,7 +21,6 @@ This shell bundles multiple tools to facilitate cloud fabrication and adminstrat
 * `terraform` for provisioning miscellaneous resources 
 * `kubectl` for controlling kubernetes
 * `s3fs` for mounting S3 bucket container cluster configurations
-* `gomplate` for rendering go templates
 * `hub` for managing cluster repos on Github
 
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 NO_COLOR="`echo -e "\033[0m"`"
 PROMPT_COLOR="`echo -e "\033[32;01m"`"
@@ -27,13 +27,18 @@ if [ -f "$1" ]; then
   output="$input.new"
   source $input
   rm -f "$output"
-  for env in `cat $1 | grep -v '^#' | cut -d= -f1`; do
+  for env in `grep -vE '^\s*#' < $input | cut -d= -f1`; do
     desc=`grep "^$env=" $1|cut -d'#' -f2 | sed -E 's/^ +| +$//'`
     prompt "$env" ">>> $desc"
     printf '%s=%s\n' "$env" "${!env}" | xargs -I'{}' printf '%-60s # %s\n' '{}' "$desc" >> $output
     echo
   done
-  cat $output
+  if [ -s $output ]; then
+    cat $output
+  else
+    echo "No inputs available for configuration"
+    exit 2
+  fi
   echo
   Y="yes" confirm Y "Do you want to overwrite $input with these values?"
   mv -f "$input" "$input~"

@@ -15,6 +15,7 @@ install:
 
 script:
 - make deps
+- make lint
 - make docker:build
 
 after_success:

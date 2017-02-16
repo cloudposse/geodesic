@@ -1,5 +1,3 @@
-CLOUD_CONFIG_SAMPLE ?= $(GEODESIC_PATH)/modules/config/env.sample
-
 include helpers
 include all
 
@@ -33,7 +31,7 @@ init-git:
 
 ## Edit configuration
 edit: init require-cluster-mounted
-	@configure-env $(CLOUD_CONFIG)
+	@configure-env $(CLOUD_CONFIG) 1>&2
 
 ## Reset local state
 reset: require-cluster-mounted
@@ -52,7 +50,7 @@ validate: require-aws-profile
 	$(call assert-set,CLUSTER_STATE_BUCKET_REGION)
 
 ## Create state bucket
-create-bucket: validate
+create-bucket: validate require-bucket-does-not-exist
 	@aws s3 mb s3://$(CLUSTER_STATE_BUCKET) --region=$(CLUSTER_STATE_BUCKET_REGION)
 	@aws s3api put-bucket-versioning \
 		--bucket $(CLUSTER_STATE_BUCKET) \
@@ -85,14 +83,15 @@ destroy-bucket: validate
 mount: validate 
 	@mkdir -p $(REMOTE_MOUNT_POINT)
 	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(REMOTE_MOUNT_POINT) \
-		-o iam_role=$(AWS_DEFAULT_PROFILE),nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/var/tmp/
+		-o iam_role=$(AWS_DEFAULT_PROFILE),nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/dev/shm
 	@sleep 1
 	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
 	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
 	@mkdir -p $(REMOTE_STATE)
-	@[ -f $(REMOTE_STATE)/env ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(REMOTE_STATE)/env
+	@[ -f $(CLOUD_CONFIG) ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(CLOUD_CONFIG)
 	@mkdir -p $(dir $(KUBECONFIG))
 	@mkdir -p $(KOPS_STATE_PATH)
+	@[ ! -f "${KOPS_STATE_PATH}/id_rsa" ] || cloud kops add-ssh-key
 
 ## Unmount remote cluster state bucket
 unmount:
@@ -105,3 +104,11 @@ unmount:
 status:
 	@git -C ${LOCAL_STATE} status
 
+require-bucket-does-not-exist:
+	@aws s3 ls s3://$(CLUSTER_STATE_BUCKET) --region $(CLUSTER_STATE_BUCKET_REGION) >/dev/null 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		echo "Bucket $(CLUSTER_STATE_BUCKET) already exists"; \
+		exit 1; \
+	else \
+		exit 0; \
+	fi

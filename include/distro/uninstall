@@ -1,5 +1,7 @@
+ifeq ($(LINT),)
 NAMESPACE ?= $(shell basename $(abspath $(shell pwd)/../))
 PACKAGES ?= $(shell helm list --short | xargs -n1 -I'{}' sh -c '[ -f $(HELM_VALUES_PATH)/$(NAMESPACE)/{}.yaml ] && echo {}')
+endif
 
 define chart-uninstall
 	@helm delete $@ --purge

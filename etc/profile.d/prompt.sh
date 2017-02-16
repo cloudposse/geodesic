@@ -21,8 +21,8 @@ function geodesic-prompt() {
 
 
   # Augment prompt (PS1) with some geodesic state information
-  if [ -d "${LOCAL_STATE}/.git" ]; then
-    GIT_STATE=$(git -C ${LOCAL_STATE} diff-files --no-ext-diff --quiet)
+  if [ -d "${CLUSTER_REPO_PATH}/.git" ]; then
+    GIT_STATE=$(git -C ${CLUSTER_REPO_PATH} diff-files --no-ext-diff --quiet)
     STATUS="\[✅\]";
     if [ -n "${GIT_STATE}" ]; then
       STATUS="\[❌\]"

@@ -20,6 +20,9 @@ This shell bundles multiple tools to facilitate cloud fabrication and adminstrat
 * `helm` for installing packages on the kubernetes cluster
 * `terraform` for provisioning miscellaneous resources 
 * `kubectl` for controlling kubernetes
+* `s3fs` for mounting S3 bucket container cluster configurations
+* `hub` for managing cluster repos on Github
+
 
 NOTE: we currently only support running the docker shell on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well.
 

@@ -8,7 +8,7 @@ etcd-operator:
 
 ## Install DNS
 dns:
-	$(call chart-install,cloudposse-incubator/cloudposse-incubator/route53-kubernetes)
+	$(call chart-install,cloudposse-incubator/route53-kubernetes)
 
 ## Install SSL
 ssl:

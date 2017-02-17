@@ -6,18 +6,21 @@ MESSAGE ?= Automatic commit
 REMOTE ?= origin
 BRANCH ?= master
 
+deps: 
+	@ls -1 $(LOCAL_STATE)/clusters/ | xargs -I '{}' adduser -h $(LOCAL_STATE)/clusters/{} -s /sbin/nologin -g 'Cluster Repo' -D -H {} >/dev/null 2>&1 || true
+
 validate:
 	$(call assert-set,CLUSTER_NAME)
 
 ## Create a new private cluster repo
-create: validate test
+create: validate test deps
 	@[ -d $(CLUSTER_REPO_PATH) ] || mkdir -p $(CLUSTER_REPO_PATH)
 	@[ -d $(CLUSTER_REPO_PATH)/.git ] || git -C $(CLUSTER_REPO_PATH) init
 	@cd $(CLUSTER_REPO_PATH) && \
 		hub create -p -d "Geodesic cluster configuration for $(CLUSTER_NAME)" $(GITHUB_ORG)/$(CLUSTER_NAME) 
 
 ## Clone an existing cluster repo
-clone: validate test
+clone: validate test deps
 	$(call assert-set,GITHUB_ORG)
 	@git clone -b $(BRANCH) git@github.com:$(GITHUB_ORG)/$(CLUSTER_NAME) $(CLUSTER_REPO_PATH)
 	@cloud hub pull
@@ -31,12 +34,12 @@ update:
 	fi
 
 ## Pull down updates
-pull: validate test
+pull: validate test deps
 	@git -C $(CLUSTER_REPO_PATH) pull $(REMOTE) $(BRANCH)
 	@git -C $(CLUSTER_REPO_PATH) submodule update --init --remote
 
 ## Push changes to github
-push: validate test
+push: validate test deps
 	@git -C $(CLUSTER_REPO_PATH) push $(REMOTE) $(BRANCH)
 
 ## Commit changes 

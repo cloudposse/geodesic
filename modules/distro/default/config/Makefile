@@ -3,9 +3,9 @@ include distro/config
 
 ## Configure Ingress Load Balancer
 lb:
-	$(call chart-values,$@,cloudposse-incubator/nginx-ingress)
+	$(call chart-config,cloudposse-incubator/nginx-ingress)
 
 ## Configure CI/CD
 ci:
-	$(call chart-values,$@,cloudposse-incubator/jenkins)
+	$(call chart-config,cloudposse-incubator/jenkins)
 

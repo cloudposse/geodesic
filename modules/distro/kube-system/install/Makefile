@@ -4,7 +4,7 @@ include distro/install
 
 ## Install Etcd Operator
 etcd-operator:
-	$(call chart-install,cloudposse-incubator/etcd-operator)
+	$(call chart-install,stable/etcd-operator)
 
 ## Install DNS
 dns:

@@ -1,15 +1,15 @@
+ifneq ($(LINT),true)
 NAMESPACE ?= $(shell basename $(abspath $(shell pwd)/../))
 PACKAGES ?= $(shell grep -E '^[a-zA-Z0-9\-\:]+:' Makefile | sed 's/: */ /')
+endif
 
-define chart-values
-	@if [ -f "$(HELM_VALUES_PATH)/$(NAMESPACE)/$(1).yaml" ]; then \
-		echo "$@ already configured in $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml"; \
-	else \
+define chart-config
+	@if [ ! -f "$(HELM_VALUES_PATH)/$(NAMESPACE)/$(@).yaml" ]; then \
 		echo "Fetching config for $@ from $(1)"; \
 		mkdir -p  $(HELM_VALUES_PATH)/$(NAMESPACE); \
 		helm inspect values $(1) > $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml; \
-		configure-yaml $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml
 	fi
+	@configure-yaml $(HELM_VALUES_PATH)/$(NAMESPACE)/$@.yaml;
 endef
 
 ## Configure all packages
@@ -22,4 +22,4 @@ list:
 
 ## Delete left-over packages
 clean:
-  @rm -f *.tgz
+	@rm -f *.tgz

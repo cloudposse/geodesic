@@ -17,6 +17,14 @@ function prompt() {
   export $1
 }
 
+sigint() {
+  echo -e "\nAborted"
+  exit 1
+}
+
+trap sigint SIGINT
+
+
 if [ $# -ne 1 ]; then
   echo "Usage: $0 [env-file]"
   exit 1

@@ -13,13 +13,20 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+sigint() {
+  echo -e "\nAborted"
+  exit 1
+}
+
+trap sigint SIGINT
+
 if [ -f "$1" ]; then
   input=$1
   output="$input"
   values_env="$(dirname "$output")/$(basename "$input" .yaml).env"
   grep -E '^\s*-\s*&[A-Z0-9_]+\s+".*?"\s+#' "$input" | \
-    sed -r 's/ *- *&//g' | \
-    sed -E 's/(^[A-Z0-9_]+) *"/\1="/' > "$values_env"
+    sed -r 's/^\s*-\s*&//g' | \
+    sed -r 's/(^[A-Z0-9_]+) *"/\1="/' > "$values_env"
 
   configure-env "$values_env"
   status=$?
@@ -27,7 +34,9 @@ if [ -f "$1" ]; then
     . "${values_env}"
     for env in `grep -Eo '^[A-Z0-9_]+' < ${values_env}`; do
       repl=$(printf '\&%-20s %-30s #' "$env" "\"${!env}\"")
-      sed -i.bak -E "s/(&$env \".*?\".*?#)/$repl/g" $output | grep "&$env"
+      set -x
+      sed -i -r "s/(&$env\\s*\".*?\"\\s*#)/$repl/g" $output
+      grep "&$env" $output
     done
     echo "Wrote $output"
   elif [ $status -eq 2 ]; then

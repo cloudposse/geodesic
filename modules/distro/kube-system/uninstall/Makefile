@@ -3,37 +3,37 @@ include distro/uninstall
 
 ## Uninstall DNS
 dns:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall SSL
 ssl:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall SSH
 ssh:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall UI
 ui:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall Etcd Operator
 etcd-operator:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall log aggregation
 logs:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall monitoring
 monitoring:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall metrics
 metrics:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall Data Dog
 dd:
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 

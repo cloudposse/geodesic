@@ -3,9 +3,9 @@ include distro/uninstall
 
 ## Uninstall Ingress Load Balancer
 lb: confirm
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 
 ## Uninstall CI/CD
 ci: confirm
-	@helm delete $@ --purge
+	$(call chart-uninstall)
 

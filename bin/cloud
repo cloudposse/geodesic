@@ -19,7 +19,7 @@ function options_to_env() {
     k=${k^^}      # Convert to uppercase
 
     v=${kv[1]}    # Treat second element as value
-    v=${kv:-true} # Set it to true for boolean flags
+    v=${v:-true}  # Set it to true for boolean flags
 
     env="$k=$v"
     envs+=("$env")

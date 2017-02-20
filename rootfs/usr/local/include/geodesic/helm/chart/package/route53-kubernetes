@@ -1,0 +1,6 @@
+include bundle/package
+
+NAME ?= dns
+NAMESPACE ?= kube-system
+PACKAGE ?= cloudposse-incubator/route53-kubernetes
+

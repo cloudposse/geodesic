@@ -73,18 +73,14 @@ ENV LOCAL_STATE=/mnt/local
 ENV REMOTE_MOUNT_POINT=/mnt/remote
 ENV REMOTE_STATE=/mnt/remote/geodesic
 
-ENV GEODESIC_PATH=/geodesic
+ENV GEODESIC_PATH=/usr/local/include/geodesic
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/mnt/local
 
 VOLUME ["/mnt/local"]
 
 ADD aws-assumed-role/profile /etc/profile.d/aws-assume-role.sh
-ADD contrib /geodesic/contrib
-ADD modules /geodesic/modules
-ADD etc /etc
-ADD bin /usr/local/bin
-ADD include /usr/local/include
+ADD rootfs/ /
 
 WORKDIR /mnt/local
 

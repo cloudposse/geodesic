@@ -1,0 +1,5 @@
+include bundle/package
+
+NAME ?= etcd-operator
+NAMESPACE ?= kube-system
+PACKAGE ?= stable/etcd-operator

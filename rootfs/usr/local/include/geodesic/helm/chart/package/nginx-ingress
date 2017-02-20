@@ -1,0 +1,27 @@
+include bundle/package
+
+NAME ?= ci
+NAMESPACE ?= default
+PACKAGE ?= cloudposse-incubator/nginx-ingress
+
+## Initialize Ingress Load Balancer Configuration
+init:
+	$(call chart-config)
+
+## Edit Ingress Load Balancer Configuration
+edit:
+	$(call chart-edit)
+
+## Install Ingress Load Balancer
+install:
+	$(call chart-install)
+
+## Uninstall Ingress Load Balancer
+uninstall:
+	$(call chart-uninstall)
+
+## Upgrade Ingress Load Balancer
+upgrade:
+	$(call chart-upgrade)
+
+

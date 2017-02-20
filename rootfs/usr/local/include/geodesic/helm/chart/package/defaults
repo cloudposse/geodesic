@@ -1,0 +1,21 @@
+PACKAGES ?= ci logs monitoring metrics tls ssh etcd-operator
+
+helm = @echo $(PACKAGES) | xargs -I'{}' cloud helm chart $@ {}
+
+install: 
+	$(call helm)
+
+uninstall: 
+	$(call helm)
+
+upgrade: 
+	$(call helm)
+
+install: 
+	$(call helm)
+
+init: 
+	$(call helm)
+
+edit: 
+	$(call helm)

@@ -1,0 +1,26 @@
+include helm/package
+
+NAME ?= ci
+NAMESPACE ?= default
+PACKAGE ?= cloudposse-incubator/jenkins
+
+## Initialize CI/CD Configuration
+init: validate
+	$(call $@)
+
+## Edit CI/CD Configuration
+edit: validate
+	$(call $@)
+
+## Install CI/CD
+install: validate
+	$(call $@)
+
+## Uninstall CI/CD
+uninstall: validate
+	$(call $@)
+
+## Upgrade CI/CD
+upgrade: validate
+	$(call $@)
+

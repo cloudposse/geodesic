@@ -1,0 +1,4 @@
+PACKAGE_PATH ?= /usr/include/bundle/packages
+
+NAMESPACE ?= $(shell basename `pwd`)
+

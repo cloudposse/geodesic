@@ -51,7 +51,7 @@ RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
 # Install S3FS
-# Overrride path for AWS Metadata API so we can run outside of AWS
+# Overrride URI for AWS Metadata API so we can run outside of AWS using a hardcoded path on the filesystem :)
 ENV S3FS_VERSION 1.80
 RUN apk --update add fuse libxml2 mailcap && \
     apk --virtual .build-deps add alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev && \

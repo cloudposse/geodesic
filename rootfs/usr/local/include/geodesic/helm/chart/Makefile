@@ -1,3 +1,6 @@
+include helpers
+include all
+
 PACKAGE_PATH ?= package/
 
 ifneq ($(LINT),true)

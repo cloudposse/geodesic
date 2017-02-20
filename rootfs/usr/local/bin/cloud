@@ -97,10 +97,13 @@ while [[ $targets ]]; do
     ${command[@]}
     exit $?
   else
-    # Otherwise it's a target of a module (or possibly an ENV)
-    command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
-    debug "command: ${command[@]}; pwd: `pwd`"
-    ${command[@]}
-    exit $?
+    break
   fi
 done
+
+# Otherwise it's a target of a module (or possibly an ENV)
+command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
+debug "command: ${command[@]}; pwd: `pwd`"
+${command[@]}
+exit $?
+

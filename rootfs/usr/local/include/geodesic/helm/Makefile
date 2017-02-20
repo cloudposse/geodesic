@@ -22,3 +22,5 @@ update:
 upgrade:
 	@helm init --upgrade
 
+## Manage charts
+chart: module

@@ -1,1 +1,26 @@
-syslog-forwarder
+include helm/package
+
+PACKAGE ?= cloudposse-incubator/syslog-forwarder
+NAME ?= logs
+NAMESPACE ?= kube-system
+
+## Initialize Fluentd Syslog Forwarder Configuration
+init: validate
+	$(call $@)
+
+## Edit Fluentd Syslog Forwarder Configuration
+edit: validate
+	$(call $@)
+
+## Install Fluentd Syslog Forwarder
+install: validate
+	$(call $@)
+
+## Uninstall Fluentd Syslog Forwarder
+uninstall: validate
+	$(call $@)
+
+## Upgrade Fluentd Syslog Forwarder
+upgrade: validate
+	$(call $@)
+

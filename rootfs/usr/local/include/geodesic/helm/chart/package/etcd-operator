@@ -1,4 +1,4 @@
-include bundle/package
+include helm/package
 
 NAME ?= etcd-operator
 NAMESPACE ?= kube-system

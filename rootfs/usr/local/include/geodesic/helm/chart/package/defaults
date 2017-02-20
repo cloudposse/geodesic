@@ -11,9 +11,6 @@ uninstall:
 upgrade: 
 	$(call helm)
 
-install: 
-	$(call helm)
-
 init: 
 	$(call helm)
 

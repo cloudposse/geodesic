@@ -1,1 +1,6 @@
 -include $(LOCAL_STATE)/clusters/$(CLUSTER_NAME)/Makefile
+
+.PHONY : placeholder
+placeholder::
+	@exit 0
+

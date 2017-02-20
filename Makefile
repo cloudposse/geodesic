@@ -13,7 +13,7 @@ all: init deps lint build install run
 
 lint:
 	@LINT=true \
-	 find rootfs/usr/local/include -type f -name 'Makefile*' -exec \
+	 find rootfs/usr/local/include -type f '!' -name '*.sample' -exec \
 			 /bin/sh -c 'echo "==> {}">/dev/stderr; make --include-dir=rootfs/usr/local/include/ --just-print --dry-run --recon --no-print-directory --quiet --silent -f {}' \; > /dev/null
 	@make bash:lint
 

@@ -1,34 +1,86 @@
+
+[![Docker Stars](https://img.shields.io/docker/stars/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
+[![Docker Pulls](https://img.shields.io/docker/pulls/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
+[![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
+[![GitHub Stars](https://img.shields.io/github/stars/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/stargazers) 
+[![GitHub Issues](https://img.shields.io/github/issues/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/issues)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/cloudposse/geodesic.svg)](http://isitmaintained.com/project/cloudposse/geodesic "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/cloudposse/geodesic.svg)](http://isitmaintained.com/project/cloudposse/geodesic "Percentage of issues still open")
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cloudposse/geodesic/pulls)
+[![License](https://img.shields.io/badge/license-APACHE%202.0%20-brightgreen.svg)](https://github.com/cloudposse/geodesic/blob/master/LICENSE)
+
 # Geodesic
 
-*definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
+> *definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
 
-The geodesic shell is the fastest way to get up and running with a rock solid cloud platform. 
 
-It takes an opinionated approach to cloud architecture, which therefore allows many assumptions to be made on how it works. 
+The Geodesic is the ultimate cloud platform mashup. We've bundled together all the tools you need into a single [Docker](http://docker.com/) container to get you up an running quickly  with a world-class, [kubernetes](https://kubernetes.io/) based infrastructure running on [AWS](http://aws.amazon.com/). 
 
-The end result is a highly consistent, turnkey cloud platform that follows best practices while at the same time packs almost everything a typical 
-startup needs to get up and running in record time.  
 
-Since we run in `docker`, the barrier to entry is very low. Users don't need to download & configure all of the dependencies. Just install docker, and run the installer to get up and going. 
+
+
+
+
+
+## Table of Contents
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Help](#help)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [Running](#running)
+  - [Building](#building)
+  - [Configuration](#configuration)
+- [Recommendations](#recommendations)
+    - [Environment Variables](#environment-variables)
+      - [Duo Settings](#duo-settings)
+      - [Google Authenticator Settings](#google-authenticator-settings)
+      - [Enforcer Settings](#enforcer-settings)
+      - [SSH Auditor](#ssh-auditor)
+    - [User Accounts & SSH Keys](#user-accounts-&-ssh-keys)
+  - [Extending](#extending)
+- [Contributing](#contributing)
+    - [Bug Reports & Feature Requests](#bug-reports-&-feature-requests)
+    - [Developing](#developing)
+- [Change Log](#change-log)
+- [Thanks](#thanks)
+- [License](#license)
+- [About](#about)
+  - [Contributors](#contributors)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Help
+
+**Got a question?** 
+File a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](http://cloudposse.com/contact/) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
+
+## Features:
+* **Secure** - PKI, OAuth, MFA Everywhere (ssh, vpn, dashboards), [ultra secure bastion](https://github.com/cloudposse/bastion) with audit capabilities, [IAM assumed roles](https://github.com/cloudposse/aws-assume-role/), automatic key rotation, encryption at rest, and VPCs
+* **Repeatable** - 100% Infrastructure-as-Code, with support for scriptable admin tasks in any language
+* **12-Factor** - 
+* **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications
+* **OpenSource** - Permissive [APACHE 2.0](LICENSE) license
+
+
+The end result is a secure turnkey cloud platform that packages everything a typical startup needs to get up and running in record time without compromising security or preventing customization.
+
 
 ## Technologies
 
-This shell bundles multiple tools to facilitate cloud fabrication and adminstration.
-
-* `kops` for kubernetes cluster orchestration
-* `aws-cli` for interacting directly with the AWS APIs
-* `helm` for installing packages on the kubernetes cluster
-* `terraform` for provisioning miscellaneous resources 
-* `kubectl` for controlling kubernetes
-* `s3fs` for mounting S3 bucket container cluster configurations
-* `hub` for managing cluster repos on Github
+Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of these components.
 
 
-NOTE: we currently only support running the docker shell on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well.
+* [`kops`](https://github.com/kubernetes/kops/) for kubernetes cluster orchestration 
+* [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
+* [`helm`](https://github.com/kubernetes/helm/) for installing packages like varnish or apache on the kubernetes cluster
+* [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
+* [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
+* [`s3fs`](https://github.com/s3fs-fuse/s3fs-fuse) for mounting encrypted S3 buckets that store cluster configurations and secrets
+* [`hub`](https://github.com/github/hub) for managing your infrastructure-as-code on Github - the way you can extend geodesic to do pretty much anything you want
 
-## Caveats
-
-* While the underlying tools support multiple cloud providers, we are currently only testing with AWS. Pull Requests welcome.
 
 ## Prerequisites
 
@@ -40,7 +92,14 @@ Docker can be easily installed by following the instructions for your OS:
 * [Windows](https://docs.docker.com/windows/step_one/)
 * [Mac OS](https://docs.docker.com/mac/step_one/)
 
-## Quickstart
+### Caveats
+
+* While the underlying tools support multiple cloud providers, we are currently only testing with AWS. Pull Requests welcome.
+* Geodesic is tested on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well
+
+
+
+## Quick Start
 
 1. Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)
 ```
@@ -56,6 +115,13 @@ geodesic
 
 4. Run `assume-role $role` where $role is the one you configured in your AWS configuration.
 
+5. Run `cloud configure`
+
+6. Run `cloud up`
+
+All done. Your cloud is now up and running.
+
+
 ## Usage Examples
 
 First, make sure you've followed the *Quickstart* up above.
@@ -65,7 +131,6 @@ First, make sure you've followed the *Quickstart* up above.
 ```shell
 cloud configure
 cloud up
-cloud init
 ```
 
 Now you'll want to edit the configuration files that were generated for the `kube-system` namespace.
@@ -80,7 +145,7 @@ Then edit the configuration files that were generated for the `default` namespac
 cloud distro default list-configs
 ```
 
-If there's something you don't want, just delete the file.
+If there's something you don't want installed, just delete the file.
 
 To deploy the apps, now run:
 ```shell
@@ -98,7 +163,140 @@ cloud ssh
 
 ```shell
 cloud down
-```shell
+```
+
+
+### Running
+
+Refer to the [Environment Variables](#environment-variables) section below to tune how the `bastion` operates.
+
+
+```bash
+$ docker run -p 1234:22 cloudposse/bastion:latest
+```
+
+### Building
+
+```bash
+$ git clone https://github.com/cloudposse/bastion.git
+$ cd bastion
+$ make docker:build
+```
+
+
+### Configuration
+
+## Recommendations
+
+* Do not allow `root` (or `sudo`) access to this container as doing so would allow remote users to manipulate audit-logs
+* Use this more as a "jump host" for accessing other internal systems rather than installing a lot of unnecessary stuff, which increases the overall attack surface.
+* Sync the contents of `SSH_AUDIT_DIR` to some remote, offsite location. If using S3, we recommend enabling bucket-versioning.
+
+
+#### User Accounts & SSH Keys
+
+The `bastion` does not attempt to manage user accounts. We suggest using [GitHub Authorized Keys](https://github.com/cloudposse/github-authorized-keys) to provision user accounts and SSH keys. We provide a [chart](https://github.com/cloudposse/charts/incubator/bastion.git) of how we recommend doing it.
+
+## FAQ
+
+### Cannot list directory
+
+```
+$ ls /s3
+ls: reading directory '.': I/O error
+```
+
+This means your AWS credentials have expired. Re-run `assume-role`.
+
+### Cannot unmount folder
+```bash
+$ cloud config unmount
+umount: can't unmount /s3: Resource busy
+```
+
+This means some process (maybe you) is in the directory. Try running `cd /` and rerun the unmount.
+
+
+
+## Extending
+
+Geodesic was written to be easily extended. There are a couple ways to do it. 
+
+If you want to add functionality, the recommended way is with your cluster repo. 
+
+If you want to replace core-functionality, create a new repo, and define a Dockerfile which is `FROM cloudposse/geodesic:latest` (or pin it to a [build number](https://travis-ci.org/cloudposse/geodesic) for stability).
+
+
+## Contributing
+
+#### Bug Reports & Feature Requests
+
+Please use the [issue tracker](https://github.com/cloudposse/bastion/issues) to report any bugs or file feature requests.
+
+#### Developing
+
+PRs are welcome. In general, we follow the "fork-and-pull" Git workflow.
+
+ 1. **Fork** the repo on GitHub
+ 2. **Clone** the project to your own machine
+ 3. **Commit** changes to your own branch
+ 4. **Push** your work back up to your fork
+ 5. Submit a **Pull request** so that we can review your changes
+
+NOTE: Be sure to merge the latest from "upstream" before making a pull request!
+
+## Change Log
+
+View our closed [Pull Requests](https://github.com/cloudposse/geodesic/pulls?q=is%3Apr+is%3Aclosed).
+
+
+## License
+
+Apache2 © [Cloud Posse, LLC](https://cloudposse.com)
+
+## About
+
+Geodesic is maintained and funded by [Cloud Posse, LLC][website]. Like it? Please let us know at <hello@cloudposse.com>
+
+We love [Open Source Software](https://github.com/cloudposse/)! 
+
+See [our other projects][community]
+or [hire us][hire] to help build your next cloud-platform.
+
+  [website]: http://cloudposse.com/
+  [community]: https://github.com/cloudposse/
+  [hire]: http://cloudposse.com/contact/
+  
+### Contributors
+
+[![Erik Osterman](http://s.gravatar.com/avatar/88c480d4f73b813904e00a5695a454cb?s=144)](https://osterman.com/) 
+
+[Erik Osterman](https://github.com/osterman) 
+	
+[![Igor Rodionov](http://s.gravatar.com/avatar/bc70834d32ed4517568a1feb0b9be7e2?s=144)](https://sindresorhus.com) 
+
+[Igor Rodionov](https://github.com/goruha) 
+
+
+
+
+
+--------------------
+
+
+
+
+# Geodesic
+
+It takes an opinionated approach to cloud architecture, which therefore allows many assumptions to be made on how it works. 
+
+Since we run in `docker`, the barrier to entry is very low. Users don't need to download & configure all of the dependencies. Just install docker, and run the installer to get up and going. 
+
+
+
+## Quickstart
+
+
 
 ### Pulling down an existing cluster
 
@@ -142,24 +340,6 @@ with the "cloud" way of doing this as well as a clear way of communicating what 
 cloud config checkout demo.dev.cloudposse.com CLUSTER_STATE_BUCKET_REGION=us-west-2
 ```
 
-## FAQ
-
-1. Cannot list directory
-
-```
-$ ls /s3
-ls: reading directory '.': I/O error
-```
-
-This means your AWS credentials have expired. Re-run `assume-role`.
-
-2. Cannot unmount folder
-```bash
-$ cloud config unmount
-umount: can't unmount /s3: Resource busy
-```
-
-This means some process (maybe you) is in the directory. Try running `cd /` and rerun the unmount.
 
 ## Layout Inside of the Geodesic Shell
 

@@ -1,0 +1,26 @@
+include helm/package
+
+NAME ?= metrics
+NAMESPACE ?= kube-system
+PACKAGE ?= cloudposse-incubator/kube-state-metrics
+
+## Initialize Kube State Metrics Configuration
+init: validate
+	$(call $@)
+
+## Edit Kube State Metrics Configuration
+edit: validate
+	$(call $@)
+
+## Install Kube State Metrics
+install: validate
+	$(call $@)
+
+## Uninstall Kube State Metrics
+uninstall: validate
+	$(call $@)
+
+## Upgrade Kube State Metrics
+upgrade: validate
+	$(call $@)
+

@@ -1,0 +1,26 @@
+include helm/package
+
+NAME ?= ui
+NAMESPACE ?= kube-system
+PACKAGE ?= cloudposse-incubator/kubernetes-dashboard
+
+## Initialize Kubernetes Dashboard Configuration
+init: validate
+	$(call $@)
+
+## Edit Kubernetes Dashboard Configuration
+edit: validate
+	$(call $@)
+
+## Install Kubernetes Dashboard
+install: validate
+	$(call $@)
+
+## Uninstall Kubernetes Dashboard
+uninstall: validate
+	$(call $@)
+
+## Upgrade Kubernetes Dashboard
+upgrade: validate
+	$(call $@)
+

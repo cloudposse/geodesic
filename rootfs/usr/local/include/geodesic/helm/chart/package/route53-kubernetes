@@ -1,6 +1,26 @@
-include bundle/package
+include helm/package
 
 NAME ?= dns
 NAMESPACE ?= kube-system
 PACKAGE ?= cloudposse-incubator/route53-kubernetes
+
+## Initialize Route53 Kubernetes Configuration
+init: validate
+	$(call $@)
+
+## Edit Route53 Kubernetes Configuration
+edit: validate
+	$(call $@)
+
+## Install Route53 Kubernetes
+install: validate
+	$(call $@)
+
+## Uninstall Route53 Kubernetes
+uninstall: validate
+	$(call $@)
+
+## Upgrade Route53 Kubernetes
+upgrade: validate
+	$(call $@)
 

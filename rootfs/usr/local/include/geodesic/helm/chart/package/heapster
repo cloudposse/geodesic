@@ -1,0 +1,26 @@
+include helm/package
+
+NAME ?= monitoring
+NAMESPACE ?= kube-system
+PACKAGE ?= cloudposse-incubator/heapster
+
+## Initialize Heapster Configuration
+init: validate
+	$(call $@)
+
+## Edit Heapster Configuration
+edit: validate
+	$(call $@)
+
+## Install Heapster
+install: validate
+	$(call $@)
+
+## Uninstall Heapster
+uninstall: validate
+	$(call $@)
+
+## Upgrade Heapster
+upgrade: validate
+	$(call $@)
+

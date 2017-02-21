@@ -8,7 +8,13 @@ function _cloud_complete() {
   targets=("${targets[@]:1}")
   [[ $targets ]] || targets=(".*")
 
-  cd /geodesic/modules
+  # If a cluster module is defined, it takes presedence 
+  if [ -n "${targets[0]}" ] && [ -d "${LOCAL_STATE}/clusters/${CLUSTER_NAME}/${targets[0]}" ]; then
+    cd "${LOCAL_STATE}/clusters/${CLUSTER_NAME}"
+  else
+    cd "$GEODESIC_PATH"
+  fi
+
   while [[ $targets ]]; do
     arg=${targets[0]}
     # If it's a directory, we assume it's a module
@@ -16,6 +22,7 @@ function _cloud_complete() {
       targets=("${targets[@]:1}")
       cd "$arg"
     elif [ -f "$arg" ]; then
+      targets=("${targets[@]:1}")
       command=("make" "--no-print-directory" "-f" "${arg}" "help")
       break
     else

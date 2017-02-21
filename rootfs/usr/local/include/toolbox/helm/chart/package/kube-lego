@@ -1,0 +1,5 @@
+NAME ?= kube-lego
+NAMESPACE ?= kube-system
+PACKAGE ?= cloudposse-incubator/kube-lego
+
+include helm/package/defaults

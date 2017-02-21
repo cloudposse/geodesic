@@ -1,0 +1,9 @@
+init:
+	@if [ ! -f "$(HELM_VALUES_PATH)/$(NAME).yaml" ]; then \
+		echo "Fetching config for $(NAME) from $(PACKAGE)"; \
+		mkdir -p  $(HELM_VALUES_PATH)/; \
+		helm inspect values $(PACKAGE) > $(HELM_VALUES_PATH)/$(NAME).yaml; \
+	fi
+	@configure-yaml $(HELM_VALUES_PATH)/$(NAME).yaml;
+
+

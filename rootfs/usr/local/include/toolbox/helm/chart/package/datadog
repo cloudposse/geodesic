@@ -1,0 +1,5 @@
+NAME ?= datadog
+NAMESPACE ?= kube-system
+PACKAGE ?= stable/datadog
+
+include helm/package/defaults

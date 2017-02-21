@@ -73,7 +73,7 @@ ENV LOCAL_STATE=/mnt/local
 ENV REMOTE_MOUNT_POINT=/mnt/remote
 ENV REMOTE_STATE=/mnt/remote/geodesic
 
-ENV GEODESIC_PATH=/usr/local/include/geodesic
+ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/mnt/local
 

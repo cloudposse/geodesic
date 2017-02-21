@@ -1,5 +1,5 @@
-include helm/package
-
 NAME ?= etcd-operator
 NAMESPACE ?= kube-system
 PACKAGE ?= stable/etcd-operator
+
+include helm/package/defaults

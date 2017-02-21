@@ -1,0 +1,6 @@
+## Display package info
+info:
+	@echo "Name......: $(NAME)"
+	@echo "Namepsace.: $(NAMESPACE)"
+	@echo "Package...: $(PACKAGE)"
+	@echo "Values....: $(HELM_VALUES_PATH)/$(NAME).yaml"

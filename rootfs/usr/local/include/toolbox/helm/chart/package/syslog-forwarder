@@ -1,0 +1,5 @@
+PACKAGE ?= cloudposse-incubator/syslog-forwarder
+NAME ?= logs
+NAMESPACE ?= kube-system
+
+include helm/package/defaults

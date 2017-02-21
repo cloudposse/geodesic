@@ -1,0 +1,10 @@
+include helpers
+include helm/package/info
+include helm/package/init
+include helm/package/edit
+include helm/package/install
+include helm/package/uninstall
+include helm/package/upgrade
+include helm/package/clean
+include helm/package/validate
+

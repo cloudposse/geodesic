@@ -1,0 +1,5 @@
+NAME ?= ui
+NAMESPACE ?= kube-system
+PACKAGE ?= cloudposse-incubator/kubernetes-dashboard
+
+include helm/package/defaults

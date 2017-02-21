@@ -1,0 +1,3 @@
+## Uninstall package
+uninstall:
+	@helm delete $(NAME) --purge

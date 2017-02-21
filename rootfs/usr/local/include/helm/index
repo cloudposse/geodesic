@@ -1,0 +1,3 @@
+ifneq ($(LINT),true)
+	PACKAGES ?= $(shell ls -1)
+endif

@@ -1,0 +1,5 @@
+## Show pending changes
+plan: remote-config
+	$(call assert-set,DIR)
+	@mkdir -p $(TF_STATE_DIR)
+	@terraform plan -input=false -out=$(TF_STATE_DIR)/terraform.out $(DIR)

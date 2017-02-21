@@ -89,20 +89,18 @@ while [[ $targets ]]; do
   # If it's a directory, we assume it's a module
   if [ -d "$arg" ]; then
     targets=("${targets[@]:1}")
+    command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
     cd "$arg"
   elif [ -f "$arg" ]; then
     targets=("${targets[@]:1}")
     command=("make" "--no-print-directory" "-f" "${arg}" "${targets[@]}" "${envs[@]}")
     debug "command: ${command[@]}; pwd: `pwd`"
-    ${command[@]}
-    exit $?
+    break
   else
     break
   fi
 done
 
-# Otherwise it's a target of a module (or possibly an ENV)
-command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
 debug "command: ${command[@]}; pwd: `pwd`"
 ${command[@]}
 exit $?

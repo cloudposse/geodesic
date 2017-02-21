@@ -1,0 +1,4 @@
+## Apply pending changes
+apply: plan
+	@confirm CLUSTER_NAME
+	@terraform apply -input=false $(TF_STATE_DIR)/terraform.out

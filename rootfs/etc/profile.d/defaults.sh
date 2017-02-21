@@ -65,7 +65,10 @@ export KUBECONFIG=${REMOTE_STATE}/kubernetes/kubeconfig
 #
 # Terraform
 #
-export TF_STATE_FILE=${LOCAL_STATE}/terraform/terraform.tfstate
+export TF_STATE_DIR=${LOCAL_STATE}/terraform/${CLUSTER_NAME}
+export TF_STATE_FILE=${TF_STATE_DIR}/terraform.tfstate
+export TF_BUCKET=${CLUSTER_STATE_BUCKET}
+export TF_PREFIX=terraform
 
 #
 # Geodesic

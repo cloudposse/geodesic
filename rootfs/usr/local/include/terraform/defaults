@@ -1,0 +1,6 @@
+include terraform/remote-config
+include terraform/validate
+include terraform/plan
+include terraform/apply
+include terraform/destroy
+include terraform/get

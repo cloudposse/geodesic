@@ -2,4 +2,4 @@ NAME ?= metrics
 NAMESPACE ?= kube-system
 CHART ?= cloudposse-incubator/kube-state-metrics
 
-include helm/package/defaults
+include helm/chart/defaults

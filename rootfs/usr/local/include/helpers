@@ -32,6 +32,12 @@ define assert-unset
   @[ -n "$$$(1)" ] || (echo "$(1) should not be defined in $(@)"; exit 1)
 endef
 
+# Convert an ENV to --env arg (if defined); eg. $(call env-to-arg,VERSION) returns --version=something
+define env-to-arg
+  $(shell printf -- '--%s=%s' $(shell echo $(1) | tr '[:upper:]' '[:lower:]' | tr '_' '-') $($(1)) | sed 's/^.*=$$//')
+endef
+
+
 default: help
 
 # Symbolically represents something handled by `cloud` as a module

@@ -1,5 +1,0 @@
-NAME ?= monitoring
-NAMESPACE ?= kube-system
-PACKAGE ?= cloudposse-incubator/heapster
-
-include helm/package/defaults

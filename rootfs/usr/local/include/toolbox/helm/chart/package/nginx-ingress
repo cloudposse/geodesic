@@ -1,5 +1,0 @@
-NAME ?= ci
-NAMESPACE ?= default
-PACKAGE ?= cloudposse-incubator/nginx-ingress
-
-include helm/package/defaults

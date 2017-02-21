@@ -1,4 +1,0 @@
-## Upgrade package
-upgrade:
-	@helm upgrade --values $(HELM_VALUES_PATH)/$(NAME).yaml $(NAME) $(PACKAGE)
-

@@ -1,5 +1,0 @@
-NAME ?= ci
-NAMESPACE ?= default
-PACKAGE ?= cloudposse-incubator/jenkins
-
-include helm/package/defaults

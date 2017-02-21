@@ -1,3 +1,0 @@
-## Install package
-install:
-	@helm install --namespace $(NAMESPACE) --name $(NAME) --values $(HELM_VALUES_PATH)/$(NAME).yaml $(PACKAGE)

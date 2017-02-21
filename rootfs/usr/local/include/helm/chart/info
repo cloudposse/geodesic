@@ -1,4 +1,4 @@
-## Display package info
+## Display chart info
 info:
 	@echo "Name......: $(NAME)"
 	@echo "Namepsace.: $(NAMESPACE)"

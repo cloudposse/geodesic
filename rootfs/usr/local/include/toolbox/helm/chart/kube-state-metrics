@@ -1,5 +1,5 @@
 NAME ?= metrics
 NAMESPACE ?= kube-system
-PACKAGE ?= cloudposse-incubator/kube-state-metrics
+CHART ?= cloudposse-incubator/kube-state-metrics
 
 include helm/package/defaults

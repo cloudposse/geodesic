@@ -1,0 +1,5 @@
+NAME ?= ci
+NAMESPACE ?= default
+CHART ?= cloudposse-incubator/nginx-ingress
+
+include helm/chart/defaults

@@ -2,6 +2,7 @@
 function _cloud_complete() {
   local targets=("${COMP_WORDS[@]}")
   local i=0
+  local command
 
   # Pop off command
   targets=("${targets[@]:1}")
@@ -14,11 +15,14 @@ function _cloud_complete() {
     if [ -d "$arg" ]; then
       targets=("${targets[@]:1}")
       cd "$arg"
+    elif [ -f "$arg" ]; then
+      command=("make" "--no-print-directory" "-f" "${arg}" "help")
+      break
     else
+      command=("make" "--no-print-directory" "help")
       break
     fi
   done
-  command=("make" "--no-print-directory" "help")
   query="^${targets[@]:-.*}"
   for w in $("${command[@]}" | grep -Eo '^ +[^ ]+' | sed 's/^ *//g' | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep "${query}"); do
     COMPREPLY[i++]="$w"

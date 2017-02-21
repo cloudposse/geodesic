@@ -1,0 +1,5 @@
+NAME ?= etcd-operator
+NAMESPACE ?= kube-system
+CHART ?= stable/etcd-operator
+
+include helm/chart/defaults

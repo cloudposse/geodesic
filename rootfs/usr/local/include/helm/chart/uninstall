@@ -1,0 +1,3 @@
+## Uninstall chart
+uninstall:
+	@helm delete $(NAME) --purge

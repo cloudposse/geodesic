@@ -1,0 +1,107 @@
+#!/bin/bash
+
+set -o pipefail
+
+export options=()
+export envs=()
+export targets=()
+
+function options_to_env() {
+  local kv
+  local k
+  local v
+
+  for option in ${options[@]}; do
+    kv=(${option/=/ })
+    k=${kv[0]}    # Take first element as key
+    k=${k#--}     # Strip leading --
+    k=${k//-/_}   # Convert dashes to underscores
+    k=${k^^}      # Convert to uppercase
+
+    v=${kv[1]}    # Treat second element as value
+    v=${v:-true}  # Set it to true for boolean flags
+
+    env="$k=$v"
+    envs+=("$env")
+  done
+}
+
+function debug() {
+  if [ "${VERBOSE}" == "true" ]; then
+    echo "[DEBUG] $*"
+  fi
+}
+
+while [[ $1 ]]
+do
+  case "$1" in
+    -h | --help)
+      targets+=("help")
+      shift
+      ;;
+    -v | --verbose)
+      envs+=("VERBOSE=true")
+      export VERBOSE=true
+      shift
+      ;;
+    --*)
+      options+=("${1}")
+      shift
+      ;;
+    --) # End of all options
+      shift
+      break;
+      ;;
+    -*)
+      echo "Error: Unknown option: $1" >&2
+      exit 1
+      ;;
+    *=*)
+      envs+=("${1}")
+      shift
+      ;;
+    *)
+      targets+=("${1}")
+      shift
+      ;;
+  esac
+done
+
+options_to_env
+
+debug "options:[${options[@]}]"
+debug "envs:[${envs[@]}]"
+debug "targets:[${targets[@]}]"
+
+# If a cluster module is defined, it takes presedence 
+if [ -n "${targets[0]}" ] && [ -d "${LOCAL_STATE}/clusters/${CLUSTER_NAME}/${targets[0]}" ]; then
+  cd "${LOCAL_STATE}/clusters/${CLUSTER_NAME}"
+else
+  cd "$GEODESIC_PATH"
+fi
+
+# set a default target of help
+[[ $targets ]] || targets=("help")
+
+# Iterate over arguments
+while [[ $targets ]]; do
+  arg=${targets[0]}
+  # If it's a directory, we assume it's a module
+  if [ -d "$arg" ]; then
+    targets=("${targets[@]:1}")
+    command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
+    cd "$arg"
+  elif [ -f "$arg" ]; then
+    targets=("${targets[@]:1}")
+    command=("make" "--no-print-directory" "-f" "${arg}" "${targets[@]}" "${envs[@]}")
+    debug "command: ${command[@]}; pwd: `pwd`"
+    break
+  else
+    break
+  fi
+done
+
+debug "command: ${command[@]}; pwd: `pwd`"
+${command[@]}
+exit $?
+

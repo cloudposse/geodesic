@@ -1,0 +1,4 @@
+## Fetch terraform modules
+get:
+	$(call assert-set,DIR)
+	@terraform get $(DIR)

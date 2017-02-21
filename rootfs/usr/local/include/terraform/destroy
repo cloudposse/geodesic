@@ -1,0 +1,5 @@
+## Destroy all terraform resources
+destroy:
+	$(call assert-set,DIR)
+	@confirm CLUSTER_NAME
+	@terraform destroy $(DIR)

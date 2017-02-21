@@ -1,0 +1,4 @@
+EDITOR ?= vim
+
+edit:
+	@$(EDITOR) $(HELM_VALUES_PATH)/$(NAME).yaml

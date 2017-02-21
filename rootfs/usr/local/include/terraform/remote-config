@@ -1,0 +1,15 @@
+DIR ?= .
+
+## Configure Terraform to use remote S3 bucket
+remote-config:
+	$(call assert-set,DIR)
+	@mkdir -p $(TF_STATE_DIR)
+	@rm -rf $(DIR)/.terraform
+	@ln -s $(TF_STATE_DIR) $(DIR)/.terraform
+	@terraform remote config \
+		-backend=s3 \
+		-backend-config="bucket=$(TF_BUCKET)" \
+		-backend-config="key=$(TF_BUCKET_PREFIX)/geodesic.tfstate" \
+		-backend-config="region=$(AWS_REGION)" \
+		-backend-config="profile=$(AWS_PROFILE)" \
+		-backend-config="role_arn=$(AWS_ASSUME_ROLE_ARN)"

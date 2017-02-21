@@ -51,7 +51,7 @@ RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
 # Install S3FS
-# Overrride path for AWS Metadata API so we can run outside of AWS
+# Overrride URI for AWS Metadata API so we can run outside of AWS using a hardcoded path on the filesystem :)
 ENV S3FS_VERSION 1.80
 RUN apk --update add fuse libxml2 mailcap && \
     apk --virtual .build-deps add alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev && \
@@ -73,18 +73,14 @@ ENV LOCAL_STATE=/mnt/local
 ENV REMOTE_MOUNT_POINT=/mnt/remote
 ENV REMOTE_STATE=/mnt/remote/geodesic
 
-ENV GEODESIC_PATH=/geodesic
+ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/mnt/local
 
 VOLUME ["/mnt/local"]
 
 ADD aws-assumed-role/profile /etc/profile.d/aws-assume-role.sh
-ADD contrib /geodesic/contrib
-ADD modules /geodesic/modules
-ADD etc /etc
-ADD bin /usr/local/bin
-ADD include /usr/local/include
+ADD rootfs/ /
 
 WORKDIR /mnt/local
 

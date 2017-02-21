@@ -1,0 +1,5 @@
+NAME ?= monitoring
+NAMESPACE ?= kube-system
+CHART ?= cloudposse-incubator/heapster
+
+include helm/chart/defaults

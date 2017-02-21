@@ -1,0 +1,7 @@
+include terraform/validate
+include terraform/remote-config
+
+## Show pending changes
+plan: validate remote-config
+	$(call assert-set,DIR)
+	@terraform plan -input=false -out=$(TF_STATE_DIR)/terraform.out $(DIR)

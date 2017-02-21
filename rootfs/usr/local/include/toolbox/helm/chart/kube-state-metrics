@@ -1,0 +1,5 @@
+NAME ?= metrics
+NAMESPACE ?= kube-system
+CHART ?= cloudposse-incubator/kube-state-metrics
+
+include helm/chart/defaults

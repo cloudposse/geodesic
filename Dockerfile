@@ -4,7 +4,8 @@ RUN apk update \
     && apk add unzip curl tar \
           python make bash vim jq \
           openssl openssh-client iputils drill \
-          git coreutils less groff bash-completion hub hub-bash-completion
+          git coreutils less groff bash-completion hub hub-bash-completion && \
+          mkdir /etc/bash_completion.d/
 
 USER root
 
@@ -21,15 +22,15 @@ RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VER
 ENV KUBERNETES_VERSION 1.5.2
 RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
-    && chmod +x /usr/local/bin/kubectl
+    && chmod +x /usr/local/bin/kubectl \
+    && kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
 # Install kops
 ENV KOPS_VERSION 1.5.1
 RUN curl --fail -sSL -O https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-linux-amd64 \
     && mv kops-linux-amd64 /usr/local/bin/kops \
     && chmod +x /usr/local/bin/kops \
-    && /usr/local/bin/kops completion bash > /etc/profile.d/kops.sh \
-    && chmod 755 /etc/profile.d/kops.sh
+    && /usr/local/bin/kops completion bash > /etc/bash_completion.d/kops.sh
 
 # Install helm
 ENV HELM_VERSION 2.2.0
@@ -37,14 +38,17 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin/helm \
     && rm -rf linux-amd64 \
-    && chmod +x /usr/local/bin/helm
+    && chmod +x /usr/local/bin/helm \
+    && helm completion > /etc/bash_completion.d/helm.sh
 
 # Install aws cli bundle
 RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && unzip awscli-bundle.zip \
     && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws \
     && rm awscli-bundle.zip \
-    && rm -rf awscli-bundle
+    && rm -rf awscli-bundle \
+    && ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh \
+    && ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
 # Install S3FS
 # Overrride path for AWS Metadata API so we can run outside of AWS

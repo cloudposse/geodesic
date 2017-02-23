@@ -20,6 +20,7 @@ function _cloud_complete() {
     # If it's a directory, we assume it's a module
     if [ -d "$arg" ]; then
       targets=("${targets[@]:1}")
+      command=("make" "--no-print-directory" "help")
       cd "$arg"
     elif [ -f "$arg" ]; then
       targets=("${targets[@]:1}")

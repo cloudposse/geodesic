@@ -6,8 +6,6 @@ export DOCKER_BUILD_FLAGS =
 $(shell curl --silent -O "https://raw.githubusercontent.com/cloudposse/build-harness/master/templates/Makefile.build-harness")
 -include Makefile.*
 
-SHELL = /bin/bash
-
 all: init deps lint build install run
 
 lint:

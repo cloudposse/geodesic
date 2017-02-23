@@ -97,6 +97,7 @@ while [[ $targets ]]; do
     debug "command: ${command[@]}; pwd: `pwd`"
     break
   else
+    command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
     break
   fi
 done

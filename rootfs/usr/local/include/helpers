@@ -38,7 +38,7 @@ define env-to-arg
 endef
 
 
-default:: help
+default: help
 
 # Symbolically represents something handled by `cloud` as a module
 module: 

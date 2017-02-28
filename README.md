@@ -1,15 +1,5 @@
 
-[![Docker Stars](https://img.shields.io/docker/stars/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
-[![Docker Pulls](https://img.shields.io/docker/pulls/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
-[![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
-[![GitHub Stars](https://img.shields.io/github/stars/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/stargazers) 
-[![GitHub Issues](https://img.shields.io/github/issues/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/issues)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/cloudposse/geodesic.svg)](http://isitmaintained.com/project/cloudposse/geodesic "Average time to resolve an issue")
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/cloudposse/geodesic.svg)](http://isitmaintained.com/project/cloudposse/geodesic "Percentage of issues still open")
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cloudposse/geodesic/pulls)
-[![License](https://img.shields.io/badge/license-APACHE%202.0%20-brightgreen.svg)](https://github.com/cloudposse/geodesic/blob/master/LICENSE)
-
-# Geodesic
+# Geodesic [![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
 
 > *definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
 
@@ -49,6 +39,16 @@ How do you get started? It's easy. We've bundled all the tools into a single [Do
   - [Contributors](#contributors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+[![Docker Stars](https://img.shields.io/docker/stars/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
+[![Docker Pulls](https://img.shields.io/docker/pulls/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
+[![GitHub Stars](https://img.shields.io/github/stars/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/stargazers) 
+[![GitHub Issues](https://img.shields.io/github/issues/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/issues)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/cloudposse/geodesic.svg)](http://isitmaintained.com/project/cloudposse/geodesic "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/cloudposse/geodesic.svg)](http://isitmaintained.com/project/cloudposse/geodesic "Percentage of issues still open")
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cloudposse/geodesic/pulls)
+[![License](https://img.shields.io/badge/license-APACHE%202.0%20-brightgreen.svg)](https://github.com/cloudposse/geodesic/blob/master/LICENSE)
+
 
 ## Help
 

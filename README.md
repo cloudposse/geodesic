@@ -13,7 +13,7 @@
 
 > *definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
 
-The Geodesic is the ultimate cloud platform mashup. We've bundled together all the tools you need to get you up an running quickly with a world-class infrastructure backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/).
+The Geodesic is the ultimate cloud platform mashup toolbox. We've bundled together all the tools you need to get you up and running quickly with a world-class infrastructure backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/).
 
 How do you get started? It's easy. We've bundled all the tools into a single [Docker](http://docker.com/) container, so you can kick the tires and see what it is all about.
 
@@ -24,24 +24,27 @@ How do you get started? It's easy. We've bundled all the tools into a single [Do
 
 
 - [Help](#help)
+- [Features](#features)
+- [Technologies](#technologies)
+- [Prerequisites](#prerequisites)
+  - [Install Docker](#install-docker)
 - [Quick Start](#quick-start)
-- [Usage](#usage)
-  - [Running](#running)
-  - [Building](#building)
-  - [Configuration](#configuration)
-- [Recommendations](#recommendations)
-    - [Environment Variables](#environment-variables)
-      - [Duo Settings](#duo-settings)
-      - [Google Authenticator Settings](#google-authenticator-settings)
-      - [Enforcer Settings](#enforcer-settings)
-      - [SSH Auditor](#ssh-auditor)
-    - [User Accounts & SSH Keys](#user-accounts-&-ssh-keys)
-  - [Extending](#extending)
+- [Usage Examples](#usage-examples)
+  - [Bringing up a cluster](#bringing-up-a-cluster)
+  - [Connecting to the cluster](#connecting-to-the-cluster)
+  - [Destroying a cluster](#destroying-a-cluster)
+- [FAQ](#faq)
+  - [Cannot list directory](#cannot-list-directory)
+  - [Cannot unmount folder](#cannot-unmount-folder)
+  - [Caveats](#caveats)
+- [Extending](#extending)
+- [Extending the Geodesic Shell](#extending-the-geodesic-shell)
+- [Layout Inside of the Geodesic Shell](#layout-inside-of-the-geodesic-shell)
+- [Design Decisions](#design-decisions)
 - [Contributing](#contributing)
     - [Bug Reports & Feature Requests](#bug-reports-&-feature-requests)
     - [Developing](#developing)
 - [Change Log](#change-log)
-- [Thanks](#thanks)
 - [License](#license)
 - [About](#about)
   - [Contributors](#contributors)

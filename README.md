@@ -37,7 +37,6 @@ How do you get started? It's easy. We've bundled all the tools into a single [Do
   - [Cannot list directory](#cannot-list-directory)
   - [Cannot unmount folder](#cannot-unmount-folder)
   - [Caveats](#caveats)
-- [Extending](#extending)
 - [Extending the Geodesic Shell](#extending-the-geodesic-shell)
 - [Layout Inside of the Geodesic Shell](#layout-inside-of-the-geodesic-shell)
 - [Design Decisions](#design-decisions)
@@ -167,12 +166,6 @@ This means some process (maybe you) is in the directory. Try running `cd /` and 
 * While the underlying tools support multiple cloud providers, we are currently only testing with AWS. Pull Requests welcome.
 * Geodesic is tested on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well
 
-
-## Extending
-
-
-
-If you want to replace core-functionality, create a new repo, and define a Dockerfile which is `FROM cloudposse/geodesic:latest` (or pin it to a [build number](https://travis-ci.org/cloudposse/geodesic) for stability).
 
 ## Extending the Geodesic Shell
 

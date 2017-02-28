@@ -42,6 +42,13 @@ if [ "$1" == "update" ]; then
     echo "Failed to update geodesic"
     exit 1
   fi
+elif [ "$1" == "uninstall" ]; then
+  echo "Uninstalling ${DOCKER_NAME}..."
+  docker rm -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
+  if ! [[ "$0" =~ rootfs ]]; then
+    rm -f "$0"
+  fi
+  exit 0
 elif [ "$1" == "stop" ]; then
   exec docker kill ${DOCKER_NAME}
 fi

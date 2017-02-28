@@ -3,7 +3,7 @@
 
 > *definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
 
-The Geodesic is the ultimate cloud platform mashup toolbox. We've bundled together all the tools you need to get you up and running quickly with a world-class infrastructure backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/).
+The Geodesic is the ultimate cloud platform toolbox. It's a mashup of all the tools you need to get you up and running quickly with a framework for building a world-class infrastructure backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/).
 
 How do you get started? It's easy. We've bundled all the tools into a single [Docker](http://docker.com/) container, so you can kick the tires and see what it is all about.
 

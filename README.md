@@ -21,7 +21,6 @@ An organization may chose to leverage all of these components, or just the parts
 * **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications and CI/CD systems like TravisCI, CircleCI or Jenkins;
 * **OpenSource** - Permissive [APACHE 2.0](LICENSE) license means no lock-in and no on-going license fees
 
-Geodesic is is exactly what you need for a secure, turnkey cloud platform that packages everything a typical startup or technology organization needs to get up and running in record time without compromising security or preventing customization.
 
 ## Technologies
 

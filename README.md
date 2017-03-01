@@ -28,12 +28,6 @@ An organization may chose to leverage all of these components, or just the parts
 [![License](https://img.shields.io/badge/license-APACHE%202.0%20-brightgreen.svg)](https://github.com/cloudposse/geodesic/blob/master/LICENSE)
 
 
-## Help
-
-**Got a question?** 
-
-File a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
-
 ## Features
 * **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/cloudposse/aws-assume-role/), automatic key rotation, encryption at rest, and VPCs;
 * **Repeatable** - 100% Infrastructure-as-Code with change automation and support for scriptable admin tasks in any language, including terraform;
@@ -66,7 +60,6 @@ Docker can be easily installed by following the instructions for your OS:
 * [Windows](https://docs.docker.com/windows/step_one/)
 * [Mac OS](https://docs.docker.com/mac/step_one/)
 
-
 ## Quick Start
 
 1. Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)
@@ -90,148 +83,24 @@ geodesic
 All done. Your cloud is now up and running.
 
 
-## Usage Examples
+## Help
 
-First, make sure you've followed the *Quickstart* up above.
+**Got a question?** 
 
-
-### Show Available Commands
-
-```shell
-$ cloud help
-
-Available targets:
-
-  deps                                Setup environment
-  init                                Initialize cluster
-  create                              Create a new cluster
-  up                                  Bring up a new cluster
-  down                                Tear down an existing cluster
-  ssh                                 Connect to the cluster via SSH
-  config                              Manage configuration
-  bootstrap                           Bootstrap the overall system
-  kops                                Toolbox for kops
-  kubernetes                          Toolbox for kubernetes
-  helm                                Toolbox for helm
-  hub                                 Toolbox for github repo
-  terraform                           Toolbox for terraform
-  help                                This help screen
-```
-
-
-### Bringing up a cluster
-
-```shell
-cloud configure
-cloud up
-```
-
-Now you'll want to edit the configuration files that were generated for the `kube-system` namespace.
-
-```shell
-cloud helm chart defaults init install
-```
-
-### Connecting to the cluster
-
-```shell
-cloud ssh
-```
-
-### Destroying a cluster
-
-```shell
-cloud down
-```
-
-
-## FAQ
-
-### Cannot list directory
-
-```
-$ ls /s3
-ls: reading directory '.': I/O error
-```
-
-This means your AWS credentials have expired. Re-run `assume-role`.
-
-### Cannot unmount folder
-```bash
-$ cloud config unmount
-umount: can't unmount /s3: Resource busy
-```
-
-This means some process (maybe you) is in the directory. Try running `cd /` and rerun the unmount.
-
-### Caveats
-
-* While the underlying tools support multiple cloud providers, we are currently only testing with AWS. Pull Requests welcome.
-* Geodesic is tested on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well
-
-
-## Extending the Geodesic Shell
-
-Geodesic was written to be easily extended. There are a couple ways to do it. 
-
-You can easily extend the Geodesic shell by creating your own repo with a `Dockerfile`. We suggest you have it inherit `FROM geodeisc:latest` (or pin it to a [build number](https://travis-ci.org/cloudposse/geodesic) for stability). If you want to add or modify core functionality, this is the recommended way to do it.
-
-In side your container, you can replace any of our code with your own to make it behave exactly as you wish. You could even create one dedicated shell per cluster with 
-logic tailored specifically for that cluster.
-
-Here are some other tips. Most of our modules do an `-include Makefile.*`, which means, we'll include other `Makefiles` in that directory. To add additional functionality,
-simply drop-in your `Makefile.something` in that module directory.
-
-Want to add additional aliases or affect the shell? Drop your script in `/etc/profile.d` and it will be loaded automatically when the shell starts. 
-
-As you can see, you can easily change almost any aspect of how the shell works simply by extending it.
-
-
-
-## Layout Inside of the Geodesic Shell
-
-We leverage as many semantics of the linux shell as we can to make the experience as frictionless as possible.
-
-* `/usr/local/include` houses all internal `Makefiles`. Any time `include something` is used in a `Makefile`, it will search this directory for `something`.
-* `/etc/profile.d` is where shell profiles are stored (like aliases). These are executed when the shell starts.
-* `/etc/bash_completion.d` is where all bash completion scripts are kept and sourced when the shell starts.
-* `/usr/local/bin` has some helper scripts
-* `/etc/motd` is the current "Message of the Day"
-* `/mnt/local` is where we house the local state (like your temporary AWS credentials)
-* `/mnt/remote` is where we mount the S3 bucket for cluster state; these files are never written to disk and only kept in memory for security
-
-## Design Decisions
-
-We designed this shell as the last layer of abstraction. It stitches all the tools together like `make`, `aws-cli`, `kops`, `helm`, `kubectl`, and `terraform`. As time progresses,
-there will undoubtably be even more that come into play. For this reason, we chose to use a combination of `bash` and `make` which together are ideally suited to combine the 
-strengths of all these wonderful tools into one powerful shell, without raising the barrier to entry too high.
-
-The `cloud` command ties everything together. It's designed to call `make` targets within the various `module` directories. Targets are documented using `##` symbols preceding the target name. 
-
-For example, calling `cloud kops ssh` works like this:
-
-1. It checks to see if there's a module called `kops`. It finds one.
-2. It checks to see if there's a nested module called `ssh`. It does not, so it calls the `ssh` target of the `kops` module.
-
-Since we use `make` under-the-hood, you can add all your ENVs at the end of the command. Think of ENVs as named parameters. Alternatively, all environment variables can be passed as arguments. For example, running `cloud ssh SSH_USERNAME=admin` is identical to running `cloud ssh --ssh-username=admin`.
-
-For the default environment variables, checkout `/etc/profile.d/defaults.sh`. We believe using ENVs this way is both consistent
-with the "cloud" (12-factor) way of doing things, as well as a clear way of communicating what values are being passed without using a complicated convention. Additionally, you can set & forget these ENVs in your shell.
-
-```shell
-cloud config use demo.example.org CLUSTER_STATE_BUCKET_REGION=us-west-2
-```
+Review the [docs](docs/), file a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
 
 
 ## Contributing
 
-#### Bug Reports & Feature Requests
+### Bug Reports & Feature Requests
 
 Please use the [issue tracker](https://github.com/cloudposse/bastion/issues) to report any bugs or file feature requests.
 
-#### Developing
+### Developing
 
-PRs are welcome. In general, we follow the "fork-and-pull" Git workflow.
+If you're interested in being a contributor and want to get involved in developing Geodesic, we'd love to hear from you! Shoot us an [email](mailto:hello@cloudposse.com).
+
+In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
  1. **Fork** the repo on GitHub
  2. **Clone** the project to your own machine
@@ -241,14 +110,26 @@ PRs are welcome. In general, we follow the "fork-and-pull" Git workflow.
 
 NOTE: Be sure to merge the latest from "upstream" before making a pull request!
 
-## Change Log
-
-View our closed [Pull Requests](https://github.com/cloudposse/geodesic/pulls?q=is%3Apr+is%3Aclosed).
-
-
 ## License
 
-Apache2 © [Cloud Posse, LLC](https://cloudposse.com)
+APACHE 2.0 © [Cloud Posse, LLC](https://cloudposse.com)
+
+> Licensed to the Apache Software Foundation (ASF) under one
+> or more contributor license agreements.  See the NOTICE file
+> distributed with this work for additional information
+> regarding copyright ownership.  The ASF licenses this file
+> to you under the Apache License, Version 2.0 (the
+> "License"); you may not use this file except in compliance
+> with the License.  You may obtain a copy of the License at
+> 
+>   http://www.apache.org/licenses/LICENSE-2.0
+>
+> Unless required by applicable law or agreed to in writing,
+> software distributed under the License is distributed on an
+> "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+> KIND, either express or implied.  See the License for the
+> specific language governing permissions and limitations
+> under the License.
 
 ## About
 
@@ -269,7 +150,7 @@ or [hire us][hire] to help build your next cloud-platform.
 
 [Erik Osterman](https://github.com/osterman) 
 	
-[![Igor Rodionov](http://s.gravatar.com/avatar/bc70834d32ed4517568a1feb0b9be7e2?s=144)](https://sindresorhus.com) 
+[![Igor Rodionov](http://s.gravatar.com/avatar/bc70834d32ed4517568a1feb0b9be7e2?s=144)](https://cloudposse.com/) 
 
 [Igor Rodionov](https://github.com/goruha) 
 

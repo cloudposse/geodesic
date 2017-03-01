@@ -1,44 +1,22 @@
 
 # Geodesic [![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
 
+## Introduction
+
+Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform. 
+
+It provides a fully customizable framework for defining and building world-class cloud infrastructures backed by AWS (https://aws.amazon.com/) and powered by kubernetes (https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security.
+
+Geodesic is composed of two parts:
+
+1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools. Those tools are then integrated to work in concert with each other using a consistent framework. Installation of the shell is as easy as running a docker container.  
+2. It is a distribution of essential services. The distribution includes a collection of Helm charts for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS,  Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
+
+An organization may chose to leverage all of these components, or just the parts the make their life easier.
+
 > *definition:* relating to or denoting the shortest possible line between two points on a sphere or other curved surface.
 
-The Geodesic is the ultimate cloud platform toolbox. It's a mashup of all the tools you need to get you up and running quickly with a framework for building a world-class infrastructure backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/).
-
-How do you get started? It's easy. We've bundled all the tools into a single [Docker](http://docker.com/) container, so you can kick the tires and see what it is all about.
-
-
-## Table of Contents
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-
-- [Help](#help)
-- [Features](#features)
-- [Technologies](#technologies)
-- [Prerequisites](#prerequisites)
-  - [Install Docker](#install-docker)
-- [Quick Start](#quick-start)
-- [Usage Examples](#usage-examples)
-  - [Bringing up a cluster](#bringing-up-a-cluster)
-  - [Connecting to the cluster](#connecting-to-the-cluster)
-  - [Destroying a cluster](#destroying-a-cluster)
-- [FAQ](#faq)
-  - [Cannot list directory](#cannot-list-directory)
-  - [Cannot unmount folder](#cannot-unmount-folder)
-  - [Caveats](#caveats)
-- [Extending the Geodesic Shell](#extending-the-geodesic-shell)
-- [Layout Inside of the Geodesic Shell](#layout-inside-of-the-geodesic-shell)
-- [Design Decisions](#design-decisions)
-- [Contributing](#contributing)
-    - [Bug Reports & Feature Requests](#bug-reports-&-feature-requests)
-    - [Developing](#developing)
-- [Change Log](#change-log)
-- [License](#license)
-- [About](#about)
-  - [Contributors](#contributors)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+## Badges of Honor
 
 [![Docker Stars](https://img.shields.io/docker/stars/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
 [![Docker Pulls](https://img.shields.io/docker/pulls/cloudposse/geodesic.svg)](https://hub.docker.com/r/cloudposse/geodesic)
@@ -54,11 +32,11 @@ How do you get started? It's easy. We've bundled all the tools into a single [Do
 
 **Got a question?** 
 
-File a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](http://cloudposse.com/contact/) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
+File a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
 
 ## Features
 * **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/cloudposse/aws-assume-role/), automatic key rotation, encryption at rest, and VPCs;
-* **Repeatable** - 100% Infrastructure-as-Code, with support for scriptable admin tasks in any language, including terraform;
+* **Repeatable** - 100% Infrastructure-as-Code with change automation and support for scriptable admin tasks in any language, including terraform;
 * **Extensible** - A framework where everything can be be extended to work the way you want to to;
 * **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications and CI/CD systems like TravisCI, CircleCI or Jenkins;
 * **OpenSource** - Permissive [APACHE 2.0](LICENSE) license means no lock-in and no on-going license fees

@@ -122,12 +122,13 @@ or [hire us][hire] to help build your next cloud-platform.
   
 ### Contributors
 
-[![Erik Osterman](http://s.gravatar.com/avatar/88c480d4f73b813904e00a5695a454cb?s=144)](https://osterman.com/) 
 
-[Erik Osterman](https://github.com/osterman) 
-	
-[![Igor Rodionov](http://s.gravatar.com/avatar/bc70834d32ed4517568a1feb0b9be7e2?s=144)](https://cloudposse.com/) 
+| [![Erik Osterman][erik_img]][erik_web]<br/>[Erik Osterman][erik_web] | [![Igor Rodionov][igor_img]][igor_web]<br/>[Igor Rodionov][igor_web] |
+|-------------------------------------------------------|------------------------------------------------------------------|
 
-[Igor Rodionov](https://github.com/goruha) 
+  [erik_img]: http://s.gravatar.com/avatar/88c480d4f73b813904e00a5695a454cb?s=144
+  [erik_web]: https://github.com/osterman/
+  [igor_img]: http://s.gravatar.com/avatar/bc70834d32ed4517568a1feb0b9be7e2?s=144
+  [igor_web]: https://github.com/goruha/
 
 

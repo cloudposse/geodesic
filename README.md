@@ -41,16 +41,17 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 
 Docker can be easily installed by following the instructions for your OS:
 
-* [Linux](https://docs.docker.com/linux/step_one/); alternatively, if you're comfortable on the command-line, run  `curl -fsSL https://get.docker.com/ | sh` 
+* [Linux](https://docs.docker.com/linux/step_one/) (Or simply run  `curl -fsSL https://get.docker.com/ | sh`)
 * [Windows](https://docs.docker.com/windows/step_one/)
 * [Mac OS](https://docs.docker.com/mac/step_one/)
 
 ## Quick Start
 
 1. Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)
-    ```
-    curl -s https://geodesic.sh | bash
-    ```
+
+   ```
+   curl -s https://geodesic.sh | bash
+   ```
 2. Run `geodesic` to start the geodesic shell
 3. Run `setup-role` to configure your AWS credentials
 4. Run `assume-role $role` where $role is the one you configured in your AWS configuration.
@@ -84,11 +85,11 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
  4. **Push** your work back up to your fork
  5. Submit a **Pull request** so that we can review your changes
 
-NOTE: Be sure to merge the latest from "upstream" before making a pull request!
+**NOTE:** Be sure to merge the latest from "upstream" before making a pull request!
 
 ## License
 
-APACHE 2.0 © 2016-2017 [Cloud Posse, LLC](https://cloudposse.com)
+[APACHE 2.0](LICENSE) © 2016-2017 [Cloud Posse, LLC](https://cloudposse.com)
 
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file

@@ -55,7 +55,7 @@ fi
 
 if [ -t 1 ]; then
   # Running in terminal 
-  DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}-bootstrap" --env LS_COLORS --env TERM --env TERM_COLOR)
+  DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}-bootstrap" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
 
   if [ -n "$SSH_AUTH_SOCK" ]; then
     if [ `uname -s` == 'Darwin' ]; then

@@ -77,4 +77,5 @@ export TF_BUCKET_PREFIX=geodesic/terraform
 #
 export CLOUD_CONFIG=${REMOTE_STATE}/env
 export CLOUD_CONFIG_SAMPLE=${GEODESIC_PATH}/modules/config/env.sample
+export SHELL_NAME=Geodesic
 

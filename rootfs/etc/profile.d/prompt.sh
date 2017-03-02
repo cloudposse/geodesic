@@ -10,6 +10,14 @@ function reload() {
   if [ -f "/etc/profile.d/defaults.sh" ]; then
     . "/etc/profile.d/defaults.sh"
   fi
+
+  # Load a Cluster .bashrc (if one exists & not already loaded)
+  if [ -f "${CLUSTER_REPO_PATH}/.bashrc" ]; then
+    if [ "${CLUSTER_REPO_PATH_BASHRC}" != "${CLUSTER_REPO_PATH}/.bashrc" ]; then
+      CLUSTER_REPO_PATH_BASHRC="${CLUSTER_REPO_PATH}/.bashrc"
+      . "${CLUSTER_REPO_PATH_BASHRC}"
+    fi
+  fi
 }
 
 # Define our own prompt

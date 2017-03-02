@@ -1,3 +1,6 @@
+#
+# CI/CD configuration for https://travis-ci.org/cloudposse/geodesic/
+#
 sudo: required
 addons:
   apt:

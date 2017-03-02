@@ -1,6 +1,6 @@
-[submodule "aws-assumed-role"]
-	path = aws-assumed-role
-	url = git@github.com:cloudposse/aws-assumed-role.git
 [submodule "dist/charts"]
 	path = dist/charts
 	url = git@github.com:cloudposse/charts.git
+[submodule "aws-assumed-role"]
+	path = aws-assumed-role
+	url = https://github.com/cloudposse/aws-assumed-role.git

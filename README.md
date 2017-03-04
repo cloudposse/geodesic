@@ -55,8 +55,9 @@ Docker can be easily installed by following the instructions for your OS:
 2. Run `geodesic` to start the geodesic shell
 3. Run `setup-role` to configure your AWS credentials
 4. Run `assume-role $role` where $role is the one you configured in your AWS configuration.
-5. Run `cloud configure`
-6. Run `cloud up`
+5. Run `ssh-add ~/.ssh/id_rsa` to add your ssh key to the SSH agent (must be same key used on Github)
+5. Run `cloud create` to run through configuration steps
+6. Run `cloud up` to provision the cluster
 
 All done. Your cloud is now up and running.
 

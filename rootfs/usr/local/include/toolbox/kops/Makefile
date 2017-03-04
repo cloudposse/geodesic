@@ -42,7 +42,15 @@ plan: validate
 apply: confirm update rolling-update
 	@cloud config push
 
-validate: require-cluster-mounted
+require-short-soa:
+	$(call assert-set,KOPS_DNS_ZONE)
+	@TTL=`drill -t SOA $(KOPS_DNS_ZONE) | grep '^$(KOPS_DNS_ZONE)' | awk '{print $$2}'`; \
+	if [ $$TTL -gt 60 ]; then \
+		echo "SOA TTL for $(KOPS_DNS_ZONE) should be 60 seconds or less (current: $${TTL}s); High SOA TTLs cause problems due to negative-cache hits for DNS lookups"; \
+		exit 1; \
+	fi
+
+validate: require-cluster-mounted require-short-soa
 	$(call assert-set,AWS_PROFILE,Run `assume-role` first)
 	$(call assert-set,AWS_DEFAULT_PROFILE,Run `assume-role` first)
 	$(call assert-set,KUBERNETES_VERSION)

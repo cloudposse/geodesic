@@ -27,11 +27,12 @@ Available targets:
 ```
 
 
-## Bringing up a cluster
+## Bringing up a new cluster
 
 ```shell
-cloud configure
-cloud up
+ssh-add ~/.ssh/id_rsa          # to add your ssh key to the SSH agent (must be same key used on Github)
+cloud create                   # to run through configuration steps
+cloud up                       # to provision the cluster
 ```
 
 Now you'll want to edit the configuration files that were generated for the `kube-system` namespace.

@@ -43,14 +43,16 @@ if [ "$1" == "update" ]; then
     exit 1
   fi
 elif [ "$1" == "uninstall" ]; then
-  echo "Uninstalling ${DOCKER_NAME}..."
-  docker rm -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
+  echo "# Uninstalling ${DOCKER_NAME}..."
+  docker rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
+  docker rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
   if ! [[ "$0" =~ rootfs ]]; then
     rm -f "$0"
   fi
   exit 0
 elif [ "$1" == "stop" ]; then
-  exec docker kill ${DOCKER_NAME}
+  echo "# Stopping ${DOCKER_NAME}..."
+  exec docker kill ${DOCKER_NAME} >/dev/null 2>&1
 fi
 
 if [ -t 1 ]; then

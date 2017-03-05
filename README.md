@@ -36,7 +36,7 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 
 ## Demo
 
-![https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif](http://gph.is/2lJU5Op)
+![](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)
 
 ## Prerequisites
 

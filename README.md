@@ -34,6 +34,9 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`s3fs`](https://github.com/s3fs-fuse/s3fs-fuse) for mounting encrypted S3 buckets that store cluster configurations and secrets
 * [`hub`](https://github.com/github/hub) for managing your infrastructure-as-code on Github - the way you can extend geodesic to do pretty much anything you want
 
+## Demo
+
+![](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)
 
 ## Prerequisites
 

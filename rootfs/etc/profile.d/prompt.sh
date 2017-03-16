@@ -1,3 +1,6 @@
+# Allow bash to check the window size to keep prompt with relative to window size
+shopt -s checkwinsize
+
 function reload() {
 # Load cluster env
   if [ -f "${CLOUD_CONFIG}" ]; then
@@ -18,6 +21,7 @@ function reload() {
       . "${CLUSTER_REPO_PATH_BASHRC}"
     fi
   fi
+  eval $(resize)
 }
 
 # Define our own prompt

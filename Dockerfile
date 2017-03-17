@@ -65,6 +65,13 @@ RUN apk --update add fuse libxml2 mailcap && \
     make install && \
     apk del .build-deps
 
+# Install Google Cloud SDK
+ENV GCLOUD_SDK_VERSION=147.0.0
+RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    tar -zvxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    ./google-cloud-sdk/install.sh && \
+    rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz ./google-cloud-sdk /root/.bashrc
+
 ENV BOOTSTRAP=true
 
 # Where to store state

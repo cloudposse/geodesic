@@ -33,6 +33,7 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
 * [`s3fs`](https://github.com/s3fs-fuse/s3fs-fuse) for mounting encrypted S3 buckets that store cluster configurations and secrets
 * [`hub`](https://github.com/github/hub) for managing your infrastructure-as-code on Github - the way you can extend geodesic to do pretty much anything you want
+* [`gcloud`](https://cloud.google.com/sdk/) for integration with Google Cloud (e.g. GKE)
 
 ## Demo
 

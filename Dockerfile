@@ -69,8 +69,13 @@ RUN apk --update add fuse libxml2 mailcap && \
 ENV GCLOUD_SDK_VERSION=147.0.0
 RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar -zvxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    ./google-cloud-sdk/install.sh && \
-    rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz ./google-cloud-sdk /root/.bashrc
+    mv google-cloud-sdk /usr/local/ && \
+    /usr/local/google-cloud-sdk/install.sh --quiet --rc-path /etc/bash_completion.d/gcloud.sh && \
+    rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
+
 
 ENV BOOTSTRAP=true
 

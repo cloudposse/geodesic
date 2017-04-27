@@ -54,7 +54,7 @@ configure:
 ## Bootstrap the overall system
 bootstrap: require-aws-profile require-cluster-mounted require-cluster-online 
 	@[ ! -f $(REMOTE_STATE)/.bootstrapped ] || (echo "Cluster already bootstraped"; exit 1)
-	@[ -z "$(DOCKER_USER)" ] || [ -z "$(DOCKER_PASSWORD)" ] || [ -z "$(DOCKER_EMAIL)" ] \
+	@[ -z "$(DOCKER_USER)" ] || [ -z "$(DOCKER_PASSWORD)" ] || [ -z "$(DOCKER_EMAIL)" ] || \
 		cloud kubernetes create-dockercfg  # Set the Docker Registry secret
 	@cloud helm init                       # Initalize helm for packages
 	@cloud helm init-repos                 # Initalize helm for packages

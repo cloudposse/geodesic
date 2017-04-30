@@ -7,7 +7,7 @@ init:
 	@rm -rf $(DIR)/.terraform
 	@ln -s $(TF_STATE_DIR) $(DIR)/.terraform
 	@terraform init \
-		-backend=s3 \
+		-backend=true \
 		-backend-config="bucket=$(TF_BUCKET)" \
 		-backend-config="key=$(TF_BUCKET_PREFIX)/geodesic.tfstate" \
 		-backend-config="region=$(AWS_REGION)" \

@@ -72,13 +72,16 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
     mv google-cloud-sdk /usr/local/ && \
     /usr/local/google-cloud-sdk/install.sh --quiet --rc-path /etc/bash_completion.d/gcloud.sh && \
     rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    rm -rf /root/.config/ && \
     ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
 ENV AWSEBCLI_VERSION 3.10.1
 RUN apk add py-pip && \
-    pip install awsebcli==${AWSEBCLI_VERSION} --upgrade
+    pip install awsebcli==${AWSEBCLI_VERSION} --upgrade && \
+    rm -rf /root/.cache && \
+    find / -type f -regex '.*\.py[co]' -delete
 
 ENV BOOTSTRAP=true
 

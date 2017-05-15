@@ -1,6 +1,8 @@
 include helpers
 include all
 
+S3FS_OPTIONS ?= nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/dev/shm
+
 ## Use an existing cluster
 use: module
 
@@ -82,8 +84,17 @@ destroy-bucket: validate
 ## Mount remote cluster state bucket
 mount: validate 
 	@mkdir -p $(REMOTE_MOUNT_POINT)
+ifeq ($(AWS_ASSUME_ROLE_ARN),)
+# Support standard AWS credentials
+	@echo "$(AWS_ACCESS_KEY_ID):$(AWS_SECRET_ACCESS_KEY)" > /dev/shm/passwd-s3fs
+	@chmod 600 /dev/shm/passwd-s3fs
 	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(REMOTE_MOUNT_POINT) \
-		-o iam_role=$(AWS_DEFAULT_PROFILE),nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/dev/shm
+		-o passwd_file=/dev/shm/passwd-s3fs,$(S3FS_OPTIONS)
+else
+# Support Assumed Roles / STS Tokens
+	@/usr/bin/s3fs $(CLUSTER_STATE_BUCKET) $(REMOTE_MOUNT_POINT) \
+		-o iam_role=$(AWS_DEFAULT_PROFILE),$(S3FS_OPTIONS)
+endif
 	@sleep 1
 	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
 	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
@@ -97,9 +108,11 @@ mount: validate
 
 ## Unmount remote cluster state bucket
 unmount:
-	@[ -d $(REMOTE_MOUNT_POINT) ] || (echo "Nothing mounted"; exit 1)
-	@/bin/umount $(REMOTE_MOUNT_POINT)
+	@[ -d $(REMOTE_MOUNT_POINT) ] || (echo "Mount point does not exist"; exit 1)
+	@mountpoint -q $(REMOTE_MOUNT_POINT) || (echo "Nothing mounted to mount point"; exit 1)
+	/bin/umount $(REMOTE_MOUNT_POINT)
 	@rmdir $(REMOTE_MOUNT_POINT)
+	@rm -f /dev/shm/passwd-s3fs
 	@echo "Unmounted $(CLUSTER_STATE_BUCKET)"
 
 ## Show what configurations have been modified

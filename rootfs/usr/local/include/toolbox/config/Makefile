@@ -84,7 +84,7 @@ destroy-bucket: validate
 ## Mount remote cluster state bucket
 mount: validate 
 	@mkdir -p $(REMOTE_MOUNT_POINT)
-ifeq ($(AWS_ASSUME_ROLE_ARN),)
+ifeq ($(AWS_IAM_ROLE_ARN),)
 # Support standard AWS credentials
 	@echo "$(AWS_ACCESS_KEY_ID):$(AWS_SECRET_ACCESS_KEY)" > /dev/shm/passwd-s3fs
 	@chmod 600 /dev/shm/passwd-s3fs

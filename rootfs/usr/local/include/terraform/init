@@ -10,7 +10,7 @@ init:
 	@mkdir -p $(TF_STATE_DIR)
 	@rm -rf $(DIR)/.terraform
 	@ln -s $(TF_STATE_DIR) $(DIR)/.terraform
-ifeq ($(AWS_ASSUME_ROLE_ARN),)
+ifeq ($(AWS_IAM_ROLE_ARN),)
 	@terraform init \
 		-backend=true \
 		-backend-config="bucket=$(TF_BUCKET)" \
@@ -24,5 +24,5 @@ else
 		-backend-config="key=$(TF_BUCKET_PREFIX)/geodesic.tfstate" \
 		-backend-config="region=$(CLUSTER_STATE_BUCKET_REGION)" \
 		-backend-config="profile=$(AWS_PROFILE)" \
-		-backend-config="role_arn=$(AWS_ASSUME_ROLE_ARN)"
+		-backend-config="role_arn=$(AWS_IAM_ROLE_ARN)"
 endif

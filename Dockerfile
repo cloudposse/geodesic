@@ -6,6 +6,8 @@ RUN apk update \
           openssl openssh-client iputils drill \
           git coreutils less groff bash-completion hub hub-bash-completion && \
           mkdir /etc/bash_completion.d/
+	  
+RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
 USER root
 

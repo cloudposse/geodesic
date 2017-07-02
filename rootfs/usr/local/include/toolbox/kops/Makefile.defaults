@@ -1,6 +1,6 @@
 export KOPS_BIN ?= kops
 
-export KOPS_REGION ?= us-west-2
+export KOPS_REGION ?= $(AWS_REGION)
 
 export KOPS_DNS_ZONE ?= $(CLUSTER_DNS_ZONE)
 export KOPS_NAME ?= $(CLUSTER_NAME)
@@ -9,7 +9,7 @@ export KOPS_NAME ?= $(CLUSTER_NAME)
 export KOPS_STATE_STORE ?= s3://$(CLUSTER_STATE_BUCKET)
 
 export KOPS_CLOUD ?= aws
-export KOPS_ZONES ?= us-west-2a
+export KOPS_ZONES ?= $(AWS_REGION)a
 
 export KOPS_MASTER_SIZE ?= t2.medium
 export KOPS_MASTER_ZONES ?= $(KOPS_ZONES)

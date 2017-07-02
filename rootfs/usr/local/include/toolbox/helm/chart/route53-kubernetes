@@ -1,5 +1,0 @@
-NAME ?= dns
-NAMESPACE ?= kube-system
-CHART ?= cloudposse-incubator/route53-kubernetes
-
-include helm/chart/defaults

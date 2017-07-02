@@ -1,1 +1,5 @@
-nginx-ingress
+NAME ?= lb
+NAMESPACE ?= default
+CHART ?= cloudposse-incubator/nginx-ingress
+
+include helm/chart/defaults

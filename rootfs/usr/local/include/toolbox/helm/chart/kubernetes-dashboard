@@ -1,5 +1,0 @@
-NAME ?= ui
-NAMESPACE ?= kube-system
-CHART ?= cloudposse-incubator/kubernetes-dashboard
-
-include helm/chart/defaults

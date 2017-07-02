@@ -1,5 +1,0 @@
-NAME ?= ssh
-NAMESPACE ?= kube-system
-CHART ?= cloudposse-incubator/github-authorized-keys
-
-include helm/chart/defaults

@@ -1,1 +1,6 @@
-kube-lego
+NAME ?= tls
+NAMESPACE ?= kube-system
+CHART ?= cloudposse-incubator/kube-lego
+TIMEOUT ?= 600
+
+include helm/chart/defaults

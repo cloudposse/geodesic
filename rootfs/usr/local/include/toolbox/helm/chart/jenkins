@@ -1,6 +1,0 @@
-NAME ?= ci
-NAMESPACE ?= default
-CHART ?= cloudposse-incubator/jenkins
-TIMEOUT ?= 600
-
-include helm/chart/defaults

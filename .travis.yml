@@ -14,7 +14,7 @@ services:
 - docker
 install:
 - make init
-- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then make docker:login; fi'
+- make travis:docker-login
 
 script:
 - make deps
@@ -22,7 +22,7 @@ script:
 - make docker:build
 
 after_success:
-- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then make travis:docker-tag-and-push; fi'
+- make travis:docker-tag-and-push
 
 deploy:
   # Deploy to dev (branch)

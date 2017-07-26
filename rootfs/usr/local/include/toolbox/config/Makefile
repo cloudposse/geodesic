@@ -37,7 +37,7 @@ edit: init require-cluster-mounted
 
 ## Reset local state
 reset: require-cluster-mounted
-	@rf -rf $(REMOTE_STATE)/* $(REMOTE_STATE)/.bootstrapped
+	@rm -rf $(REMOTE_STATE)/* $(REMOTE_STATE)/.bootstrapped
 	@rm -f $(LOCAL_STATE)/history
 	@cloud config init
 	@echo "Reset local state"

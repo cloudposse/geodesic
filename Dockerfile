@@ -4,6 +4,7 @@ RUN apk update \
     && apk add unzip curl tar \
           python make bash vim jq \
           openssl openssh-client iputils drill \
+          gcc libffi-dev python-dev musl-dev openssl-dev py-virtualenv \
           git coreutils less groff bash-completion hub hub-bash-completion && \
           mkdir /etc/bash_completion.d/
 	  
@@ -82,6 +83,12 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
 ENV AWSEBCLI_VERSION 3.10.1
 RUN apk add py-pip && \
     pip install awsebcli==${AWSEBCLI_VERSION} --upgrade && \
+    rm -rf /root/.cache && \
+    find / -type f -regex '.*\.py[co]' -delete
+
+ENV ANSIBLE_VERSION 2.3.1.0
+ENV JINJA2_VERSION 2.8.1
+RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} --upgrade && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
 

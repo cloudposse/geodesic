@@ -86,7 +86,7 @@ RUN apk add py-pip && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
 
-ENV ANSIBLE_VERSION 2.2.2.0
+ENV ANSIBLE_VERSION 2.3.1.0
 ENV JINJA2_VERSION 2.8.1
 RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} --upgrade && \
     rm -rf /root/.cache && \

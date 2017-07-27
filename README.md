@@ -57,10 +57,25 @@ Docker can be easily installed by following the instructions for your OS:
    ```
    curl -s https://geodesic.sh | bash
    ```
-2. Run `geodesic` to start the geodesic shell
-3. Run `setup-role` to configure your AWS credentials
-4. Run `assume-role $role` where $role is the one you configured in your AWS configuration.
-5. Run `ssh-add ~/.ssh/id_rsa` to add your ssh key to the SSH agent (must be same key used on Github)
+2. Create a `Dockerfile` that defines your environment
+   ```
+  FROM cloudposse/geodesic:easy-clusters
+
+  ENV AWS_PROFILE=ops
+  ENV AWS_DEFAULT_PROFILE=ops
+  ENV CLUSTER_PREFIX=aws
+  ENV CLUSTER_DNS_ZONE=example.com
+  ENV AWS_REGION=us-west-2
+
+  COPY conf/ /conf/
+
+  WORKDIR /conf/
+   ```
+3. Build your cluster image
+   ```
+   docker build -t aws.example.com
+   ```
+4. Run `geodesic use aws.example.com` to start the geodesic shell for that cluster
 5. Run `cloud create` to run through configuration steps
 6. Run `cloud up` to provision the cluster
 

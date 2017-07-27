@@ -74,8 +74,8 @@ debug "envs:[${envs[@]}]"
 debug "targets:[${targets[@]}]"
 
 # If a cluster module is defined, it takes presedence 
-if [ -n "${targets[0]}" ] && [ -d "${LOCAL_STATE}/clusters/${CLUSTER_NAME}/${targets[0]}" ]; then
-  cd "${LOCAL_STATE}/clusters/${CLUSTER_NAME}"
+if [ -n "${targets[0]}" ] && [ -d "/conf/${targets[0]}" ]; then
+  cd "/conf"
 else
   cd "$GEODESIC_PATH"
 fi

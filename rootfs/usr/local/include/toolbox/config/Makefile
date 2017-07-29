@@ -3,9 +3,6 @@ include all
 
 S3FS_OPTIONS ?= nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/dev/shm
 
-## Use an existing cluster
-use: module
-
 ## Initialize environment
 init: init-git
 	@mkdir -p $(dir $(TF_STATE_FILE))

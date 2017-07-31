@@ -21,7 +21,6 @@ Available targets:
   kops                                Toolbox for kops
   kubernetes                          Toolbox for kubernetes
   helm                                Toolbox for helm
-  hub                                 Toolbox for github repo
   terraform                           Toolbox for terraform
   help                                This help screen
 ```

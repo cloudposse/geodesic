@@ -3,9 +3,6 @@ include all
 
 S3FS_OPTIONS ?= nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/dev/shm
 
-## Use an existing cluster
-use: module
-
 ## Initialize environment
 init: init-git
 	@mkdir -p $(dir $(TF_STATE_FILE))
@@ -104,7 +101,6 @@ endif
 	@mkdir -p $(KOPS_STATE_PATH)
 	@mkdir -p $(HELM_VALUES_PATH)
 	@[ ! -f "${KOPS_STATE_PATH}/id_rsa" ] || cloud kops add-ssh-key
-	@source $(CLOUD_CONFIG) && cloud hub deps
 
 ## Unmount remote cluster state bucket
 unmount:

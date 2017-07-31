@@ -101,7 +101,6 @@ endif
 	@mkdir -p $(KOPS_STATE_PATH)
 	@mkdir -p $(HELM_VALUES_PATH)
 	@[ ! -f "${KOPS_STATE_PATH}/id_rsa" ] || cloud kops add-ssh-key
-	@source $(CLOUD_CONFIG) && cloud hub deps
 
 ## Unmount remote cluster state bucket
 unmount:

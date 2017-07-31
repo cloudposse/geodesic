@@ -5,9 +5,9 @@ RUN apk update \
           python make bash vim jq \
           openssl openssh-client iputils drill \
           gcc libffi-dev python-dev musl-dev openssl-dev py-virtualenv \
-          git coreutils less groff bash-completion hub hub-bash-completion && \
+          git coreutils less groff bash-completion && \
           mkdir /etc/bash_completion.d/
-	  
+
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
 USER root

@@ -18,7 +18,7 @@ fi
 # Check if docker is installed
 which docker >/dev/null
 if [ $? -ne 0 ]; then
-  echo "Docker is requried to run ${APP_NAME}"
+  echo "Docker is required to run ${APP_NAME}"
   exit 1
 fi
 
@@ -32,7 +32,7 @@ fi
 # Check if tee is installed
 which tee >/dev/null
 if [ $? -ne 0 ]; then
-  echo "Tee is requried to install ${APP_NAME}"
+  echo "Tee is required to install ${APP_NAME}"
   exit 1
 fi
 

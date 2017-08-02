@@ -201,7 +201,7 @@ if [ "${GEODESIC_SHELL}" == "true" ]; then
 fi
 
 if [ -z "${DOCKER_NAME}" ]; then
-  echo "Error: --name not specfified (E.g. --name=foobar.example.com)"
+  echo "Error: --name not specified (E.g. --name=foobar.example.com)"
   exit 1
 fi
 

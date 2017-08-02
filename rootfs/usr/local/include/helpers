@@ -53,7 +53,7 @@ require-aws-profile:
 	$(call assert-set,AWS_DEFAULT_PROFILE,Run `assume-role` first)
 
 require-cluster-online:
-	@cloud kops is-online || (echo 'Cluster is unavilable. Did you run `cloud up`?'; exit 1)
+	@cloud kops is-online || (echo 'Cluster is unavailable. Did you run `cloud up`?'; exit 1)
 
 require-cluster-mounted:
 	@[ -f "${REMOTE_STATE}/env" ] || (echo 'Cluster not mounted. Did you run `cloud config use $$cluster`?'; exit 1)
@@ -74,4 +74,3 @@ help:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 	@printf "\n"
-

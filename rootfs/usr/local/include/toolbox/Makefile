@@ -22,6 +22,7 @@ create: require-aws-profile
 		 cloud config create-bucket && \
 		 cloud config mount && \
 		@mv -f /tmp/env $(CLOUD_CONFIG)
+
 .PHONY : up
 ## Bring up a new cluster
 up:

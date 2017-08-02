@@ -14,14 +14,20 @@ init:
 ## Create a new cluster
 create: require-aws-profile
 		@set -o allexport; \
-		 CLOUD_CONFIG=/tmp/env; \
-		 ([ -f $$CLOUD_CONFIG ] || cp -a $(CLOUD_CONFIG_SAMPLE) $$CLOUD_CONFIG) && \
-		 configure-env $$CLOUD_CONFIG && \
-		 source $$CLOUD_CONFIG && \
 		 source /etc/profile.d/defaults.sh && \
 		 cloud config create-bucket && \
-		 cloud config mount && \
-		@mv -f /tmp/env $(CLOUD_CONFIG)
+		 cloud config mount
+
+#create: require-aws-profile
+#		@set -o allexport; \
+#		 CLOUD_CONFIG=/tmp/env; \
+#		 ([ -f $$CLOUD_CONFIG ] || cp -a $(CLOUD_CONFIG_SAMPLE) $$CLOUD_CONFIG) && \
+#		 configure-env $$CLOUD_CONFIG && \
+#		 source $$CLOUD_CONFIG && \
+#		 source /etc/profile.d/defaults.sh && \
+#		 cloud config create-bucket && \
+#		 cloud config mount && \
+#		@mv -f /tmp/env $(CLOUD_CONFIG)
 
 .PHONY : up
 ## Bring up a new cluster

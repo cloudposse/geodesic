@@ -63,8 +63,8 @@ Docker can be easily installed by following the instructions for your OS:
 
   ENV AWS_PROFILE=ops
   ENV AWS_DEFAULT_PROFILE=ops
-  ENV CLUSTER_PREFIX=aws
-  ENV CLUSTER_DNS_ZONE=example.com
+  ENV CLUSTER_PREFIX=aws                                # Short name of cluster (e.g. foobar)
+  ENV CLUSTER_DNS_ZONE=example.com                      # Parent zone for cluster (e.g. example.com)
   ENV AWS_REGION=us-west-2
 
   COPY conf/ /conf/

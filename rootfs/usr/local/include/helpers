@@ -56,7 +56,6 @@ require-cluster-online:
 	@cloud kops is-online || (echo 'Cluster is unavailable. Did you run `cloud up`?'; exit 1)
 
 require-cluster-mounted:
-	# @[ -f "${REMOTE_STATE}/env" ] || (echo 'Cluster not mounted. Did you run `cloud config use $$cluster`?'; exit 1)
 	echo 'require-cluster-mounted called'
 
 .PHONY : help

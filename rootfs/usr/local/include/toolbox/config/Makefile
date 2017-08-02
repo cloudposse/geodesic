@@ -28,20 +28,12 @@ init-git:
 	fi
 
 
-## Edit configuration
-#edit: init require-cluster-mounted
-#	@configure-env $(CLOUD_CONFIG) 1>&2
-
 ## Reset local state
 reset: require-cluster-mounted
 	@rm -rf $(REMOTE_STATE)/* $(REMOTE_STATE)/.bootstrapped
 	@rm -f $(LOCAL_STATE)/history
 	@cloud config init
 	@echo "Reset local state"
-
-## View current configuration
-#view: require-cluster-mounted
-#	@cat "$(CLOUD_CONFIG)"
 
 ## Validate configuration
 validate: require-aws-profile

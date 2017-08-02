@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Geodesic Wrapper Script
 
 if [ "${BASH_VERSINFO}" -lt 4 ]; then

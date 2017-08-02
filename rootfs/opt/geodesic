@@ -1,6 +1,11 @@
 #!/bin/bash
 # Geodesic Wrapper Script
 
+if [ "${BASH_VERSINFO}" -lt 4 ]; then
+	echo "Bash Version >= 4 required (${BASH_VERSINFO} installed) to run: $0"
+	exit 1
+fi
+
 set -o pipefail
 
 # Geodesic Settings

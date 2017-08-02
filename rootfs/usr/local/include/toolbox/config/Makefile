@@ -29,8 +29,8 @@ init-git:
 
 
 ## Edit configuration
-edit: init require-cluster-mounted
-	@configure-env $(CLOUD_CONFIG) 1>&2
+#edit: init require-cluster-mounted
+#	@configure-env $(CLOUD_CONFIG) 1>&2
 
 ## Reset local state
 reset: require-cluster-mounted
@@ -40,8 +40,8 @@ reset: require-cluster-mounted
 	@echo "Reset local state"
 
 ## View current configuration
-view: require-cluster-mounted
-	@cat "$(CLOUD_CONFIG)"
+#view: require-cluster-mounted
+#	@cat "$(CLOUD_CONFIG)"
 
 ## Validate configuration
 validate: require-aws-profile
@@ -96,7 +96,6 @@ endif
 	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
 	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
 	@mkdir -p $(REMOTE_STATE)
-	@[ -f $(CLOUD_CONFIG) ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(CLOUD_CONFIG)
 	@mkdir -p $(dir $(KUBECONFIG))
 	@mkdir -p $(KOPS_STATE_PATH)
 	@mkdir -p $(HELM_VALUES_PATH)

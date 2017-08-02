@@ -113,44 +113,85 @@ function use() {
   fi
 }
 
-while [[ $1 ]]
-do
-  case "$1" in
-    -h | --help)
-      targets+=("help")
-      shift
-      ;;
-    -v | --verbose)
-      export VERBOSE=true
-      shift
-      ;;
-    --*)
-      options+=("${1}")
-      shift
-      ;;
-    --) # End of all options
-      shift
-      ;;
-    -*)
-      echo "Error: Unknown option: $1" >&2
-      exit 1
-      ;;
-    *=*)
-      declare -g "${1}"
-      shift
-      ;;
-    *)
-      targets+=("${1}")
-      shift
-      ;;
-  esac
-done
+function parse_args() {
+  while [[ $1 ]]
+  do
+    case "$1" in
+      -h | --help)
+        targets+=("help")
+        shift
+        ;;
+      -v | --verbose)
+        export VERBOSE=true
+        shift
+        ;;
+      --*)
+        options+=("${1}")
+        shift
+        ;;
+      --) # End of all options
+        shift
+        ;;
+      -*)
+        echo "Error: Unknown option: $1" >&2
+        exit 1
+        ;;
+      *=*)
+        declare -g "${1}"
+        shift
+        ;;
+      *)
+        targets+=("${1}")
+        shift
+        ;;
+    esac
+  done
+}
 
+function uninstall() {
+  echo "# Uninstalling ${DOCKER_NAME}..."
+  docker rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
+  docker rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
+  exit 0
+}
+
+function update(){
+  echo "# Installing the latest version of geodesic from ${GEODESIC_INSTALLER_URL}"
+  curl --silent --fail ${GEODESIC_INSTALLER_URL} | bash
+   if [ $? -eq 0 ]; then
+    echo "# ${DOCKER_IMAGE} has been updated."
+    exit 0
+  else
+    echo "Failed to update geodesic"
+    exit 1
+  fi
+}
+
+function stop() {
+   echo "# Stopping ${DOCKER_NAME}..."
+   exec docker kill ${DOCKER_NAME} >/dev/null 2>&1
+}
+
+function help() {
+  echo "Usage: $0 [target] ARGS"
+  echo ""
+  echo "  Targets:"
+  echo "    update     Upgrade geodesic wrapper shell with --name=<DOCKER_IMAGE>"
+  echo "    stop       Stop running shell with --name=<DOCKER_IMAGE>"
+  echo "    uninstall  Remove geodesic image with --name=<DOCKER_IMAGE>"
+  echo "    use        Use cluster with --name=<DOCKER_IMAGE>"
+  echo ""
+  echo "  Arguments:"
+  echo "    --dev      Enable development mode"
+  echo ""
+}
+
+parse_args "$@"
 options_to_env
 
 # Docker settings
 export DOCKER_TAG=${TAG:-latest}
-export DOCKER_NAME=$(basename ${NAME:-})
+export DOCKER_NAME=$(basename "${NAME:-}")
 export DOCKER_DNS=${DNS:-8.8.8.8}
 export DOCKER_IMAGE=${IMAGE:-${DOCKER_NAME}:${DOCKER_TAG}}
 
@@ -160,7 +201,7 @@ if [ "${GEODESIC_SHELL}" == "true" ]; then
 fi
 
 if [ -z "${DOCKER_NAME}" ]; then
-  echo "Error: --name not specfified (E.g. --name foobar.example.com)"
+  echo "Error: --name not specfified (E.g. --name=foobar.example.com)"
   exit 1
 fi
 
@@ -184,25 +225,15 @@ fi
 
 for target in $targets; do
   if [ "$target" == "update" ]; then
-    echo "# Installing the latest version of geodesic from ${GEODESIC_INSTALLER_URL}"
-    curl --silent --fail ${GEODESIC_INSTALLER_URL} | bash
-    if [ $? -eq 0 ]; then
-      echo "# ${DOCKER_IMAGE} has been updated."
-      exit 0
-    else
-      echo "Failed to update geodesic"
-      exit 1
-    fi
+    update 
   elif [ "$target" == "uninstall" ]; then
-    echo "# Uninstalling ${DOCKER_NAME}..."
-    docker rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
-    docker rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
-    exit 0
+    uninstall
   elif [ "$target" == "stop" ]; then
-    echo "# Stopping ${DOCKER_NAME}..."
-    exec docker kill ${DOCKER_NAME} >/dev/null 2>&1
+    stop
   elif [ "$target" == "use" ]; then
     use
+  elif [ "$target" == "help" ]; then
+    help 
   else 
     echo "Unknown target: $target"
     exit 1

@@ -150,7 +150,7 @@ options_to_env
 
 # Docker settings
 export DOCKER_TAG=${TAG:-latest}
-export DOCKER_NAME=${NAME:-}
+export DOCKER_NAME=$(basename ${NAME:-})
 export DOCKER_DNS=${DNS:-8.8.8.8}
 export DOCKER_IMAGE=${IMAGE:-${DOCKER_NAME}:${DOCKER_TAG}}
 

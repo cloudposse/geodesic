@@ -75,6 +75,11 @@ function use() {
                 )
   fi
 
+  if [ "${DEV}" == "true" ]; then
+    echo "# Enabling development mode..."
+    DOCKER_ARGS+=("--volume=$(pwd)/conf:/conf")
+  fi
+
   if [ -n "${HOME}" ]; then
     if [ "${HOME}" == "/mnt/local" ]; then
       echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"

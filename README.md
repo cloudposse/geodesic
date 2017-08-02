@@ -59,7 +59,7 @@ Docker can be easily installed by following the instructions for your OS:
 2. Create a `Dockerfile` that defines your environment
 
    ```
-   FROM cloudposse/geodesic:easy-clusters
+   FROM cloudposse/geodesic:latest
    ENV AWS_PROFILE=ops
    ENV AWS_DEFAULT_PROFILE=ops
    ENV CLUSTER_PREFIX=aws                                # Short name of cluster (e.g. foobar)

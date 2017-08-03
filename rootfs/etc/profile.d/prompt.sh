@@ -1,14 +1,8 @@
+#!/usr/bin/env bash
 # Allow bash to check the window size to keep prompt with relative to window size
 shopt -s checkwinsize
 
 function reload() {
-# Load cluster env
-  if [ -f "${CLOUD_CONFIG}" ]; then
-    set -o allexport
-    . "${CLOUD_CONFIG}"
-    set +o allexport
-  fi
-
   # Reprocess defaults
   if [ -f "/etc/profile.d/defaults.sh" ]; then
     . "/etc/profile.d/defaults.sh"
@@ -24,13 +18,13 @@ function reload() {
   eval $(resize)
 }
 
+
 # Define our own prompt
 function geodesic-prompt() {
   reload
 
   # Run the aws-assume-role prompt
   console-prompt
-
 
   # Augment prompt (PS1) with some geodesic state information
   if [ -d "${CLUSTER_REPO_PATH}/.git" ]; then
@@ -47,5 +41,3 @@ function geodesic-prompt() {
 }
 
 export PROMPT_COMMAND=geodesic-prompt
-
-

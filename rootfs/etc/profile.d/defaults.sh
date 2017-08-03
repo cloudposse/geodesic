@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Setup some default envs
 export LESS=-Xr
 
@@ -75,7 +77,5 @@ export TF_BUCKET_PREFIX=geodesic/terraform
 #
 # Geodesic
 #
-export CLOUD_CONFIG=${REMOTE_STATE}/env
-export CLOUD_CONFIG_SAMPLE=${GEODESIC_PATH}/config/env.sample
 export SHELL_NAME=Geodesic
 

@@ -1,11 +1,12 @@
-#!/bin/bash
-# Please run the following commands to start the geodesic shell (modify as necessary)
+#!/usr/bin/env bash
+# Geodesic Wrapper Script
 
-# Docker settings
-export DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
-export DOCKER_TAG=${DOCKER_TAG:-latest}
-export DOCKER_NAME=${DOCKER_NAME:-geodesic}
-export DOCKER_DNS=${DOCKER_DNS:-8.8.8.8}
+if [ "${BASH_VERSINFO}" -lt 4 ]; then
+	echo "Bash Version >= 4 required (${BASH_VERSINFO} installed) to run: $0"
+	exit 1
+fi
+
+set -o pipefail
 
 # Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-8001}
@@ -14,8 +15,193 @@ export GEODESIC_INSTALLER_URL=${GEODESIC_INSTALLER_URL:-https://geodesic.sh}
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
 
+export options=()
+export targets=()
+
+function options_to_env() {
+  local kv
+  local k
+  local v
+
+  for option in ${options[@]}; do
+    kv=(${option/=/ })
+    k=${kv[0]}    # Take first element as key
+    k=${k#--}     # Strip leading --
+    k=${k//-/_}   # Convert dashes to underscores
+    k=${k^^}      # Convert to uppercase
+
+    v=${kv[1]}    # Treat second element as value
+    v=${v:-true}  # Set it to true for boolean flags
+
+    declare -g $k="$v"
+  done
+}
+
+function debug() {
+  if [ "${VERBOSE}" == "true" ]; then
+    echo "[DEBUG] $*"
+  fi
+}
+
+function use() {
+  if [ -t 1 ]; then
+    # Running in terminal 
+    DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}-bootstrap" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
+
+    if [ -n "$SSH_AUTH_SOCK" ]; then
+      if [ `uname -s` == 'Darwin' ]; then
+        # Run our own SSH agent
+        DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                       --volume "${HOME}/.ssh:/mnt/local/.ssh" )
+      else
+        DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                       --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 
+                       --env SSH_AUTH_SOCK
+                       --env SSH_CLIENT
+                       --env SSH_CONNECTION
+                       --env SSH_TTY 
+                       --env USER)
+      fi
+    fi
+  else
+    DOCKER_ARGS=()
+  fi
+
+  if [ "${OS}" == "Darwin" ]; then
+    # Run in privleged mode to enable time synchronization of system clock with hardware clock
+    # Implement DNS fix related to https://github.com/docker/docker/issues/24344
+    DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                  --dns=${DOCKER_DNS}
+                )
+  fi
+
+  if [ "${DEV}" == "true" ]; then
+    echo "# Enabling development mode..."
+    DOCKER_ARGS+=("--volume=$(pwd)/conf:/conf")
+  fi
+
+  if [ -n "${HOME}" ]; then
+    if [ "${HOME}" == "/mnt/local" ]; then
+      echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"
+    else
+      echo "# Mounting ${HOME} into container"
+      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                    --volume=${HOME}:${HOME}
+                  )
+    fi
+  fi
+
+  DOCKER_ARGS=("${DOCKER_ARGS[@]}"
+                --privileged
+                --publish ${GEODESIC_PORT}:${GEODESIC_PORT}
+                --name "${DOCKER_NAME}"
+                --rm 
+                --env BOOTSTRAP=false
+                --env KUBERNETES_API_PORT=${GEODESIC_PORT}
+                --volume ${STATE_DIR}:/mnt/local)
+  set -o pipefail
+  docker ps | grep -q ${DOCKER_NAME} >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo "# Attaching to existing ${DOCKER_NAME} session"
+    if [ $# -eq 0 ]; then
+      set -- "/bin/bash" "-l" "$@"
+    fi
+    docker exec -it "${DOCKER_NAME}" $*
+  else
+    echo "# Starting new ${DOCKER_NAME} session"
+    docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE} $*
+  fi
+}
+
+function parse_args() {
+  while [[ $1 ]]
+  do
+    case "$1" in
+      -h | --help)
+        targets+=("help")
+        shift
+        ;;
+      -v | --verbose)
+        export VERBOSE=true
+        shift
+        ;;
+      --*)
+        options+=("${1}")
+        shift
+        ;;
+      --) # End of all options
+        shift
+        ;;
+      -*)
+        echo "Error: Unknown option: $1" >&2
+        exit 1
+        ;;
+      *=*)
+        declare -g "${1}"
+        shift
+        ;;
+      *)
+        targets+=("${1}")
+        shift
+        ;;
+    esac
+  done
+}
+
+function uninstall() {
+  echo "# Uninstalling ${DOCKER_NAME}..."
+  docker rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
+  docker rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
+  exit 0
+}
+
+function update(){
+  echo "# Installing the latest version of geodesic from ${GEODESIC_INSTALLER_URL}"
+  curl --silent --fail ${GEODESIC_INSTALLER_URL} | bash
+   if [ $? -eq 0 ]; then
+    echo "# ${DOCKER_IMAGE} has been updated."
+    exit 0
+  else
+    echo "Failed to update geodesic"
+    exit 1
+  fi
+}
+
+function stop() {
+   echo "# Stopping ${DOCKER_NAME}..."
+   exec docker kill ${DOCKER_NAME} >/dev/null 2>&1
+}
+
+function help() {
+  echo "Usage: $0 [target] ARGS"
+  echo ""
+  echo "  Targets:"
+  echo "    update     Upgrade geodesic wrapper shell with --name=<DOCKER_IMAGE>"
+  echo "    stop       Stop running shell with --name=<DOCKER_IMAGE>"
+  echo "    uninstall  Remove geodesic image with --name=<DOCKER_IMAGE>"
+  echo "    use        Use cluster with --name=<DOCKER_IMAGE>"
+  echo ""
+  echo "  Arguments:"
+  echo "    --dev      Enable development mode"
+  echo ""
+}
+
+parse_args "$@"
+options_to_env
+
+# Docker settings
+export DOCKER_TAG=${TAG:-latest}
+export DOCKER_NAME=$(basename "${NAME:-}")
+export DOCKER_DNS=${DNS:-8.8.8.8}
+export DOCKER_IMAGE=${IMAGE:-${DOCKER_NAME}:${DOCKER_TAG}}
+
 if [ "${GEODESIC_SHELL}" == "true" ]; then
   echo "Cannot run while in a geodesic shell"
+  exit 1
+fi
+
+if [ -z "${DOCKER_NAME}" ]; then
+  echo "Error: --name not specified (E.g. --name=foobar.example.com)"
   exit 1
 fi
 
@@ -32,88 +218,24 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-if [ "$1" == "update" ]; then
-  echo "# Installing the latest version of geodesic from ${GEODESIC_INSTALLER_URL}"
-  curl --silent --fail ${GEODESIC_INSTALLER_URL} | bash
-  if [ $? -eq 0 ]; then
-    echo "# ${DOCKER_NAME}:${DOCKER_TAG} has been updated."
-    exit 0
-  else
-    echo "Failed to update geodesic"
+if [ -z "$targets" ]; then
+  echo "Must specify a target"
+  exit 1
+fi
+
+for target in $targets; do
+  if [ "$target" == "update" ]; then
+    update 
+  elif [ "$target" == "uninstall" ]; then
+    uninstall
+  elif [ "$target" == "stop" ]; then
+    stop
+  elif [ "$target" == "use" ]; then
+    use
+  elif [ "$target" == "help" ]; then
+    help 
+  else 
+    echo "Unknown target: $target"
     exit 1
   fi
-elif [ "$1" == "uninstall" ]; then
-  echo "# Uninstalling ${DOCKER_NAME}..."
-  docker rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
-  docker rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
-  if ! [[ "$0" =~ rootfs ]]; then
-    rm -f "$0"
-  fi
-  exit 0
-elif [ "$1" == "stop" ]; then
-  echo "# Stopping ${DOCKER_NAME}..."
-  exec docker kill ${DOCKER_NAME} >/dev/null 2>&1
-fi
-
-if [ -t 1 ]; then
-  # Running in terminal 
-  DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}-bootstrap" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
-
-  if [ -n "$SSH_AUTH_SOCK" ]; then
-    if [ `uname -s` == 'Darwin' ]; then
-      # Run our own SSH agent
-      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                     --volume "${HOME}/.ssh:/mnt/local/.ssh" )
-    else
-      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                     --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 
-                     --env SSH_AUTH_SOCK
-                     --env SSH_CLIENT
-                     --env SSH_CONNECTION
-                     --env SSH_TTY 
-                     --env USER)
-    fi
-  fi
-else
-  DOCKER_ARGS=()
-fi
-
-if [ "${OS}" == "Darwin" ]; then
-  # Run in privleged mode to enable time synchronization of system clock with hardware clock
-  # Implement DNS fix related to https://github.com/docker/docker/issues/24344
-  DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                --dns=${DOCKER_DNS}
-              )
-fi
-
-if [ -n "${HOME}" ]; then
-  if [ "${HOME}" == "/mnt/local" ]; then
-    echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"
-  else
-    echo "# Mounting ${HOME} into container"
-    DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                  --volume=${HOME}:${HOME}
-                )
-  fi
-fi
-
-DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-              --privileged
-              --publish ${GEODESIC_PORT}:${GEODESIC_PORT}
-              --name "${DOCKER_NAME}"
-              --rm 
-              --env BOOTSTRAP=false
-              --env KUBERNETES_API_PORT=${GEODESIC_PORT}
-              --volume ${STATE_DIR}:/mnt/local)
-
-docker inspect geodesic >/dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo "# Attaching to existing ${DOCKER_NAME} session"
-  if [ $# -eq 0 ]; then
-    set -- "/bin/bash" "-l" "$@"
-  fi
-  docker exec -it "${DOCKER_NAME}" $*
-else
-  echo "# Starting new ${DOCKER_NAME} session"
-  docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE}:${DOCKER_TAG} $*
-fi
+done

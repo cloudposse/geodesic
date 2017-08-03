@@ -3,9 +3,6 @@ include all
 
 S3FS_OPTIONS ?= nosuid,nonempty,nodev,allow_other,default_acl=private,retries=5,use_sse,use_cache=/dev/shm
 
-## Use an existing cluster
-use: module
-
 ## Initialize environment
 init: init-git
 	@mkdir -p $(dir $(TF_STATE_FILE))
@@ -31,20 +28,12 @@ init-git:
 	fi
 
 
-## Edit configuration
-edit: init require-cluster-mounted
-	@configure-env $(CLOUD_CONFIG) 1>&2
-
 ## Reset local state
 reset: require-cluster-mounted
 	@rm -rf $(REMOTE_STATE)/* $(REMOTE_STATE)/.bootstrapped
 	@rm -f $(LOCAL_STATE)/history
 	@cloud config init
 	@echo "Reset local state"
-
-## View current configuration
-view: require-cluster-mounted
-	@cat "$(CLOUD_CONFIG)"
 
 ## Validate configuration
 validate: require-aws-profile
@@ -99,12 +88,10 @@ endif
 	@grep -q s3fs /etc/mtab || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
 	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
 	@mkdir -p $(REMOTE_STATE)
-	@[ -f $(CLOUD_CONFIG) ] || cp -a $(CLOUD_CONFIG_SAMPLE) $(CLOUD_CONFIG)
 	@mkdir -p $(dir $(KUBECONFIG))
 	@mkdir -p $(KOPS_STATE_PATH)
 	@mkdir -p $(HELM_VALUES_PATH)
 	@[ ! -f "${KOPS_STATE_PATH}/id_rsa" ] || cloud kops add-ssh-key
-	@source $(CLOUD_CONFIG) && cloud hub deps
 
 ## Unmount remote cluster state bucket
 unmount:

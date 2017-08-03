@@ -13,17 +13,11 @@ init:
 
 ## Create a new cluster
 create: require-aws-profile
-		@cloud hub test
 		@set -o allexport; \
-		 CLOUD_CONFIG=/tmp/env; \
-		 ([ -f $$CLOUD_CONFIG ] || cp -a $(CLOUD_CONFIG_SAMPLE) $$CLOUD_CONFIG) && \
-		 configure-env $$CLOUD_CONFIG && \
-		 source $$CLOUD_CONFIG && \
 		 source /etc/profile.d/defaults.sh && \
 		 cloud config create-bucket && \
-		 cloud config mount && \
-		 cloud hub create
-		@mv -f /tmp/env $(CLOUD_CONFIG)
+		 cloud config mount
+
 .PHONY : up
 ## Bring up a new cluster
 up:
@@ -68,14 +62,10 @@ kops: module
 .PHONY: kubernetes
 ## Toolbox for kubernetes
 kubernetes: module
-  
+
 .PHONY: helm
 ## Toolbox for helm
 helm: module
-
-.PHONY: hub
-## Toolbox for github repo
-hub: module
 
 .PHONY: terraform
 ## Toolbox for terraform

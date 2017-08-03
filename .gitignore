@@ -1,2 +1,4 @@
 .build-harness
 build-harness/
+aws-assumed-role/
+.idea/

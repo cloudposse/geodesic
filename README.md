@@ -77,7 +77,7 @@ Docker can be easily installed by following the instructions for your OS:
    ```
 
 
-4. Run `geodesic use aws.example.com` to start the geodesic shell for that cluster
+4. Run `geodesic use --name aws.example.com` to start the geodesic shell for that cluster
 5. Run `cloud create` to run through configuration steps
 6. Run `cloud up` to provision the cluster
 

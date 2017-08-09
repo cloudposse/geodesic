@@ -79,7 +79,6 @@ Docker can be easily installed by following the instructions for your OS:
     # Username for connecting to the cluster via SSH
     ENV SSH_USERNAME=admin
     
-    
     # Kubernetes Master EC2 instance type (optional, required if the cluster uses Kubernetes)
     ENV KOPS_MASTER_SIZE=t2.medium
     
@@ -89,7 +88,7 @@ Docker can be easily installed by following the instructions for your OS:
     # Kubernetes node count (Node EC2 instance count) (optional, required if the cluster uses Kubernetes)
     ENV KOPS_NODE_COUNT=3
     
-    
+    # Place configuration in 'conf/' directory
     COPY conf/ /conf/
     
     WORKDIR /conf/

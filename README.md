@@ -61,18 +61,37 @@ Docker can be easily installed by following the instructions for your OS:
    ```
     FROM cloudposse/geodesic:0.2.0
     
-    ENV AWS_DEFAULT_PROFILE=ops                         # Default AWS Profile name
-    ENV CLUSTER_PREFIX=aws                              # Prefix of the cluster
-    ENV CLUSTER_DNS_ZONE=example.com                    # Parent zone for the cluster
-    ENV AWS_REGION=us-west-2                            # AWS Region for the cluster
-    ENV CLUSTER_STATE_BUCKET_REGION=us-west-2           # AWS Region of the S3 bucket to store cluster configuration
-    ENV SSH_USERNAME=admin                              # Username for connecting to the cluster via SSH
+    # Default AWS Profile name
+    ENV AWS_DEFAULT_PROFILE=ops
     
-    ENV KOPS_MASTER_SIZE=t2.medium                      # Kubernetes Master EC2 instance type (optional, required if the cluster uses Kubernetes)
-    ENV KOPS_NODE_SIZE=t2.medium                        # Kubernetes Node EC2 instance type (optional, required if the cluster uses Kubernetes)
-    ENV KOPS_NODE_COUNT=3                               # Kubernetes node count (Node EC2 instance count) (optional, required if the cluster uses Kubernetes)
+    # Prefix of the cluster
+    ENV CLUSTER_PREFIX=aws
     
-    COPY conf/ /conf/   
+    # Parent zone for the cluster
+    ENV CLUSTER_DNS_ZONE=example.com
+    
+    # AWS Region for the cluster
+    ENV AWS_REGION=us-west-2
+    
+    # AWS Region of the S3 bucket to store cluster configuration
+    ENV CLUSTER_STATE_BUCKET_REGION=us-west-2
+    
+    # Username for connecting to the cluster via SSH
+    ENV SSH_USERNAME=admin
+    
+    
+    # Kubernetes Master EC2 instance type (optional, required if the cluster uses Kubernetes)
+    ENV KOPS_MASTER_SIZE=t2.medium
+    
+    # Kubernetes Node EC2 instance type (optional, required if the cluster uses Kubernetes)
+    ENV KOPS_NODE_SIZE=t2.medium
+    
+    # Kubernetes node count (Node EC2 instance count) (optional, required if the cluster uses Kubernetes)
+    ENV KOPS_NODE_COUNT=3
+    
+    
+    COPY conf/ /conf/
+    
     WORKDIR /conf/
    ```
 

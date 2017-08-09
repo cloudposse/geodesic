@@ -77,7 +77,7 @@ Docker can be easily installed by following the instructions for your OS:
    ```
 
 
-4. Run `geodesic use aws.example.com` to start the geodesic shell for that cluster
+4. Run `geodesic use --name=aws.example.com` to start the geodesic shell for that cluster
 5. Run `cloud create` to run through configuration steps
 6. Run `cloud up` to provision the cluster
 
@@ -147,12 +147,14 @@ or [hire us][hire] to help build your next cloud-platform.
 ### Contributors
 
 
-| [![Erik Osterman][erik_img]][erik_web]<br/>[Erik Osterman][erik_web] | [![Igor Rodionov][igor_img]][igor_web]<br/>[Igor Rodionov][igor_web] |
-|-------------------------------------------------------|------------------------------------------------------------------|
+| [![Erik Osterman][erik_img]][erik_web]<br/>[Erik Osterman][erik_web] | [![Igor Rodionov][igor_img]][igor_web]<br/>[Igor Rodionov][igor_web] | [![Andriy Knysh][andriy_img]][andriy_web]<br/>[Andriy Knysh][andriy_web] |
+|-------------------------------------------------------|------------------------------------------------------------------|------------------------------------------------------------------|
 
   [erik_img]: http://s.gravatar.com/avatar/88c480d4f73b813904e00a5695a454cb?s=144
   [erik_web]: https://github.com/osterman/
   [igor_img]: http://s.gravatar.com/avatar/bc70834d32ed4517568a1feb0b9be7e2?s=144
   [igor_web]: https://github.com/goruha/
+  [andriy_img]: https://avatars0.githubusercontent.com/u/7356997?v=4&u=ed9ce1c9151d552d985bdf5546772e14ef7ab617&s=144
+  [andriy_web]: https://github.com/aknysh/
 
 

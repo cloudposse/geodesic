@@ -59,15 +59,21 @@ Docker can be easily installed by following the instructions for your OS:
 2. Create a `Dockerfile` that defines your environment
 
    ```
-   FROM cloudposse/geodesic:latest
-   ENV AWS_PROFILE=ops
-   ENV AWS_DEFAULT_PROFILE=ops
-   ENV CLUSTER_PREFIX=aws                                # Short name of cluster (e.g. foobar)
-   ENV CLUSTER_DNS_ZONE=example.com                      # Parent zone for cluster (e.g. example.com)
-   ENV AWS_REGION=us-west-2
-
-   COPY conf/ /conf/
-   WORKDIR /conf/
+    FROM cloudposse/geodesic:0.2.0
+    
+    ENV AWS_DEFAULT_PROFILE=ops                         # Default AWS Profile name
+    ENV CLUSTER_PREFIX=aws                              # Prefix of the cluster
+    ENV CLUSTER_DNS_ZONE=example.com                    # Parent zone for the cluster
+    ENV AWS_REGION=us-west-2                            # AWS Region for the cluster
+    ENV CLUSTER_STATE_BUCKET_REGION=us-west-2           # AWS Region of the S3 bucket to store cluster configuration
+    ENV SSH_USERNAME=admin                              # Username for connecting to the cluster via SSH
+    
+    ENV KOPS_MASTER_SIZE=t2.medium                      # Kubernetes Master EC2 instance type (optional, required if the cluster uses Kubernetes)
+    ENV KOPS_NODE_SIZE=t2.medium                        # Kubernetes Node EC2 instance type (optional, required if the cluster uses Kubernetes)
+    ENV KOPS_NODE_COUNT=3                               # Kubernetes node count (Node EC2 instance count) (optional, required if the cluster uses Kubernetes)
+    
+    COPY conf/ /conf/   
+    WORKDIR /conf/
    ```
 
 3. Build your cluster image

@@ -15,6 +15,9 @@ export GEODESIC_INSTALLER_URL=${GEODESIC_INSTALLER_URL:-https://geodesic.sh}
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
 
+export USER_ID=$(id -u)
+export GROUP_ID=$(id -g)
+
 export options=()
 export targets=()
 
@@ -60,7 +63,9 @@ function use() {
                        --env SSH_CLIENT
                        --env SSH_CONNECTION
                        --env SSH_TTY 
-                       --env USER)
+                       --env USER
+                       --env USER_ID
+                       --env GROUP_ID)
       fi
     fi
   else

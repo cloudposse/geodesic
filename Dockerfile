@@ -15,7 +15,7 @@ USER root
 WORKDIR /tmp
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.10.0
+ENV TERRAFORM_VERSION 0.10.1
 RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip \

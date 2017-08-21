@@ -62,7 +62,7 @@ function use() {
                        --env SSH_AUTH_SOCK
                        --env SSH_CLIENT
                        --env SSH_CONNECTION
-                       --env SSH_TTY 
+                       --env SSH_TTY
                        --env USER
                        --env USER_ID
                        --env GROUP_ID)
@@ -83,6 +83,7 @@ function use() {
   if [ "${DEV}" == "true" ]; then
     echo "# Enabling development mode..."
     DOCKER_ARGS+=("--volume=$(pwd)/conf:/conf")
+    DOCKER_ARGS=("${DOCKER_ARGS[@]}" --env DEV=true)
   fi
 
   if [ -n "${HOME}" ]; then

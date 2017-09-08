@@ -3,7 +3,7 @@ FROM alpine:3.4
 RUN apk update \
     && apk add unzip curl tar \
           python make bash vim jq \
-          openssl openssh-client iputils drill \
+          openssl openssh-client sshpass iputils drill \
           gcc libffi-dev python-dev musl-dev openssl-dev py-virtualenv \
           git coreutils less groff bash-completion && \
           mkdir /etc/bash_completion.d/

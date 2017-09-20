@@ -1,6 +1,8 @@
 include terraform/plan
 
+TF_PARALLELISM ?= 10
+
 ## Apply pending changes
 apply: plan
 	@confirm CLUSTER_NAME
-	@terraform apply -input=false $(TF_STATE_DIR)/terraform.out
+	@terraform apply -parallelism=$(TF_PARALLELISM) -input=false $(TF_STATE_DIR)/terraform.out

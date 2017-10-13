@@ -25,13 +25,15 @@ function geodesic-prompt() {
 
   # Run the aws-assume-role prompt
   console-prompt
-  local WHITE_HEAVY_CHECK_MARK=$'\u2705 '
-  local BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 '
-  local TWO_JOINED_SQUARES=$'\u29C9 '
-  local CROSS_MARK=$'\u274C '
-  local STATUS=${CROSS_MARK}
+  WHITE_HEAVY_CHECK_MARK=$'\u2705 '
+  BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 '
+  TWO_JOINED_SQUARES=$'\u29C9 '
+  CROSS_MARK=$'\u274C '
+  STATUS=${CROSS_MARK}
 
-  if [ $AWS_SESSION_TTL -gt 0 ]; then
+  if [ -z "$AWS_IAM_ROLE_ARN" ]; then
+    STATUS=${WHITE_HEAVY_CHECK_MARK}
+  elif [ $AWS_SESSION_TTL -gt 0 ]; then
     STATUS=${WHITE_HEAVY_CHECK_MARK}
   fi
 

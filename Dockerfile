@@ -44,6 +44,13 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && chmod +x /usr/local/bin/helm \
     && helm completion > /etc/bash_completion.d/helm.sh
 
+# Install packer
+ENV PACKER_VERSION 1.1.1
+RUN curl --fail -sSL -O https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
+    && unzip packer_${PACKER_VERSION}_linux_amd64.zip \
+    && rm packer_${PACKER_VERSION}_linux_amd64.zip \
+    && mv packer /usr/local/bin
+
 # Install aws cli bundle
 RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && unzip awscli-bundle.zip \
@@ -112,4 +119,3 @@ ADD rootfs/ /
 WORKDIR /mnt/local
 
 ENTRYPOINT ["/bin/bash", "-l"]
-

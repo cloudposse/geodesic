@@ -3,7 +3,7 @@
 
 ## Introduction
 
-Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform. 
+Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform.
 
 It provides a fully customizable framework for defining and building world-class cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security.
 
@@ -26,10 +26,11 @@ An organization may chose to leverage all of these components, or just the parts
 
 At its core, Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of the components of a modern cloud.
 
-* [`kops`](https://github.com/kubernetes/kops/) for kubernetes cluster orchestration 
+* [`kops`](https://github.com/kubernetes/kops/) for kubernetes cluster orchestration
 * [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
 * [`helm`](https://github.com/kubernetes/helm/) for installing packages like varnish or apache on the kubernetes cluster
 * [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
+* [`packer`](https://github.com/hashicorp/packer/) for creating identical machine images for multiple platforms
 * [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
 * [`ansible`](http://docs.ansible.com/ansible/latest/index.html) Ansible is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks.
 * [`s3fs`](https://github.com/s3fs-fuse/s3fs-fuse) for mounting encrypted S3 buckets that store cluster configurations and secrets
@@ -60,37 +61,37 @@ Docker can be easily installed by following the instructions for your OS:
 
    ```
     FROM cloudposse/geodesic:0.2.0
-    
+
     # Default AWS Profile name
     ENV AWS_DEFAULT_PROFILE=ops
-    
+
     # Prefix of the cluster
     ENV CLUSTER_PREFIX=aws
-    
+
     # Parent zone for the cluster
     ENV CLUSTER_DNS_ZONE=example.com
-    
+
     # AWS Region for the cluster
     ENV AWS_REGION=us-west-2
-    
+
     # AWS Region of the S3 bucket to store cluster configuration
     ENV CLUSTER_STATE_BUCKET_REGION=us-west-2
-    
+
     # Username for connecting to the cluster via SSH
     ENV SSH_USERNAME=admin
-    
+
     # Kubernetes Master EC2 instance type (optional, required if the cluster uses Kubernetes)
     ENV KOPS_MASTER_SIZE=t2.medium
-    
+
     # Kubernetes Node EC2 instance type (optional, required if the cluster uses Kubernetes)
     ENV KOPS_NODE_SIZE=t2.medium
-    
+
     # Kubernetes node count (Node EC2 instance count) (optional, required if the cluster uses Kubernetes)
     ENV KOPS_NODE_COUNT=3
-    
+
     # Place configuration in 'conf/' directory
     COPY conf/ /conf/
-    
+
     WORKDIR /conf/
    ```
 
@@ -109,7 +110,7 @@ All done. Your cloud is now up and running.
 
 ## Help
 
-**Got a question?** 
+**Got a question?**
 
 Review the [docs](docs/), file a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
 
@@ -145,7 +146,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-     
+
       http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing,
@@ -159,7 +160,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 Geodesic is maintained and funded by [Cloud Posse, LLC][website]. Like it? Please let us know at <hello@cloudposse.com>
 
-We love [Open Source Software](https://github.com/cloudposse/)! 
+We love [Open Source Software](https://github.com/cloudposse/)!
 
 See [our other projects][community]
 or [hire us][hire] to help build your next cloud-platform.
@@ -167,7 +168,7 @@ or [hire us][hire] to help build your next cloud-platform.
   [website]: http://cloudposse.com/
   [community]: https://github.com/cloudposse/
   [hire]: http://cloudposse.com/contact/
-  
+
 ### Contributors
 
 
@@ -180,5 +181,3 @@ or [hire us][hire] to help build your next cloud-platform.
   [igor_web]: https://github.com/goruha/
   [andriy_img]: https://avatars0.githubusercontent.com/u/7356997?v=4&u=ed9ce1c9151d552d985bdf5546772e14ef7ab617&s=144
   [andriy_web]: https://github.com/aknysh/
-
-

@@ -32,7 +32,7 @@ function geodesic-prompt() {
 
   if [ -n "$AWS_IAM_ROLE_ARN" ]; then
     STATUS=${WHITE_HEAVY_CHECK_MARK}
-  elif [ $AWS_SESSION_TTL -gt 0 ]; then
+  elif [ $AWS_SESSION_TTL -gt 0 ] && [ -n $AWS_SESSION_TOKEN ]; then
     STATUS=${WHITE_HEAVY_CHECK_MARK}
   else
     STATUS=${CROSS_MARK}

@@ -30,7 +30,7 @@ function geodesic-prompt() {
   TWO_JOINED_SQUARES=$'\u29C9 '
   CROSS_MARK=$'\u274C '
 
-  if [ -z "$AWS_IAM_ROLE_ARN" ]; then
+  if [ -n "$AWS_IAM_ROLE_ARN" ]; then
     STATUS=${WHITE_HEAVY_CHECK_MARK}
   elif [ $AWS_SESSION_TTL -gt 0 ]; then
     STATUS=${WHITE_HEAVY_CHECK_MARK}

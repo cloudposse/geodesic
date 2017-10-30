@@ -29,12 +29,13 @@ function geodesic-prompt() {
   BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 '
   TWO_JOINED_SQUARES=$'\u29C9 '
   CROSS_MARK=$'\u274C '
-  STATUS=${CROSS_MARK}
 
   if [ -z "$AWS_IAM_ROLE_ARN" ]; then
     STATUS=${WHITE_HEAVY_CHECK_MARK}
   elif [ $AWS_SESSION_TTL -gt 0 ]; then
     STATUS=${WHITE_HEAVY_CHECK_MARK}
+  else
+    STATUS=${CROSS_MARK}
   fi
 
   if [ -n "${CLUSTER_NAME}" ]; then

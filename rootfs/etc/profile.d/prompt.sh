@@ -25,19 +25,25 @@ function geodesic-prompt() {
 
   # Run the aws-assume-role prompt
   console-prompt
+  WHITE_HEAVY_CHECK_MARK=$'\u2705 '
+  BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 '
+  TWO_JOINED_SQUARES=$'\u29C9 '
+  CROSS_MARK=$'\u274C '
 
-  # Augment prompt (PS1) with some geodesic state information
-  if [ -d "${CLUSTER_REPO_PATH}/.git" ]; then
-    GIT_STATE=$(git -C ${CLUSTER_REPO_PATH} diff-files --no-ext-diff)
-    STATUS="\[✅\]";
-    if [ -n "${GIT_STATE}" ]; then
-      STATUS="\[❌\]"
-    fi
+  if [ -n "$AWS_IAM_ROLE_ARN" ]; then
+    export STATUS=${WHITE_HEAVY_CHECK_MARK}
+  elif [ $AWS_SESSION_TTL -gt 0 ] && [ -n "$AWS_SESSION_TOKEN" ]; then
+    export STATUS=${WHITE_HEAVY_CHECK_MARK}
+  else
+    export STATUS=${CROSS_MARK}
   fi
 
   if [ -n "${CLUSTER_NAME}" ]; then
-    PS1=" \[⧉\] ${CLUSTER_NAME}\n$STATUS  $ROLE_PROMPT \W \[➤\] "
+    PS1=$' ${TWO_JOINED_SQUARES}'" ${CLUSTER_NAME}\n"$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
+  else
+    PS1=$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
   fi
+  export PS1
 }
 
 export PROMPT_COMMAND=geodesic-prompt

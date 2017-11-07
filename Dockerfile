@@ -15,21 +15,32 @@ USER root
 WORKDIR /tmp
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.10.7
+ENV TERRAFORM_VERSION 0.10.8
 RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && mv terraform /usr/local/bin
 
 # Install kubectl
-ENV KUBERNETES_VERSION 1.5.2
+ENV KUBERNETES_VERSION 1.7.10
 RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl \
     && kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
 # Install kops
-ENV KOPS_VERSION 1.5.1
+ENV KOPS_VERSION 1.7.1
+ENV KOPS_STATE_STORE s3://undefined
+ENV KOPS_STATE_STORE_REGION us-east-1
+ENV AWS_SDK_LOAD_CONFIG=1
+ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
+ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
+ENV KOPS_TEMPLATE=/templates/kops/default.yaml
+ENV KOPS_BASE_IMAGE=kope.io/k8s-1.6-debian-jessie-amd64-hvm-ebs-2017-05-02
+ENV KOPS_BASTION_PUBLIC_NAME="bastion"
+ENV KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
+ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
+ENV KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
 RUN curl --fail -sSL -O https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-linux-amd64 \
     && mv kops-linux-amd64 /usr/local/bin/kops \
     && chmod +x /usr/local/bin/kops \
@@ -60,20 +71,10 @@ RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh \
     && ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
-# Install S3FS
-# Overrride URI for AWS Metadata API so we can run outside of AWS using a hardcoded path on the filesystem :)
-ENV S3FS_VERSION 1.80
-RUN apk --update add fuse libxml2 mailcap && \
-    apk --virtual .build-deps add alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev && \
-	git clone https://github.com/s3fs-fuse/s3fs-fuse.git && \
-    cd s3fs-fuse && \
-    git checkout tags/v${S3FS_VERSION} && \
-    ./autogen.sh && \
-    ./configure --prefix=/usr && \
-    sed -i -E 's!http://169.254.169.254.*?/!file:///mnt/local/aws/cli/cache/!g' src/curl.cpp && \
-    make && \
-    make install && \
-    apk del .build-deps
+# Install goofys
+ENV GOOFYS_VERSION 0.0.18
+RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
+    && chmod +x /usr/local/bin/goofys
 
 # Install Google Cloud SDK
 ENV GCLOUD_SDK_VERSION=147.0.0
@@ -98,6 +99,20 @@ ENV JINJA2_VERSION 2.8.1
 RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} --upgrade && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
+
+# Install gomplate
+ENV GOMPLATE_VERSION 2.2.0
+RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
+    && chmod +x /usr/local/bin/gomplate
+
+# Instance sizes
+ENV BASTION_MACHINE_TYPE "t2.medium"
+ENV MASTER_MACHINE_TYPE "t2.medium"
+ENV NODE_MACHINE_TYPE "t2.medium"
+
+# Min/Max number of nodes (aka workers)
+ENV NODE_MAX_SIZE 2
+ENV NODE_MIN_SIZE 2
 
 ENV BOOTSTRAP=true
 

@@ -105,6 +105,15 @@ ENV GOMPLATE_VERSION 2.2.0
 RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
     && chmod +x /usr/local/bin/gomplate
 
+# Instance sizes
+ENV BASTION_MACHINE_TYPE "t2.medium"
+ENV MASTER_MACHINE_TYPE "t2.medium"
+ENV NODE_MACHINE_TYPE "t2.medium"
+
+# Min/Max number of nodes (aka workers)
+ENV NODE_MAX_SIZE 2
+ENV NODE_MIN_SIZE 2
+
 ENV BOOTSTRAP=true
 
 # Where to store state

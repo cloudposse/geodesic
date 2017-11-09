@@ -35,6 +35,7 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`ansible`](http://docs.ansible.com/ansible/latest/index.html) Ansible is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks.
 * [`s3fs`](https://github.com/s3fs-fuse/s3fs-fuse) for mounting encrypted S3 buckets that store cluster configurations and secrets
 * [`gcloud`, `gsutil`](https://cloud.google.com/sdk/) for integration with Google Cloud (e.g. GKE, GCE, Google Storage)
+* [`gomplate`](https://github.com/hairyhenderson/gomplate/) for template rendering configuraton files using the GoLang template engine. Supports lots of local and remote datasources.
 
 ## Demo
 

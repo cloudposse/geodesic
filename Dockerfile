@@ -137,6 +137,12 @@ ENV GOMPLATE_VERSION 2.2.0
 RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
     && chmod +x /usr/local/bin/gomplate
 
+# Install AWS Assumed Role
+ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
+RUN mkdir -p /etc/profile.d \
+    && curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/0.1.0/profile \
+    && chmod +x /etc/profile.d/aws-assume-role.sh
+
 ENV BOOTSTRAP=true
 
 # Where to store state
@@ -151,7 +157,6 @@ ENV HOME=/mnt/local
 
 VOLUME ["/mnt/local"]
 
-ADD aws-assumed-role/profile /etc/profile.d/aws-assume-role.sh
 ADD rootfs/ /
 
 WORKDIR /mnt/local

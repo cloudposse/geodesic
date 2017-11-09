@@ -15,14 +15,14 @@ USER root
 WORKDIR /tmp
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.10.7
+ENV TERRAFORM_VERSION 0.10.8
 RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && mv terraform /usr/local/bin
 
 # Install kubectl
-ENV KUBERNETES_VERSION 1.5.2
+ENV KUBERNETES_VERSION 1.7.10
 RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl \
@@ -60,7 +60,7 @@ ENV NODE_MAX_SIZE 2
 ENV NODE_MIN_SIZE 2
 
 # Install helm
-ENV HELM_VERSION 2.3.1
+ENV HELM_VERSION 2.6.0
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin/helm \
@@ -100,7 +100,7 @@ RUN apk --update add fuse libxml2 mailcap && \
     apk del .build-deps
 
 # Install Google Cloud SDK
-ENV GCLOUD_SDK_VERSION=147.0.0
+ENV GCLOUD_SDK_VERSION=179.0.0
 RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar -zvxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     mv google-cloud-sdk /usr/local/ && \
@@ -111,14 +111,16 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
-ENV AWSEBCLI_VERSION 3.10.1
+# Install AWS CLI
+ENV AWSEBCLI_VERSION 3.12.0
 RUN apk add py-pip && \
     pip install awsebcli==${AWSEBCLI_VERSION} --upgrade && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
 
-ENV ANSIBLE_VERSION 2.3.1.0
-ENV JINJA2_VERSION 2.8.1
+# Install Ansible
+ENV ANSIBLE_VERSION 2.4.1.0
+ENV JINJA2_VERSION 2.10
 RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} --upgrade && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete

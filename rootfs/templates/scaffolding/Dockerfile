@@ -31,3 +31,5 @@ ENV KOPS_NODE_COUNT=3
 COPY conf/ /conf/
 
 WORKDIR /conf/
+
+RUN build-kops-manifest

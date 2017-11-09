@@ -1,0 +1,8 @@
+#!/bin/bash
+KOPS_MANIFEST_TEMPLATE="${1:-/templates/kops/default.yaml}"
+KOPS_MANIFEST_OUTPUT="${2:-/conf/kops/manifest.yaml}"
+
+mkdir -p `dirname ${KOPS_MANIFEST_OUTPUT}`
+
+gomplate -f ${KOPS_MANIFEST_TEMPLATE} > ${KOPS_MANIFEST_OUTPUT}
+echo "Wrote manifest to ${KOPS_MANIFEST_OUTPUT}..."

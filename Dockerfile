@@ -36,7 +36,11 @@ ENV AWS_SDK_LOAD_CONFIG=1
 ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
 ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
 ENV KOPS_TEMPLATE=/templates/kops/default.yaml
-ENV KOPS_BASE_IMAGE=kope.io/k8s-1.6-debian-jessie-amd64-hvm-ebs-2017-05-02
+
+# https://github.com/kubernetes/kops/blob/master/channels/stable
+# https://github.com/kubernetes/kops/blob/master/docs/images.md
+ENV KOPS_BASE_IMAGE=kope.io/k8s-1.7-debian-jessie-amd64-hvm-ebs-2017-07-28
+
 ENV KOPS_BASTION_PUBLIC_NAME="bastion"
 ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
 ENV KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"

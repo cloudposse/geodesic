@@ -19,7 +19,7 @@ push:
 	docker push $(DOCKER_IMAGE)
 
 install:
-	@docker run --rm $(DOCKER_IMAGE) | sudo bash
+	@docker run --rm $(DOCKER_IMAGE_NAME) | sudo bash -s dev
 
 run:
 	$(CLUSTER)

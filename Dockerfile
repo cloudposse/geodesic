@@ -99,6 +99,12 @@ RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} --upg
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
 
+# Install gomplate
+ENV GOMPLATE_VERSION 2.2.0
+RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
+    && chmod +x /usr/local/bin/gomplate
+
+
 ENV BOOTSTRAP=true
 
 # Where to store state

@@ -1,0 +1,5 @@
+#!/bin/bash
+CLUSTER=${1:-geodesic.example.org}
+SCAFFOLDING=/templates/scaffolding/
+cd ${SCAFFOLDING}
+tar --transform="s|^./|${CLUSTER}/|" -c .

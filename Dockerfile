@@ -158,9 +158,11 @@ ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/mnt/local
 
 VOLUME ["/mnt/local"]
+VOLUME ["/mnt/remote"]
 
 ADD rootfs/ /
 
 WORKDIR /mnt/local
 
-ENTRYPOINT ["/bin/bash", "-l"]
+ENTRYPOINT ["/bin/bash"]
+CMD ["-c", "bootstrap"]

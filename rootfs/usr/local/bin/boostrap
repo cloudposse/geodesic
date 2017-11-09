@@ -1,44 +1,50 @@
 #!/bin/bash
-DOCKER_IMAGE=${DOCKER_IMAGE:-cloudposse/geodesic}
-DOCKER_TAG=${DOCKER_TAG:-$1}
-APP_NAME=${APP_NAME:-geodesic}
+DOCKER_IMAGE=${DOCKER_IMAGE:-$1}
+DOCKER_TAG=${DOCKER_TAG:-$2}
+APP_NAME=${APP_NAME:-`basename $DOCKER_IMAGE`}
 INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
+INSTALLER_NAME="${APP_NAME}-installer"
 OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
-REQUIRE_PULL=${REQUIRE_PULL:-true}
+REQUIRE_PULL=${REQUIRE_PULL:-false}
+
+if [ -a "${DOCKER_IMAGE}" ]; then 
+  echo "Docker image cannot be empty" >&2
+  exit 1
+fi
 
 if [ -z "${DOCKER_TAG}" ]; then
   DOCKER_TAG=latest
 fi
 
 if [ "${GEODESIC_SHELL}" == "true" ]; then
-  echo "Installer cannot be run from inside a geodesic shell"
+  echo "Installer cannot be run from inside a geodesic shell" >&2
   exit 1
 fi
 
 # Check if docker is installed
 which docker >/dev/null
 if [ $? -ne 0 ]; then
-  echo "Docker is required to run ${APP_NAME}"
+  echo "Docker is required to run ${APP_NAME}" >&2
   exit 1
 fi
 
 # Check that we can connect to docker
 docker ps >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
+  echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again." >&2
   exit 1
 fi
 
 # Check if tee is installed
 which tee >/dev/null
 if [ $? -ne 0 ]; then
-  echo "Tee is required to install ${APP_NAME}"
+  echo "Tee is required to install ${APP_NAME}" >&2
   exit 1
 fi
 
 # Check that we can write to install path
 if [ ! -w "${INSTALL_PATH}" ]; then
-  echo "Cannot write to ${INSTALL_PATH}. Please retry using sudo."
+  echo "Cannot write to ${INSTALL_PATH}. Please retry using sudo." 2>&1
   exit 1
 fi
 
@@ -53,9 +59,9 @@ if [ "${REQUIRE_PULL}" == "true" ]; then
 fi 
 
 # Sometimes docker might not exit cleanly 
-docker rm "${APP_NAME}-install" >/dev/null 2>&1
+docker rm -f "${INSTALLER_NAME}" >/dev/null 2>&1
 
-(docker run --name "${APP_NAME}-install" --rm --tty "${DOCKER_IMAGE}:${DOCKER_TAG}" | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
+(docker run --name "${INSTALLER_NAME}" --rm "${DOCKER_IMAGE}:${DOCKER_TAG}" | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
   chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 
 if [ $? -eq 0 ]; then

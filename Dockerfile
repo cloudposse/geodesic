@@ -87,7 +87,7 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
-ENV AWSEBCLI_VERSION 3.10.1
+ENV AWSEBCLI_VERSION 3.12.0
 RUN apk add py-pip && \
     pip install awsebcli==${AWSEBCLI_VERSION} --upgrade && \
     rm -rf /root/.cache && \

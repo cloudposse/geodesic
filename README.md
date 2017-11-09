@@ -85,7 +85,11 @@ Docker can be easily installed by following the instructions for your OS:
 
 6. Run the shell: `/usr/local/bin/$CLUSTER`
 
-7. Create your `kops` cluster:
+## Creating a Kops Cluster
+
+Create your `kops` cluster from a manifest. The manifest template is located in `/templates/kops/default.yaml` and is compiled by running `build-kops-manifest`
+
+After building the manifest, create the cluster by running and following the resultant instructions.
    ```
    kops create -f /conf/kops/manifest.yml
    ```  

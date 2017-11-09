@@ -57,7 +57,7 @@ Docker can be easily installed by following the instructions for your OS:
 
 2. Create a new project
 
-   This will create a new project in your current working directory, complete with a `Dockerfile`, `Makefile`, and `.travis.yml` file.
+   This will create a new project in your current working directory, complete with a `Dockerfile`, `Makefile` file.
 
    ```
    docker run -e CLUSTER cloudposse/geodesic:latest -c new-project | bash

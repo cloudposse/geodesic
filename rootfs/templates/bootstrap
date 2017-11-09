@@ -1,13 +1,13 @@
 #!/bin/bash
-DOCKER_IMAGE=${DOCKER_IMAGE:-$1}
-DOCKER_TAG=${DOCKER_TAG:-$2}
+DOCKER_IMAGE={{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}
+DOCKER_TAG={{getenv "DOCKER_TAG" "${1:-dev}"}}
 APP_NAME=${APP_NAME:-`basename $DOCKER_IMAGE`}
 INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 INSTALLER_NAME="${APP_NAME}-installer"
 OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
 REQUIRE_PULL=${REQUIRE_PULL:-false}
 
-if [ -a "${DOCKER_IMAGE}" ]; then 
+if [ -z "${DOCKER_IMAGE}" ]; then 
   echo "Docker image cannot be empty" >&2
   exit 1
 fi
@@ -61,7 +61,7 @@ fi
 # Sometimes docker might not exit cleanly 
 docker rm -f "${INSTALLER_NAME}" >/dev/null 2>&1
 
-(docker run --name "${INSTALLER_NAME}" --rm "${DOCKER_IMAGE}:${DOCKER_TAG}" | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
+(docker run --name "${INSTALLER_NAME}" --rm -e DOCKER_IMAGE -e DOCKER_TAG "${DOCKER_IMAGE}:${DOCKER_TAG}" -c wrapper | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
   chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 
 if [ $? -eq 0 ]; then

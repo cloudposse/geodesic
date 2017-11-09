@@ -14,7 +14,7 @@ lint:
 	@make bash:lint
 
 deps:
-	@make --no-print-directory git:submodules-update
+	@exit 0
 
 build:
 	@make --no-print-directory docker:build

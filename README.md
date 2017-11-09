@@ -64,20 +64,28 @@ Docker can be easily installed by following the instructions for your OS:
    ```
 
 2. Customize project as necessary. Edit the `Dockerfile` to reflect your settings. The files are installed to the `$CLUSTER/` folder.
-
-3. Build the docker container
    ```
    cd $CLUSTER
+   ```
+
+3. Initialize the project
+   ```
+   make init
+   ```
+
+4. Build the docker container
+   ```
    make docker:build
    ```    
-4. Install the wrapper shell
+
+5. Install the wrapper shell
    ```
    make install
    ```
 
-5. Run the shell: `/usr/local/bin/$CLUSTER`
+6. Run the shell: `/usr/local/bin/$CLUSTER`
 
-6. Create your `kops` cluster:
+7. Create your `kops` cluster:
    ```
    kops create -f /conf/kops/manifest.yml
    ```  

@@ -1,4 +1,4 @@
-FROM cloudposse/geodesic:0.2.0
+FROM cloudposse/geodesic:0.5.0
 
 # Default AWS Profile name
 ENV AWS_DEFAULT_PROFILE=ops

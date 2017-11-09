@@ -60,13 +60,20 @@ ENV NODE_MAX_SIZE 2
 ENV NODE_MIN_SIZE 2
 
 # Install helm
-ENV HELM_VERSION 2.6.0
+ENV HELM_VERSION 2.7.0
+ENV HELM_HOME /var/lib/helm
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin/helm \
     && rm -rf linux-amd64 \
     && chmod +x /usr/local/bin/helm \
-    && helm completion > /etc/bash_completion.d/helm.sh
+    && helm completion bash > /etc/bash_completion.d/helm.sh \
+    && mkdir -p ${HELM_HOME} \
+    && helm init --client-only \
+    && helm plugin install https://github.com/mstrzele/helm-edit \
+    && helm plugin install https://github.com/app-registry/appr-helm-plugin \
+    && helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
+    && helm repo update
 
 # Install packer
 ENV PACKER_VERSION 1.1.1

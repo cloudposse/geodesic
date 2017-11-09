@@ -145,8 +145,6 @@ VOLUME ["/mnt/local"]
 ADD aws-assumed-role/profile /etc/profile.d/aws-assume-role.sh
 ADD rootfs/ /
 
-COPY templates/ /templates/
-
 WORKDIR /mnt/local
 
 ENTRYPOINT ["/bin/bash", "-l"]

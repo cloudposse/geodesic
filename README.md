@@ -10,15 +10,15 @@ It provides a fully customizable framework for defining and building world-class
 Geodesic is composed of two parts:
 
 1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools. Those tools are then integrated to work in concert with each other using a consistent framework. Installation of the shell is as easy as running a docker container.  
-2. It is a distribution of essential services. The distribution includes a collection of Helm charts for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS,  Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
+2. It is a distribution of essential services. The distribution includes a collection of Helm charts for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS,  Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up to work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
 
-An organization may chose to leverage all of these components, or just the parts the make their life easier.
+An organization may chose to leverage all of these components, or just the parts that make their life easier.
 
 ## Features
-* **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/cloudposse/aws-assume-role/), automatic key rotation, encryption at rest, and VPCs;
-* **Repeatable** - 100% Infrastructure-as-Code with change automation and support for scriptable admin tasks in any language, including terraform;
-* **Extensible** - A framework where everything can be be extended to work the way you want to to;
-* **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications and CI/CD systems like TravisCI, CircleCI or Jenkins;
+* **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/cloudposse/aws-assume-role/), automatic key rotation, encryption at rest, and VPCs
+* **Repeatable** - 100% Infrastructure-as-Code with change automation and support for scriptable admin tasks in any language, including Terraform
+* **Extensible** - A framework where everything can be extended to work the way you want to
+* **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications and CI/CD systems like TravisCI, CircleCI or Jenkins
 * **OpenSource** - Permissive [APACHE 2.0](LICENSE) license means no lock-in and no on-going license fees
 
 
@@ -26,16 +26,16 @@ An organization may chose to leverage all of these components, or just the parts
 
 At its core, Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of the components of a modern cloud.
 
-* [`kops`](https://github.com/kubernetes/kops/) for kubernetes cluster orchestration
+* [`kops`](https://github.com/kubernetes/kops/) for Kubernetes cluster orchestration
 * [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
-* [`helm`](https://github.com/kubernetes/helm/) for installing packages like varnish or apache on the kubernetes cluster
+* [`helm`](https://github.com/kubernetes/helm/) for installing packages like Varnish or Apache on the Kubernetes cluster
 * [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
 * [`packer`](https://github.com/hashicorp/packer/) for creating identical machine images for multiple platforms
 * [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
-* [`ansible`](http://docs.ansible.com/ansible/latest/index.html) Ansible is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks.
-* [`s3fs`](https://github.com/s3fs-fuse/s3fs-fuse) for mounting encrypted S3 buckets that store cluster configurations and secrets
+* [`ansible`](http://docs.ansible.com/ansible/latest/index.html) Ansible is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks
 * [`gcloud`, `gsutil`](https://cloud.google.com/sdk/) for integration with Google Cloud (e.g. GKE, GCE, Google Storage)
-* [`gomplate`](https://github.com/hairyhenderson/gomplate/) for template rendering configuraton files using the GoLang template engine. Supports lots of local and remote datasources.
+* [`gomplate`](https://github.com/hairyhenderson/gomplate/) for template rendering configuration files using the GoLang template engine. Supports lots of local and remote datasources
+* [`goofys`](https://github.com/kahing/goofys/) a high-performance Amazon S3 file system for mounting encrypted S3 buckets that store cluster configurations and secrets
 
 ## Demo
 
@@ -57,7 +57,7 @@ Docker can be easily installed by following the instructions for your OS:
 
 2. Create a new project
 
-   This will create a new project in your current working directory, complete with a `Dockerfile`, `Makefile` file.
+   This will create a new project in your current working directory, complete with `Dockerfile` and `Makefile`.
 
    ```
    docker run -e CLUSTER \
@@ -90,7 +90,7 @@ Docker can be easily installed by following the instructions for your OS:
 
 ## Creating a Kops Cluster
 
-Create your `kops` cluster from a manifest. The manifest template is located in `/templates/kops/default.yaml` and is compiled by running `build-kops-manifest`
+Create your `kops` cluster from a manifest. The manifest template is located in `/templates/kops/default.yaml` and is compiled by running `build-kops-manifest`.
 
 After building the manifest, create the cluster by running and following the resultant instructions.
    ```

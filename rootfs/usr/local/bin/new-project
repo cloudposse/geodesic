@@ -1,5 +1,15 @@
 #!/bin/bash
 CLUSTER=${1:-geodesic.example.org}
 SCAFFOLDING=/templates/scaffolding/
-cd ${SCAFFOLDING}
+OUTPUT=/tmp/scaffolding
+
+rm -rf ${OUTPUT}
+mkdir -p ${OUTPUT}
+
+# Render templates
+echo "Building project for ${CLUSTER}..." 1>&2
+gomplate --input-dir ${SCAFFOLDING} --output-dir ${OUTPUT}
+
+# Compress into a tarball
+cd ${OUTPUT}
 tar --transform="s|^./|${CLUSTER}/|" -c .

@@ -1,5 +1,5 @@
 export CLUSTER ?= $(shell basename `pwd`)
-export DOCKER_ORG ?= cloudposse
+export DOCKER_ORG ?= {{ getenv "DOCKER_ORG" "cloudposse" }}
 export DOCKER_IMAGE ?= $(DOCKER_ORG)/$(CLUSTER)
 export DOCKER_TAG ?= dev
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)

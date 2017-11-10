@@ -1,11 +1,11 @@
 #!/bin/bash
-DOCKER_IMAGE={{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}
-DOCKER_TAG={{getenv "DOCKER_TAG" "${1:-dev}"}}
-APP_NAME=${APP_NAME:-`basename $DOCKER_IMAGE`}
-INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
-INSTALLER_NAME="${APP_NAME}-installer"
-OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
-REQUIRE_PULL=${REQUIRE_PULL:-false}
+export DOCKER_IMAGE={{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}
+export DOCKER_TAG={{getenv "DOCKER_TAG" "${1:-dev}"}}
+export APP_NAME=${APP_NAME:-`basename $DOCKER_IMAGE`}
+export INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
+export INSTALLER_NAME="${APP_NAME}-installer"
+export OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
+export REQUIRE_PULL=${REQUIRE_PULL:-false}
 
 if [ -z "${DOCKER_IMAGE}" ]; then 
   echo "Docker image cannot be empty" >&2

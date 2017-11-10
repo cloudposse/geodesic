@@ -2,6 +2,19 @@
 # Allow bash to check the window size to keep prompt with relative to window size
 shopt -s checkwinsize
 
+PROMPT_HOOKS=()
+
+function prompter() {
+	for hook in ${PROMPT_HOOKS}; do
+		"${hook}"
+	done
+}
+export PROMPT_COMMAND=prompter
+
+
+# Run the aws-assume-role prompt
+PROMPT_HOOKS+=console-prompt
+
 function reload() {
   # Reprocess defaults
   if [ -f "/etc/profile.d/defaults.sh" ]; then
@@ -17,14 +30,11 @@ function reload() {
   fi
   eval $(resize)
 }
-
+PROMPT_HOOKS+=reload
 
 # Define our own prompt
 function geodesic-prompt() {
-  reload
 
-  # Run the aws-assume-role prompt
-  console-prompt
   WHITE_HEAVY_CHECK_MARK=$'\u2705 '
   BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 '
   TWO_JOINED_SQUARES=$'\u29C9 '
@@ -45,5 +55,4 @@ function geodesic-prompt() {
   fi
   export PS1
 }
-
-export PROMPT_COMMAND=geodesic-prompt
+PROMPT_HOOKS+=geodesic-prompt

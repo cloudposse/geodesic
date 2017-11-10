@@ -1,4 +1,4 @@
-FROM cloudposse/geodesic:0.5.0
+FROM {{ getenv "GEODESIC_IMAGE" "cloudposse/geodesic" }}:{{ getenv "GEODESIC_TAG" "latest" }}
 
 ENV DOCKER_IMAGE "{{ getenv "DOCKER_IMAGE" "org/geodesic.example.org" }}"
 ENV DOCKER_TAG "{{ getenv "DOCKER_TAG" "latest" }}"

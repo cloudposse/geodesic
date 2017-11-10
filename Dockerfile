@@ -91,21 +91,6 @@ RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh \
     && ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
-# Install S3FS
-# Overrride URI for AWS Metadata API so we can run outside of AWS using a hardcoded path on the filesystem :)
-ENV S3FS_VERSION 1.80
-RUN apk --update add fuse libxml2 mailcap && \
-    apk --virtual .build-deps add alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev && \
-	git clone https://github.com/s3fs-fuse/s3fs-fuse.git && \
-    cd s3fs-fuse && \
-    git checkout tags/v${S3FS_VERSION} && \
-    ./autogen.sh && \
-    ./configure --prefix=/usr && \
-    sed -i -E 's!http://169.254.169.254.*?/!file:///mnt/local/aws/cli/cache/!g' src/curl.cpp && \
-    make && \
-    make install && \
-    apk del .build-deps
-
 # Install Google Cloud SDK
 ENV GCLOUD_SDK_VERSION=179.0.0
 RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \

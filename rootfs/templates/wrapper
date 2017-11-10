@@ -51,7 +51,7 @@ function use() {
     DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
     
     if [ -n "${ENV_FILE}" ]; then
-      DOCKER_ARGS+="--env-file ${ENV_FILE}"
+      DOCKER_ARGS=("${DOCKER_ARGS[@]}" --env-file ${ENV_FILE})
     fi
 
     if [ -n "$SSH_AUTH_SOCK" ]; then

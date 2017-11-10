@@ -20,7 +20,7 @@ build:
 	@make --no-print-directory docker:build
 
 install:
-	@REQUIRE_PULL=false public/install.sh
+	@docker run --rm -e CLUSTER=galaxy $(DOCKER_IMAGE_NAME) | sudo bash -s dev
 
 run:
 	@geodesic

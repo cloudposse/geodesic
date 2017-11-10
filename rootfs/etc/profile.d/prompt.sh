@@ -4,17 +4,18 @@ shopt -s checkwinsize
 
 PROMPT_HOOKS=()
 
+export PROMPT_COMMAND=prompter
 function prompter() {
-	for hook in ${PROMPT_HOOKS}; do
+	for hook in ${PROMPT_HOOKS[@]}; do
 		"${hook}"
 	done
 }
-export PROMPT_COMMAND=prompter
 
 
 # Run the aws-assume-role prompt
-PROMPT_HOOKS+=console-prompt
+PROMPT_HOOKS+=("console-prompt")
 
+PROMPT_HOOKS+=("reload")
 function reload() {
   # Reprocess defaults
   if [ -f "/etc/profile.d/defaults.sh" ]; then
@@ -30,10 +31,23 @@ function reload() {
   fi
   eval $(resize)
 }
-PROMPT_HOOKS+=reload
+
+PROMPT_HOOKS+=("terraform_prompt")
+function terraform_prompt() {
+  shopt -s nullglob
+  TF_FILES=(*.tf)
+  if [ ! -z "${TF_FILES}" ]; then
+	if [ ! -d ".terraform" ]; then
+      if [ -f Makefile ]; then
+		echo "Run 'make init' to use this project"
+      fi
+	fi
+  fi
+}
 
 # Define our own prompt
-function geodesic-prompt() {
+PROMPT_HOOKS+=("geodesic_prompt")
+function geodesic_prompt() {
 
   WHITE_HEAVY_CHECK_MARK=$'\u2705 '
   BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 '
@@ -55,4 +69,3 @@ function geodesic-prompt() {
   fi
   export PS1
 }
-PROMPT_HOOKS+=geodesic-prompt

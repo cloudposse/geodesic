@@ -6,7 +6,7 @@ RUN apk update \
           openssl openssh-client sshpass iputils drill \
           gcc libffi-dev python-dev musl-dev openssl-dev py-virtualenv \
           git coreutils less groff bash-completion && \
-          mkdir /etc/bash_completion.d/
+          mkdir -p /etc/bash_completion.d/ /etc/profile.d/
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -139,8 +139,7 @@ RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderso
 
 # Install AWS Assumed Role
 ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
-RUN mkdir -p /etc/profile.d \
-    && curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/0.1.0/profile \
+RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/0.1.0/profile \
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
 ENV BANNER "geodesic"

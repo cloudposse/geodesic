@@ -104,7 +104,6 @@ function use() {
                 --publish ${GEODESIC_PORT}:${GEODESIC_PORT}
                 --name "${DOCKER_NAME}"
                 --rm 
-                --env BOOTSTRAP=false
                 --env KUBERNETES_API_PORT=${GEODESIC_PORT}
                 --volume ${STATE_DIR}:/mnt/local)
   set -o pipefail

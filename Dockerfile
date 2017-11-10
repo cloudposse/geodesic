@@ -143,8 +143,6 @@ RUN mkdir -p /etc/profile.d \
     && curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/0.1.0/profile \
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
-ENV BOOTSTRAP=true
-
 ENV BANNER "geodesic"
 
 # Where to store state

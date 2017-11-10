@@ -2,7 +2,7 @@ FROM alpine:3.4
 
 RUN apk update \
     && apk add unzip curl tar \
-          python make bash vim jq \
+          python make bash vim jq figlet \
           openssl openssh-client sshpass iputils drill \
           gcc libffi-dev python-dev musl-dev openssl-dev py-virtualenv \
           git coreutils less groff bash-completion && \
@@ -144,6 +144,8 @@ RUN mkdir -p /etc/profile.d \
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
 ENV BOOTSTRAP=true
+
+ENV BANNER "geodesic"
 
 # Where to store state
 ENV LOCAL_MOUNT_POINT=/mnt/local

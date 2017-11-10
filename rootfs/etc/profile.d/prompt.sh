@@ -6,9 +6,9 @@ PROMPT_HOOKS=()
 
 export PROMPT_COMMAND=prompter
 function prompter() {
-	for hook in ${PROMPT_HOOKS[@]}; do
-		"${hook}"
-	done
+    for hook in ${PROMPT_HOOKS[@]}; do
+        "${hook}"
+    done
 }
 
 
@@ -37,11 +37,11 @@ function terraform_prompt() {
   shopt -s nullglob
   TF_FILES=(*.tf)
   if [ ! -z "${TF_FILES}" ]; then
-	if [ ! -d ".terraform" ]; then
+    if [ ! -d ".terraform" ]; then
       if [ -f Makefile ]; then
-		echo "Run 'make init' to use this project"
+        echo "Run 'make init' to use this project"
       fi
-	fi
+    fi
   fi
 }
 

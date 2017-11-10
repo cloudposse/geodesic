@@ -60,7 +60,10 @@ Docker can be easily installed by following the instructions for your OS:
    This will create a new project in your current working directory, complete with a `Dockerfile`, `Makefile` file.
 
    ```
-   docker run -e CLUSTER cloudposse/geodesic:latest -c new-project | tar -xv -C .
+   docker run -e CLUSTER \
+              -e DOCKER_IMAGE=cloudposse/${CLUSTER} \
+              -e DOCKER_TAG=dev  
+        cloudposse/geodesic:latest -c new-project | tar -xv -C .
    ```
 
 2. Customize project as necessary. Edit the `Dockerfile` to reflect your settings. The files are installed to the `$CLUSTER/` folder.

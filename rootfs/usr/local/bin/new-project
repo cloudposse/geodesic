@@ -1,5 +1,5 @@
 #!/bin/bash
-CLUSTER=${1:-geodesic.example.org}
+CLUSTER=${CLUSTER:-geodesic.example.org}
 SCAFFOLDING=/templates/scaffolding/
 OUTPUT=/tmp/scaffolding
 

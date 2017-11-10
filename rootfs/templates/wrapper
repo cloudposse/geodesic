@@ -10,7 +10,6 @@ set -o pipefail
 
 # Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-8001}
-export GEODESIC_INSTALLER_URL=${GEODESIC_INSTALLER_URL:-https://geodesic.sh}
 
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
@@ -49,7 +48,11 @@ function debug() {
 function use() {
   if [ -t 1 ]; then
     # Running in terminal 
-    DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}-bootstrap" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
+    DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
+    
+    if [ -n "${ENV_FILE}" ]; then
+      DOCKER_ARGS=("${DOCKER_ARGS[@]}" --env-file ${ENV_FILE})
+    fi
 
     if [ -n "$SSH_AUTH_SOCK" ]; then
       if [ `uname -s` == 'Darwin' ]; then
@@ -101,7 +104,6 @@ function use() {
                 --publish ${GEODESIC_PORT}:${GEODESIC_PORT}
                 --name "${DOCKER_NAME}"
                 --rm 
-                --env BOOTSTRAP=false
                 --env KUBERNETES_API_PORT=${GEODESIC_PORT}
                 --volume ${STATE_DIR}:/mnt/local)
   set -o pipefail
@@ -113,8 +115,8 @@ function use() {
     fi
     docker exec -it "${DOCKER_NAME}" $*
   else
-    echo "# Starting new ${DOCKER_NAME} session"
-    docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE} $*
+    echo "# Starting new ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
+    docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE} -l $*
   fi
 }
 
@@ -157,17 +159,18 @@ function uninstall() {
   echo "# Uninstalling ${DOCKER_NAME}..."
   docker rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
   docker rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
+  echo "# Not deleting $0"
   exit 0
 }
 
 function update(){
-  echo "# Installing the latest version of geodesic from ${GEODESIC_INSTALLER_URL}"
-  curl --silent --fail ${GEODESIC_INSTALLER_URL} | bash
-   if [ $? -eq 0 ]; then
+  echo "# Installing the latest version of ${DOCKER_IMAGE}"
+  docker run --rm ${DOCKER_IMAGE} | bash -s ${DOCKER_TAG}
+  if [ $? -eq 0 ]; then
     echo "# ${DOCKER_IMAGE} has been updated."
     exit 0
   else
-    echo "Failed to update geodesic"
+    echo "Failed to update ${DOCKER_IMAGE}"
     exit 1
   fi
 }
@@ -181,13 +184,14 @@ function help() {
   echo "Usage: $0 [target] ARGS"
   echo ""
   echo "  Targets:"
-  echo "    update     Upgrade geodesic wrapper shell with --name=<DOCKER_IMAGE>"
-  echo "    stop       Stop running shell with --name=<DOCKER_IMAGE>"
-  echo "    uninstall  Remove geodesic image with --name=<DOCKER_IMAGE>"
-  echo "    use        Use cluster with --name=<DOCKER_IMAGE>"
+  echo "    update     Upgrade geodesic wrapper shell"
+  echo "    stop       Stop a running shell"
+  echo "    uninstall  Remove geodesic image"
+  echo "    <empty>    Enter into a shell"
   echo ""
   echo "  Arguments:"
-  echo "    --dev      Enable development mode"
+  echo "    --dev          Enable development mode"
+  echo "    --env-file=... Pass an environment file containing key=value pairs"
   echo ""
 }
 
@@ -195,18 +199,33 @@ parse_args "$@"
 options_to_env
 
 # Docker settings
-export DOCKER_TAG=${TAG:-latest}
-export DOCKER_NAME=$(basename "${NAME:-}")
+export DOCKER_IMAGE={{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}
+export DOCKER_TAG={{getenv "DOCKER_TAG" "${DOCKER_TAG:-dev}"}}
+export DOCKER_NAME=${DOCKER_NAME:-`basename $DOCKER_IMAGE`}
+
+if [ -n "${NAME}" ]; then
+  export DOCKER_NAME=$(basename "${NAME:-}")
+fi
+
+if [ -n "${TAG}" ]; then
+  export DOCKER_TAG=${TAG}
+fi
+
+if [ -n "${IMAGE}" ]; then
+  export DOCKER_IMAGE=${IMAGE:-${DOCKER_IMAGE}:${DOCKER_TAG}}
+else
+  export DOCKER_IMAGE=${DOCKER_IMAGE}:${DOCKER_TAG}
+fi
+
 export DOCKER_DNS=${DNS:-8.8.8.8}
-export DOCKER_IMAGE=${IMAGE:-${DOCKER_NAME}:${DOCKER_TAG}}
 
 if [ "${GEODESIC_SHELL}" == "true" ]; then
   echo "Cannot run while in a geodesic shell"
   exit 1
 fi
 
-if [ -z "${DOCKER_NAME}" ]; then
-  echo "Error: --name not specified (E.g. --name=foobar.example.com)"
+if [ -z "${DOCKER_IMAGE}" ]; then
+  echo "Error: --image not specified (E.g. --image=cloudposse/foobar.example.com:1.0)"
   exit 1
 fi
 
@@ -224,8 +243,8 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ -z "$targets" ]; then
-  echo "Must specify a target"
-  exit 1
+  # Execute default target
+  targets=("use")
 fi
 
 for target in $targets; do

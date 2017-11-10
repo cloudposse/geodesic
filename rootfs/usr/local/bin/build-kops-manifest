@@ -1,0 +1,8 @@
+#!/bin/bash
+KOPS_TEMPLATE="${1:-$KOPS_TEMPLATE}"
+KOPS_MANIFEST="${2:-$KOPS_MANIFEST}"
+
+mkdir -p `dirname ${KOPS_MANIFEST}`
+
+gomplate -f ${KOPS_TEMPLATE} > ${KOPS_MANIFEST}
+echo "Wrote manifest to ${KOPS_MANIFEST}..."

@@ -53,59 +53,49 @@ Docker can be easily installed by following the instructions for your OS:
 
 ## Quick Start
 
-1. Install the geodesic client, if you haven't already: (feel free to inspect the shell script!)
+1. `export CLUSTER=test.example.com`
+
+2. Create a new project
+
+   This will create a new project in your current working directory, complete with a `Dockerfile`, `Makefile` file.
 
    ```
-   curl -s https://geodesic.sh | sudo bash
-   ```
-2. Create a `Dockerfile` that defines your environment
-
-   ```
-    FROM cloudposse/geodesic:0.2.0
-
-    # Default AWS Profile name
-    ENV AWS_DEFAULT_PROFILE=ops
-
-    # Prefix of the cluster
-    ENV CLUSTER_PREFIX=aws
-
-    # Parent zone for the cluster
-    ENV CLUSTER_DNS_ZONE=example.com
-
-    # AWS Region for the cluster
-    ENV AWS_REGION=us-west-2
-
-    # AWS Region of the S3 bucket to store cluster configuration
-    ENV CLUSTER_STATE_BUCKET_REGION=us-west-2
-
-    # Username for connecting to the cluster via SSH
-    ENV SSH_USERNAME=admin
-
-    # Kubernetes Master EC2 instance type (optional, required if the cluster uses Kubernetes)
-    ENV KOPS_MASTER_SIZE=t2.medium
-
-    # Kubernetes Node EC2 instance type (optional, required if the cluster uses Kubernetes)
-    ENV KOPS_NODE_SIZE=t2.medium
-
-    # Kubernetes node count (Node EC2 instance count) (optional, required if the cluster uses Kubernetes)
-    ENV KOPS_NODE_COUNT=3
-
-    # Place configuration in 'conf/' directory
-    COPY conf/ /conf/
-
-    WORKDIR /conf/
+   docker run -e CLUSTER \
+              -e DOCKER_IMAGE=cloudposse/${CLUSTER} \
+              -e DOCKER_TAG=dev \
+              cloudposse/geodesic:latest -c new-project | tar -xv -C .
    ```
 
-3. Build your cluster image
-
+2. Customize project as necessary. Edit the `Dockerfile` to reflect your settings. The files are installed to the `$CLUSTER/` folder.
    ```
-   docker build -t aws.example.com
+   cd $CLUSTER
    ```
 
+3. Initialize the project
+   ```
+   make init
+   ```
 
-4. Run `geodesic use --name=aws.example.com` to start the geodesic shell for that cluster
-5. Run `cloud create` to run through configuration steps
-6. Run `cloud up` to provision the cluster
+4. Build the docker container
+   ```
+   make docker:build
+   ```    
+
+5. Install the wrapper shell
+   ```
+   make install
+   ```
+
+6. Run the shell: `/usr/local/bin/$CLUSTER`
+
+## Creating a Kops Cluster
+
+Create your `kops` cluster from a manifest. The manifest template is located in `/templates/kops/default.yaml` and is compiled by running `build-kops-manifest`
+
+After building the manifest, create the cluster by running and following the resultant instructions.
+   ```
+   kops create -f /conf/kops/manifest.yml
+   ```  
 
 All done. Your cloud is now up and running.
 

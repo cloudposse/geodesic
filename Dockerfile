@@ -142,6 +142,11 @@ ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
 RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/0.1.0/profile \
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
+# Install goofys
+ENV GOOFYS_VERSION 0.0.18
+RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
+    && chmod +x /usr/local/bin/goofys
+
 ENV BANNER "geodesic"
 
 # Where to store state

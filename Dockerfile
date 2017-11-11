@@ -124,7 +124,7 @@ RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderso
 
 # Install AWS Assumed Role
 ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
-RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/0.1.0/profile \
+RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/${AWS_ASSUMED_ROLE_VERSION}/profile \
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
 # Install goofys

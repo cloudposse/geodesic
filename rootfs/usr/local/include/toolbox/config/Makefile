@@ -69,9 +69,8 @@ destroy-bucket: validate
 
 ## Mount remote cluster state bucket
 mount: validate
-	LOG_FILE=/var/log/goofys.log
 	@mkdir -p $(REMOTE_MOUNT_POINT)
-	@(nohup goofys -f --file-mode=0600 --region ${CLUSTER_STATE_BUCKET_REGION} --sse s3://$(CLUSTER_STATE_BUCKET) ${REMOTE_MOUNT_POINT}) 2>&1 >>${LOG_FILE} 2>&1 || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
+	@(nohup goofys -f --file-mode=0600 --region ${CLUSTER_STATE_BUCKET_REGION} --sse s3://$(CLUSTER_STATE_BUCKET) ${REMOTE_MOUNT_POINT}) 2>&1 >>/var/log/goofys.log 2>&1 || (echo "Failed to mount $(CLUSTER_STATE_BUCKET)"; rmdir $(REMOTE_MOUNT_POINT); exit 1)
 	@echo "Mounted $(CLUSTER_STATE_BUCKET) to $(REMOTE_MOUNT_POINT)"
 	@mkdir -p $(REMOTE_STATE)
 	@mkdir -p $(dir $(KUBECONFIG))

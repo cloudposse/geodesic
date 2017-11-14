@@ -12,7 +12,7 @@ spec:
   cloudLabels:
     Cluster: {{getenv "CLUSTER"}}
   cloudProvider: aws
-  configBase: {{getenv "KOPS_STATE_STORE" }}/{{getenv "CLUSTER"}}/kops
+  configBase: {{getenv "KOPS_STATE_STORE" }}/{{getenv "CLUSTER"}}
   {{if getenv "KOPS_DNS_ZONE" }}
   dnsZone: {{getenv "KOPS_DNS_ZONE"}}
   {{else}}

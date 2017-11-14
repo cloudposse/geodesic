@@ -5,7 +5,8 @@ RUN apk update \
           python make bash vim jq figlet \
           openssl openssh-client sshpass iputils drill \
           gcc libffi-dev python-dev musl-dev openssl-dev py-virtualenv \
-          git coreutils less groff bash-completion && \
+          git coreutils less groff bash-completion \
+          fuse libc6-compat && \
           mkdir -p /etc/bash_completion.d/ /etc/profile.d/
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
@@ -91,21 +92,6 @@ RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
     && ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh \
     && ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
-# Install S3FS
-# Overrride URI for AWS Metadata API so we can run outside of AWS using a hardcoded path on the filesystem :)
-ENV S3FS_VERSION 1.80
-RUN apk --update add fuse libxml2 mailcap && \
-    apk --virtual .build-deps add alpine-sdk automake autoconf libxml2-dev fuse-dev curl-dev && \
-	git clone https://github.com/s3fs-fuse/s3fs-fuse.git && \
-    cd s3fs-fuse && \
-    git checkout tags/v${S3FS_VERSION} && \
-    ./autogen.sh && \
-    ./configure --prefix=/usr && \
-    sed -i -E 's!http://169.254.169.254.*?/!file:///mnt/local/aws/cli/cache/!g' src/curl.cpp && \
-    make && \
-    make install && \
-    apk del .build-deps
-
 # Install Google Cloud SDK
 ENV GCLOUD_SDK_VERSION=179.0.0
 RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
@@ -139,8 +125,13 @@ RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderso
 
 # Install AWS Assumed Role
 ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
-RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/0.1.0/profile \
+RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/${AWS_ASSUMED_ROLE_VERSION}/profile \
     && chmod +x /etc/profile.d/aws-assume-role.sh
+
+# Install goofys
+ENV GOOFYS_VERSION 0.0.18
+RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
+    && chmod +x /usr/local/bin/goofys
 
 ENV BANNER "geodesic"
 

@@ -9,7 +9,7 @@ fi
 set -o pipefail
 
 # Geodesic Settings
-export GEODESIC_PORT=${GEODESIC_PORT:-8001}
+export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$%30000))}
 
 STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
@@ -116,6 +116,7 @@ function use() {
     docker exec -it "${DOCKER_NAME}" $*
   else
     echo "# Starting new ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
+    echo "# Exposing port ${GEODESIC_PORT}"
     docker run "${DOCKER_ARGS[@]}" ${DOCKER_IMAGE} -l $*
   fi
 }
@@ -215,6 +216,10 @@ if [ -n "${IMAGE}" ]; then
   export DOCKER_IMAGE=${IMAGE:-${DOCKER_IMAGE}:${DOCKER_TAG}}
 else
   export DOCKER_IMAGE=${DOCKER_IMAGE}:${DOCKER_TAG}
+fi
+
+if [ -n "${PORT}" ]; then
+  export GEODESIC_PORT=${PORT}
 fi
 
 export DOCKER_DNS=${DNS:-8.8.8.8}

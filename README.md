@@ -53,22 +53,22 @@ Docker can be easily installed by following the instructions for your OS:
 
 ## Quick Start
 
-1. `export CLUSTER=test.example.com`
+1. `export CLUSTER_NAME=test.example.com`
 
 2. Create a new project
 
    This will create a new project in your current working directory, complete with `Dockerfile` and `Makefile`.
 
    ```
-   docker run -e CLUSTER \
-              -e DOCKER_IMAGE=cloudposse/${CLUSTER} \
+   docker run -e CLUSTER_NAME \
+              -e DOCKER_IMAGE=cloudposse/${CLUSTER_NAME} \
               -e DOCKER_TAG=dev \
               cloudposse/geodesic:latest -c new-project | tar -xv -C .
    ```
 
-2. Customize project as necessary. Edit the `Dockerfile` to reflect your settings. The files are installed to the `$CLUSTER/` folder.
+2. Customize project as necessary. Edit the `Dockerfile` to reflect your settings. The files are installed to the `$CLUSTER_NAME/` folder.
    ```
-   cd $CLUSTER
+   cd $CLUSTER_NAME
    ```
 
 3. Initialize the project
@@ -86,7 +86,7 @@ Docker can be easily installed by following the instructions for your OS:
    make install
    ```
 
-6. Run the shell: `/usr/local/bin/$CLUSTER`
+6. Run the shell: `/usr/local/bin/$CLUSTER_NAME`
 
 ## Creating a Kops Cluster
 

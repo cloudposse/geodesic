@@ -1,6 +1,6 @@
-export CLUSTER ?= $(shell basename `pwd`)
+export CLUSTER_NAME ?= $(shell basename `pwd`)
 export DOCKER_ORG ?= {{ getenv "DOCKER_ORG" "cloudposse" }}
-export DOCKER_IMAGE ?= $(DOCKER_ORG)/$(CLUSTER)
+export DOCKER_IMAGE ?= $(DOCKER_ORG)/$(CLUSTER_NAME)
 export DOCKER_TAG ?= dev
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
 export DOCKER_BUILD_FLAGS = 
@@ -22,4 +22,4 @@ install:
 	@docker run --rm $(DOCKER_IMAGE_NAME) | sudo bash -s dev
 
 run:
-	$(CLUSTER)
+	$(CLUSTER_NAME)

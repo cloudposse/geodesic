@@ -86,11 +86,12 @@ fi
 # Iterate over arguments
 while [[ $targets ]]; do
   arg=${targets[0]}
-  # If it's a directory, we assume it's a module
-  if [ -d "$arg" ]; then
+  # If it's a directory with a Makefile, we assume it's a module
+  if [ -f "$arg/Makefile" ]; then
     targets=("${targets[@]:1}")
     command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
     cd "$arg"
+  # If it's a file, we assume it's a Makefile
   elif [ -f "$arg" ]; then
     targets=("${targets[@]:1}")
     command=("make" "--no-print-directory" "-f" "${arg}" "${targets[@]}" "${envs[@]}")

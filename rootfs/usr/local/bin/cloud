@@ -73,8 +73,11 @@ debug "options:[${options[@]}]"
 debug "envs:[${envs[@]}]"
 debug "targets:[${targets[@]}]"
 
-# If a cluster module is defined, it takes presedence 
-if [ -n "${targets[0]}" ] && [ -d "/conf/${targets[0]}" ]; then
+# If a cluster module directory/Makefile is defined, it takes presedence 
+if [ -n "${targets[0]}" ] && [ -d "/conf/${targets[0]}" ] && [ -f "/conf/${targets[0]}/Makefile" ]; then
+  cd "/conf"
+# If a cluster module Makefile is defined, it takes presedence 
+elif [ -n "${targets[0]}" ] && [ -f "/conf/${targets[0]}" ]; then
   cd "/conf"
 else
   cd "$GEODESIC_PATH"
@@ -86,8 +89,8 @@ fi
 # Iterate over arguments
 while [[ $targets ]]; do
   arg=${targets[0]}
-  # If it's a directory with a Makefile, we assume it's a module
-  if [ -f "$arg/Makefile" ]; then
+  # If it's a directory, we assume it's a module
+  if [ -d "$arg" ]; then
     targets=("${targets[@]:1}")
     command=("make" "--no-print-directory" "${targets[@]}" "${envs[@]}")
     cd "$arg"

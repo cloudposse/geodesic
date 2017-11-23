@@ -67,7 +67,7 @@ export KUBECONFIG=${REMOTE_STATE}/kubernetes/kubeconfig
 #
 # Terraform
 #
-export TF_STATE_DIR=${LOCAL_STATE}/terraform/${CLUSTER_NAME}
+export TF_STATE_DIR=${LOCAL_STATE}/terraform/${CLUSTER_NAME}/$(basename `pwd`)
 export TF_STATE_FILE=${TF_STATE_DIR}/terraform.tfstate
 export TF_LOG=ERROR
 export TF_LOG_PATH=${TF_STATE_DIR}/terraform.log

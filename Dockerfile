@@ -66,6 +66,7 @@ ENV NODE_MIN_SIZE 2
 
 # Install helm
 ENV HELM_VERSION 2.7.0
+ENV HELM_GITHUB_VERSION 0.1.0
 ENV HELM_HOME /var/lib/helm
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
@@ -78,7 +79,7 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && mkdir -p ${HELM_HOME}/plugins \
     && helm plugin install https://github.com/mstrzele/helm-edit \
     && helm plugin install https://github.com/app-registry/appr-helm-plugin \
-    && helm plugin install https://github.com/sagansystems/helm-github \
+    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
     && helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
     && helm repo update
 

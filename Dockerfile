@@ -4,7 +4,7 @@ RUN apk update \
     && apk add unzip curl tar \
           python make bash vim jq figlet \
           openssl openssh-client sshpass iputils drill \
-          gcc libffi-dev python-dev musl-dev openssl-dev py-virtualenv \
+          gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
           git coreutils less groff bash-completion \
           fuse libc6-compat && \
           mkdir -p /etc/bash_completion.d/ /etc/profile.d/
@@ -17,6 +17,11 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 USER root
 
 WORKDIR /tmp
+
+# Install gomplate
+ENV GOMPLATE_VERSION 2.2.0
+RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
+    && chmod +x /usr/local/bin/gomplate
 
 # Install Terraform
 ENV TERRAFORM_VERSION 0.10.8
@@ -90,45 +95,12 @@ RUN curl --fail -sSL -O https://releases.hashicorp.com/packer/${PACKER_VERSION}/
     && rm packer_${PACKER_VERSION}_linux_amd64.zip \
     && mv packer /usr/local/bin
 
-# Install aws cli bundle
-RUN curl --fail -sSL -O https://s3.amazonaws.com/aws-cli/awscli-bundle.zip \
-    && unzip awscli-bundle.zip \
-    && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws \
-    && rm awscli-bundle.zip \
-    && rm -rf awscli-bundle \
-    && ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh \
-    && ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
-
-# Install Google Cloud SDK
-ENV GCLOUD_SDK_VERSION=179.0.0
-RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    tar -zvxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    mv google-cloud-sdk /usr/local/ && \
-    /usr/local/google-cloud-sdk/install.sh --quiet --rc-path /etc/bash_completion.d/gcloud.sh && \
-    rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    rm -rf /root/.config/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
-
-# Install AWS CLI
-ENV AWSEBCLI_VERSION 3.12.0
-RUN apk add py-pip && \
-    pip install awsebcli==${AWSEBCLI_VERSION} --upgrade && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete
-
 # Install Ansible
 ENV ANSIBLE_VERSION 2.4.1.0
 ENV JINJA2_VERSION 2.10
-RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} --upgrade && \
+RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
-
-# Install gomplate
-ENV GOMPLATE_VERSION 2.2.0
-RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
-    && chmod +x /usr/local/bin/gomplate
 
 # Install AWS Assumed Role
 ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
@@ -139,6 +111,32 @@ RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubuser
 ENV GOOFYS_VERSION 0.0.18
 RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
     && chmod +x /usr/local/bin/goofys
+
+# Install Google Cloud SDK
+ENV GCLOUD_SDK_VERSION=179.0.0
+RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    tar -zxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    mv google-cloud-sdk /usr/local/ && \
+    /usr/local/google-cloud-sdk/install.sh --quiet --rc-path /etc/bash_completion.d/gcloud.sh && \
+    rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    rm -rf /root/.config/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
+
+# Install AWS CLI
+ENV AWSEBCLI_VERSION 3.12.0
+RUN pip install awsebcli==${AWSEBCLI_VERSION} && \
+    rm -rf /root/.cache && \
+    find / -type f -regex '.*\.py[co]' -delete
+
+# Install aws cli bundle
+ENV AWSCLI_VERSION 1.11.185
+RUN pip install awscli==${AWSCLI_VERSION} && \
+    rm -rf /root/.cache && \
+    find / -type f -regex '.*\.py[co]' -delete && \
+    ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
+    ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
 ENV BANNER "geodesic"
 

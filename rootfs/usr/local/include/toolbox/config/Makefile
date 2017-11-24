@@ -83,7 +83,7 @@ mount: validate
 unmount:
 	@[ -d $(REMOTE_MOUNT_POINT) ] || (echo "Mount point does not exist"; exit 1)
 	@mountpoint -q $(REMOTE_MOUNT_POINT) || (echo "Nothing mounted to mount point"; exit 1)
-	/bin/umount $(REMOTE_MOUNT_POINT)
+	@/bin/umount -f $(REMOTE_MOUNT_POINT)
 	@rmdir $(REMOTE_MOUNT_POINT)
 	@echo "Unmounted $(CLUSTER_STATE_BUCKET)"
 

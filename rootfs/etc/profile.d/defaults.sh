@@ -31,7 +31,6 @@ fi
 #
 # Helm
 #
-export HELM_HOME=${REMOTE_STATE}/helm/
 export HELM_VALUES_PATH=${REMOTE_STATE}/helm/values
 
 #

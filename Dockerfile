@@ -70,7 +70,7 @@ ENV NODE_MAX_SIZE 2
 ENV NODE_MIN_SIZE 2
 
 # Install helm
-ENV HELM_VERSION 2.7.0
+ENV HELM_VERSION 2.7.2
 ENV HELM_GITHUB_VERSION 0.1.0
 ENV HELM_HOME /var/lib/helm
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \

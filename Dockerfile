@@ -24,7 +24,7 @@ RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderso
     && chmod +x /usr/local/bin/gomplate
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.10.8
+ENV TERRAFORM_VERSION 0.11.2
 RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip \

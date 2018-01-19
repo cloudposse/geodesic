@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# From https://docs.codefresh.io/v1.0/docs/adding-non-gke-kubernetes-cluster
+echo "Configure a new cluster here:"
+echo "      https://g.codefresh.io/account/integration/kubernetes"
+echo 
+
+echo "API Host"
+echo "=============="
+export CURRENT_CONTEXT=$(kubectl config current-context)
+export CURRENT_CLUSTER=$(kubectl config view -o go-template="{{\$curr_context := \"$CURRENT_CONTEXT\" }}{{range .contexts}}{{if eq .name \$curr_context}}{{.context.cluster}}{{end}}{{end}}")
+echo $(kubectl config view -o go-template="{{\$cluster_context := \"$CURRENT_CLUSTER\"}}{{range .clusters}}{{if eq .name \$cluster_context}}{{.cluster.server}}{{end}}{{end}}")
+echo
+
+echo "CA Certificate"
+echo "=============="
+echo $(kubectl get secret -o go-template='{{index .data "ca.crt" }}' $(kubectl get sa default -o go-template="{{range .secrets}}{{.name}}{{end}}"))
+echo
+
+echo "Token"
+echo "=============="
+echo $(kubectl get secret -o go-template='{{index .data "token" }}' $(kubectl get sa default -o go-template="{{range .secrets}}{{.name}}{{end}}"))
+echo

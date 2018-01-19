@@ -31,14 +31,14 @@ RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VER
     && mv terraform /usr/local/bin
 
 # Install kubectl
-ENV KUBERNETES_VERSION 1.7.10
+ENV KUBERNETES_VERSION 1.8.7
 RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl \
     && kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
 # Install kops
-ENV KOPS_VERSION 1.7.1
+ENV KOPS_VERSION 1.8.0
 ENV KOPS_STATE_STORE s3://undefined
 ENV KOPS_STATE_STORE_REGION us-east-1
 ENV AWS_SDK_LOAD_CONFIG=1

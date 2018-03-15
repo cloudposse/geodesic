@@ -1,4 +1,4 @@
-FROM alpine:3.6
+FROM alpine:3.7
 
 RUN apk update \
     && apk add unzip curl tar \
@@ -17,6 +17,12 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 USER root
 
 WORKDIR /tmp
+
+# Install github-commenter
+# https://github.com/cloudposse/github-commenter
+ENV GITHUB_COMMENTER_VERSION 0.1.0
+RUN curl --fail -sSL -o /usr/local/bin/github-commenter https://github.com/cloudposse/github-commenter/releases/download/${GITHUB_COMMENTER_VERSION}/github-commenter_linux_amd64 \
+    && chmod +x /usr/local/bin/github-commenter
 
 # Install gomplate
 ENV GOMPLATE_VERSION 2.2.0

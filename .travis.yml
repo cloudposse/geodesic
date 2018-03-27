@@ -14,15 +14,15 @@ services:
 - docker
 install:
 - make init
-- make travis:docker-login
+- make travis/docker-login
 
 script:
 - make deps
 - make lint
-- make docker:build
+- make docker/build
 
 after_success:
-- make travis:docker-tag-and-push
+- make travis/docker-tag-and-push
 
 deploy:
   # Deploy to dev (branch)

@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script is used to manage `/etc/fstab` entries and mount/unmount S3 filesystems together with `s3fs`
 ACTION=$1
 BUCKET=$2
 BUCKET_PREFIX=$3

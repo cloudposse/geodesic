@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script is used to mount filesystems from `/etc/fstab`
 export DEVICE="$(eval echo ${1})"
 export MOUNT_POINT="$(eval echo ${2})"
 export BUCKET_REGION="${BUCKET_REGION:-us-east-1}"

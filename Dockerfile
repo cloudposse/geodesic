@@ -113,6 +113,11 @@ ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
 RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/${AWS_ASSUMED_ROLE_VERSION}/profile \
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
+# Install Chamber to manage secrets with SSM+KMS
+ENV CHAMBER_VERSION 2.0.0
+RUN curl --fail -sSL -o /usr/local/bin/chamber https://github.com/segmentio/chamber/releases/download/v2.0.0/chamber-v${CHAMBER_VERSION}-linux-amd64 \
+    && chmod +x /usr/local/bin/chamber
+
 # Install goofys
 ENV GOOFYS_VERSION 0.0.18
 RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \

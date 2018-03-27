@@ -16,7 +16,7 @@ TF_BACKEND=("-backend=true" "-backend-config=key=${TF_BUCKET_PREFIX}/${TF_FILE}"
 [ -z "${AWS_PROFILE}" ]         || TF_BACKEND+=("-backend-config=profile=${AWS_PROFILE}")
 [ -z "${AWS_ROLE_ARN}" ]        || TF_BACKEND+=("-backend-config=role_arn=${AWS_ROLE_ARN}")
 
-secrets mount
+s3 mount
 
 terraform init ${TF_BACKEND[@]}
 

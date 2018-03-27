@@ -8,7 +8,7 @@ ENV CONFIG_PATH=/secrets
 
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
-ENV HOME=${CACHE_PATH}
+ENV HOME=/localhost
 ENV CLUSTER_NAME=example.foo.bar
 
 # Install all packages as root

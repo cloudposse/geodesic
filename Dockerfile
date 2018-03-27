@@ -25,12 +25,12 @@ RUN curl --fail -sSL -o /usr/local/bin/github-commenter https://github.com/cloud
     && chmod +x /usr/local/bin/github-commenter
 
 # Install gomplate
-ENV GOMPLATE_VERSION 2.2.0
+ENV GOMPLATE_VERSION 2.4.0
 RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
     && chmod +x /usr/local/bin/gomplate
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.11.2
+ENV TERRAFORM_VERSION 0.11.5
 RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
@@ -76,8 +76,8 @@ ENV NODE_MAX_SIZE 2
 ENV NODE_MIN_SIZE 2
 
 # Install helm
-ENV HELM_VERSION 2.7.2
-ENV HELM_GITHUB_VERSION 0.1.0
+ENV HELM_VERSION 2.8.2
+ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_HOME /var/lib/helm
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
@@ -114,7 +114,7 @@ RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubuser
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
 # Install goofys
-ENV GOOFYS_VERSION 0.0.18
+ENV GOOFYS_VERSION 0.0.19
 RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
     && chmod +x /usr/local/bin/goofys
 

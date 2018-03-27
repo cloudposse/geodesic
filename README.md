@@ -26,16 +26,17 @@ An organization may chose to leverage all of these components, or just the parts
 
 At its core, Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of the components of a modern cloud.
 
-* [`kops`](https://github.com/kubernetes/kops/) for Kubernetes cluster orchestration
-* [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
-* [`helm`](https://github.com/kubernetes/helm/) for installing packages like Varnish or Apache on the Kubernetes cluster
-* [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
-* [`packer`](https://github.com/hashicorp/packer/) for creating identical machine images for multiple platforms
-* [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
 * [`ansible`](http://docs.ansible.com/ansible/latest/index.html) Ansible is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks
+* [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
+* [`chamber`](https://github.com/segmentio/chamber) for managing secrets with AWS SSM+KMS
+* [`helm`](https://github.com/kubernetes/helm/) for installing packages like Varnish or Apache on the Kubernetes cluster
+* [`kops`](https://github.com/kubernetes/kops/) for Kubernetes cluster orchestration
+* [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
 * [`gcloud`, `gsutil`](https://cloud.google.com/sdk/) for integration with Google Cloud (e.g. GKE, GCE, Google Storage)
 * [`gomplate`](https://github.com/hairyhenderson/gomplate/) for template rendering configuration files using the GoLang template engine. Supports lots of local and remote datasources
 * [`goofys`](https://github.com/kahing/goofys/) a high-performance Amazon S3 file system for mounting encrypted S3 buckets that store cluster configurations and secrets
+* [`packer`](https://github.com/hashicorp/packer/) for creating identical machine images for multiple platforms
+* [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
 
 ## Demo
 

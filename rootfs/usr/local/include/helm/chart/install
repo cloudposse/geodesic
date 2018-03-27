@@ -1,4 +1,0 @@
-## Install chart
-install:
-	@helm install $(call env-to-arg,TIMEOUT) $(call env-to-arg,VERSION) \
-		--namespace $(NAMESPACE) --name $(NAME) --values $(HELM_VALUES_PATH)/$(NAME).yaml $(CHART) 

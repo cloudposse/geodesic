@@ -1,5 +1,0 @@
-NAME ?= datadog
-NAMESPACE ?= kube-system
-CHART ?= stable/datadog
-
-include helm/chart/defaults

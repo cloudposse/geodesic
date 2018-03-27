@@ -1,4 +1,0 @@
-## Upgrade chart
-upgrade:
-	@helm upgrade --values $(HELM_VALUES_PATH)/$(NAME).yaml $(NAME) $(CHART)
-

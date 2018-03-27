@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+shopt -s nullglob
+
+TF_STATE_BUCKET_REGION=${TF_STATE_BUCKET_REGION:-us-east-1}
+TF_STATE_BUCKET_PREFIX=${TF_STATE_BUCKET_PREFIX:-$CLUSTER/$(basename `pwd`)}
+TF_STATE_FILE=${TF_STATE_FILE:-terraform.tfstate}
+TF_FILES=(*.tf)
+
+[ ! -z ${TF_FILES} ] || (echo "Run $0 from a terraform project directory"; exit 1)
+
+terraform init \
+	-backend=true \
+	-backend-config="bucket=${TF_STATE_BUCKET}" \
+	-backend-config="key=${TF_STATE_BUCKET_PREFIX}/${TF_STATE_FILE}" \
+	-backend-config="region=${TF_STATE_BUCKET_REGION}" \
+	-backend-config="profile=${AWS_PROFILE}" \
+	-backend-config="role_arn=${AWS_SUBACCOUNT_ROLE}"

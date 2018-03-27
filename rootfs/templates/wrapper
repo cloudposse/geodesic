@@ -58,7 +58,7 @@ function use() {
       if [ `uname -s` == 'Darwin' ]; then
         # Run our own SSH agent
         DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                       --volume "${HOME}/.ssh:/mnt/local/.ssh" )
+                       --volume "${HOME}:/localhost" )
       else
         DOCKER_ARGS=("${DOCKER_ARGS[@]}"
                        --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 
@@ -81,11 +81,6 @@ function use() {
     DOCKER_ARGS=("${DOCKER_ARGS[@]}"
                   --dns=${DOCKER_DNS}
                 )
-  fi
-
-  if [ "${DEV}" == "true" ]; then
-    echo "# Enabling development mode..."
-    DOCKER_ARGS+=("--volume=$(pwd)/conf:/conf")
   fi
 
   if [ -n "${HOME}" ]; then
@@ -191,7 +186,6 @@ function help() {
   echo "    <empty>    Enter into a shell"
   echo ""
   echo "  Arguments:"
-  echo "    --dev          Enable development mode"
   echo "    --env-file=... Pass an environment file containing key=value pairs"
   echo ""
 }

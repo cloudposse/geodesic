@@ -1,5 +1,0 @@
--include /conf/Makefile
-
-.PHONY : placeholder
-placeholder::
-	@exit 0

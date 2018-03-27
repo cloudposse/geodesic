@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Start SSH agent
+eval $(ssh-agent)
+
+# Add keys (if any) to the agent
+[ -f /secrets/id_rsa ] && ssh-add /secrets/id_rsa
+[ -f ~/.ssh/id_rsa ] && ssh-add ~/.ssh/id_rsa

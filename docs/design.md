@@ -13,14 +13,10 @@ For example, calling `cloud kops ssh` works like this:
 1. It checks to see if there's a module called `kops`. It finds one.
 2. It checks to see if there's a nested module called `ssh`. It does not, so it calls the `ssh` target of the `kops` module.
 
-Since we use `make` under-the-hood, you can add all your ENVs at the end of the command. Think of ENVs as named parameters. Alternatively, all environment variables can be passed as arguments. For example, running `cloud ssh SSH_USERNAME=admin` is identical to running `cloud ssh --ssh-username=admin`.
+Since we use `make` under-the-hood, you can add all your ENVs at the end of the command. Think of ENVs as named parameters. Alternatively, all environment variables can be passed as arguments. 
 
 For the default environment variables, checkout `/etc/profile.d/defaults.sh`. We believe using ENVs this way is both consistent
 with the "cloud" (12-factor) way of doing things, as well as a clear way of communicating what values are being passed without using a complicated convention. Additionally, you can set & forget these ENVs in your shell.
-
-```shell
-cloud config use demo.example.org CLUSTER_STATE_BUCKET_REGION=us-west-2
-```
 
 ## Layout Inside the Shell
 

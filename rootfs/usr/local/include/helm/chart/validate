@@ -1,7 +1,0 @@
-## Validate 
-validate:
-	@if [ ! -d "$(HELM_VALUES_PATH)" ]; then \
-		echo "Cluster not mounted"; \
-		exit 1; \
-	fi
-

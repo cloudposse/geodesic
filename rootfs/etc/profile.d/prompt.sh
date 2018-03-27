@@ -39,7 +39,7 @@ function terraform_prompt() {
   if [ ! -z "${TF_FILES}" ]; then
     if [ ! -d ".terraform" ]; then
       if [ -f Makefile ]; then
-        echo "Run 'make init' to use this project"
+        echo "Run 'init-terraform' to use this project"
       fi
     fi
   fi

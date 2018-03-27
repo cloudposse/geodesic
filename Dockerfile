@@ -4,7 +4,6 @@ ENV BANNER "geodesic"
 
 # Where to store state
 ENV CACHE_PATH=/localhost/.geodesic
-ENV CONFIG_PATH=/secrets
 
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd

@@ -8,7 +8,7 @@ ENV CONFIG_PATH=/secrets
 
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
-ENV HOME=/localhost
+ENV HOME=/conf
 ENV CLUSTER_NAME=example.foo.bar
 
 # Install all packages as root
@@ -44,11 +44,6 @@ RUN curl --fail -sSL -o /usr/local/bin/github-commenter https://github.com/cloud
 ENV GOMPLATE_VERSION 2.4.0
 RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
     && chmod +x /usr/local/bin/gomplate
-
-#
-# Terraform
-#
-ENV TF_STATE_DIR=${CACHE_PATH}/terraform/${CLUSTER_NAME}
 
 #
 # Install Terraform

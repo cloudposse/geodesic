@@ -8,6 +8,8 @@ TF_FILES=(*.tf)
 
 [ ! -z ${TF_FILES} ] || (echo "Run $0 from a terraform project directory"; exit 1)
 
+secrets mount
+
 terraform init \
 	-backend=true \
 	-backend-config="bucket=${TF_BUCKET}" \

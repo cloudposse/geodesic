@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-shopt -s nullglob
+# This script sets up a Terraform backend for a given project using envs
 
+shopt -s nullglob
 TF_BUCKET_REGION=${TF_BUCKET_REGION:-us-east-1}
 TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename `pwd`)}
 TF_FILE=${TF_FILE:-terraform.tfstate}
 TF_FILES=(*.tf)
+TF_BACKEND=("-backend=true" "-backend-config=key=${TF_BUCKET_PREFIX}/${TF_FILE}")
 
 [ ! -z ${TF_FILES} ] || (echo "Run $0 from a terraform project directory"; exit 1)
 
+[ -z "${TF_BUCKET}" ]           || TF_BACKEND+=("-backend-config=bucket=${TF_BUCKET}")
+[ -z "${TF_BUCKET_REGION}" ]    || TF_BACKEND+=("-backend-config=region=${TF_BUCKET_REGION}")
+[ -z "${TF_DYNAMODB_TABLE}" ]   || TF_BACKEND+=("-backend-config=dynamodb_table=${TF_DYNAMODB_TABLE}")
+[ -z "${AWS_PROFILE}" ]         || TF_BACKEND+=("-backend-config=profile=${AWS_PROFILE}")
+[ -z "${AWS_ROLE_ARN}" ]        || TF_BACKEND+=("-backend-config=role_arn=${AWS_ROLE_ARN}")
+
 secrets mount
 
-terraform init \
-	-backend=true \
-	-backend-config="bucket=${TF_BUCKET}" \
-	-backend-config="key=${TF_BUCKET_PREFIX}/${TF_FILE}" \
-	-backend-config="region=${TF_BUCKET_REGION}" \
-	-backend-config="profile=${AWS_PROFILE}" \
-	-backend-config="role_arn=${AWS_SUBACCOUNT_ROLE}"
+terraform init ${TF_BACKEND[@]}
+

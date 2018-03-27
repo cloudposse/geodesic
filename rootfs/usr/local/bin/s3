@@ -15,7 +15,7 @@ else
 	BUCKET_PREFIX=":${BUCKET_PREFIX}"
 fi
 
-if [[ "$ACTION" = "add" ]]; then
+if [[ "$ACTION" = "fstab" ]]; then
 	printf "$FSTAB_ENTRY" "${FSTYPE}" "${BUCKET}" "${BUCKET_PREFIX}" "${MOUNT_POINT}"  >> ${FSTAB}
 	# Create mount point directory
 	mkdir -p "${MOUNT_POINT}"

@@ -114,7 +114,7 @@ RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubuser
     && chmod +x /etc/profile.d/aws-assume-role.sh
 
 # Install goofys
-ENV GOOFYS_VERSION 0.0.19
+ENV GOOFYS_VERSION 0.19.0
 RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
     && chmod +x /usr/local/bin/goofys
 

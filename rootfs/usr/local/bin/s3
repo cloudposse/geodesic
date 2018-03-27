@@ -20,7 +20,7 @@ if [[ "$ACTION" = "add" ]]; then
 	mkdir -p "${MOUNT_POINT}"
 elif [[ "$ACTION" = "mount" ]]; then
 	mount -a
-	echo "Mounted secrets"
+	echo "Mounted buckets"
 	# Display all mounted filesystems of fstype
 	grep "^${FSTYPE}#" ${FSTAB} | awk '{print $2}' | xargs -r df --output=source,target
 elif [[ "$ACTION" == "unmount" ]]; then

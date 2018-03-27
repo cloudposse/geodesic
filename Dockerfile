@@ -115,7 +115,7 @@ RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubuser
 
 # Install Chamber to manage secrets with SSM+KMS
 ENV CHAMBER_VERSION 2.0.0
-RUN curl --fail -sSL -o /usr/local/bin/chamber https://github.com/segmentio/chamber/releases/download/v2.0.0/chamber-v${CHAMBER_VERSION}-linux-amd64 \
+RUN curl --fail -sSL -o /usr/local/bin/chamber https://github.com/segmentio/chamber/releases/download/v${CHAMBER_VERSION}/chamber-v${CHAMBER_VERSION}-linux-amd64 \
     && chmod +x /usr/local/bin/chamber
 
 # Install goofys

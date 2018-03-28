@@ -2,8 +2,6 @@
 # Allow bash to check the window size to keep prompt with relative to window size
 shopt -s checkwinsize
 
-PROMPT_HOOKS=()
-
 export PROMPT_COMMAND=prompter
 function prompter() {
     for hook in ${PROMPT_HOOKS[@]}; do
@@ -24,13 +22,6 @@ function terraform_prompt() {
     if [ ! -d ".terraform" ]; then
       echo -e "-> Run 'init-terraform' to use this project"
     fi
-  fi
-}
-
-PROMPT_HOOKS+=("terraform_prompt")
-function terraform_prompt() {
-  if [ -z "${AWS_VAULT}" ]; then
-    echo -e "-> Run 'assume-role' to login to AWS"
   fi
 }
 

@@ -9,6 +9,13 @@ else
   ln -sf /localhost/.awsvault ${HOME}
 fi
 
+PROMPT_HOOKS+=("aws_vault_prompt")
+function aws_vault_prompt() {
+  if [ -z "${AWS_VAULT}" ]; then
+    echo -e "-> Run 'assume-role' to login to AWS"
+  fi
+}
+
 # Alias to start a shell or run a command with an assumed role
 function assume-role() {
   role=${1:-${AWS_DEFAULT_PROFILE}}

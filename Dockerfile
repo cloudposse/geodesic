@@ -31,6 +31,15 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 WORKDIR /tmp
 
 #
+# Install aws-vault to easily assume roles (not related to HashiCorp Vault)
+#
+ENV AWS_VAULT_VERSION 4.2.0
+ENV AWS_VAULT_BACKEND file
+#ENV AWS_VAULT_FILE_PASSPHRASE=
+RUN curl --fail -sSL -o /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/releases/download/v${AWS_VAULT_VERSION}/aws-vault-linux-amd64 \
+    && chmod +x /usr/local/bin/aws-vault
+
+#
 # Install github-commenter
 #
 ENV GITHUB_COMMENTER_VERSION 0.1.0
@@ -137,14 +146,6 @@ RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
 
-#
-# Install AWS Assumed Role
-#
-ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
-RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/${AWS_ASSUMED_ROLE_VERSION}/profile \
-    && chmod +x /etc/profile.d/aws-assume-role.sh
-
-#
 # Install Chamber to manage secrets with SSM+KMS
 #
 ENV CHAMBER_VERSION 2.0.0

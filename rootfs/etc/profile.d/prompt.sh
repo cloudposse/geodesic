@@ -42,6 +42,10 @@ function geodesic_prompt() {
     export STATUS=${CROSS_MARK}
   fi
 
+  if [ -n "${AWS_VAULT}" ]; then
+    ROLE_PROMPT="(${AWS_VAULT})"
+  fi
+
   if [ -n "${CLUSTER_NAME}" ]; then
     PS1=$' ${TWO_JOINED_SQUARES}'" ${CLUSTER_NAME}\n"$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
   else

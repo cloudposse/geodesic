@@ -11,9 +11,6 @@ function prompter() {
     done
 }
 
-# Run the aws-assume-role prompt
-PROMPT_HOOKS+=("console-prompt")
-
 PROMPT_HOOKS+=("reload")
 function reload() {
   eval $(resize)
@@ -39,9 +36,7 @@ function geodesic_prompt() {
   TWO_JOINED_SQUARES=$'\u29C9 '
   CROSS_MARK=$'\u274C '
 
-  if [ -n "$AWS_IAM_ROLE_ARN" ]; then
-    export STATUS=${WHITE_HEAVY_CHECK_MARK}
-  elif [ $AWS_SESSION_TTL -gt 0 ] && [ -n "$AWS_SESSION_TOKEN" ]; then
+  if [ -n "$AWS_SESSION_TOKEN" ]; then
     export STATUS=${WHITE_HEAVY_CHECK_MARK}
   else
     export STATUS=${CROSS_MARK}

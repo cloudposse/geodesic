@@ -1,6 +1,7 @@
 
 IMPORTANT:
-* Only files in /mnt/local, and /mnt/remote are saved
-* Type "cloud help" for a list of available commands
+* You $HOME directory has been mounted to `/localhost`
+* Use `aws-vault` to manage your sessions
+
 
 

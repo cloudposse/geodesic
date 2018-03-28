@@ -5,7 +5,11 @@ ln -sf /localhost/.awsvault ${HOME}
 
 # Alias to start a shell or run a command with an assumed role
 function assume-role() {
-  role=$1
+  role=${1:-${AWS_DEFAULT_PROFILE}}
+  if [ -z "${role}" ]; then
+    echo "Usage: $0 [role]"
+    return 1
+  fi
   shift
   if [ $# -eq 0 ]; then
     aws-vault exec $role bash

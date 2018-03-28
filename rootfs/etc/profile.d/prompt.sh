@@ -22,8 +22,15 @@ function terraform_prompt() {
   TF_FILES=(*.tf)
   if [ ! -z "${TF_FILES}" ]; then
     if [ ! -d ".terraform" ]; then
-      echo -e "\nRun 'init-terraform' to use this project"
+      echo -e "-> Run 'init-terraform' to use this project"
     fi
+  fi
+}
+
+PROMPT_HOOKS+=("terraform_prompt")
+function terraform_prompt() {
+  if [ -z "${AWS_VAULT}" ]; then
+    echo -e "-> Run 'assume-role' to login to AWS"
   fi
 }
 

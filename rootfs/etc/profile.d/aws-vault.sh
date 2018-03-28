@@ -12,9 +12,9 @@ function assume-role() {
   fi
   shift
   if [ $# -eq 0 ]; then
-    aws-vault exec $role bash
+    aws-vault exec $role -- bash -l
   else
-    aws-vault exec $role $*
+    aws-vault exec $role -- $*
   fi
 }
 

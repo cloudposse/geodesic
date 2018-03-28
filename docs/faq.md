@@ -11,7 +11,7 @@ This means your AWS credentials have expired. Re-run `assume-role`.
 
 ## Error: Cannot unmount folder
 ```bash
-$ secrets unmount
+$ s3 unmount
 umount: can't unmount /s3: Resource busy
 ```
 

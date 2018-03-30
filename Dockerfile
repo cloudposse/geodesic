@@ -79,7 +79,6 @@ RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/releas
 ENV KOPS_VERSION 1.8.0
 ENV KOPS_STATE_STORE s3://undefined
 ENV KOPS_STATE_STORE_REGION us-east-1
-ENV AWS_SDK_LOAD_CONFIG=1
 ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
 ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
 ENV KOPS_TEMPLATE=/templates/kops/default.yaml

@@ -1,12 +1,26 @@
 FROM alpine:3.7
 
+ENV BANNER "geodesic"
+
+# Where to store state
+ENV CACHE_PATH=/localhost/.geodesic
+
+ENV GEODESIC_PATH=/usr/local/include/toolbox
+ENV MOTD_URL=http://geodesic.sh/motd
+ENV HOME=/conf
+ENV CLUSTER_NAME=example.foo.bar
+
+# Install all packages as root
+USER root
+
+# Install common packages
 RUN apk update \
     && apk add unzip curl tar \
           python make bash vim jq figlet \
           openssl openssh-client sshpass iputils drill \
           gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
           git coreutils less groff bash-completion \
-          fuse libc6-compat && \
+          fuse syslog-ng libc6-compat && \
           mkdir -p /etc/bash_completion.d/ /etc/profile.d/
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
@@ -14,40 +28,57 @@ RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 # Disable vim from reating a swapfile (incompatible with goofys)
 RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
-USER root
-
 WORKDIR /tmp
 
+#
+# Install aws-vault to easily assume roles (not related to HashiCorp Vault)
+#
+ENV AWS_VAULT_VERSION 4.2.0
+ENV AWS_VAULT_BACKEND file
+ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
+#ENV AWS_VAULT_FILE_PASSPHRASE=
+RUN curl --fail -sSL -o /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/releases/download/v${AWS_VAULT_VERSION}/aws-vault-linux-amd64 \
+    && chmod +x /usr/local/bin/aws-vault
+
+#
 # Install github-commenter
-# https://github.com/cloudposse/github-commenter
+#
 ENV GITHUB_COMMENTER_VERSION 0.1.0
 RUN curl --fail -sSL -o /usr/local/bin/github-commenter https://github.com/cloudposse/github-commenter/releases/download/${GITHUB_COMMENTER_VERSION}/github-commenter_linux_amd64 \
     && chmod +x /usr/local/bin/github-commenter
 
+#
 # Install gomplate
+#
 ENV GOMPLATE_VERSION 2.4.0
 RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
     && chmod +x /usr/local/bin/gomplate
 
+#
 # Install Terraform
+#
 ENV TERRAFORM_VERSION 0.11.5
 RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && mv terraform /usr/local/bin
 
+#
 # Install kubectl
+#
+ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 ENV KUBERNETES_VERSION 1.8.7
 RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl \
     && kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
+#
 # Install kops
+#
 ENV KOPS_VERSION 1.8.0
 ENV KOPS_STATE_STORE s3://undefined
 ENV KOPS_STATE_STORE_REGION us-east-1
-ENV AWS_SDK_LOAD_CONFIG=1
 ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
 ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
 ENV KOPS_TEMPLATE=/templates/kops/default.yaml
@@ -75,10 +106,13 @@ ENV NODE_MACHINE_TYPE "t2.medium"
 ENV NODE_MAX_SIZE 2
 ENV NODE_MIN_SIZE 2
 
+#
 # Install helm
+#
 ENV HELM_VERSION 2.8.2
 ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_HOME /var/lib/helm
+ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin/helm \
@@ -94,36 +128,40 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
     && helm repo update
 
+#
 # Install packer
+#
 ENV PACKER_VERSION 1.1.1
 RUN curl --fail -sSL -O https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip \
     && rm packer_${PACKER_VERSION}_linux_amd64.zip \
     && mv packer /usr/local/bin
 
+#
 # Install Ansible
+#
 ENV ANSIBLE_VERSION 2.4.1.0
 ENV JINJA2_VERSION 2.10
 RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
 
-# Install AWS Assumed Role
-ENV AWS_ASSUMED_ROLE_VERSION 0.1.0
-RUN curl --fail -sSL -o /etc/profile.d/aws-assume-role.sh https://raw.githubusercontent.com/cloudposse/aws-assumed-role/${AWS_ASSUMED_ROLE_VERSION}/profile \
-    && chmod +x /etc/profile.d/aws-assume-role.sh
-
 # Install Chamber to manage secrets with SSM+KMS
+#
 ENV CHAMBER_VERSION 2.0.0
 RUN curl --fail -sSL -o /usr/local/bin/chamber https://github.com/segmentio/chamber/releases/download/v${CHAMBER_VERSION}/chamber-v${CHAMBER_VERSION}-linux-amd64 \
     && chmod +x /usr/local/bin/chamber
 
+#
 # Install goofys
+#
 ENV GOOFYS_VERSION 0.19.0
 RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
     && chmod +x /usr/local/bin/goofys
 
+#
 # Install Google Cloud SDK
+#
 ENV GCLOUD_SDK_VERSION=179.0.0
 RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar -zxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
@@ -135,13 +173,24 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
-# Install AWS CLI
+#
+# AWS
+#
+ENV AWS_DATA_PATH=/localhost/.aws/
+ENV AWS_SHARED_CREDENTIALS_FILE=/localhost/.aws/credentials
+ENV AWS_CONFIG_FILE=/localhost/.aws/config
+
+#
+# Install AWS Elastic Beanstalk CLI
+#
 ENV AWSEBCLI_VERSION 3.12.0
 RUN pip install awsebcli==${AWSEBCLI_VERSION} && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete
 
+#
 # Install aws cli bundle
+#
 ENV AWSCLI_VERSION 1.11.185
 RUN pip install awscli==${AWSCLI_VERSION} && \
     rm -rf /root/.cache && \
@@ -149,23 +198,20 @@ RUN pip install awscli==${AWSCLI_VERSION} && \
     ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
     ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/
 
-ENV BANNER "geodesic"
+#
+# Shell
+#
+ENV HISTFILE=${CACHE_PATH}/history
+ENV SHELL=/bin/bash
+ENV LESS=-Xr
+ENV XDG_CONFIG_HOME=${CACHE_PATH}
+ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
-# Where to store state
-ENV LOCAL_MOUNT_POINT=/mnt/local
-ENV LOCAL_STATE=/mnt/local
-ENV REMOTE_MOUNT_POINT=/mnt/remote
-ENV REMOTE_STATE=/mnt/remote/geodesic
-
-ENV GEODESIC_PATH=/usr/local/include/toolbox
-ENV MOTD_URL=http://geodesic.sh/motd
-ENV HOME=/mnt/local
-
-VOLUME ["/mnt/local"]
+VOLUME ["${CACHE_PATH}"]
 
 ADD rootfs/ /
 
-WORKDIR /mnt/local
+WORKDIR /conf
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c", "bootstrap"]

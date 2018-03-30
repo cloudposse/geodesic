@@ -1,6 +1,0 @@
-## Display chart info
-info:
-	@echo "Name......: $(NAME)"
-	@echo "Namepsace.: $(NAMESPACE)"
-	@echo "Chart.....: $(CHART)"
-	@echo "Values....: $(HELM_VALUES_PATH)/$(NAME).yaml"

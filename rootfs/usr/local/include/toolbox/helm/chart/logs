@@ -1,5 +1,0 @@
-NAME ?= logs
-NAMESPACE ?= kube-system
-CHART ?= cloudposse-incubator/syslog-forwarder
-
-include helm/chart/defaults

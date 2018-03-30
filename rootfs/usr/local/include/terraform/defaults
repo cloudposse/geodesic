@@ -1,3 +1,0 @@
-include terraform/apply
-include terraform/get
-include terraform/destroy

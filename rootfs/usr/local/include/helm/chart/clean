@@ -1,3 +1,0 @@
-## Delete left-over chart packages
-clean:
-	@rm -f *.tgz

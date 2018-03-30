@@ -1,7 +1,0 @@
-include terraform/validate
-include terraform/init
-
-## Show pending changes
-plan: validate init
-	$(call assert-set,DIR)
-	@terraform plan -input=false -out=$(TF_STATE_DIR)/terraform.out $(DIR)

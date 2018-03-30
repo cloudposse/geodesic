@@ -27,6 +27,7 @@ An organization may chose to leverage all of these components, or just the parts
 At its core, Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of the components of a modern cloud.
 
 * [`ansible`](http://docs.ansible.com/ansible/latest/index.html) Ansible is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks
+* [`aws-vault`](https://github.com/99designs/aws-vault) for securely storing and accessing AWS credentials in an encrypted vault for the purpose of assuming IAM roles
 * [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
 * [`chamber`](https://github.com/segmentio/chamber) for managing secrets with AWS SSM+KMS
 * [`helm`](https://github.com/kubernetes/helm/) for installing packages like Varnish or Apache on the Kubernetes cluster

@@ -32,9 +32,9 @@ function assume-role() {
   fi
   shift
   if [ $# -eq 0 ]; then
-    aws-vault exec $role -- bash -l
+    aws-vault exec --assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL} $role -- bash -l
   else
-    aws-vault exec $role -- $*
+    aws-vault exec --assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL} $role -- $*
   fi
 }
 

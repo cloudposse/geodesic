@@ -35,6 +35,7 @@ WORKDIR /tmp
 #
 ENV AWS_VAULT_VERSION 4.2.0
 ENV AWS_VAULT_BACKEND file
+ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #ENV AWS_VAULT_FILE_PASSPHRASE=
 RUN curl --fail -sSL -o /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/releases/download/v${AWS_VAULT_VERSION}/aws-vault-linux-amd64 \
     && chmod +x /usr/local/bin/aws-vault

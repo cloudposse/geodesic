@@ -30,6 +30,13 @@ function assume-role() {
     echo "Usage: $0 [role]"
     return 1
   fi
+  # Sync the clock in the Docker Virtual Machine to the system's hardware clock to avoid time drift
+  # (Only works in privileged mode)
+  hwclock -s >/dev/null 2>&1 
+  if [ $? -ne 0 ]; then
+    echo "* Failed to sync system time from hardware clock"
+  fi
+
   shift
   if [ $# -eq 0 ]; then
     aws-vault exec --assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL} $role -- bash -l

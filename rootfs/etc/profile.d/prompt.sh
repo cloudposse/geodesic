@@ -42,6 +42,8 @@ function geodesic_prompt() {
 
   if [ -n "${AWS_VAULT}" ]; then
     ROLE_PROMPT="(${AWS_VAULT})"
+  else
+    ROLE_PROMPT="(none)"
   fi
 
   if [ -n "${CLUSTER_NAME}" ]; then

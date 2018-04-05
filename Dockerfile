@@ -122,11 +122,28 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && mkdir -p ${HELM_HOME} \
     && helm init --client-only \
     && mkdir -p ${HELM_HOME}/plugins \
-    && helm plugin install https://github.com/mstrzele/helm-edit \
-    && helm plugin install https://github.com/app-registry/appr-helm-plugin \
-    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
-    && helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
+
+#
+# Install helm repos
+#
+RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
     && helm repo update
+
+# 
+# Install helm plugins
+# 
+RUN helm plugin install https://github.com/mstrzele/helm-edit --version v0.2.0 \
+    && helm plugin install https://github.com/app-registry/appr-helm-plugin --version v0.7.0 \
+    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
+    && helm plugin install https://github.com/databus23/helm-diff --version 2.8.0+1
+
+#
+# Install helmfile
+#
+ENV HELMFILE_VERSION 0.11
+RUN curl --fail -sSL -o /usr/local/bin/helmfile https://github.com/roboll/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 \
+    && chmod +x /usr/local/bin/helmfile
+
 
 #
 # Install packer

@@ -44,76 +44,21 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 
 ![](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)
 
-## Prerequisites
+## Documentation
 
-### Install Docker
-
-Docker can be easily installed by following the instructions for your OS:
-
-* [Linux](https://docs.docker.com/linux/step_one/) (Or simply run  `curl -fsSL https://get.docker.com/ | sh`)
-* [Windows](https://docs.docker.com/windows/step_one/)
-* [Mac OS](https://docs.docker.com/mac/step_one/)
-
-## Quick Start
-
-1. `export CLUSTER_NAME=test.example.com`
-
-2. Create a new project
-
-   This will create a new project in your current working directory, complete with `Dockerfile` and `Makefile`.
-
-   ```
-   docker run -e CLUSTER_NAME \
-              -e DOCKER_IMAGE=cloudposse/${CLUSTER_NAME} \
-              -e DOCKER_TAG=dev \
-              cloudposse/geodesic:latest -c new-project | tar -xv -C .
-   ```
-
-2. Customize project as necessary. Edit the `Dockerfile` to reflect your settings. The files are installed to the `$CLUSTER_NAME/` folder.
-   ```
-   cd $CLUSTER_NAME
-   ```
-
-3. Initialize the project
-   ```
-   make init
-   ```
-
-4. Build the docker container
-   ```
-   make docker:build
-   ```    
-
-5. Install the wrapper shell
-   ```
-   make install
-   ```
-
-6. Run the shell: `/usr/local/bin/$CLUSTER_NAME`
-
-## Creating a Kops Cluster
-
-Create your `kops` cluster from a manifest. The manifest template is located in `/templates/kops/default.yaml` and is compiled by running `build-kops-manifest`.
-
-After building the manifest, create the cluster by running and following the resultant instructions.
-   ```
-   kops create -f /conf/kops/manifest.yml
-   ```  
-
-All done. Your cloud is now up and running.
+Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/docs/geodesic). 
 
 ## Help
 
 **Got a question?**
 
-Review the [docs](docs/), file a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
-
+Review the [docs](https://docs.cloudposse.com/geodesic), ask a [question](https://docs.cloudposse.com/discuss-new), file a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
 
 ## Contributing
 
 ### Bug Reports & Feature Requests
 
-Please use the [issue tracker](https://github.com/cloudposse/bastion/issues) to report any bugs or file feature requests.
+Please use the [issue tracker](https://github.com/cloudposse/geodesic/issues) to report any bugs or file feature requests.
 
 ### Developing
 

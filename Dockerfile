@@ -211,7 +211,6 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
-ENV AWS_SHARED_CREDENTIALS_FILE=/localhost/.aws/credentials
 ENV AWS_CONFIG_FILE=/localhost/.aws/config
 
 #

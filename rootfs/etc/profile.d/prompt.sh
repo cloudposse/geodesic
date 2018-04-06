@@ -34,7 +34,7 @@ function geodesic_prompt() {
   TWO_JOINED_SQUARES=$'\u29C9 '
   CROSS_MARK=$'\u274C '
 
-  if [ -n "$AWS_SESSION_TOKEN" ]; then
+  if [ -n "$AWS_VAULT" ]; then
     export STATUS=${WHITE_HEAVY_CHECK_MARK}
   else
     export STATUS=${CROSS_MARK}

@@ -21,7 +21,9 @@ RUN apk update \
           gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
           git coreutils less groff bash-completion \
           fuse syslog-ng libc6-compat && \
-          mkdir -p /etc/bash_completion.d/ /etc/profile.d/
+          mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
+    && mkdir -p /conf \
+    && touch /conf/.gitconfig \
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -107,10 +109,16 @@ ENV NODE_MAX_SIZE 2
 ENV NODE_MIN_SIZE 2
 
 #
+# Install sops (required by `helm-secrets`)
+# 
+ENV SOPS_VERSION 3.0.2
+RUN curl --fail -sSL -o /usr/local/bin/sops https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux \
+    && chmod +x /usr/local/bin/sops
+
+#
 # Install helm
 #
 ENV HELM_VERSION 2.8.2
-ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
@@ -122,11 +130,37 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && mkdir -p ${HELM_HOME} \
     && helm init --client-only \
     && mkdir -p ${HELM_HOME}/plugins \
-    && helm plugin install https://github.com/mstrzele/helm-edit \
-    && helm plugin install https://github.com/app-registry/appr-helm-plugin \
-    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
-    && helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
+
+#
+# Install helm repos
+#
+RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
+    && helm repo add incubator  https://kubernetes-charts-incubator.storage.googleapis.com/ \
+    && helm repo add coreos-stable https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/ \
     && helm repo update
+
+# 
+# Install helm plugins
+# 
+ENV HELM_APPR_VERSION 0.7.0
+ENV HELM_DIFF_VERSION 2.8.0+1
+ENV HELM_EDIT_VERSION 0.2.0
+ENV HELM_GITHUB_VERSION 0.2.0
+ENV HELM_SECRETS_VERSION 1.2.9
+
+RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --version v${HELM_APPR_VERSION} \
+    && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
+    && helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
+    && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
+    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}
+
+#
+# Install helmfile
+#
+ENV HELMFILE_VERSION 0.11
+RUN curl --fail -sSL -o /usr/local/bin/helmfile https://github.com/roboll/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 \
+    && chmod +x /usr/local/bin/helmfile
+
 
 #
 # Install packer

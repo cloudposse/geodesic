@@ -29,8 +29,9 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`ansible`](http://docs.ansible.com/ansible/latest/index.html) Ansible is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks
 * [`aws-vault`](https://github.com/99designs/aws-vault) for securely storing and accessing AWS credentials in an encrypted vault for the purpose of assuming IAM roles
 * [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
-* [`chamber`](https://github.com/segmentio/chamber) for managing secrets with AWS SSM+KMS
+* [`chamber`](https://github.com/segmentio/chamber) for managing secrets with AWS SSM+KMS and exposing them as environment variables
 * [`helm`](https://github.com/kubernetes/helm/) for installing packages like Varnish or Apache on the Kubernetes cluster
+* [`helmfile`](https://github.com/roboll/helmfile) for 12-factorizing chart values and installing chart collections
 * [`kops`](https://github.com/kubernetes/kops/) for Kubernetes cluster orchestration
 * [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
 * [`gcloud`, `gsutil`](https://cloud.google.com/sdk/) for integration with Google Cloud (e.g. GKE, GCE, Google Storage)

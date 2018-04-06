@@ -1,7 +1,5 @@
 ## what
-* change 1
-* change 2
-* change 3
+* Describe high-level what changed.
 
 ## why
-* justification for changes
+* Justification for changes.

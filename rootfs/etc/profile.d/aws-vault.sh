@@ -5,8 +5,14 @@ if [ -n "${AWS_VAULT}" ]; then
   export TF_VAR_aws_assume_role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
   echo "* Assumed role ${TF_VAR_aws_assume_role_arn}"
 else
+  AWS_VAULT_ARGS=("--assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL}")
   [ -d /localhost/.awsvault ] || mkdir /localhost/.awsvault
   ln -sf /localhost/.awsvault ${HOME}
+  if [ "${VAULT_SERVER_ENABLED:-true}" == "true" ]; then
+    echo "* Started EC2 metadata service at http://169.254.169.254/latest"
+    aws-vault server &
+    AWS_VAULT_ARGS+=("--server")
+  fi
 fi
 
 PROMPT_HOOKS+=("aws_vault_prompt")
@@ -39,9 +45,9 @@ function assume-role() {
 
   shift
   if [ $# -eq 0 ]; then
-    aws-vault exec --assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL} $role -- bash -l
+    aws-vault exec ${AWS_VAULT_ARGS[@]} $role -- bash -l
   else
-    aws-vault exec --assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL} $role -- $*
+    aws-vault exec ${AWS_VAULT_ARGS[@]} $role -- $*
   fi
 }
 

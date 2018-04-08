@@ -3,6 +3,18 @@ kind: Cluster
 metadata:
   name: {{getenv "CLUSTER_NAME"}}
 spec:
+  additionalPolicies:
+      nodes: |
+        [
+          {
+            "Sid": "assumeClusterRole",
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": ["*"]
+          }
+        ]
   api:
     loadBalancer:
       type: Public

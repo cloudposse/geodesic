@@ -46,7 +46,7 @@ module:
 
 .PHONY : confirm
 confirm:
-	@confirm CLUSTER_NAME
+	@confirm KOPS_CLUSTER_NAME
 
 .PHONY : help
 ## This help screen

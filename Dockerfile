@@ -8,7 +8,7 @@ ENV CACHE_PATH=/localhost/.geodesic
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
-ENV CLUSTER_NAME=example.foo.bar
+ENV KOPS_CLUSTER_NAME=example.foo.bar
 
 # Install all packages as root
 USER root

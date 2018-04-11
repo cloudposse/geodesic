@@ -1,17 +1,11 @@
 #!/usr/bin/env bash
 # Geodesic Wrapper Script
 
-if [ "${BASH_VERSINFO}" -lt 4 ]; then
-	echo "Bash Version >= 4 required (${BASH_VERSINFO} installed) to run: $0"
-	exit 1
-fi
-
 set -o pipefail
 
 # Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$%30000))}
 
-STATE_DIR=${STATE_DIR:-${HOME}/.geodesic}
 OS=$(uname -s)
 
 export USER_ID=$(id -u)
@@ -20,6 +14,13 @@ export GROUP_ID=$(id -g)
 export options=()
 export targets=()
 
+function require_installed() {
+  if ! which $1 > /dev/null; then
+    echo "Cannot find $1 installed on this system. Please install and try again."
+    exit 1
+  fi
+}
+
 function options_to_env() {
   local kv
   local k
@@ -27,15 +28,15 @@ function options_to_env() {
 
   for option in ${options[@]}; do
     kv=(${option/=/ })
-    k=${kv[0]}    # Take first element as key
-    k=${k#--}     # Strip leading --
-    k=${k//-/_}   # Convert dashes to underscores
-    k=${k^^}      # Convert to uppercase
+    k=${kv[0]}                                  # Take first element as key
+    k=${k#--}                                   # Strip leading --
+    k=${k//-/_}                                 # Convert dashes to underscores
+    k=$(echo $k | tr '[:lower:]' '[:upper:]')   # Convert to uppercase (bash3 compat)
 
     v=${kv[1]}    # Treat second element as value
     v=${v:-true}  # Set it to true for boolean flags
 
-    declare -g $k="$v"
+    export $k="$v"
   done
 }
 
@@ -46,22 +47,15 @@ function debug() {
 }
 
 function use() {
+  DOCKER_ARGS=()
   if [ -t 1 ]; then
     # Running in terminal 
-    DOCKER_ARGS=(-it --rm --name="${DOCKER_NAME}" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
+    DOCKER_ARGS+=(-it --rm --name="${DOCKER_NAME}" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
     
-    if [ -n "${ENV_FILE}" ]; then
-      DOCKER_ARGS=("${DOCKER_ARGS[@]}" --env-file ${ENV_FILE})
-    fi
-
     if [ -n "$SSH_AUTH_SOCK" ]; then
-      if [ `uname -s` == 'Darwin' ]; then
-        # Run our own SSH agent
-        DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                       --volume "${HOME}:/localhost" )
-      else
-        DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                       --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 
+      if [ `uname -s` == 'Linux' ]; then
+        # Bind-mount SSH agent socket into container (linux only)
+        DOCKER_ARGS+=( --volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK" 
                        --env SSH_AUTH_SOCK
                        --env SSH_CLIENT
                        --env SSH_CONNECTION
@@ -75,32 +69,30 @@ function use() {
     DOCKER_ARGS=()
   fi
 
+  if [ -n "${ENV_FILE}" ]; then
+    DOCKER_ARGS+=(--env-file ${ENV_FILE})
+  fi
+
   if [ "${OS}" == "Darwin" ]; then
     # Run in privleged mode to enable time synchronization of system clock with hardware clock
     # Implement DNS fix related to https://github.com/docker/docker/issues/24344
-    DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                  --dns=${DOCKER_DNS}
-                )
+    DOCKER_ARGS+=("--dns=${DOCKER_DNS}")
   fi
 
   if [ -n "${HOME}" ]; then
-    if [ "${HOME}" == "/mnt/local" ]; then
+    if [ "${HOME}" == "/localhost" ]; then
       echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"
     else
       echo "# Mounting ${HOME} into container"
-      DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                    --volume=${HOME}:${HOME}
-                  )
+      DOCKER_ARGS+=(--volume=${HOME}:/localhost)
     fi
   fi
 
-  DOCKER_ARGS=("${DOCKER_ARGS[@]}"
-                --privileged
+  DOCKER_ARGS+=(--privileged
                 --publish ${GEODESIC_PORT}:${GEODESIC_PORT}
                 --name "${DOCKER_NAME}"
                 --rm 
-                --env KUBERNETES_API_PORT=${GEODESIC_PORT}
-                --volume ${STATE_DIR}:/mnt/local)
+                --env KUBERNETES_API_PORT=${GEODESIC_PORT})
   set -o pipefail
   docker ps | grep -q ${DOCKER_NAME} >/dev/null 2>&1
   if [ $? -eq 0 ]; then
@@ -190,6 +182,10 @@ function help() {
   echo ""
 }
 
+
+require_installed tr
+require_installed grep
+
 parse_args "$@"
 options_to_env
 
@@ -228,12 +224,7 @@ if [ -z "${DOCKER_IMAGE}" ]; then
   exit 1
 fi
 
-mkdir -p ${STATE_DIR}
-
-if ! which docker > /dev/null; then
-  echo "Cannot find docker installed on this system. Please install and try again."
-  exit 1
-fi
+require_installed docker
 
 docker ps >/dev/null 2>&1
 if [ $? -ne 0 ]; then

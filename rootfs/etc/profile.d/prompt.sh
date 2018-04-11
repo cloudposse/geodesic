@@ -46,8 +46,8 @@ function geodesic_prompt() {
     ROLE_PROMPT="(none)"
   fi
 
-  if [ -n "${CLUSTER_NAME}" ]; then
-    PS1=$' ${TWO_JOINED_SQUARES}'" ${CLUSTER_NAME}\n"$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
+  if [ -n "${KOPS_CLUSTER_NAME}" ]; then
+    PS1=$' ${TWO_JOINED_SQUARES}'" ${KOPS_CLUSTER_NAME}\n"$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
   else
     PS1=$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
   fi

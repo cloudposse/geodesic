@@ -1,7 +1,7 @@
 
 # Geodesic [![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
 
-![Geodesic Logo](docs/geodesic.png)
+![Geodesic Logo](docs/geodesic-small.png)
 
 ## Introduction
 

@@ -1,6 +1,8 @@
 
 # Geodesic [![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
 
+![Geodesic Logo](docs/geodesic.png)
+
 ## Introduction
 
 Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform.

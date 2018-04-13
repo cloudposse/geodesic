@@ -1,6 +1,8 @@
 
 # Geodesic [![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
 
+![Geodesic Logo](docs/geodesic-small.png)
+
 ## Introduction
 
 Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform.
@@ -49,6 +51,17 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 ## Documentation
 
 Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/docs/geodesic). 
+
+## Our Logo
+
+![Geodesic Logo](docs/geodesic-small.png)
+
+In mathematics, a geodesic line is the shortest distance between two points on a sphere. It's also a solid structure composed of geometric shapes such as hexagons.
+
+We like to think of geodesic as the shortest path to a rock-solid cloud infrastructure. The geodesic logo is a hexagon with a cube suspended at its center. The cube represents this geodesic container, which is central to everything and at the same time is what ties everything together.
+
+But look a little closer and you’ll notice there’s much more to it. It's also an isometric shape of a cube with a missing piece. This represents its pluggable design, which lets anyone extend it to suit their vision.
+
 
 ## Help
 
@@ -100,6 +113,8 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 ## About
 
 Geodesic is maintained and funded by [Cloud Posse, LLC][website]. Like it? Please let us know at <hello@cloudposse.com>
+
+![Cloud Posse](https://cloudposse.com/logo-300x69.png)
 
 We love [Open Source Software](https://github.com/cloudposse/)!
 

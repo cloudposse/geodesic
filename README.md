@@ -52,6 +52,17 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 
 Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/docs/geodesic). 
 
+## Our Logo
+
+In mathematics, a geodesic line is the shortest distance between two points on a spehere. It's also a solid structure composed of geometric shapes such as hexagons. 
+
+We like to think of geodesic as the shortest path to a rock-solid cloud infrastructure. The geodesic logo is a hexagon with a cube suspended at it's center. 
+The cube represents this geodesic container, which is central to everything and at the same time is what ties everything together. 
+
+But look a little closer and you’ll notice there’s much more to it. It's also an isometric shape of a cube with a missing piece. This represents its pluggable design, 
+which let's anyone extend it to suit their vision.
+
+
 ## Help
 
 **Got a question?**

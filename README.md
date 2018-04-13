@@ -54,6 +54,8 @@ Extensive documentation is provided on our [Documentation Hub](https://docs.clou
 
 ## Our Logo
 
+![Geodesic Logo](docs/geodesic-small.png)
+
 In mathematics, a geodesic line is the shortest distance between two points on a spehere. It's also a solid structure composed of geometric shapes such as hexagons. 
 
 We like to think of geodesic as the shortest path to a rock-solid cloud infrastructure. The geodesic logo is a hexagon with a cube suspended at it's center. 
@@ -113,6 +115,8 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 ## About
 
 Geodesic is maintained and funded by [Cloud Posse, LLC][website]. Like it? Please let us know at <hello@cloudposse.com>
+
+![Cloud Posse](https://cloudposse.com/logo-300x69.png)
 
 We love [Open Source Software](https://github.com/cloudposse/)!
 

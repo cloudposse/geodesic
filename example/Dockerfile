@@ -27,3 +27,4 @@ RUN curl --fail -SL -O https://github.com/wallix/awless/releases/download/v0.1.1
     && mv awless /usr/local/bin
 RUN apk add --no-cache py2-lxml
 RUN pip install aws-google-auth
+#docker build --rm --build-arg KUBERNETES_VERSION=1.9.6 --build-arg KOPS_VERSION=1.9.0 --build-arg AWS_VAULT_VERSION="" -t nikiai/tools .

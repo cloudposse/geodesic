@@ -1,4 +1,4 @@
-FROM alpine:3.6
+FROM alpine:3.7
 
 ONBUILD ARG BANNER="geodesic"
 
@@ -8,7 +8,7 @@ USER root
 RUN echo -e "http://nl.alpinelinux.org/alpine/v3.6/main\nhttp://nl.alpinelinux.org/alpine/v3.6/community" > /etc/apk/repositories
 # Install common packages
 RUN apk add --no-cache --update unzip curl tar \
-          python make jq figlet \
+          python make vim jq figlet \
           openssl openssh-client sshpass iputils drill \
           gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
           git coreutils less groff bash-completion \
@@ -30,14 +30,14 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 ENV SECRETS_PATH=${HOME}
 
 # Disable vim from reating a swapfile (incompatible with goofys)
-#RUN echo 'set noswapfile' >> /etc/vim/vimrc
+RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)
 #
-ONBUILD ARG AWS_VAULT_VERSION=4.2.0
+ONBUILD ARG AWS_VAULT_VERSION=4.2.1
 ENV AWS_VAULT_BACKEND file
 ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #ENV AWS_VAULT_FILE_PASSPHRASE=
@@ -133,7 +133,8 @@ ONBUILD RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/he
     && helm completion bash > /etc/bash_completion.d/helm.sh \
     && mkdir -p ${HELM_HOME} \
     && helm init --client-only \
-    && mkdir -p ${HELM_HOME}/plugins
+    && mkdir -p ${HELM_HOME}/plugins \
+    && rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz
 
 #
 # Install helm repos, need bit refactoring to pass repo list.
@@ -176,6 +177,7 @@ ONBUILD RUN if [ "${PACKER_VERSION}" != "" ]; then \
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip \
     && rm packer_${PACKER_VERSION}_linux_amd64.zip \
     && mv packer /usr/local/bin; \
+    && rm -rf packer_${PACKER_VERSION}_linux_amd64.zip \
     fi
 
 #

@@ -5,16 +5,15 @@ ONBUILD ARG BANNER="geodesic"
 # Install all packages as root
 USER root
 
-RUN echo -e "http://nl.alpinelinux.org/alpine/v3.6/main\nhttp://nl.alpinelinux.org/alpine/v3.6/community" > /etc/apk/repositories
 # Install common packages
-RUN apk add --no-cache --update unzip curl tar \
-          python make vim jq figlet \
-          openssl openssh-client sshpass iputils drill \
-          gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
-          git coreutils less groff bash-completion \
-          fuse syslog-ng libc6-compat && \
-          rm -rf /tmp/* /var/cache/apk/* && \
-          mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
+RUN apk add --no-cache unzip curl tar \
+    python make bash vim jq figlet \
+    openssl openssh-client sshpass iputils drill \
+    gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
+    git coreutils less groff bash-completion \
+    fuse syslog-ng libc6-compat py2-lxml python-dev cython  \
+    && rm -rf /tmp/* /var/cache/apk/* \
+    && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
     && mkdir -p /conf \
     && touch /conf/.gitconfig
 
@@ -37,9 +36,16 @@ WORKDIR /tmp
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)
 #
-ONBUILD ARG AWS_VAULT_VERSION=4.2.1
+
+ONBUILD ARG AWS_GOOGLE_AUTH="0.0.24"
+ONBUILD ENV AWS_GOOGLE_AUTH "${AWS_GOOGLE_AUTH}"
+ONBUILD RUN if [ -n "${AWS_GOOGLE_AUTH}" ]; then pip install --no-cache-dir aws-google-auth==${AWS_GOOGLE_AUTH} ; fi
+
+ONBUILD ARG AWS_VAULT_VERSION
+ONBUILD ENV AWS_VAULT_VERSION "${AWS_VAULT_VERSION}"
+#=4.2.1
 ENV AWS_VAULT_BACKEND file
-ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
+ENV AWS_VAULT_ASSUME_ROLE_TTL=3500
 #ENV AWS_VAULT_FILE_PASSPHRASE=
 ONBUILD RUN if [ "${AWS_VAULT_VERSION}" != "" ]; then \
     curl --fail -sSL -o /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/releases/download/v${AWS_VAULT_VERSION}/aws-vault-linux-amd64 \
@@ -72,7 +78,8 @@ RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VER
 #
 # Install kubectl
 #
-ONBUILD ARG KUBERNETES_VERSION=1.8.7
+ONBUILD ARG KUBERNETES_VERSION
+#=1.8.7
 ONBUILD RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl \
@@ -82,7 +89,8 @@ ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 #
 # Install kops
 #
-ONBUILD ARG KOPS_VERSION=1.8.0
+ONBUILD ARG KOPS_VERSION
+#=1.8.0
 ENV KOPS_STATE_STORE s3://undefined
 ENV KOPS_STATE_STORE_REGION us-east-1
 ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
@@ -114,7 +122,7 @@ ENV NODE_MIN_SIZE 2
 
 #
 # Install sops (required by `helm-secrets`)
-# 
+#
 ONBUILD ARG SOPS_VERSION=3.0.3
 ONBUILD RUN curl --fail -sSL -o /usr/local/bin/sops https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux \
     && chmod +x /usr/local/bin/sops
@@ -134,7 +142,7 @@ ONBUILD RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/he
     && mkdir -p ${HELM_HOME} \
     && helm init --client-only \
     && mkdir -p ${HELM_HOME}/plugins \
-    && rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz
+    && rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz;
 
 #
 # Install helm repos, need bit refactoring to pass repo list.
@@ -144,9 +152,9 @@ ONBUILD RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/inc
     && helm repo add coreos-stable https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/ \
     && helm repo update
 
-# 
+#
 # Install helm plugins
-# 
+#
 ENV HELM_APPR_VERSION 0.7.0
 ENV HELM_DIFF_VERSION 2.8.0+1
 ENV HELM_EDIT_VERSION 0.2.0
@@ -177,7 +185,6 @@ ONBUILD RUN if [ "${PACKER_VERSION}" != "" ]; then \
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip \
     && rm packer_${PACKER_VERSION}_linux_amd64.zip \
     && mv packer /usr/local/bin; \
-    && rm -rf packer_${PACKER_VERSION}_linux_amd64.zip \
     fi
 
 #
@@ -187,7 +194,7 @@ ONBUILD ARG ANSIBLE_VERSION
 #=2.4.1.0
 ENV JINJA2_VERSION 2.10
 ONBUILD RUN if [ "${ANSIBLE_VERSION}" != "" ]; then \
-    pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
+    pip install --no-cache-dir ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete; \
     fi
@@ -234,7 +241,7 @@ ENV AWS_CONFIG_FILE=/localhost/.aws/config
 ONBUILD ARG AWSEBCLI_VERSION
 # 3.12.0
 ONBUILD RUN if [ "${AWSEBCLI_VERSION}" != "" ]; then \
-    pip install awsebcli==${AWSEBCLI_VERSION} && \
+    pip install --no-cache-dir awsebcli==${AWSEBCLI_VERSION} && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete; \
     fi
@@ -245,11 +252,18 @@ ONBUILD RUN if [ "${AWSEBCLI_VERSION}" != "" ]; then \
 ONBUILD ARG AWSCLI_VERSION
 # 1.11.185
 ONBUILD RUN if [ "${AWSCLI_VERSION}" != "" ]; then \
-    pip install awscli==${AWSCLI_VERSION} && \
+    pip install --no-cache-dir awscli==${AWSCLI_VERSION} && \
     rm -rf /root/.cache && \
     find / -type f -regex '.*\.py[co]' -delete && \
     ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
     ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/; \
+    fi
+
+ONBUILD ARG AWLESS_VERSION="v0.1.10"
+ONBUILD RUN if [ -n "${AWLESS_VERSION}" ]; then curl --fail -SL -O https://github.com/wallix/awless/releases/download/${AWLESS_VERSION}/awless-linux-amd64.tar.gz \
+    && tar -xzf awless-linux-amd64.tar.gz \
+    && rm awless-linux-amd64.tar.gz \
+    && mv awless /usr/local/bin; \
     fi
 
 #

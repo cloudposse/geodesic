@@ -1,7 +1,7 @@
-export DOCKER_IMAGE ?= cloudposse/geodesic
-export DOCKER_TAG ?= dev
+export DOCKER_IMAGE ?= nikiai/geodesic-base
+export DOCKER_TAG ?= alpine
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
-export DOCKER_BUILD_FLAGS = 
+export DOCKER_BUILD_FLAGS ?= --no-cache --squash --rm
 
 include $(shell curl --silent -o .build-harness "https://raw.githubusercontent.com/cloudposse/build-harness/master/templates/Makefile.build-harness"; echo .build-harness)
 
@@ -18,6 +18,12 @@ deps:
 
 build:
 	@make --no-print-directory docker:build
+
+cleanup:
+	docker container prune -f && docker image prune -f
+
+push:
+	docker push $(DOCKER_IMAGE)
 
 install:
 	@docker run --rm -e CLUSTER=galaxy $(DOCKER_IMAGE_NAME) | sudo bash -s dev

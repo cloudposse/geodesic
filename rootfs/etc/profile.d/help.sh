@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 function help() {
 cat<<__EOF__
 Available commands:

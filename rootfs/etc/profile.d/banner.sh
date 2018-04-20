@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 COLOR_RESET="[0m"
 BANNER_COLOR="${BANNER_COLOR:-[36m}"
 BANNER_INDENT="${BANNER_INDENT:-    }"

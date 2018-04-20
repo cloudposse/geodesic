@@ -2,10 +2,8 @@
 
 if [ -n "${AWS_GOOGLE_AUTH}" ]; then
 
-    if [ -n "${AWS_VAULT}" ]; then
-      AWS_VAULT_ARGS=("-d=${AWS_VAULT_ASSUME_ROLE_TTL}")
-    fi
-
+    export AWS_VAULT_ARGS=("-d=${AWS_VAULT_ASSUME_ROLE_TTL}")
+    
     PROMPT_HOOKS+=("aws_vault_prompt")
     function aws_vault_prompt() {
       if [ -z "${AWS_VAULT}" ]; then

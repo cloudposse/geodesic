@@ -10,7 +10,6 @@ addons:
     - curl
 env:
   - DOCKER_IMAGE_NAME=nikiai/geodesic-base
-  - DOCKER_TAG=alpine
   
 services:
 - docker

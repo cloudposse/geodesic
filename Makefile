@@ -1,7 +1,7 @@
 export DOCKER_IMAGE ?= nikiai/geodesic-base
 export DOCKER_TAG ?= alpine
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
-export DOCKER_BUILD_FLAGS ?= --no-cache --squash --rm
+export DOCKER_BUILD_FLAGS ?= --no-cache --rm
 
 include $(shell curl --silent -o .build-harness "https://raw.githubusercontent.com/cloudposse/build-harness/master/templates/Makefile.build-harness"; echo .build-harness)
 

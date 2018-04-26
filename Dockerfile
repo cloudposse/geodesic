@@ -31,6 +31,19 @@ RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
+# 
+# Install the simple cloudposse package manager
+#
+ARG PACKAGES_VERSION=0.1.1
+ENV PACKAGES_VERSION ${PACKAGES_VERSION}
+RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/packages.git /packages && rm -rf /packages/.git
+
+#
+# Install packges using the package manager
+#
+ARG PACKAGES="fetch kubectx kubens"
+ENV PACKAGES ${PACKAGES}
+RUN make -C /packages/install ${PACKAGES}
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)

@@ -511,6 +511,8 @@ releases:
     default: "true"
   chart: "cloudposse-incubator/nginx-ingress"
   version: "0.1.7"
+  values: 
+  - "values/nginx-ingress.yaml"
   set:
     ### Optional: NGINX_INGRESS_REPLICA_COUNT; e.g. 4
     - name: "replicaCount"

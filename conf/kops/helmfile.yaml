@@ -22,7 +22,7 @@ repositories:
 
 # CoreOS Stable helm charts
 - name: "coreos-stable"
-  url: "https://s3-us-west-2.amazonaws.com/coreos-charts/stable"
+  url: "https://s3-eu-west-1.amazonaws.com/coreos-charts/stable"
 
 releases:
 
@@ -87,22 +87,22 @@ releases:
     - name: "ingress.enabled"
       value: "true"
 
-    - name: "ingress.annotations.kubernetes\.io/ingress.class"
+    - name: "ingress.annotations.kubernetes\\.io/ingress.class"
       value: "nginx"
     
-    - name: "ingress.annotations.kubernetes\.io/tls-acme"
+    - name: "ingress.annotations.kubernetes\\.io/tls-acme"
       value: "true"
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
-    - name: "ingress.annotations.external-dns\.alpha.kubernetes\.io/hostname"
+    - name: "ingress.annotations.external-dns\\.alpha.kubernetes\\.io/hostname"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
     ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
-    - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
     # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
-    - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
       value: "60"
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
@@ -142,22 +142,22 @@ releases:
     - name: "gateway.ingress.enabled"
       value: true
 
-    - name: "gateway.ingress.annotations.kubernetes\.io/ingress\.class"
+    - name: "gateway.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
 
-    - name: "gateway.ingress.annotations.kubernetes\.io/tls-acme"
+    - name: "gateway.ingress.annotations.kubernetes\\.io/tls-acme"
       value: true
 
     ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
-    - name: "gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname"
+    - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "CHART_REPO_GATEWAY_HOSTNAME" }}'
 
     ### Required: CHART_REPO_GATEWAY_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
-    - name: "gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
+    - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "CHART_REPO_GATEWAY_INGRESS" }}'
 
     ### Optional: CHART_REPO_GATEWAY_TTL; e.g. 60
-    - name: "gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
+    - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
       value: '{{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}'
 
     ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
@@ -215,7 +215,7 @@ releases:
       value: '{{ env "CHART_REPO_GATEWAY_BASIC_AUTH_PASS" }}'
 
     ### Required: CHART_REPO_STORAGE_AWS_IAM_ROLE; e.g. cp-staging-chart-repo
-    - name: "gateway.replica.annotations.iam\.amazonaws\.com/role"
+    - name: "gateway.replica.annotations.iam\\.amazonaws\\.com/role"
       value: '{{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}'
 
     ## Server config
@@ -225,22 +225,22 @@ releases:
     - name: "server.ingress.enabled"
       value: true
 
-    - name: "server.ingress.annotations.kubernetes\.io/ingress\.class"
+    - name: "server.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
 
-    - name: "server.ingress.annotations.kubernetes\.io/tls-acme"
+    - name: "server.ingress.annotations.kubernetes\\.io/tls-acme"
       value: true
 
     ### Required: CHART_REPO_SERVER_HOSTNAME; charts.us-west-2.staging.cloudposse.org
-    - name: "server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname"
+    - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "CHART_REPO_SERVER_HOSTNAME" }}'
 
     ### Required: CHART_REPO_SERVER_INGRESS; ingress.us-west-2.staging.cloudposse.org
-    - name: "server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
+    - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "CHART_REPO_SERVER_INGRESS" }}'
 
     ### Optional: CHART_REPO_SERVER_TTL; e.g. 60
-    - name: "server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
+    - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
       value: '{{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}'
 
     ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
@@ -298,7 +298,7 @@ releases:
       value: '{{ env "CHART_REPO_SERVER_BASIC_AUTH_PASS" }}'
 
     ### Required: CHART_REPO_STORAGE_AWS_IAM_ROLE; e.g. cp-staging-chart-repo
-    - name: "server.replica.annotations.iam\.amazonaws\.com/role"
+    - name: "server.replica.annotations.iam\\.amazonaws\\.com/role"
       value: '{{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}'
 
 ################################################################################
@@ -320,7 +320,7 @@ releases:
   chart: "stable/external-dns"
   version: "0.5.4"
   set:
-    - name: "nodeSelector.kubernetes\.io/role"
+    - name: "nodeSelector.kubernetes\\.io/role"
       value: "master"
 
     - name: "extraEnv.EXTERNAL_DNS_SOURCE"
@@ -348,7 +348,7 @@ releases:
       value: "aws"
 
     ### Required: EXTERNAL_DNS_IAM_ROLE; e.g. cp-staging-external-dns
-    - name: "podAnnotations.iam\.amazonaws\.com/role"
+    - name: "podAnnotations.iam\\.amazonaws\\.com/role"
       value: '{{ env "EXTERNAL_DNS_IAM_ROLE" }}'
 
     ## Resources
@@ -406,7 +406,7 @@ releases:
     ## Lego Settings
     ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
     - name: "lego.email"
-      value: '{{ env "KUBE_LEGO_EMAIL") }}'
+      value: '{{ env "KUBE_LEGO_EMAIL" }}'
 
     ### Optional: KUBE_LEGO_PROD; e.g. true
     - name: "lego.prod"
@@ -539,9 +539,9 @@ releases:
       value: "128Mi"
 
     ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
-    - name: "service.annotations.external-dns\.alpha\.kubernetes\.io/hostname"
+    - name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
 
     ### Optional: NGINX_INGRESS_TTL; e.g. 60
-    - name: "service.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
+    - name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
       value: '{{ coalesce (env "NGINX_INGRESS_TTL") "60" }}'

@@ -1,0 +1,341 @@
+#
+# Master Helmfile
+#
+
+
+#
+# Usage:
+#   
+#   helmfile sync --selector namespace=kube-system,name!=chart-repo
+#
+# References: 
+#   - https://github.com/roboll/helmfile
+#
+
+repositories:
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
+- name: "coreos-stable"
+  url: "https://s3-us-west-2.amazonaws.com/coreos-charts/stable"
+
+releases:
+
+##
+## Chart Museum
+##
+- name: chartmuseum
+  namespace: kube-system
+  labels:
+    name: chartmuseum
+    namespace: kube-system
+  chart: stable/chartmuseum
+  version: 1.3.1
+  set: 
+    - name: "replicaCount"
+      value: "1"
+
+    # disable all routes prefixed with /api
+    - name: "env.open.DISABLE_API"
+      value: "false"
+
+    # allow chart versions to be re-uploaded
+    - name: "env.open.ALLOW_OVERWRITE"
+      value: "true"
+
+    # username for basic http authentication
+    - name: "env.secret.BASIC_AUTH_USER"
+      value: '{{ env "CHARTMUSEUM_BASIC_AUTH_USER" }}'
+
+    # password for basic http authentication
+    - name: "env.secret.BASIC_AUTH_PASS"
+      value: '{{ env "CHARTMUSEUM_BASIC_AUTH_PASS" }}'
+
+    # Resources
+    - name: "resources.limits.cpu"
+      value: "100m"
+
+    - name: "resources.limits.memory"
+      value: "512Mi"
+    - name: "requests.cpu" 
+      value: "5m"
+    - name: "requests.memory"
+      value: "256Mi"
+
+   # Persistence
+   - name: "persistence.enabled"
+     value: "true"
+   - name: "persistence.accessMode"
+     value: "ReadWriteOnce"
+   - name: "persistence.size"
+     value: "1Gi"
+
+  # ingress
+  - name: "ingress.enabled"
+  - value: "true"
+
+  - name: "ingress.annotations.kubernetes\.io/ingress.class"
+
+##
+## Chart Repo
+##
+
+# https://github.com/cloudposse/charts/blob/master/incubator/chart-repo/values.yaml
+# https://github.com/kubernetes/charts/blob/master/stable/chartmuseum/values.yaml
+- name: chart-repo
+  namespace: kube-system
+  labels:
+    name: chart-repo
+    namespace: kube-system
+  chart: cloudposse-incubator/chart-repo
+  version: 0.2.1
+  set:
+    # Gateway config
+    - name: gateway.enabled
+      value: true
+    - name: gateway.ingress.enabled
+      value: true
+    - name: gateway.ingress.annotations.kubernetes\.io/ingress\.class
+      value: nginx
+    - name: gateway.ingress.annotations.kubernetes\.io/tls-acme
+      value: true
+    - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname
+      value: {{ env "CHART_REPO_GATEWAY_HOSTNAME" }}
+    - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target
+      value: {{ env "CHART_REPO_GATEWAY_INGRESS" }}
+    - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl
+      value: {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}
+    - name: gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]
+      value: "/api"
+    - name: gateway.ingress.tls.secretName
+      value: {{ env "CHART_REPO_GATEWAY_INGRESS_TLS_SECRET_NAME" }}
+    - name: gateway.ingress.tls.hosts[0]
+      value: {{ env "CHART_REPO_GATEWAY_HOSTNAME" }}
+    - name: gateway.replicaCount
+      value: {{ env "CHART_REPO_GATEWAY_REPLICA_COUNT" }}
+    - name: gateway.image.tag
+      value: {{ env "CHART_REPO_IMAGE_TAG" }}
+    - name: gateway.env.open.STORAGE
+      value: {{ env "CHART_REPO_STORAGE" }}
+    - name: gateway.env.open.STORAGE_AMAZON_BUCKET
+      value: {{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}
+    - name: gateway.env.open.STORAGE_AMAZON_PREFIX
+      value: {{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" }}
+    - name: gateway.env.open.STORAGE_AMAZON_REGION
+      value: {{ env "CHART_REPO_STORAGE_AMAZON_REGION" }}
+    - name: gateway.env.open.DEBUG
+      value: {{ env "CHART_REPO_DEBUG" }}
+    - name: gateway.env.open.DISABLE_API
+      value: false
+    - name: gateway.env.open.ALLOW_OVERWRITE
+      value: true
+    - name: gateway.env.secret.BASIC_AUTH_USER
+      value: {{ env "CHART_REPO_GATEWAY_BASIC_AUTH_USER" }}
+    - name: gateway.env.secret.BASIC_AUTH_PASS
+      value: {{ env "CHART_REPO_GATEWAY_BASIC_AUTH_PASS" }}
+    - name: gateway.replica.annotations.iam\.amazonaws\.com/role
+      value: {{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}
+
+    # Server config
+    - name: server.enabled
+      value: true
+    - name: server.ingress.enabled
+      value: true
+    - name: server.ingress.annotations.kubernetes\.io/ingress\.class
+      value: nginx
+    - name: server.ingress.annotations.kubernetes\.io/tls-acme
+      value: true
+    - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname
+      value: {{ env "CHART_REPO_SERVER_HOSTNAME" }}
+    - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target
+      value: {{ env "CHART_REPO_SERVER_INGRESS" }}
+    - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl
+      value: {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}
+    - name: gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]
+      value: "/api"
+    - name: server.ingress.tls.secretName
+      value: {{ env "CHART_REPO_SERVER_INGRESS_TLS_SECRET_NAME" }}
+    - name: server.ingress.tls.hosts[0]
+      value: {{ env "CHART_REPO_SERVER_HOSTNAME" }}
+    - name: server.replicaCount
+      value: {{ env "CHART_REPO_SERVER_REPLICA_COUNT" }}
+    - name: server.image.tag
+      value: {{ env "CHART_REPO_IMAGE_TAG" }}
+    - name: server.env.open.STORAGE
+      value: {{ env "CHART_REPO_STORAGE" }}
+    - name: server.env.open.STORAGE_AMAZON_BUCKET
+      value: {{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}
+    - name: server.env.open.STORAGE_AMAZON_PREFIX
+      value: {{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" }}
+    - name: server.env.open.STORAGE_AMAZON_REGION
+      value: {{ env "CHART_REPO_STORAGE_AMAZON_REGION" }}
+    - name: server.env.open.DEBUG
+      value: {{ env "CHART_REPO_DEBUG" }}
+    - name: server.env.open.DISABLE_API
+      value: true
+    - name: server.env.open.ALLOW_OVERWRITE
+      value: false
+    - name: server.env.secret.BASIC_AUTH_USER
+      value: {{ env "CHART_REPO_SERVER_BASIC_AUTH_USER" }}
+    - name: server.env.secret.BASIC_AUTH_PASS
+      value: {{ env "CHART_REPO_SERVER_BASIC_AUTH_PASS" }}
+    - name: server.replica.annotations.iam\.amazonaws\.com/role
+      value: {{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}
+
+##
+## External DNS
+##
+
+# https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
+- name: external-dns
+  namespace: kube-system
+  labels:
+    name: external-dns
+    namespace: kube-system
+  chart: stable/external-dns
+  version: 0.5.4
+  set:
+    - name: nodeSelector.kubernetes\.io/role
+      value: master
+    - name: extraEnv.EXTERNAL_DNS_SOURCE
+      value: service\ningress"
+    - name: tolerations[0].key
+      value: node-role.kubernetes.io/master
+    - name: tolerations[0].effect
+      value: NoSchedule
+    - name: txtOwnerId
+      value: {{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}
+    - name: txtPrefix
+      value: {{ env "EXTERNAL_DNS_TXT_PREFIX" }}
+    - name: publishInternalServices
+      value: true
+    - name: provider
+      value: aws
+    - name: podAnnotations.iam\.amazonaws\.com/role
+      value: {{ env "EXTERNAL_DNS_IAM_ROLE" }}
+    - name: resources.limits.cpu
+      value: 200m
+    - name: resources.limits.memory
+      value: 256Mi
+    - name: resources.requests.cpu
+      value: 100m
+    - name: resources.requests.memory
+      value: 128Mi
+
+## 
+## Kube Lego - Automatic Let's Encrypt for Ingress
+##
+
+# https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
+- name: kube-lego
+  namespace: kube-system
+  labels:
+    name: kube-lego
+    namespace: kube-system
+
+  chart: cloudposse-incubator/kube-lego
+  version: 0.1.2
+  set:
+    - name: replicaCount
+      value: {{ coalesce (env "KUBE_LEGO_REPLICA_COUNT") "1" }}
+    - name: debug
+      value: {{ coalesce (env "KUBE_LEGO_DEBUG") "false" }}
+    - name: image.repository
+      value: jetstack/kube-lego
+    - name: image.tag
+      value: {{ coalesce (env "KUBE_LEGO_IMAGE_TAG") "0.1.2" }}
+    - name: image.pullPolicy
+      value: IfNotPresent
+    - name: lego.email
+      value: {{ if (env "KUBE_LEGO_EMAIL") env "KUBE_LEGO_EMAIL" }}{{ else }}{{ fail "KUBE_LEGO_EMAIL not set" }}{{ end }}
+    - name: lego.prod
+      value: {{ coalesce (env "KUBE_LEGO_PROD") "true" }}
+    - name: pod.internalPort
+      value: 8080
+    - name: resources.limits.cpu
+      value: 200m
+    - name: resources.limits.memory
+      value: 256Mi
+    - name: resources.requests.cpu
+      value: 50m
+    - name: resources.requests.memory
+      value: 128Mi
+
+##
+## Kube2IAM - AWS Assumed Roles for Pods
+## 
+
+# https://github.com/kubernetes/charts/blob/master/stable/kube2iam/values.yaml
+- name: kube2iam
+  namespace: kube-system
+  labels:
+    name: kube2iam
+    namespace: kube-system
+  chart: stable/kube2iam
+  version: 0.8.5
+  set:
+    - name: tolerations[0].key
+      value: node-role.kubernetes.io/master
+    - name: tolerations[0].effect
+      value: NoSchedule
+    - name: aws.region
+      value: {{ env "AWS_REGION" }}
+    - name: extraArgs.auto-discover-base-arn
+      value: true
+    - name: host.iptables
+      value: true
+    - name: host.interface
+      value: cali+
+    - name: resources.limits.cpu
+      value: 200m
+    - name: resources.limits.memory
+      value: 256Mi
+    - name: resources.requests.cpu
+      value: 50m
+    - name: resources.requests.memory
+      value: 128Mi
+      
+## 
+## NGINX Ingress Controller
+##
+
+# https://github.com/cloudposse/charts/blob/master/incubator/nginx-ingress/values.yaml
+- name: nginx-ingress
+  namespace: kube-system
+  labels:
+    namespace: kube-system
+    name: nginx-ingress
+  chart: cloudposse-incubator/nginx-ingress
+  version: 0.1.7
+  set:
+    - name: replicaCount
+      value: {{ coalesce (env "NGINX_INGRESS_REPLICA_COUNT") "4" }}
+    - name: image.repository
+      value: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+    - name: image.tag
+      value: {{ coalesce (env "NGINX_INGRESS_IMAGE_TAG") "0.11.0" }}
+    - name: image.pullPolicy
+      value: "IfNotPresent"
+    - name: resources.limits.cpu
+      value: "200m"
+    - name: resources.limits.memory
+      value: "256Mi"
+    - name: resources.requests.cpu
+      value: "50m"
+    - name: resources.requests.memory
+      value: "128Mi"
+    - name: nginx-default-backend.replicaCount
+      value: {{ coalesce (env "NGINX_INGRESS_BACKEND_REPLICA_COUNT") "2" }}
+    - name: nginx-default-backend.resources.limits.cpu
+      value: "200m"
+    - name: nginx-default-backend.resources.limits.memory
+      value: "256Mi"
+    - name: nginx-default-backend.resources.requests.cpu
+      value: "50m"
+    - name: nginx-default-backend.resources.requests.memory
+      value: "128Mi"
+    - name: service.annotations.external-dns\.alpha\.kubernetes\.io/hostname
+      value: {{ env "NGINX_INGRESS_EXTERNAL_DNS_ALPHA_KUBERNETES_HOSTNAME" }}
+    - name: service.annotations.external-dns\.alpha\.kubernetes\.io/ttl
+      value: "60"

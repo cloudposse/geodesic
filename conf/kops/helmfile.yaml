@@ -1,5 +1,7 @@
 #
-# Master Helmfile
+# Master Helmfile 
+#
+#      by Cloud Posse <hello@cloudposse.com>
 #
 
 
@@ -13,10 +15,15 @@
 #
 
 repositories:
+# Stable repo of official helm charts
 - name: "stable"
   url: "https://kubernetes-charts.storage.googleapis.com"
+
+# Cloud Posse incubator repo of helm charts
 - name: "cloudposse-incubator"
   url: "https://charts.cloudposse.com/incubator/"
+
+# CoreOS Stable helm charts
 - name: "coreos-stable"
   url: "https://s3-us-west-2.amazonaws.com/coreos-charts/stable"
 
@@ -45,17 +52,16 @@ releases:
     - name: "env.open.ALLOW_OVERWRITE"
       value: "true"
 
-    # username for basic http authentication
-    ## Required: CHARTMUSEUM_BASIC_AUTH_USER
+    ## Required: CHARTMUSEUM_BASIC_AUTH_USER; e.g. server
     - name: "env.secret.BASIC_AUTH_USER"
       value: '{{ env "CHARTMUSEUM_BASIC_AUTH_USER" }}'
 
     # password for basic http authentication
     ## Required: CHARTMUSEUM_BASIC_AUTH_PASS
-    - name: "env.secret.BASIC_AUTH_PASS"
+    - name: "env.secret.BASIC_AUTH_PASS"; e.g. 15041434-3DC2-42F8-9358-F8AED8780A66
       value: '{{ env "CHARTMUSEUM_BASIC_AUTH_PASS" }}'
 
-    # Resources
+    ### Resources
     - name: "resources.limits.cpu"
       value: "100m"
 
@@ -68,7 +74,7 @@ releases:
     - name: "requests.memory"
       value: "256Mi"
 
-    # Persistence
+    ### Persistence
     - name: "persistence.enabled"
       value: "true"
 
@@ -78,7 +84,7 @@ releases:
     - name: "persistence.size"
       value: "1Gi"
 
-    # ingress
+    ### Ingress
     - name: "ingress.enabled"
       value: "true"
 
@@ -88,29 +94,27 @@ releases:
     - name: "ingress.annotations.kubernetes\.io/tls-acme"
       value: "true"
 
-    # Host name for chart museum.
     ## Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.cloudposse.org
     - name: "ingress.annotations.external-dns\.alpha.kubernetes\.io/hostname"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
-    # Ingress endpoint for chart museum.
     ## Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.cloudposse.org
     - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
-    # DNS TTL for CHARTMUSEUM_HOSTNAME
+    # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
     - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
       value: "60"
 
-    ## Required: CHARTMUSEUM_HOSTNAME
+    ## Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/"
 
-    ## Optional: CHARTMUSEUM_SECRET_NAME
+    ## Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
     - name: "ingress.tls[0].secretName"
       value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
 
-    ## Required: CHARTMUSEUM_HOSTNAME
+    ## Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
@@ -143,57 +147,57 @@ releases:
     - name: gateway.ingress.annotations.kubernetes\.io/tls-acme
       value: true
 
-    ## Required: CHART_REPO_GATEWAY_HOSTNAME
+    ## Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.cloudposse.org
     - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname
       value: {{ env "CHART_REPO_GATEWAY_HOSTNAME" }}
 
-    ## Required: CHART_REPO_GATEWAY_INGRESS
+    ## Required: CHART_REPO_GATEWAY_INGRESS; e.g. ingress.us-west-2.cloudposse.org
     - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target
       value: {{ env "CHART_REPO_GATEWAY_INGRESS" }}
 
-    ## Optional: CHART_REPO_GATEWAY_TTL
+    ## Optional: CHART_REPO_GATEWAY_TTL; e.g. 60
     - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl
       value: {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}
 
-    ## Required: CHART_REPO_GATEWAY_HOSTNAME
+    ## Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.cloudposse.org
     - name: gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]
       value: "/api"
 
-    ## Optional: CHART_REPO_GATEWAY_SECRET_NAME
+    ## Optional: CHART_REPO_GATEWAY_SECRET_NAME; e.g. chart-repo-gateway-tls
     - name: gateway.ingress.tls.secretName
-      value: {{ env "CHART_REPO_GATEWAY_SECRET_NAME" }}
+      value: {{ coalesce (env "CHART_REPO_GATEWAY_SECRET_NAME") "chart-repo-gateway-tls" }}
 
-    ## Required: CHART_REPO_GATEWAY_HOSTNAME"
+    ## Required: CHART_REPO_GATEWAY_HOSTNAME"; e.g. gateway.charts.us-west-2.cloudposse.org
     - name: gateway.ingress.tls.hosts[0]
       value: {{ env "CHART_REPO_GATEWAY_HOSTNAME" }}
 
-    ## Optional: CHART_REPO_GATEWAY_REPLICA_COUNT"
+    ## Optional: CHART_REPO_GATEWAY_REPLICA_COUNT"; e.g. 2
     - name: gateway.replicaCount
-      value: {{ env "CHART_REPO_GATEWAY_REPLICA_COUNT" }}
+      value: {{ coalesce (env "CHART_REPO_GATEWAY_REPLICA_COUNT") "2" }}
 
-    ## Optional: CHART_REPO_IMAGE_TAG
+    ## Optional: CHART_REPO_IMAGE_TAG; e.g. v0.4.2
     - name: gateway.image.tag
-      value: {{ env "CHART_REPO_IMAGE_TAG" }}
+      value: {{ coalesce (env "CHART_REPO_IMAGE_TAG") "v0.4.2" }}
 
-    ## Required: CHART_REPO_STORAGE
+    ## Optional: CHART_REPO_STORAGE; e.g. amazon
     - name: gateway.env.open.STORAGE
-      value: {{ env "CHART_REPO_STORAGE" }}
+      value: {{ coalesce (env "CHART_REPO_STORAGE") "amazon" }}
 
-    ## Required: CHART_REPO_STORAGE_AMAZON_BUCKET
+    ## Required: CHART_REPO_STORAGE_AMAZON_BUCKET; e.g. cp-staging-chart-repo
     - name: gateway.env.open.STORAGE_AMAZON_BUCKET
       value: {{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}
 
-    ## Optional: CHART_REPO_STORAGE_AMAZON_PREFIX
+    ## Optional: CHART_REPO_STORAGE_AMAZON_PREFIX; e.g. /
     - name: gateway.env.open.STORAGE_AMAZON_PREFIX
-      value: {{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" }}
+      value: {{ coalesce (env "CHART_REPO_STORAGE_AMAZON_PREFIX") "/" }}
 
-    ## Required: CHART_REPO_STORAGE_AMAZON_REGION
+    ## Optional: CHART_REPO_STORAGE_AMAZON_REGION; e.g. us-west-2
     - name: gateway.env.open.STORAGE_AMAZON_REGION
-      value: {{ env "CHART_REPO_STORAGE_AMAZON_REGION" }}
+      value: {{ coalesce (env "CHART_REPO_STORAGE_AMAZON_REGION") (env "AWS_REGION") }}
 
-    ## Optional: CHART_REPO_DEBUG
+    ## Optional: CHART_REPO_DEBUG; e.g. true
     - name: gateway.env.open.DEBUG
-      value: {{ env "CHART_REPO_DEBUG" }}
+      value: {{ coalesce (env "CHART_REPO_DEBUG") "true" }}
 
     - name: gateway.env.open.DISABLE_API
       value: false
@@ -201,79 +205,82 @@ releases:
     - name: gateway.env.open.ALLOW_OVERWRITE
       value: true
 
-    ## Required: CHART_REPO_GATEWAY_BASIC_AUTH_USER
+    ## Optional: CHART_REPO_GATEWAY_BASIC_AUTH_USER; e.g. gateway
     - name: gateway.env.secret.BASIC_AUTH_USER
-      value: {{ env "CHART_REPO_GATEWAY_BASIC_AUTH_USER" }}
+      value: {{ coalesce (env "CHART_REPO_GATEWAY_BASIC_AUTH_USER") "gateway" }}
 
-    ## Required: CHART_REPO_GATEWAY_BASIC_AUTH_PASS
+    ## Required: CHART_REPO_GATEWAY_BASIC_AUTH_PASS; e.g. 6D847893-6494-45FE-96D5-A46DB198E41A
     - name: gateway.env.secret.BASIC_AUTH_PASS
       value: {{ env "CHART_REPO_GATEWAY_BASIC_AUTH_PASS" }}
 
-    ## Required: CHART_REPO_STORAGE_AWS_IAM_ROLE
+    ## Required: CHART_REPO_STORAGE_AWS_IAM_ROLE; e.g. cp-staging-chart-repo
     - name: gateway.replica.annotations.iam\.amazonaws\.com/role
       value: {{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}
 
     # Server config
     - name: server.enabled
       value: true
+
     - name: server.ingress.enabled
       value: true
+
     - name: server.ingress.annotations.kubernetes\.io/ingress\.class
       value: nginx
+
     - name: server.ingress.annotations.kubernetes\.io/tls-acme
       value: true
 
-    ## Required: CHART_REPO_SERVER_HOSTNAME
+    ## Required: CHART_REPO_SERVER_HOSTNAME; charts.us-west-2.cloudposse.org
     - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname
       value: {{ env "CHART_REPO_SERVER_HOSTNAME" }}
 
-    ## Required: CHART_REPO_SERVER_INGRESS
+    ## Required: CHART_REPO_SERVER_INGRESS; ingress.us-west-2.cloudposse.org
     - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target
       value: {{ env "CHART_REPO_SERVER_INGRESS" }}
 
-    ## Optional: CHART_REPO_SERVER_TTL
+    ## Optional: CHART_REPO_SERVER_TTL; e.g. 60
     - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl
       value: {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}
 
-    ## Required: CHART_REPO_SERVER_HOSTNAME
+    ## Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
     - name: gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]
       value: "/api"
 
-    ## Required: CHART_REPO_SERVER_SECRET_NAME
+    ## Required: CHART_REPO_SERVER_SECRET_NAME; e.g. chart-repo-server-tls
     - name: server.ingress.tls.secretName
-      value: {{ env "CHART_REPO_SERVER_SECRET_NAME" }}
+      value: {{ coalesce (env "CHART_REPO_SERVER_SECRET_NAME") "chart-repo-server-tls" }}
 
-    ## Required: CHART_REPO_SERVER_HOSTNAME
+    ## Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
     - name: server.ingress.tls.hosts[0]
       value: {{ env "CHART_REPO_SERVER_HOSTNAME" }}
 
-    ## Optional: CHART_REPO_SERVER_REPLICA_COUNT
+    ## Optional: CHART_REPO_SERVER_REPLICA_COUNT; e.g. 2
     - name: server.replicaCount
-      value: {{ env "CHART_REPO_SERVER_REPLICA_COUNT" }}
+      value: {{ coalesce (env "CHART_REPO_SERVER_REPLICA_COUNT") "2" }}
 
-    ## Optional: CHART_REPO_IMAGE_TAG
+    ## Optional: CHART_REPO_IMAGE_TAG; e.g. v0.4.2
     - name: server.image.tag
       value: {{ env "CHART_REPO_IMAGE_TAG" }}
 
-    ## Required: CHART_REPO_STORAGE
-    - name: server.env.open.STORAGE
-      value: {{ env "CHART_REPO_STORAGE" }}
+    ## Optional: CHART_REPO_STORAGE; e.g. amazon
+    - name: server.env.open.STORAGE; e.g. amazon
+      value: {{ coalesce (env "CHART_REPO_STORAGE") "amazon" }}
 
-    ## Required: CHART_REPO_STORAGE_AMAZON_BUCKET
+    ## Required: CHART_REPO_STORAGE_AMAZON_BUCKET; e.g. cp-staging-chart-repo
     - name: server.env.open.STORAGE_AMAZON_BUCKET
       value: {{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}
 
-    ## Optional: CHART_REPO_STORAGE_AMAZON_PREFIX
+    ## Optional: CHART_REPO_STORAGE_AMAZON_PREFIX; e.g. "/"
     - name: server.env.open.STORAGE_AMAZON_PREFIX
-      value: {{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" }}
+      value: {{ coalesce (env "CHART_REPO_STORAGE_AMAZON_PREFIX") "/" }}
 
-    ## Required: CHART_REPO_STORAGE_AMAZON_REGION
+    ## Required: CHART_REPO_STORAGE_AMAZON_REGION; e.g. us-west-2
     - name: server.env.open.STORAGE_AMAZON_REGION
-      value: {{ env "CHART_REPO_STORAGE_AMAZON_REGION" }}
+      value: {{ coalesce (env "CHART_REPO_STORAGE_AMAZON_REGION") (env "AWS_REGION") }}
 
-    ## Optional: CHART_REPO_DEBUG
+    ## Optional: CHART_REPO_DEBUG; e.g. true
     - name: server.env.open.DEBUG
-      value: {{ env "CHART_REPO_DEBUG" }}
+      value: {{ coalesce (env "CHART_REPO_DEBUG") "true" }}
 
     - name: server.env.open.DISABLE_API
       value: true
@@ -281,15 +288,15 @@ releases:
     - name: server.env.open.ALLOW_OVERWRITE
       value: false
 
-    ## Required: CHART_REPO_SERVER_BASIC_AUTH_USER
+    ## Optional: CHART_REPO_SERVER_BASIC_AUTH_USER; e.g. server
     - name: server.env.secret.BASIC_AUTH_USER
-      value: {{ env "CHART_REPO_SERVER_BASIC_AUTH_USER" }}
+      value: {{ coalesce (env "CHART_REPO_SERVER_BASIC_AUTH_USER") "server" }}
 
-    ## Required: CHART_REPO_SERVER_BASIC_AUTH_PASS
+    ## Required: CHART_REPO_SERVER_BASIC_AUTH_PASS; e.g. A11FF4E0-69A4-4F0F-9B74-A586A3C563C2
     - name: server.env.secret.BASIC_AUTH_PASS
       value: {{ env "CHART_REPO_SERVER_BASIC_AUTH_PASS" }}
 
-    ## Required: CHART_REPO_STORAGE_AWS_IAM_ROLE
+    ## Required: CHART_REPO_STORAGE_AWS_IAM_ROLE; e.g. cp-staging-chart-repo
     - name: server.replica.annotations.iam\.amazonaws\.com/role
       value: {{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}
 
@@ -322,11 +329,11 @@ releases:
     - name: tolerations[0].effect
       value: NoSchedule
 
-    ## Required: EXTERNAL_DNS_TXT_OWNER_ID
+    ## Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. 11591833-F9CE-407C-8519-35A947DB1D87
     - name: txtOwnerId
       value: {{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}
 
-    ## Required: EXTERNAL_DNS_TXT_PREFIX
+    ## Required: EXTERNAL_DNS_TXT_PREFIX; e.g. us-west-2.staging.cloudposse.org
     - name: txtPrefix
       value: {{ env "EXTERNAL_DNS_TXT_PREFIX" }}
 
@@ -336,7 +343,7 @@ releases:
     - name: provider
       value: aws
 
-    ## Required: EXTERNAL_DNS_IAM_ROLE
+    ## Required: EXTERNAL_DNS_IAM_ROLE; e.g. cp-staging-external-dns
     - name: podAnnotations.iam\.amazonaws\.com/role
       value: {{ env "EXTERNAL_DNS_IAM_ROLE" }}
 
@@ -369,29 +376,29 @@ releases:
   chart: cloudposse-incubator/kube-lego
   version: 0.1.2
   set:
-    ## Optional: KUBE_LEGO_REPLICA_COUNT
+    ## Optional: KUBE_LEGO_REPLICA_COUNT; e.g. 1
     - name: replicaCount
       value: {{ coalesce (env "KUBE_LEGO_REPLICA_COUNT") "1" }}
 
-    ## Optional: KUBE_LEGO_DEBUG
+    ## Optional: KUBE_LEGO_DEBUG; e.g. false
     - name: debug
       value: {{ coalesce (env "KUBE_LEGO_DEBUG") "false" }}
 
     - name: image.repository
       value: jetstack/kube-lego
 
-    ## Optional: KUBE_LEGO_IMAGE_TAG
+    ## Optional: KUBE_LEGO_IMAGE_TAG; e.g. 0.1.2
     - name: image.tag
       value: {{ coalesce (env "KUBE_LEGO_IMAGE_TAG") "0.1.2" }}
 
     - name: image.pullPolicy
       value: IfNotPresent
 
-    ## Required: KUBE_LEGO_EMAIL
+    ## Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
     - name: lego.email
       value: {{ env "KUBE_LEGO_EMAIL") }}
 
-    ## Optional: KUBE_LEGO_PROD
+    ## Optional: KUBE_LEGO_PROD; e.g. true
     - name: lego.prod
       value: {{ coalesce (env "KUBE_LEGO_PROD") "true" }}
 
@@ -432,7 +439,7 @@ releases:
     - name: tolerations[0].effect
       value: NoSchedule
 
-    ## Required: AWS_REGION
+    ## Required: AWS_REGION; e.g. us-west-2
     - name: aws.region
       value: {{ env "AWS_REGION" }}
 
@@ -473,14 +480,14 @@ releases:
   chart: cloudposse-incubator/nginx-ingress
   version: 0.1.7
   set:
-    ## Optional: NGINX_INGRESS_REPLICA_COUNT
+    ## Optional: NGINX_INGRESS_REPLICA_COUNT; e.g. 4
     - name: replicaCount
       value: {{ coalesce (env "NGINX_INGRESS_REPLICA_COUNT") "4" }}
 
     - name: image.repository
       value: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
 
-    ## Optional: NGINX_INGRESS_IMAGE_TAG
+    ## Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.11.0
     - name: image.tag
       value: {{ coalesce (env "NGINX_INGRESS_IMAGE_TAG") "0.11.0" }}
 
@@ -499,7 +506,7 @@ releases:
     - name: resources.requests.memory
       value: "128Mi"
 
-    ## Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT
+    ## Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT; e.g. 2
     - name: nginx-default-backend.replicaCount
       value: {{ coalesce (env "NGINX_INGRESS_BACKEND_REPLICA_COUNT") "2" }}
 
@@ -515,7 +522,7 @@ releases:
     - name: nginx-default-backend.resources.requests.memory
       value: "128Mi"
 
-    ## Required: NGINX_INGRESS_HOSTNAME
+    ## Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
     - name: service.annotations.external-dns\.alpha\.kubernetes\.io/hostname
       value: {{ env "NGINX_INGRESS_HOSTNAME" }}
 

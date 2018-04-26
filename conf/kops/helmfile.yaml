@@ -45,6 +45,8 @@ releases:
     default: "true"
   chart: "stable/chartmuseum"
   version: "1.3.1"
+  values: 
+    - "values/chartmuseum.yaml"
   set: 
     - name: "replicaCount"
       value: "1"
@@ -94,10 +96,11 @@ releases:
       value: "true"
 
     - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
-      value: "!!bool nginx"
+      value: "nginx"
     
-    - name: "ingress.annotations.kubernetes\\.io/tls-acme"
-      value: "!!bool true"
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
@@ -108,8 +111,9 @@ releases:
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
     # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
-    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: "!!int 60"
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: "60"
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
@@ -140,6 +144,8 @@ releases:
     default: "false"
   chart: "cloudposse-incubator/chart-repo"
   version: "0.2.1"
+  values: 
+    - "values/chart-repo.yaml"
   set:
     ## Gateway config
     - name: "gateway.enabled"
@@ -151,8 +157,9 @@ releases:
     - name: "gateway.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
 
-    - name: "gateway.ingress.annotations.kubernetes\\.io/tls-acme"
-      value: true
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "gateway.ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
 
     ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
@@ -163,8 +170,9 @@ releases:
       value: '{{ env "CHART_REPO_GATEWAY_INGRESS" }}'
 
     ### Optional: CHART_REPO_GATEWAY_TTL; e.g. 60
-    - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: '!!int {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}'
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}
 
     ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]'
@@ -204,7 +212,7 @@ releases:
 
     ### Optional: CHART_REPO_DEBUG; e.g. true
     - name: "gateway.env.open.DEBUG"
-      value: '!!bool {{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
+      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
 
     - name: "gateway.env.open.DISABLE_API"
       value: false
@@ -234,8 +242,9 @@ releases:
     - name: "server.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
 
-    - name: "server.ingress.annotations.kubernetes\\.io/tls-acme"
-      value: true
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "server.ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
 
     ### Required: CHART_REPO_SERVER_HOSTNAME; charts.us-west-2.staging.cloudposse.org
     - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
@@ -246,8 +255,9 @@ releases:
       value: '{{ env "CHART_REPO_SERVER_INGRESS" }}'
 
     ### Optional: CHART_REPO_SERVER_TTL; e.g. 60
-    - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: '!!int {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}'
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}
 
     ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]'
@@ -287,7 +297,7 @@ releases:
 
     ### Optional: CHART_REPO_DEBUG; e.g. true
     - name: "server.env.open.DEBUG"
-      value: '!!bool {{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
+      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
 
     - name: "server.env.open.DISABLE_API"
       value: true
@@ -464,10 +474,10 @@ releases:
       value: '{{ env "AWS_REGION" }}'
 
     - name: "extraArgs.auto-discover-base-arn"
-      value: "!!bool true"
+      value: true
 
     - name: "host.iptables"
-      value: "!!bool true"
+      value: true
 
     - name: "host.interface"
       value: "cali+"
@@ -549,5 +559,6 @@ releases:
       value: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
 
     ### Optional: NGINX_INGRESS_TTL; e.g. 60
-    - name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: '!!int {{ coalesce (env "NGINX_INGRESS_TTL") "60" }}'
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: {{ coalesce (env "NGINX_INGRESS_TTL") "60" }}

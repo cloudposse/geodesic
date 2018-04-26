@@ -76,6 +76,28 @@ releases:
   - value: "true"
 
   - name: "ingress.annotations.kubernetes\.io/ingress.class"
+    value: "nginx"
+    kubernetes.io/tls-acme: "true"
+
+  # Host name for chart museum. e.g. charts.us-west-2.cloudposse.org
+  - name: "ingress.annotations.external-dns\.alpha.kubernetes\.io/hostname"
+	value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
+
+  # Ingress endpoint for chart museum. e.g. ingress.us-west-2.cloudposse.org
+  - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
+    value: '{{ env "CHARTMUSEUM_INGRESS" }}'
+
+  - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
+    value: "60"
+
+  - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
+    value: "/"
+
+  - name: "ingress.tls[0].secretName"
+    value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
+
+  - name: "ingress.tls[0].hosts[0]"
+    value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
 ##
 ## Chart Repo

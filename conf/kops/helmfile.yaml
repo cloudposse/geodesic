@@ -22,9 +22,10 @@ repositories:
 
 releases:
 
-##
-## Chart Museum
-##
+################################################################################
+## Chart Museum ################################################################
+################################################################################
+
 - name: chartmuseum
   namespace: kube-system
   labels:
@@ -45,10 +46,12 @@ releases:
       value: "true"
 
     # username for basic http authentication
+    ## Required: CHARTMUSEUM_BASIC_AUTH_USER
     - name: "env.secret.BASIC_AUTH_USER"
       value: '{{ env "CHARTMUSEUM_BASIC_AUTH_USER" }}'
 
     # password for basic http authentication
+    ## Required: CHARTMUSEUM_BASIC_AUTH_PASS
     - name: "env.secret.BASIC_AUTH_PASS"
       value: '{{ env "CHARTMUSEUM_BASIC_AUTH_PASS" }}'
 
@@ -58,53 +61,67 @@ releases:
 
     - name: "resources.limits.memory"
       value: "512Mi"
+
     - name: "requests.cpu" 
       value: "5m"
+
     - name: "requests.memory"
       value: "256Mi"
 
-   # Persistence
-   - name: "persistence.enabled"
-     value: "true"
-   - name: "persistence.accessMode"
-     value: "ReadWriteOnce"
-   - name: "persistence.size"
-     value: "1Gi"
+    # Persistence
+    - name: "persistence.enabled"
+      value: "true"
 
-  # ingress
-  - name: "ingress.enabled"
-  - value: "true"
+    - name: "persistence.accessMode"
+      value: "ReadWriteOnce"
 
-  - name: "ingress.annotations.kubernetes\.io/ingress.class"
-    value: "nginx"
-    kubernetes.io/tls-acme: "true"
+    - name: "persistence.size"
+      value: "1Gi"
 
-  # Host name for chart museum. e.g. charts.us-west-2.cloudposse.org
-  - name: "ingress.annotations.external-dns\.alpha.kubernetes\.io/hostname"
-	value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
+    # ingress
+    - name: "ingress.enabled"
+      value: "true"
 
-  # Ingress endpoint for chart museum. e.g. ingress.us-west-2.cloudposse.org
-  - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
-    value: '{{ env "CHARTMUSEUM_INGRESS" }}'
+    - name: "ingress.annotations.kubernetes\.io/ingress.class"
+      value: "nginx"
+    
+    - name: "ingress.annotations.kubernetes\.io/tls-acme"
+      value: "true"
 
-  - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
-    value: "60"
+    # Host name for chart museum.
+    ## Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.cloudposse.org
+    - name: "ingress.annotations.external-dns\.alpha.kubernetes\.io/hostname"
+      value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
-  - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
-    value: "/"
+    # Ingress endpoint for chart museum.
+    ## Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.cloudposse.org
+    - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
+      value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
-  - name: "ingress.tls[0].secretName"
-    value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
+    # DNS TTL for CHARTMUSEUM_HOSTNAME
+    - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
+      value: "60"
 
-  - name: "ingress.tls[0].hosts[0]"
-    value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
+    ## Required: CHARTMUSEUM_HOSTNAME
+    - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
+      value: "/"
 
-##
-## Chart Repo
-##
+    ## Optional: CHARTMUSEUM_SECRET_NAME
+    - name: "ingress.tls[0].secretName"
+      value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
 
-# https://github.com/cloudposse/charts/blob/master/incubator/chart-repo/values.yaml
-# https://github.com/kubernetes/charts/blob/master/stable/chartmuseum/values.yaml
+    ## Required: CHARTMUSEUM_HOSTNAME
+    - name: "ingress.tls[0].hosts[0]"
+      value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
+
+################################################################################
+## Chart Repo ##################################################################
+################################################################################
+
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/chart-repo/values.yaml
+#   - https://github.com/kubernetes/charts/blob/master/stable/chartmuseum/values.yaml
+#
 - name: chart-repo
   namespace: kube-system
   labels:
@@ -116,46 +133,83 @@ releases:
     # Gateway config
     - name: gateway.enabled
       value: true
+
     - name: gateway.ingress.enabled
       value: true
+
     - name: gateway.ingress.annotations.kubernetes\.io/ingress\.class
       value: nginx
+
     - name: gateway.ingress.annotations.kubernetes\.io/tls-acme
       value: true
+
+    ## Required: CHART_REPO_GATEWAY_HOSTNAME
     - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname
       value: {{ env "CHART_REPO_GATEWAY_HOSTNAME" }}
+
+    ## Required: CHART_REPO_GATEWAY_INGRESS
     - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target
       value: {{ env "CHART_REPO_GATEWAY_INGRESS" }}
+
+    ## Optional: CHART_REPO_GATEWAY_TTL
     - name: gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl
       value: {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}
+
+    ## Required: CHART_REPO_GATEWAY_HOSTNAME
     - name: gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]
       value: "/api"
+
+    ## Optional: CHART_REPO_GATEWAY_SECRET_NAME
     - name: gateway.ingress.tls.secretName
-      value: {{ env "CHART_REPO_GATEWAY_INGRESS_TLS_SECRET_NAME" }}
+      value: {{ env "CHART_REPO_GATEWAY_SECRET_NAME" }}
+
+    ## Required: CHART_REPO_GATEWAY_HOSTNAME"
     - name: gateway.ingress.tls.hosts[0]
       value: {{ env "CHART_REPO_GATEWAY_HOSTNAME" }}
+
+    ## Optional: CHART_REPO_GATEWAY_REPLICA_COUNT"
     - name: gateway.replicaCount
       value: {{ env "CHART_REPO_GATEWAY_REPLICA_COUNT" }}
+
+    ## Optional: CHART_REPO_IMAGE_TAG
     - name: gateway.image.tag
       value: {{ env "CHART_REPO_IMAGE_TAG" }}
+
+    ## Required: CHART_REPO_STORAGE
     - name: gateway.env.open.STORAGE
       value: {{ env "CHART_REPO_STORAGE" }}
+
+    ## Required: CHART_REPO_STORAGE_AMAZON_BUCKET
     - name: gateway.env.open.STORAGE_AMAZON_BUCKET
       value: {{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}
+
+    ## Optional: CHART_REPO_STORAGE_AMAZON_PREFIX
     - name: gateway.env.open.STORAGE_AMAZON_PREFIX
       value: {{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" }}
+
+    ## Required: CHART_REPO_STORAGE_AMAZON_REGION
     - name: gateway.env.open.STORAGE_AMAZON_REGION
       value: {{ env "CHART_REPO_STORAGE_AMAZON_REGION" }}
+
+    ## Optional: CHART_REPO_DEBUG
     - name: gateway.env.open.DEBUG
       value: {{ env "CHART_REPO_DEBUG" }}
+
     - name: gateway.env.open.DISABLE_API
       value: false
+
     - name: gateway.env.open.ALLOW_OVERWRITE
       value: true
+
+    ## Required: CHART_REPO_GATEWAY_BASIC_AUTH_USER
     - name: gateway.env.secret.BASIC_AUTH_USER
       value: {{ env "CHART_REPO_GATEWAY_BASIC_AUTH_USER" }}
+
+    ## Required: CHART_REPO_GATEWAY_BASIC_AUTH_PASS
     - name: gateway.env.secret.BASIC_AUTH_PASS
       value: {{ env "CHART_REPO_GATEWAY_BASIC_AUTH_PASS" }}
+
+    ## Required: CHART_REPO_STORAGE_AWS_IAM_ROLE
     - name: gateway.replica.annotations.iam\.amazonaws\.com/role
       value: {{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}
 
@@ -168,48 +222,86 @@ releases:
       value: nginx
     - name: server.ingress.annotations.kubernetes\.io/tls-acme
       value: true
+
+    ## Required: CHART_REPO_SERVER_HOSTNAME
     - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname
       value: {{ env "CHART_REPO_SERVER_HOSTNAME" }}
+
+    ## Required: CHART_REPO_SERVER_INGRESS
     - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target
       value: {{ env "CHART_REPO_SERVER_INGRESS" }}
+
+    ## Optional: CHART_REPO_SERVER_TTL
     - name: server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl
       value: {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}
+
+    ## Required: CHART_REPO_SERVER_HOSTNAME
     - name: gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]
       value: "/api"
+
+    ## Required: CHART_REPO_SERVER_SECRET_NAME
     - name: server.ingress.tls.secretName
-      value: {{ env "CHART_REPO_SERVER_INGRESS_TLS_SECRET_NAME" }}
+      value: {{ env "CHART_REPO_SERVER_SECRET_NAME" }}
+
+    ## Required: CHART_REPO_SERVER_HOSTNAME
     - name: server.ingress.tls.hosts[0]
       value: {{ env "CHART_REPO_SERVER_HOSTNAME" }}
+
+    ## Optional: CHART_REPO_SERVER_REPLICA_COUNT
     - name: server.replicaCount
       value: {{ env "CHART_REPO_SERVER_REPLICA_COUNT" }}
+
+    ## Optional: CHART_REPO_IMAGE_TAG
     - name: server.image.tag
       value: {{ env "CHART_REPO_IMAGE_TAG" }}
+
+    ## Required: CHART_REPO_STORAGE
     - name: server.env.open.STORAGE
       value: {{ env "CHART_REPO_STORAGE" }}
+
+    ## Required: CHART_REPO_STORAGE_AMAZON_BUCKET
     - name: server.env.open.STORAGE_AMAZON_BUCKET
       value: {{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}
+
+    ## Optional: CHART_REPO_STORAGE_AMAZON_PREFIX
     - name: server.env.open.STORAGE_AMAZON_PREFIX
       value: {{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" }}
+
+    ## Required: CHART_REPO_STORAGE_AMAZON_REGION
     - name: server.env.open.STORAGE_AMAZON_REGION
       value: {{ env "CHART_REPO_STORAGE_AMAZON_REGION" }}
+
+    ## Optional: CHART_REPO_DEBUG
     - name: server.env.open.DEBUG
       value: {{ env "CHART_REPO_DEBUG" }}
+
     - name: server.env.open.DISABLE_API
       value: true
+
     - name: server.env.open.ALLOW_OVERWRITE
       value: false
+
+    ## Required: CHART_REPO_SERVER_BASIC_AUTH_USER
     - name: server.env.secret.BASIC_AUTH_USER
       value: {{ env "CHART_REPO_SERVER_BASIC_AUTH_USER" }}
+
+    ## Required: CHART_REPO_SERVER_BASIC_AUTH_PASS
     - name: server.env.secret.BASIC_AUTH_PASS
       value: {{ env "CHART_REPO_SERVER_BASIC_AUTH_PASS" }}
+
+    ## Required: CHART_REPO_STORAGE_AWS_IAM_ROLE
     - name: server.replica.annotations.iam\.amazonaws\.com/role
       value: {{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}
 
-##
-## External DNS
-##
+################################################################################
+## External DNS ################################################################
+################################################################################
 
-# https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
+#
+
 - name: external-dns
   namespace: kube-system
   labels:
@@ -220,36 +312,54 @@ releases:
   set:
     - name: nodeSelector.kubernetes\.io/role
       value: master
+
     - name: extraEnv.EXTERNAL_DNS_SOURCE
       value: service\ningress"
+
     - name: tolerations[0].key
       value: node-role.kubernetes.io/master
+
     - name: tolerations[0].effect
       value: NoSchedule
+
+    ## Required: EXTERNAL_DNS_TXT_OWNER_ID
     - name: txtOwnerId
       value: {{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}
+
+    ## Required: EXTERNAL_DNS_TXT_PREFIX
     - name: txtPrefix
       value: {{ env "EXTERNAL_DNS_TXT_PREFIX" }}
+
     - name: publishInternalServices
       value: true
+
     - name: provider
       value: aws
+
+    ## Required: EXTERNAL_DNS_IAM_ROLE
     - name: podAnnotations.iam\.amazonaws\.com/role
       value: {{ env "EXTERNAL_DNS_IAM_ROLE" }}
+
     - name: resources.limits.cpu
       value: 200m
+
     - name: resources.limits.memory
       value: 256Mi
+
     - name: resources.requests.cpu
       value: 100m
     - name: resources.requests.memory
       value: 128Mi
 
-## 
-## Kube Lego - Automatic Let's Encrypt for Ingress
-##
+################################################################################
+## Kube Lego - Automatic Let's Encrypt for Ingress  ############################
+################################################################################
 
-# https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
+#
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
+#
+
 - name: kube-lego
   namespace: kube-system
   labels:
@@ -259,36 +369,55 @@ releases:
   chart: cloudposse-incubator/kube-lego
   version: 0.1.2
   set:
+    ## Optional: KUBE_LEGO_REPLICA_COUNT
     - name: replicaCount
       value: {{ coalesce (env "KUBE_LEGO_REPLICA_COUNT") "1" }}
+
+    ## Optional: KUBE_LEGO_DEBUG
     - name: debug
       value: {{ coalesce (env "KUBE_LEGO_DEBUG") "false" }}
+
     - name: image.repository
       value: jetstack/kube-lego
+
+    ## Optional: KUBE_LEGO_IMAGE_TAG
     - name: image.tag
       value: {{ coalesce (env "KUBE_LEGO_IMAGE_TAG") "0.1.2" }}
+
     - name: image.pullPolicy
       value: IfNotPresent
+
+    ## Required: KUBE_LEGO_EMAIL
     - name: lego.email
-      value: {{ if (env "KUBE_LEGO_EMAIL") env "KUBE_LEGO_EMAIL" }}{{ else }}{{ fail "KUBE_LEGO_EMAIL not set" }}{{ end }}
+      value: {{ env "KUBE_LEGO_EMAIL") }}
+
+    ## Optional: KUBE_LEGO_PROD
     - name: lego.prod
       value: {{ coalesce (env "KUBE_LEGO_PROD") "true" }}
+
     - name: pod.internalPort
       value: 8080
+
     - name: resources.limits.cpu
       value: 200m
+
     - name: resources.limits.memory
       value: 256Mi
+
     - name: resources.requests.cpu
       value: 50m
+
     - name: resources.requests.memory
       value: 128Mi
 
-##
-## Kube2IAM - AWS Assumed Roles for Pods
-## 
+################################################################################
+## Kube2IAM - AWS Assumed Roles for Pods #######################################
+################################################################################
 
-# https://github.com/kubernetes/charts/blob/master/stable/kube2iam/values.yaml
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/kube2iam/values.yaml
+#
 - name: kube2iam
   namespace: kube-system
   labels:
@@ -299,30 +428,43 @@ releases:
   set:
     - name: tolerations[0].key
       value: node-role.kubernetes.io/master
+
     - name: tolerations[0].effect
       value: NoSchedule
+
+    ## Required: AWS_REGION
     - name: aws.region
       value: {{ env "AWS_REGION" }}
+
     - name: extraArgs.auto-discover-base-arn
       value: true
+
     - name: host.iptables
       value: true
+
     - name: host.interface
       value: cali+
+
     - name: resources.limits.cpu
       value: 200m
+
     - name: resources.limits.memory
       value: 256Mi
+
     - name: resources.requests.cpu
       value: 50m
+
     - name: resources.requests.memory
       value: 128Mi
       
-## 
-## NGINX Ingress Controller
-##
+################################################################################
+## NGINX Ingress Controller ####################################################
+################################################################################
 
-# https://github.com/cloudposse/charts/blob/master/incubator/nginx-ingress/values.yaml
+# 
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/nginx-ingress/values.yaml
+#
 - name: nginx-ingress
   namespace: kube-system
   labels:
@@ -331,33 +473,51 @@ releases:
   chart: cloudposse-incubator/nginx-ingress
   version: 0.1.7
   set:
+    ## Optional: NGINX_INGRESS_REPLICA_COUNT
     - name: replicaCount
       value: {{ coalesce (env "NGINX_INGRESS_REPLICA_COUNT") "4" }}
+
     - name: image.repository
       value: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+
+    ## Optional: NGINX_INGRESS_IMAGE_TAG
     - name: image.tag
       value: {{ coalesce (env "NGINX_INGRESS_IMAGE_TAG") "0.11.0" }}
+
     - name: image.pullPolicy
       value: "IfNotPresent"
+
     - name: resources.limits.cpu
       value: "200m"
+
     - name: resources.limits.memory
       value: "256Mi"
+
     - name: resources.requests.cpu
       value: "50m"
+
     - name: resources.requests.memory
       value: "128Mi"
+
+    ## Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT
     - name: nginx-default-backend.replicaCount
       value: {{ coalesce (env "NGINX_INGRESS_BACKEND_REPLICA_COUNT") "2" }}
+
     - name: nginx-default-backend.resources.limits.cpu
       value: "200m"
+
     - name: nginx-default-backend.resources.limits.memory
       value: "256Mi"
+
     - name: nginx-default-backend.resources.requests.cpu
       value: "50m"
+
     - name: nginx-default-backend.resources.requests.memory
       value: "128Mi"
+
+    ## Required: NGINX_INGRESS_HOSTNAME
     - name: service.annotations.external-dns\.alpha\.kubernetes\.io/hostname
-      value: {{ env "NGINX_INGRESS_EXTERNAL_DNS_ALPHA_KUBERNETES_HOSTNAME" }}
+      value: {{ env "NGINX_INGRESS_HOSTNAME" }}
+
     - name: service.annotations.external-dns\.alpha\.kubernetes\.io/ttl
       value: "60"

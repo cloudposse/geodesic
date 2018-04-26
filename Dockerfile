@@ -157,10 +157,10 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
 #
 # Install helmfile
 #
-ENV HELMFILE_VERSION 0.11
-RUN curl --fail -sSL -o /usr/local/bin/helmfile https://github.com/roboll/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 \
+ENV HELMFILE_VENDOR cloudposse
+ENV HELMFILE_VERSION 0.13.0-cloudposse
+RUN curl --fail -sSL -o /usr/local/bin/helmfile https://github.com/${HELMFILE_VENDOR}/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 \
     && chmod +x /usr/local/bin/helmfile
-
 
 #
 # Install packer

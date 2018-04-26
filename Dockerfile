@@ -14,14 +14,14 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 USER root
 
 # Install common packages
+ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
+                 iputils drill gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
+                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat"
+ENV APK_PACKAGES=${APK_PACKAGES}
+
 RUN apk update \
-    && apk add unzip curl tar \
-          python make bash vim jq figlet \
-          openssl openssh-client sshpass iputils drill \
-          gcc libffi-dev python-dev musl-dev openssl-dev py-pip py-virtualenv \
-          git coreutils less groff bash-completion \
-          fuse syslog-ng libc6-compat && \
-          mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
+    && apk add ${APK_PACKAGES} \
+    && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
     && mkdir -p /conf \
     && touch /conf/.gitconfig \
 
@@ -34,14 +34,14 @@ WORKDIR /tmp
 # 
 # Install the simple cloudposse package manager
 #
-ARG PACKAGES_VERSION=0.1.4
+ARG PACKAGES_VERSION=0.1.5
 ENV PACKAGES_VERSION ${PACKAGES_VERSION}
 RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/packages.git /packages && rm -rf /packages/.git
 
 #
 # Install packges using the package manager
 #
-ARG PACKAGES="fetch kubectx kubens"
+ARG PACKAGES="fetch kubectx kubens terragrunt"
 ENV PACKAGES ${PACKAGES}
 RUN make -C /packages/install ${PACKAGES}
 

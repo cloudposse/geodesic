@@ -93,11 +93,11 @@ releases:
     - name: "ingress.annotations.kubernetes\.io/tls-acme"
       value: "true"
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\.alpha.kubernetes\.io/hostname"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
-    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.cloudposse.org
+    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
@@ -105,7 +105,7 @@ releases:
     - name: "ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
       value: "60"
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/"
 
@@ -113,7 +113,7 @@ releases:
     - name: "ingress.tls[0].secretName"
       value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
@@ -148,11 +148,11 @@ releases:
     - name: "gateway.ingress.annotations.kubernetes\.io/tls-acme"
       value: true
 
-    ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: "gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname"
       value: '{{ env "CHART_REPO_GATEWAY_HOSTNAME" }}'
 
-    ### Required: CHART_REPO_GATEWAY_INGRESS; e.g. ingress.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_GATEWAY_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
     - name: "gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
       value: '{{ env "CHART_REPO_GATEWAY_INGRESS" }}'
 
@@ -160,7 +160,7 @@ releases:
     - name: "gateway.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
       value: '{{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}'
 
-    ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/api"
 
@@ -168,7 +168,7 @@ releases:
     - name: "gateway.ingress.tls.secretName"
       value: '{{ coalesce (env "CHART_REPO_GATEWAY_SECRET_NAME") "chart-repo-gateway-tls" }}'
 
-    ### Required: CHART_REPO_GATEWAY_HOSTNAME"; e.g. gateway.charts.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_GATEWAY_HOSTNAME"; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: "gateway.ingress.tls.hosts[0]"
       value: '{{ env "CHART_REPO_GATEWAY_HOSTNAME" }}'
 
@@ -231,11 +231,11 @@ releases:
     - name: "server.ingress.annotations.kubernetes\.io/tls-acme"
       value: true
 
-    ### Required: CHART_REPO_SERVER_HOSTNAME; charts.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_SERVER_HOSTNAME; charts.us-west-2.staging.cloudposse.org
     - name: "server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/hostname"
       value: '{{ env "CHART_REPO_SERVER_HOSTNAME" }}'
 
-    ### Required: CHART_REPO_SERVER_INGRESS; ingress.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_SERVER_INGRESS; ingress.us-west-2.staging.cloudposse.org
     - name: "server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/target"
       value: '{{ env "CHART_REPO_SERVER_INGRESS" }}'
 
@@ -243,7 +243,7 @@ releases:
     - name: "server.ingress.annotations.external-dns\.alpha\.kubernetes\.io/ttl"
       value: '{{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}'
 
-    ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/api"
 
@@ -251,7 +251,7 @@ releases:
     - name: "server.ingress.tls.secretName"
       value: '{{ coalesce (env "CHART_REPO_SERVER_SECRET_NAME") "chart-repo-server-tls" }}'
 
-    ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.cloudposse.org
+    ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "server.ingress.tls.hosts[0]"
       value: '{{ env "CHART_REPO_SERVER_HOSTNAME" }}'
 

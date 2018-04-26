@@ -414,7 +414,7 @@ releases:
 
     ### Optional: KUBE_LEGO_IMAGE_TAG; e.g. 0.1.2
     - name: "image.tag"
-      value: '{{ coalesce (env "KUBE_LEGO_IMAGE_TAG") "0.1.2" }}'
+      value: '{{ coalesce (env "KUBE_LEGO_IMAGE_TAG") "0.1.5" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"

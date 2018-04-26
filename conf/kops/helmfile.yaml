@@ -5,7 +5,7 @@
 #
 # Usage:
 #   
-#   helmfile --selector namespace=kube-system,name!=chart-repo sync
+#   helmfile --selector namespace=kube-system,chart!=chart-repo sync
 #
 # References: 
 #   - https://github.com/roboll/helmfile
@@ -30,7 +30,7 @@ releases:
 ## Chart Museum ################################################################
 ################################################################################
 
-- name: "chartmuseum"
+- name: "charts"
   namespace: "kube-system"
   labels:
     chart: "chartmuseum"
@@ -310,7 +310,7 @@ releases:
 #   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
 #
 
-- name: "external-dns"
+- name: "dns"
   namespace: "kube-system"
   labels:
     chart: "external-dns"
@@ -373,7 +373,7 @@ releases:
 #   - https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
 #
 
-- name: "kube-lego"
+- name: "tls"
   namespace: "kube-system"
   labels:
     chart: "kube-lego"
@@ -437,7 +437,7 @@ releases:
 # References:
 #   - https://github.com/kubernetes/charts/blob/master/stable/kube2iam/values.yaml
 #
-- name: "kube2iam"
+- name: "iam"
   namespace: "kube-system"
   labels:
     chart: "kube2iam"
@@ -486,7 +486,7 @@ releases:
 # References:
 #   - https://github.com/cloudposse/charts/blob/master/incubator/nginx-ingress/values.yaml
 #
-- name: "nginx-ingress"
+- name: "ingress"
   namespace: "kube-system"
   labels:
     chart: "nginx-ingress"

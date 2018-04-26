@@ -3,9 +3,15 @@
 ##
 
 #
-# Usage:
+# Examples:
 #   
-#   helmfile --selector namespace=kube-system,chart!=chart-repo sync
+#   Install all charts that belong in `kube-system` except for `chart-repo`
+#
+#     helmfile --selector namespace=kube-system,chart!=chart-repo sync
+#
+#   Install all default charts
+#
+#     helmfile --selector default=true sync
 #
 # References: 
 #   - https://github.com/roboll/helmfile
@@ -36,7 +42,7 @@ releases:
     chart: "chartmuseum"
     component: "platform"
     namespace: "kube-system"
-    required: "false"
+    default: "true"
   chart: "stable/chartmuseum"
   version: "1.3.1"
   set: 
@@ -87,14 +93,14 @@ releases:
     - name: "ingress.enabled"
       value: "true"
 
-    - name: "ingress.annotations.kubernetes\\.io/ingress.class"
-      value: "nginx"
+    - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
+      value: "!!bool nginx"
     
     - name: "ingress.annotations.kubernetes\\.io/tls-acme"
-      value: "true"
+      value: "!!bool true"
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
-    - name: "ingress.annotations.external-dns\\.alpha.kubernetes\\.io/hostname"
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
     ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
@@ -103,7 +109,7 @@ releases:
 
     # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: "60"
+      value: "!!int 60"
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
@@ -125,13 +131,13 @@ releases:
 #   - https://github.com/cloudposse/charts/blob/master/incubator/chart-repo/values.yaml
 #   - https://github.com/kubernetes/charts/blob/master/stable/chartmuseum/values.yaml
 #
-- name: "chart-repo"
+- name: "charts"
   namespace: "kube-system"
   labels:
     chart: "chart-repo"
     component: "platform"
     namespace: "kube-system"
-    required: "false"
+    default: "false"
   chart: "cloudposse-incubator/chart-repo"
   version: "0.2.1"
   set:
@@ -158,7 +164,7 @@ releases:
 
     ### Optional: CHART_REPO_GATEWAY_TTL; e.g. 60
     - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: '{{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}'
+      value: '!!int {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}'
 
     ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]'
@@ -198,7 +204,7 @@ releases:
 
     ### Optional: CHART_REPO_DEBUG; e.g. true
     - name: "gateway.env.open.DEBUG"
-      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
+      value: '!!bool {{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
 
     - name: "gateway.env.open.DISABLE_API"
       value: false
@@ -241,7 +247,7 @@ releases:
 
     ### Optional: CHART_REPO_SERVER_TTL; e.g. 60
     - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: '{{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}'
+      value: '!!int {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}'
 
     ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]'
@@ -281,7 +287,7 @@ releases:
 
     ### Optional: CHART_REPO_DEBUG; e.g. true
     - name: "server.env.open.DEBUG"
-      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
+      value: '!!bool {{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
 
     - name: "server.env.open.DISABLE_API"
       value: true
@@ -316,7 +322,7 @@ releases:
     chart: "external-dns"
     component: "ingress"
     namespace: "kube-system"
-    required: "true"
+    default: "true"
   chart: "stable/external-dns"
   version: "0.5.4"
   set:
@@ -379,7 +385,7 @@ releases:
     chart: "kube-lego"
     component: "ingress"
     namespace: "kube-system"
-    required: "true"
+    default: "true"
 
   chart: "cloudposse-incubator/kube-lego"
   version: "0.1.2"
@@ -443,7 +449,7 @@ releases:
     chart: "kube2iam"
     component: "iam"
     namespace: "kube-system"
-    required: "true"
+    default: "true"
   chart: "stable/kube2iam"
   version: "0.8.5"
   set:
@@ -458,10 +464,10 @@ releases:
       value: '{{ env "AWS_REGION" }}'
 
     - name: "extraArgs.auto-discover-base-arn"
-      value: true
+      value: "!!bool true"
 
     - name: "host.iptables"
-      value: true
+      value: "!!bool true"
 
     - name: "host.interface"
       value: "cali+"
@@ -492,7 +498,7 @@ releases:
     chart: "nginx-ingress"
     component: "ingress"
     namespace: "kube-system"
-    required: "true"
+    default: "true"
   chart: "cloudposse-incubator/nginx-ingress"
   version: "0.1.7"
   set:
@@ -544,4 +550,4 @@ releases:
 
     ### Optional: NGINX_INGRESS_TTL; e.g. 60
     - name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-      value: '{{ coalesce (env "NGINX_INGRESS_TTL") "60" }}'
+      value: '!!int {{ coalesce (env "NGINX_INGRESS_TTL") "60" }}'

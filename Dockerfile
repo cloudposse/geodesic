@@ -170,7 +170,8 @@ RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/r
 ENV AWS_DATA_PATH=/localhost/.aws/
 ENV AWS_CONFIG_FILE=/localhost/.aws/config
 ENV AWS_SHARED_CREDENTIALS_FILE=/localhost/.aws/credentials
-
+ENV AWS_DEFAULT_PROFILE="default"
+ENV AWS_VAULT_ASSUME_ROLE_TTL=3300
 
 #
 # Install aws cli bundle

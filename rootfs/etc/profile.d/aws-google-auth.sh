@@ -2,7 +2,7 @@
 
 if [ -n "${AWS_GOOGLE_AUTH}" ]; then
 
-    export AWS_VAULT_ARGS=("-D -d=${AWS_VAULT_ASSUME_ROLE_TTL}")
+    export AWS_VAULT_ARGS=("-d=${AWS_VAULT_ASSUME_ROLE_TTL}")
 
     PROMPT_HOOKS+=("aws_vault_prompt")
     function aws_vault_prompt() {
@@ -35,9 +35,11 @@ if [ -n "${AWS_GOOGLE_AUTH}" ]; then
       shift
       if [ $# -eq 0 ]; then
         aws-google-auth ${AWS_VAULT_ARGS[@]} -p ${role} -R ${AWS_REGION} && \
+        export AWS_DEFAULT_PROFILE=${role}
         export AWS_VAULT=${role}
       else
         aws-google-auth ${AWS_VAULT_ARGS[@]} -p ${role} -R ${AWS_REGION} && \
+        export AWS_DEFAULT_PROFILE=${role}
         export AWS_VAULT=${role}
       fi
     }
@@ -45,6 +47,11 @@ if [ -n "${AWS_GOOGLE_AUTH}" ]; then
     # Alias for backwards compatbility
     function use-profile() {
       export AWS_VAULT=""
+      export AWS_DEFAULT_PROFILE=""
+      if [ "$#" -ne 1 ]; then
+        echo "Type 'use-profile profile_name region(optional)' to switch to another profile"
+        return 1
+      fi
       assume-role $*
     }
 fi

@@ -169,6 +169,8 @@ RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/r
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
 ENV AWS_CONFIG_FILE=/localhost/.aws/config
+ENV AWS_SHARED_CREDENTIALS_FILE=/localhost/.aws/credentials
+
 
 #
 # Install aws cli bundle
@@ -210,3 +212,4 @@ ENV GOOGLE_IDP_ID C01uo53i7
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c", "bootstrap"]
+

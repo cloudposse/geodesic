@@ -1,4 +1,4 @@
-FROM nikiai/geodesic-stretch:alpine
+FROM nikiai/geodesic-stretch:develop
 
 ENV BANNER="geodesic"
 

@@ -155,7 +155,8 @@ RUN if [ -n "${AWLESS_VERSION}" ]; then curl --fail -SL -O https://github.com/wa
     && /usr/local/bin/awless completion bash > /etc/bash_completion.d/awless.sh; \
     fi
 
-ENV AWSCLI_VERSION=1.15.10
+ENV AWSCLI_VERSION
+#=1.11.190
 RUN if [ "${AWSCLI_VERSION}" != "" ]; then \
     pip install --no-cache-dir awscli==${AWSCLI_VERSION} && \
     rm -rf /root/.cache && \

@@ -169,7 +169,7 @@ RUN if [ "${AWSCLI_VERSION}" != "" ]; then \
 #
 
 ENV AWS_GOOGLE_AUTH="0.0.24"
-RUN if [ -n "${AWS_GOOGLE_AUTH}" ]; then pip install --no-cache-dir botocore=1.10.10 aws-google-auth==${AWS_GOOGLE_AUTH} ; fi
+RUN if [ -n "${AWS_GOOGLE_AUTH}" ]; then pip install --no-cache-dir botocore==1.10.10 aws-google-auth==${AWS_GOOGLE_AUTH} ; fi
 
 #
 # Shell

@@ -30,3 +30,6 @@ install:
 
 run:
 	@geodesic
+
+base:
+	docker build $(DOCKER_BUILD_FLAGS) $$BUILD_ARGS -t nikiai/geodesic-stretch:$(DOCKER_TAG) -f $(DOCKER_FILE).base $(DOCKER_BUILD_PATH)

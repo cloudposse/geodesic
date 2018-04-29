@@ -1,45 +1,16 @@
-FROM alpine:3.7
+FROM nikiai/geodesic-stretc:alpine
 
 ENV BANNER="geodesic"
 
-# Install all packages as root
-USER root
-
-RUN echo -e "http://nl.alpinelinux.org/alpine/v3.6/main\nhttp://nl.alpinelinux.org/alpine/v3.6/community" > /etc/apk/repositories
-# Install common packages
-RUN apk add --no-cache unzip curl tar \
-    python make zsh vim jq figlet \
-    libressl openssh-client sshpass iputils drill \
-    gcc libffi-dev python-dev musl-dev libressl-dev py-pip py-virtualenv \
-    git coreutils less groff bash-completion \
-    fuse syslog-ng libc6-compat py2-lxml python-dev cython  \
-    && rm -rf /tmp/* /var/cache/apk/* /etc/apk/cache/* \
-    && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
-    && mkdir -p /conf \
-    && touch /conf/.gitconfig
-
-RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
-
 # Where to store state
 ENV CACHE_PATH=/localhost/.geodesic
-
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
 ENV KOPS_CLUSTER_NAME=example.foo.bar
 ENV SECRETS_PATH=${HOME}
 
-# Disable vim from reating a swapfile (incompatible with goofys)
-RUN echo 'set noswapfile' >> /etc/vim/vimrc
-
 WORKDIR /tmp
-
-#
-# Install aws-vault to easily assume roles (not related to HashiCorp Vault)
-#
-
-ENV AWS_GOOGLE_AUTH="0.0.24"
-RUN if [ -n "${AWS_GOOGLE_AUTH}" ]; then pip install --no-cache-dir aws-google-auth==${AWS_GOOGLE_AUTH} ; fi
 
 #
 # Install gomplate
@@ -79,8 +50,8 @@ ENV KOPS_TEMPLATE=/templates/kops/default.yaml
 ENV KOPS_BASE_IMAGE=coreos.com/CoreOS-stable-1409.8.0-hvm
 
 ENV KOPS_BASTION_PUBLIC_NAME="bastion"
-ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
-ENV KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
+ENV KOPS_PRIVATE_SUBNETS="10.0.1.0/24,10.0.2.0/24,10.0.3.0/24"
+ENV KOPS_UTILITY_SUBNETS="10.0.101.0/24,10.0.102.0/24,10.0.103.0/24"
 ENV KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
 ENV KUBECONFIG=/dev/shm/kubecfg
 RUN curl --fail -sSL -O https://github.com/kubernetes/kops/releases/download/${KOPS_VERSION}/kops-linux-amd64 \
@@ -89,12 +60,12 @@ RUN curl --fail -sSL -O https://github.com/kubernetes/kops/releases/download/${K
     && /usr/local/bin/kops completion bash > /etc/bash_completion.d/kops.sh
 
 # Instance sizes
-ENV BASTION_MACHINE_TYPE "t2.medium"
+ENV BASTION_MACHINE_TYPE "t2.micro"
 ENV MASTER_MACHINE_TYPE "t2.medium"
-ENV NODE_MACHINE_TYPE "t2.medium"
+ENV NODE_MACHINE_TYPE "t2.large"
 
 # Min/Max number of nodes (aka workers)
-ENV NODE_MAX_SIZE 2
+ENV NODE_MAX_SIZE 20
 ENV NODE_MIN_SIZE 2
 
 #
@@ -133,7 +104,7 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
 # Install helm plugins
 #
 ENV HELM_APPR_VERSION 0.7.0
-ENV HELM_DIFF_VERSION 2.8.0+1
+ENV HELM_DIFF_VERSION 2.9.0+1
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_SECRETS_VERSION 1.2.9
@@ -176,15 +147,6 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=3300
 #
 # Install aws cli bundle
 #
-ENV AWSCLI_VERSION=1.11.185
-RUN if [ "${AWSCLI_VERSION}" != "" ]; then \
-    pip install --no-cache-dir awscli==${AWSCLI_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete && \
-    ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
-    ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/; \
-    fi
-
 ENV AWLESS_VERSION="v0.1.10"
 RUN if [ -n "${AWLESS_VERSION}" ]; then curl --fail -SL -O https://github.com/wallix/awless/releases/download/${AWLESS_VERSION}/awless-linux-amd64.tar.gz \
     && tar -xzf awless-linux-amd64.tar.gz \
@@ -193,14 +155,27 @@ RUN if [ -n "${AWLESS_VERSION}" ]; then curl --fail -SL -O https://github.com/wa
     && /usr/local/bin/awless completion bash > /etc/bash_completion.d/awless.sh; \
     fi
 
+ENV AWSCLI_VERSION=1.15.10
+RUN if [ "${AWSCLI_VERSION}" != "" ]; then \
+    pip install --no-cache-dir awscli==${AWSCLI_VERSION} && \
+    rm -rf /root/.cache && \
+    find / -type f -regex '.*\.py[co]' -delete && \
+    ln -s /usr/local/aws/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
+    ln -s /usr/local/aws/bin/aws_completer /usr/local/bin/; \
+    fi
+
+#
+# Install aws-google-auth
+#
+
+ENV AWS_GOOGLE_AUTH="0.0.24"
+RUN if [ -n "${AWS_GOOGLE_AUTH}" ]; then pip install --no-cache-dir botocore=1.10.10 aws-google-auth==${AWS_GOOGLE_AUTH} ; fi
+
 #
 # Shell
 #
 ENV HISTFILE=${CACHE_PATH}/history
-ENV SHELL=/bin/bash
-ENV LESS=-Xr
 ENV XDG_CONFIG_HOME=${CACHE_PATH}
-ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
 VOLUME ["${CACHE_PATH}"]
 
@@ -211,6 +186,5 @@ WORKDIR /conf
 ENV GOOGLE_SP_ID 313486584448
 ENV GOOGLE_IDP_ID C01uo53i7
 
-ENTRYPOINT ["/bin/bash"]
 CMD ["-c", "bootstrap"]
 

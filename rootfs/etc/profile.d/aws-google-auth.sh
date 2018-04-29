@@ -34,12 +34,12 @@ if [ -n "${AWS_GOOGLE_AUTH}" ]; then
 
       shift
       if [ $# -eq 0 ]; then
-        aws-google-auth ${AWS_VAULT_ARGS[@]} -p ${role} -R ${AWS_REGION} && \
         export AWS_DEFAULT_PROFILE=${role}
+        aws-google-auth ${AWS_VAULT_ARGS[@]} -p ${role} -R ${AWS_REGION} && \
         export AWS_VAULT=${role}
       else
-        aws-google-auth ${AWS_VAULT_ARGS[@]} -p ${role} -R ${AWS_REGION} && \
         export AWS_DEFAULT_PROFILE=${role}
+        aws-google-auth ${AWS_VAULT_ARGS[@]} -p ${role} -R ${AWS_REGION} && \
         export AWS_VAULT=${role}
       fi
     }

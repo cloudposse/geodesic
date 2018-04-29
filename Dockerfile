@@ -139,9 +139,8 @@ RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/r
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
-ENV AWS_CONFIG_FILE=/localhost/.aws/config
-ENV AWS_SHARED_CREDENTIALS_FILE=/localhost/.aws/credentials
-ENV AWS_DEFAULT_PROFILE="default"
+ENV AWS_CONFIG_FILE=${AWS_DATA_PATH}config
+ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_CONFIG_FILE}
 ENV AWS_VAULT_ASSUME_ROLE_TTL=3300
 
 #
@@ -155,7 +154,7 @@ RUN if [ -n "${AWLESS_VERSION}" ]; then curl --fail -SL -O https://github.com/wa
     && /usr/local/bin/awless completion bash > /etc/bash_completion.d/awless.sh; \
     fi
 
-#ENV AWSCLI_VERSION=1.11.190
+ENV AWSCLI_VERSION=1.15.10
 RUN if [ "${AWSCLI_VERSION}" != "" ]; then \
     pip install --no-cache-dir awscli==${AWSCLI_VERSION} && \
     rm -rf /root/.cache && \

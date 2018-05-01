@@ -644,3 +644,303 @@ releases:
 
     - name: "kubeletService.name"
       value: "kubelet"
+
+
+#######################################################################################
+## kube-prometheus                                                                   ##
+## Collects Kubernetes manifests, Grafana dashboards, and Prometheus rules           ##
+## combined with documentation and scripts to provide single-command                 ##
+## deployments of end-to-end Kubernetes cluster monitoring with Prometheus operator  ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/coreos/prometheus-operator/tree/master/helm/kube-prometheus
+#   - https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus
+#   - https://prometheus.io/docs/alerting/configuration
+#   - https://medium.com/@timfpark/simple-kubernetes-cluster-monitoring-with-prometheus-and-grafana-dd27edb1641
+#   - https://www.weave.works/blog/monitoring-kubernetes-infrastructure
+#   - https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics
+#
+- name: "kube-prometheus"
+  namespace: "monitoring"
+  labels:
+    chart: "kube-prometheus"
+    component: "monitoring"
+    namespace: "monitoring"
+    default: "true"
+  chart: "coreos/kube-prometheus"
+  version: "0.0.44"
+  values:
+    - "values/kube-prometheus.yaml"
+  set:
+    - name: "global.rbacEnable"
+      value: "false"
+
+    - name: "deployExporterNode"
+      value: "true"
+
+    - name: "exporter-node.resources.limits.cpu"
+      value: "10m"
+
+    - name: "exporter-node.resources.limits.memory"
+      value: "32Mi"
+
+    - name: "exporter-node.resources.requests.cpu"
+      value: "5m"
+
+    - name: "exporter-node.resources.requests.memory"
+      value: "16Mi"
+
+    - name: "deployGrafana"
+      value: "true"
+
+    - name: "grafana.resources.limits.cpu"
+      value: "50m"
+
+    - name: "grafana.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "grafana.resources.requests.cpu"
+      value: "10m"
+
+    - name: "grafana.resources.requests.memory"
+      value: "64Mi"
+
+    - name: "exporter-kube-state.addon_resizer"
+      value: ""
+
+    - name: "exporter-kube-state.resources.limits.cpu"
+      value: "50m"
+
+    - name: "exporter-kube-state.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "exporter-kube-state.resources.requests.cpu"
+      value: "10m"
+
+    - name: "exporter-kube-state.resources.requests.memory"
+      value: "64Mi"
+
+    # AlertManager
+    - name: "deployAlertManager"
+      value: "true"
+
+    - name: "alertmanager.paused"
+      value: "false"
+
+    - name: "alertmanager.podAntiAffinity"
+      value: "soft"
+
+    ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT; e.g. 4
+    - name: "alertmanager.replicaCount"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT") "4" }}'
+
+    - name: "alertmanager.image.repository"
+      value: "quay.io/prometheus/alertmanager"
+
+    ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG; e.g. v0.14.0
+    - name: "alertmanager.image.tag"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG") "v0.14.0" }}'
+
+    - name: "alertmanager.image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "alertmanager.resources.limits.cpu"
+      value: "10m"
+
+    - name: "alertmanager.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "alertmanager.resources.requests.cpu"
+      value: "5m"
+
+    - name: "alertmanager.resources.requests.memory"
+      value: "32Mi"
+
+    - name: "alertmanager.config.global.resolve_timeout"
+      value: "5m"
+
+    - name: "alertmanager.config.route.group_by"
+      value: "['alertname', 'namespace']"
+
+    - name: "alertmanager.config.route.group_wait"
+      value: "30s"
+
+    - name: "alertmanager.config.route.group_interval"
+      value: "5m"
+
+    - name: "alertmanager.config.route.repeat_interval"
+      value: "12h"
+
+    - name: "alertmanager.config.route.receiver"
+      value: "slack_general"
+
+    - name: "alertmanager.config.route.routes[0].match.alertname"
+      value: "DeadMansSwitch"
+
+    - name: "alertmanager.config.route.routes[0].match.receiver"
+      value: "null"
+
+    - name: "alertmanager.config.receivers[0].name"
+      value: "null"
+
+    - name: "alertmanager.config.receivers[1].name"
+      value: "slack_general"
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL
+    - name: "alertmanager.config.receivers[1].slack_configs[0].api_url"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL" }}'
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL; e.g. #alerts-staging
+    - name: "alertmanager.config.receivers[1].slack_configs[0].channel"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL" }}'
+
+    - name: "alertmanager.config.receivers[1].slack_configs[0].send_resolved"
+      value: "true"
+
+    ## AlertManager Service and Ingress
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. alerts.us-west-2.staging.cloudposse.org
+    - name: "alertmanager.externalUrl"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" }}'
+
+    - name: "alertmanager.service.type"
+      value: "ClusterIP"
+
+    - name: "alertmanager.service.port"
+      value: "80"
+
+    - name: "alertmanager.ingress.enabled"
+      value: "true"
+
+    - name: "alertmanager.ingress.annotations.kubernetes\\.io/ingress\\.class"
+      value: "nginx"
+
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "alertmanager.ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. e.g. alerts.us-west-2.staging.cloudposse.org
+    - name: "alertmanager.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" }}'
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    - name: "alertmanager.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_INGRESS" }}'
+
+    # DNS TTL for KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. 60
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "alertmanager.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: "60"
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. alerts.us-west-2.staging.cloudposse.org
+    - name: 'alertmanager.ingress.hosts.{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" | replace "." "\\." }}[0]'
+      value: "/"
+
+    ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_SECRET_NAME; e.g. alertmanager-general-tls
+    - name: "alertmanager.ingress.tls[0].secretName"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_SECRET_NAME") "alertmanager-general-tls" }}'
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. alerts.us-west-2.staging.cloudposse.org
+    - name: "alertmanager.ingress.tls[0].hosts[0]"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" }}'
+
+    # Prometheus
+    - name: "prometheus.retention"
+      value: "31d"
+
+    - name: "prometheus.routePrefix"
+      value: "/"
+
+    - name: "prometheus.config.specifiedInValues"
+      value: "true"
+
+    - name: "prometheus.rules.specifiedInValues"
+      value: "true"
+
+    - name: "prometheus.paused"
+      value: "false"
+
+    - name: "prometheus.podAntiAffinity"
+      value: "soft"
+
+    ### Optional: KUBE_PROMETHEUS_REPLICA_COUNT; e.g. 4
+    - name: "prometheus.replicaCount"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_REPLICA_COUNT") "4" }}'
+
+    - name: "prometheus.image.repository"
+      value: "quay.io/prometheus/prometheus"
+
+    ### Optional: KUBE_PROMETHEUS_IMAGE_TAG; e.g. v2.2.1
+    - name: "prometheus.image.tag"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_IMAGE_TAG") "v2.2.1" }}'
+
+    - name: "prometheus.image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "prometheus.resources.limits.cpu"
+      value: "600m"
+
+    - name: "prometheus.resources.limits.memory"
+      value: "2048Mi"
+
+    - name: "prometheus.resources.requests.cpu"
+      value: "400m"
+
+    - name: "prometheus.resources.requests.memory"
+      value: "1536Mi"
+
+
+    - name: "prometheus.storageSpec.volumeClaimTemplate.spec.accessModes[0]"
+      value: "ReadWrite"
+
+    - name: "prometheus.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
+      value: "50Gi"
+
+    ## Prometheus Service and Ingress
+
+    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. prometheus.us-west-2.staging.cloudposse.org
+    - name: "prometheus.externalUrl"
+      value: '{{ env "KUBE_PROMETHEUS_HOSTNAME" }}'
+
+    - name: "prometheus.service.type"
+      value: "ClusterIP"
+
+    - name: "prometheus.service.port"
+      value: "80"
+
+    - name: "prometheus.ingress.enabled"
+      value: "true"
+
+    - name: "prometheus.ingress.annotations.kubernetes\\.io/ingress\\.class"
+      value: "nginx"
+
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "prometheus.ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
+
+    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. e.g. prometheus.us-west-2.staging.cloudposse.org
+    - name: "prometheus.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+      value: '{{ env "KUBE_PROMETHEUS_HOSTNAME" }}'
+
+    ### Required: KUBE_PROMETHEUS_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    - name: "prometheus.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
+      value: '{{ env "KUBE_PROMETHEUS_INGRESS" }}'
+
+    # DNS TTL for KUBE_PROMETHEUS_HOSTNAME; e.g. 60
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "prometheus.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: "60"
+
+    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. prometheus.us-west-2.staging.cloudposse.org
+    - name: 'prometheus.ingress.hosts.{{ env "KUBE_PROMETHEUS_HOSTNAME" | replace "." "\\." }}[0]'
+      value: "/"
+
+    ### Optional: KUBE_PROMETHEUS_SECRET_NAME; e.g. prometheus-general-tls
+    - name: "prometheus.ingress.tls[0].secretName"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_SECRET_NAME") "prometheus-general-tls" }}'
+
+    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. prometheus.us-west-2.staging.cloudposse.org
+    - name: "prometheus.ingress.tls[0].hosts[0]"
+      value: '{{ env "KUBE_PROMETHEUS_HOSTNAME" }}'

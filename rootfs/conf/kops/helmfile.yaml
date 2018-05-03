@@ -583,8 +583,8 @@ releases:
     component: "metrics"
     namespace: "kube-system"
     default: "true"
-  chart: "coreos/prometheus-operator"
-  version: "0.0.15"
+  chart: "coreos-stable/prometheus-operator"
+  version: "0.0.23"
   set:
     - name: "jobLabel"
       value: "prometheus-operator"
@@ -669,8 +669,8 @@ releases:
     component: "monitoring"
     namespace: "monitoring"
     default: "true"
-  chart: "coreos/kube-prometheus"
-  version: "0.0.44"
+  chart: "coreos-stable/kube-prometheus"
+  version: "0.0.61"
   values:
     - "values/kube-prometheus.yaml"
   set:

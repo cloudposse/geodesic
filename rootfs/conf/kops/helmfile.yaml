@@ -883,17 +883,16 @@ releases:
       value: "IfNotPresent"
 
     - name: "prometheus.resources.limits.cpu"
-      value: "600m"
-
-    - name: "prometheus.resources.limits.memory"
-      value: "2048Mi"
-
-    - name: "prometheus.resources.requests.cpu"
       value: "400m"
 
-    - name: "prometheus.resources.requests.memory"
-      value: "1536Mi"
+    - name: "prometheus.resources.limits.memory"
+      value: "2024Mi"
 
+    - name: "prometheus.resources.requests.cpu"
+      value: "100m"
+
+    - name: "prometheus.resources.requests.memory"
+      value: "512Mi"
 
     - name: "prometheus.storageSpec.volumeClaimTemplate.spec.accessModes[0]"
       value: "ReadWrite"

@@ -8,4 +8,3 @@ gateway:
     annotations:
       kubernetes.io/tls-acme: "true"
       external-dns.alpha.kubernetes.io/ttl: "60"
-

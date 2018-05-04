@@ -149,10 +149,10 @@ releases:
   set:
     ## Gateway config
     - name: "gateway.enabled"
-      value: true
+      value: "true"
 
     - name: "gateway.ingress.enabled"
-      value: true
+      value: "true"
 
     - name: "gateway.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
@@ -234,10 +234,10 @@ releases:
 
     ## Server config
     - name: "server.enabled"
-      value: true
+      value: "true"
 
     - name: "server.ingress.enabled"
-      value: true
+      value: "true"
 
     - name: "server.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
@@ -300,10 +300,10 @@ releases:
       value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
 
     - name: "server.env.open.DISABLE_API"
-      value: true
+      value: "true"
 
     - name: "server.env.open.ALLOW_OVERWRITE"
-      value: false
+      value: "false"
 
     ### Optional: CHART_REPO_SERVER_BASIC_AUTH_USER; e.g. server
     - name: "server.env.secret.BASIC_AUTH_USER"
@@ -358,7 +358,7 @@ releases:
       value: '{{ env "EXTERNAL_DNS_TXT_PREFIX" }}'
 
     - name: "publishInternalServices"
-      value: true
+      value: "true"
 
     - name: "provider"
       value: "aws"
@@ -474,10 +474,10 @@ releases:
       value: '{{ env "AWS_REGION" }}'
 
     - name: "extraArgs.auto-discover-base-arn"
-      value: true
+      value: "true"
 
     - name: "host.iptables"
-      value: true
+      value: "true"
 
     - name: "host.interface"
       value: "cali+"
@@ -674,8 +674,6 @@ releases:
     default: "true"
   chart: "coreos-stable/kube-prometheus"
   version: "0.0.61"
-  values:
-    - "values/kube-prometheus.yaml"
   set:
     - name: "global.rbacEnable"
       value: "false"
@@ -802,12 +800,6 @@ releases:
     - name: "alertmanager.config.receivers[1].slack_configs[0].send_resolved"
       value: "true"
 
-    ## AlertManager Service and Ingress
-
-    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. alerts.us-west-2.staging.cloudposse.org
-    - name: "alertmanager.externalUrl"
-      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" }}'
-
     - name: "alertmanager.service.type"
       value: "ClusterIP"
 
@@ -815,39 +807,7 @@ releases:
       value: "80"
 
     - name: "alertmanager.ingress.enabled"
-      value: "true"
-
-    - name: "alertmanager.ingress.annotations.kubernetes\\.io/ingress\\.class"
-      value: "nginx"
-
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "alertmanager.ingress.annotations.kubernetes\\.io/tls-acme"
-    #  value: "true"
-
-    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. e.g. alerts.us-west-2.staging.cloudposse.org
-    - name: "alertmanager.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" }}'
-
-    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
-    - name: "alertmanager.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
-      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_INGRESS" }}'
-
-    # DNS TTL for KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. 60
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "alertmanager.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: "60"
-
-    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. alerts.us-west-2.staging.cloudposse.org
-    - name: "alertmanager.ingress.hosts[0]"
-      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" }}'
-
-    ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_SECRET_NAME; e.g. alertmanager-general-tls
-    - name: "alertmanager.ingress.tls[0].secretName"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_SECRET_NAME") "alertmanager-general-tls" }}'
-
-    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME; e.g. alerts.us-west-2.staging.cloudposse.org
-    - name: "alertmanager.ingress.tls[0].hosts[0]"
-      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_HOSTNAME" }}'
+      value: "false"
 
     # Prometheus
     - name: "prometheus.retention"
@@ -900,12 +860,6 @@ releases:
     - name: "prometheus.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
       value: "50Gi"
 
-    ## Prometheus Service and Ingress
-
-    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. prometheus.us-west-2.staging.cloudposse.org
-    - name: "prometheus.externalUrl"
-      value: '{{ env "KUBE_PROMETHEUS_HOSTNAME" }}'
-
     - name: "prometheus.service.type"
       value: "ClusterIP"
 
@@ -913,36 +867,4 @@ releases:
       value: "80"
 
     - name: "prometheus.ingress.enabled"
-      value: "true"
-
-    - name: "prometheus.ingress.annotations.kubernetes\\.io/ingress\\.class"
-      value: "nginx"
-
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "prometheus.ingress.annotations.kubernetes\\.io/tls-acme"
-    #  value: "true"
-
-    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. e.g. prometheus.us-west-2.staging.cloudposse.org
-    - name: "prometheus.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "KUBE_PROMETHEUS_HOSTNAME" }}'
-
-    ### Required: KUBE_PROMETHEUS_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
-    - name: "prometheus.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
-      value: '{{ env "KUBE_PROMETHEUS_INGRESS" }}'
-
-    # DNS TTL for KUBE_PROMETHEUS_HOSTNAME; e.g. 60
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "prometheus.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: "60"
-
-    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. prometheus.us-west-2.staging.cloudposse.org
-    - name: 'prometheus.ingress.hosts[0]'
-      value: '{{ env "KUBE_PROMETHEUS_HOSTNAME" }}'
-
-    ### Optional: KUBE_PROMETHEUS_SECRET_NAME; e.g. prometheus-general-tls
-    - name: "prometheus.ingress.tls[0].secretName"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_SECRET_NAME") "prometheus-general-tls" }}'
-
-    ### Required: KUBE_PROMETHEUS_HOSTNAME; e.g. prometheus.us-west-2.staging.cloudposse.org
-    - name: "prometheus.ingress.tls[0].hosts[0]"
-      value: '{{ env "KUBE_PROMETHEUS_HOSTNAME" }}'
+      value: "false"

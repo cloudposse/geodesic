@@ -886,7 +886,7 @@ releases:
       value: "400m"
 
     - name: "prometheus.resources.limits.memory"
-      value: "2024Mi"
+      value: "2048Mi"
 
     - name: "prometheus.resources.requests.cpu"
       value: "100m"

@@ -4,7 +4,7 @@
 
 #
 # Examples:
-#   
+#
 #   Install all charts that belong in `kube-system` except for `chart-repo`
 #
 #     helmfile --selector namespace=kube-system,chart!=chart-repo sync
@@ -13,7 +13,7 @@
 #
 #     helmfile --selector default=true sync
 #
-# References: 
+# References:
 #   - https://github.com/roboll/helmfile
 #
 
@@ -45,9 +45,9 @@ releases:
     default: "true"
   chart: "stable/chartmuseum"
   version: "1.3.1"
-  values: 
+  values:
     - "values/chartmuseum.yaml"
-  set: 
+  set:
     - name: "replicaCount"
       value: "1"
 
@@ -74,7 +74,7 @@ releases:
     - name: "resources.limits.memory"
       value: "512Mi"
 
-    - name: "requests.cpu" 
+    - name: "requests.cpu"
       value: "5m"
 
     - name: "requests.memory"
@@ -97,7 +97,7 @@ releases:
 
     - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
-    
+
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
@@ -144,15 +144,15 @@ releases:
     default: "false"
   chart: "cloudposse-incubator/chart-repo"
   version: "0.2.1"
-  values: 
+  values:
     - "values/chart-repo.yaml"
   set:
     ## Gateway config
     - name: "gateway.enabled"
-      value: true
+      value: "true"
 
     - name: "gateway.ingress.enabled"
-      value: true
+      value: "true"
 
     - name: "gateway.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
@@ -234,10 +234,10 @@ releases:
 
     ## Server config
     - name: "server.enabled"
-      value: true
+      value: "true"
 
     - name: "server.ingress.enabled"
-      value: true
+      value: "true"
 
     - name: "server.ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
@@ -300,10 +300,10 @@ releases:
       value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
 
     - name: "server.env.open.DISABLE_API"
-      value: true
+      value: "true"
 
     - name: "server.env.open.ALLOW_OVERWRITE"
-      value: false
+      value: "false"
 
     ### Optional: CHART_REPO_SERVER_BASIC_AUTH_USER; e.g. server
     - name: "server.env.secret.BASIC_AUTH_USER"
@@ -349,7 +349,7 @@ releases:
     - name: "tolerations[0].effect"
       value: "NoSchedule"
 
-    ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org 
+    ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org
     - name: "txtOwnerId"
       value: '{{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}'
 
@@ -358,7 +358,7 @@ releases:
       value: '{{ env "EXTERNAL_DNS_TXT_PREFIX" }}'
 
     - name: "publishInternalServices"
-      value: true
+      value: "true"
 
     - name: "provider"
       value: "aws"
@@ -474,10 +474,10 @@ releases:
       value: '{{ env "AWS_REGION" }}'
 
     - name: "extraArgs.auto-discover-base-arn"
-      value: true
+      value: "true"
 
     - name: "host.iptables"
-      value: true
+      value: "true"
 
     - name: "host.interface"
       value: "cali+"
@@ -493,12 +493,12 @@ releases:
 
     - name: "resources.requests.memory"
       value: "128Mi"
-      
+
 ################################################################################
 ## NGINX Ingress Controller ####################################################
 ################################################################################
 
-# 
+#
 # References:
 #   - https://github.com/cloudposse/charts/blob/master/incubator/nginx-ingress/values.yaml
 #
@@ -511,7 +511,7 @@ releases:
     default: "true"
   chart: "cloudposse-incubator/nginx-ingress"
   version: "0.1.7"
-  values: 
+  values:
   - "values/nginx-ingress.yaml"
   set:
     ### Optional: NGINX_INGRESS_REPLICA_COUNT; e.g. 4
@@ -564,3 +564,307 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: {{ coalesce (env "NGINX_INGRESS_TTL") "60" }}
+
+
+#######################################################################################
+## prometheus-operator                                                               ##
+## creates/configures/manages Prometheus clusters atop Kubernetes                    ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/coreos/prometheus-operator/tree/master/helm/prometheus-operator
+#   - https://github.com/coreos/prometheus-operator
+#
+- name: "prometheus-operator"
+  namespace: "kube-system"
+  labels:
+    chart: "prometheus-operator"
+    component: "metrics"
+    namespace: "kube-system"
+    default: "true"
+  chart: "coreos-stable/prometheus-operator"
+  version: "0.0.23"
+  set:
+    - name: "rbacEnable"
+      value: "false"
+
+    - name: "jobLabel"
+      value: "prometheus-operator"
+
+    - name: "image.repository"
+      value: "quay.io/coreos/prometheus-operator"
+
+    ### Optional: PROMETHEUS_OPERATOR_IMAGE_TAG; e.g. v0.17.0
+    - name: "image.tag"
+      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_IMAGE_TAG") "v0.17.0" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "resources.limits.cpu"
+      value: "10m"
+
+    - name: "resources.limits.memory"
+      value: "64Mi"
+
+    - name: "resources.requests.cpu"
+      value: "5m"
+
+    - name: "resources.requests.memory"
+      value: "32Mi"
+
+    - name: "global.hyperkube.repository"
+      value: "quay.io/coreos/hyperkube"
+
+    ### Optional: PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG; e.g. v1.7.6_coreos.0
+    - name: "global.hyperkube.tag"
+      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG") "v1.7.6_coreos.0" }}'
+
+    - name: "global.hyperkube.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "prometheusConfigReloader.repository"
+      value: "quay.io/coreos/prometheus-config-reloader"
+
+    ### Optional: PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG; e.g. v0.0.3
+    - name: "prometheusConfigReloader.tag"
+      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG") "v0.0.3" }}'
+
+    - name: "configmapReload.repository"
+      value: "quay.io/coreos/configmap-reload"
+
+    ### Optional: PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG; e.g. v0.0.1
+    - name: "configmapReload.tag"
+      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG") "v0.0.1" }}'
+
+    ### If enabled, prometheus-operator will create a service for scraping kubelets
+    - name: "kubeletService.enable"
+      value: "true"
+
+    - name: "kubeletService.namespace"
+      value: "kube-system"
+
+    - name: "kubeletService.name"
+      value: "kubelet"
+
+
+#######################################################################################
+## kube-prometheus                                                                   ##
+## Collects Kubernetes manifests, Grafana dashboards, and Prometheus rules           ##
+## combined with documentation and scripts to provide single-command                 ##
+## deployments of end-to-end Kubernetes cluster monitoring with Prometheus operator  ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/coreos/prometheus-operator/tree/master/helm/kube-prometheus
+#   - https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus
+#   - https://prometheus.io/docs/alerting/configuration
+#   - https://medium.com/@timfpark/simple-kubernetes-cluster-monitoring-with-prometheus-and-grafana-dd27edb1641
+#   - https://www.weave.works/blog/monitoring-kubernetes-infrastructure
+#   - https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics
+#
+- name: "kube-prometheus"
+  namespace: "monitoring"
+  labels:
+    chart: "kube-prometheus"
+    component: "monitoring"
+    namespace: "monitoring"
+    default: "true"
+  chart: "coreos-stable/kube-prometheus"
+  version: "0.0.61"
+  set:
+    - name: "global.rbacEnable"
+      value: "false"
+
+    - name: "deployExporterNode"
+      value: "true"
+
+    - name: "exporter-node.resources.limits.cpu"
+      value: "10m"
+
+    - name: "exporter-node.resources.limits.memory"
+      value: "32Mi"
+
+    - name: "exporter-node.resources.requests.cpu"
+      value: "5m"
+
+    - name: "exporter-node.resources.requests.memory"
+      value: "16Mi"
+
+    - name: "deployGrafana"
+      value: "true"
+
+    - name: "grafana.resources.limits.cpu"
+      value: "50m"
+
+    - name: "grafana.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "grafana.resources.requests.cpu"
+      value: "10m"
+
+    - name: "grafana.resources.requests.memory"
+      value: "64Mi"
+
+    - name: "exporter-kube-state.resources.limits.cpu"
+      value: "50m"
+
+    - name: "exporter-kube-state.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "exporter-kube-state.resources.requests.cpu"
+      value: "10m"
+
+    - name: "exporter-kube-state.resources.requests.memory"
+      value: "64Mi"
+
+    # AlertManager
+    - name: "deployAlertManager"
+      value: "true"
+
+    - name: "alertmanager.paused"
+      value: "false"
+
+    - name: "alertmanager.podAntiAffinity"
+      value: "soft"
+
+    ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT; e.g. 4
+    - name: "alertmanager.replicaCount"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT") "4" }}'
+
+    - name: "alertmanager.image.repository"
+      value: "quay.io/prometheus/alertmanager"
+
+    ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG; e.g. v0.14.0
+    - name: "alertmanager.image.tag"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG") "v0.14.0" }}'
+
+    - name: "alertmanager.image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "alertmanager.resources.limits.cpu"
+      value: "10m"
+
+    - name: "alertmanager.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "alertmanager.resources.requests.cpu"
+      value: "5m"
+
+    - name: "alertmanager.resources.requests.memory"
+      value: "32Mi"
+
+    - name: "alertmanager.config.global.resolve_timeout"
+      value: "5m"
+
+    - name: "alertmanager.config.route.group_by[0]"
+      value: "alertname"
+
+    - name: "alertmanager.config.route.group_by[1]"
+      value: "namespace"
+
+    - name: "alertmanager.config.route.group_wait"
+      value: "30s"
+
+    - name: "alertmanager.config.route.group_interval"
+      value: "5m"
+
+    - name: "alertmanager.config.route.repeat_interval"
+      value: "12h"
+
+    - name: "alertmanager.config.route.receiver"
+      value: "slack_general"
+
+    - name: "alertmanager.config.route.routes[0].match.alertname"
+      value: "DeadMansSwitch"
+
+    - name: "alertmanager.config.route.routes[0].match.receiver"
+      value: "null"
+
+    - name: "alertmanager.config.receivers[0].name"
+      value: "null"
+
+    - name: "alertmanager.config.receivers[1].name"
+      value: "slack_general"
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL
+    - name: "alertmanager.config.receivers[1].slack_configs[0].api_url"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL" }}'
+
+    ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL; e.g. #alerts-staging
+    - name: "alertmanager.config.receivers[1].slack_configs[0].channel"
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL" }}'
+
+    - name: "alertmanager.config.receivers[1].slack_configs[0].send_resolved"
+      value: "true"
+
+    - name: "alertmanager.service.type"
+      value: "ClusterIP"
+
+    - name: "alertmanager.service.port"
+      value: "80"
+
+    - name: "alertmanager.ingress.enabled"
+      value: "false"
+
+    # Prometheus
+    - name: "prometheus.retention"
+      value: "31d"
+
+    - name: "prometheus.routePrefix"
+      value: "/"
+
+    - name: "prometheus.config.specifiedInValues"
+      value: "true"
+
+    - name: "prometheus.rules.specifiedInValues"
+      value: "true"
+
+    - name: "prometheus.paused"
+      value: "false"
+
+    - name: "prometheus.podAntiAffinity"
+      value: "soft"
+
+    ### Optional: KUBE_PROMETHEUS_REPLICA_COUNT; e.g. 4
+    - name: "prometheus.replicaCount"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_REPLICA_COUNT") "4" }}'
+
+    - name: "prometheus.image.repository"
+      value: "quay.io/prometheus/prometheus"
+
+    ### Optional: KUBE_PROMETHEUS_IMAGE_TAG; e.g. v2.2.1
+    - name: "prometheus.image.tag"
+      value: '{{ coalesce (env "KUBE_PROMETHEUS_IMAGE_TAG") "v2.2.1" }}'
+
+    - name: "prometheus.image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "prometheus.resources.limits.cpu"
+      value: "400m"
+
+    - name: "prometheus.resources.limits.memory"
+      value: "2048Mi"
+
+    - name: "prometheus.resources.requests.cpu"
+      value: "100m"
+
+    - name: "prometheus.resources.requests.memory"
+      value: "512Mi"
+
+    - name: "prometheus.storageSpec.volumeClaimTemplate.spec.accessModes[0]"
+      value: "ReadWrite"
+
+    - name: "prometheus.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
+      value: "50Gi"
+
+    - name: "prometheus.service.type"
+      value: "ClusterIP"
+
+    - name: "prometheus.service.port"
+      value: "80"
+
+    - name: "prometheus.ingress.enabled"
+      value: "false"

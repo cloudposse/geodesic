@@ -884,8 +884,9 @@ releases:
   namespace: "datadog"
   labels:
     chart: "datadog"
-    component: "datadog"
-    namespace: "datadog"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "datadog"
     default: "false"
   chart: "stable/datadog"
   version: "0.11.2"

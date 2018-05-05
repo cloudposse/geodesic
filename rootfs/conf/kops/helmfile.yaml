@@ -868,3 +868,58 @@ releases:
 
     - name: "prometheus.ingress.enabled"
       value: "false"
+
+
+#######################################################################################
+## datadog                                                                           ##
+## Datadog is a hosted infrastructure monitoring platform                            ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/tree/master/stable/datadog
+#   - https://github.com/kubernetes/charts/blob/master/stable/datadog/values.yaml
+#
+- name: "datadog"
+  namespace: "datadog"
+  labels:
+    chart: "datadog"
+    component: "datadog"
+    namespace: "datadog"
+    default: "false"
+  chart: "stable/datadog"
+  version: "0.11.2"
+  set:
+    - name: "image.repository"
+      value: "datadog/agent"
+
+    ### Optional: DATADOG_IMAGE_TAG; e.g. 6.1.2
+    - name: "image.tag"
+      value: '{{ coalesce (env "DATADOG_IMAGE_TAG") "6.1.2" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "resources.limits.cpu"
+      value: "256m"
+
+    - name: "resources.limits.memory"
+      value: "512Mi"
+
+    - name: "resources.requests.cpu"
+      value: "50m"
+
+    - name: "resources.requests.memory"
+      value: "64Mi"
+
+    - name: "datadog.apiKey"
+      value: '{{ env "DATADOG_API_KEY" }}'
+
+    - name: "datadog.collectEvents"
+      value: "true"
+
+    - name: "rbac.create"
+      value: "false"
+
+    - name: "kube-state-metrics.rbac.create"
+      value: "false"

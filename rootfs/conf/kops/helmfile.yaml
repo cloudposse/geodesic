@@ -42,6 +42,7 @@ releases:
     chart: "chartmuseum"
     component: "platform"
     namespace: "kube-system"
+    vendor: "kubernetes"
     default: "true"
   chart: "stable/chartmuseum"
   version: "1.3.1"
@@ -127,6 +128,7 @@ releases:
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
+
 ################################################################################
 ## Chart Repo ##################################################################
 ################################################################################
@@ -141,6 +143,7 @@ releases:
     chart: "chart-repo"
     component: "platform"
     namespace: "kube-system"
+    vendor: "cloudposse"
     default: "false"
   chart: "cloudposse-incubator/chart-repo"
   version: "0.2.1"
@@ -317,6 +320,7 @@ releases:
     - name: "server.replica.annotations.iam\\.amazonaws\\.com/role"
       value: '{{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}'
 
+
 ################################################################################
 ## External DNS ################################################################
 ################################################################################
@@ -325,13 +329,13 @@ releases:
 # References:
 #   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
 #
-
 - name: "dns"
   namespace: "kube-system"
   labels:
     chart: "external-dns"
     component: "ingress"
     namespace: "kube-system"
+    vendor: "kubernetes"
     default: "true"
   chart: "stable/external-dns"
   version: "0.5.4"
@@ -388,15 +392,14 @@ releases:
 # References:
 #   - https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
 #
-
 - name: "tls"
   namespace: "kube-system"
   labels:
     chart: "kube-lego"
     component: "ingress"
     namespace: "kube-system"
+    vendor: "cloudposse"
     default: "true"
-
   chart: "cloudposse-incubator/kube-lego"
   version: "0.1.2"
   set:
@@ -459,6 +462,7 @@ releases:
     chart: "kube2iam"
     component: "iam"
     namespace: "kube-system"
+    vendor: "kubernetes"
     default: "true"
   chart: "stable/kube2iam"
   version: "0.8.5"
@@ -508,6 +512,7 @@ releases:
     chart: "nginx-ingress"
     component: "ingress"
     namespace: "kube-system"
+    vendor: "cloudposse"
     default: "true"
   chart: "cloudposse-incubator/nginx-ingress"
   version: "0.1.7"
@@ -580,8 +585,9 @@ releases:
   namespace: "kube-system"
   labels:
     chart: "prometheus-operator"
-    component: "metrics"
+    component: "monitoring"
     namespace: "kube-system"
+    vendor: "coreos"
     default: "true"
   chart: "coreos-stable/prometheus-operator"
   version: "0.0.23"
@@ -671,6 +677,7 @@ releases:
     chart: "kube-prometheus"
     component: "monitoring"
     namespace: "monitoring"
+    vendor: "coreos"
     default: "true"
   chart: "coreos-stable/kube-prometheus"
   version: "0.0.61"
@@ -881,7 +888,7 @@ releases:
 #   - https://github.com/kubernetes/charts/blob/master/stable/datadog/values.yaml
 #
 - name: "datadog"
-  namespace: "datadog"
+  namespace: "monitoring"
   labels:
     chart: "datadog"
     component: "monitoring"
@@ -924,3 +931,260 @@ releases:
 
     - name: "kube-state-metrics.rbac.create"
       value: "false"
+
+
+
+#######################################################################################
+## portal                                                                            ##
+## Portal for Kubernetes services                                                    ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/tree/master/incubator/portal
+#   - https://github.com/cloudposse/charts/blob/master/incubator/portal/values.yaml
+#
+- name: "portal"
+  namespace: "monitoring"
+  labels:
+    chart: "portal"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "cloudposse"
+    default: "true"
+  chart: "cloudposse-incubator/portal"
+  version: "0.1.0"
+  values:
+    - "values/portal.yaml"
+  set:
+      ## backends
+    - name: "backends.dashboard.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Kubernetes Dashboard" }}'
+    - name: "backends.dashboard.endpoint"
+      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" }}'
+    - name: "backends.dashboard.external"
+      value: "false"
+
+    - name: "backends.grafana.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_GRAFANA_NAME") "Grafana" }}'
+    - name: "backends.grafana.endpoint"
+      value: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" }}'
+    - name: "backends.grafana.external"
+      value: "false"
+
+    - name: "backends.alerts.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_ALERTS_NAME") "Alerts" }}'
+    - name: "backends.alerts.endpoint"
+      value: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" }}'
+    - name: "backends.alerts.external"
+      value: "false"
+
+    - name: "backends.prometheus.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_NAME") "Alerts" }}'
+    - name: "backends.prometheus.endpoint"
+      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" }}'
+    - name: "backends.prometheus.external"
+      value: "false"
+
+    - name: "backends.docs.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_NAME") "Documentation" }}'
+    - name: "backends.docs.endpoint"
+      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_ENDPOINT") "https://docs.cloudposse.com/docs" }}'
+    - name: "backends.docs.external"
+      value: "true"
+
+    - name: "config.title"
+      value: '{{ env "PORTAL_TITLE" }}'
+    - name: "config.brand"
+      value: '{{ env "PORTAL_BRAND" }}'
+    - name: "config.basehost"
+      value: '{{ env "PORTAL_HOSTNAME" }}'
+    - name: "config.image.favicon"
+      value: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" }}'
+    - name: "config.image.url"
+      value: '{{ env "PORTAL_BRAND_IMAGE_URL" }}'
+    - name: "config.image.width"
+      value: '{{ env "PORTAL_BRAND_IMAGE_WIDTH" }}'
+
+    ## dashboard
+    - name: "dashboard.replicaCount"
+      value: '{{ coalesce (env "PORTAL_DASHBOARD_REPLICA_COUNT") "2" }}'
+
+    - name: "dashboard.config.title"
+      value: '{{ env "PORTAL_DASHBOARD_TITLE" }}'
+
+    - name: "dashboard.image.repository"
+      value: "nginx"
+
+    - name: "dashboard.image.tag"
+      value: '{{ coalesce (env "PORTAL_DASHBOARD_IMAGE_TAG") "latest" }}'
+
+    - name: "dashboard.image.pullPolicy"
+      value: "Always"
+
+    - name: "dashboard.service.externalPort"
+      value: "80"
+
+    - name: "dashboard.service.internalPort"
+      value: "80"
+
+    - name: "dashboard.resources.limits.cpu"
+      value: "5m"
+
+    - name: "dashboard.resources.limits.memory"
+      value: "16Mi"
+
+    - name: "dashboard.requests.cpu"
+      value: "3m"
+
+    - name: "dashboard.requests.memory"
+      value: "8Mi"
+
+    ## proxy
+    - name: "proxy.enabled"
+      value: "true"
+
+    - name: "proxy.replicaCount"
+      value: '{{ coalesce (env "PORTAL_PROXY_REPLICA_COUNT") "2" }}'
+
+    - name: "proxy.image.repository"
+      value: "traefik"
+
+    - name: "proxy.image.tag"
+      value: '{{ coalesce (env "PORTAL_PROXY_IMAGE_TAG") "1.5.4" }}'
+
+    - name: "proxy.image.pullPolicy"
+      value: "Always"
+
+    - name: "proxy.service.externalPort"
+      value: "80"
+
+    - name: "proxy.service.internalPort"
+      value: "80"
+
+    - name: "proxy.resources.limits.cpu"
+      value: "5m"
+
+    - name: "proxy.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "proxy.requests.cpu"
+      value: "3m"
+
+    - name: "proxy.requests.memory"
+      value: "32Mi"
+
+    ## oauth2-proxy
+    - name: "oauth2-proxy.app.useSSL"
+      value: "false"
+
+    - name: "oauth2-proxy.app.upstreams[0]"
+      value: "file:///dev/null"
+
+    - name: "oauth2-proxy.app.provider"
+      value: "github"
+
+    - name: "oauth2-proxy.app.clientID"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_ID" }}'
+
+    - name: "oauth2-proxy.app.clientSecret"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_SECRET" }}'
+
+    - name: "oauth2-proxy.app.githubOrg"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION" }}'
+
+    - name: "oauth2-proxy.app.githubTeam"
+      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM") "" }}'
+
+    - name: "oauth2-proxy.requestLogging"
+      value: "false"
+
+    - name: "oauth2-proxy.passAccessToken"
+      value: "false"
+
+    - name: "oauth2-proxy.passBasicAuth"
+      value: "false"
+
+    - name: "oauth2-proxy.passHostHeader"
+      value: "true"
+
+    - name: "oauth2-proxy.cookieName"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_NAME" }}'
+
+    - name: "oauth2-proxy.cookieSecret"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
+
+    - name: "oauth2-proxy.cookieDomain"
+      value: '.{{ env "PORTAL_HOSTNAME" }}'
+
+    - name: "oauth2-proxy.cookieSecure"
+      value: "true"
+
+    - name: "oauth2-proxy.cookieHttponly"
+      value: "false"
+
+    - name: "oauth2-proxy.replicaCount"
+      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT") "2" }}'
+
+    - name: "oauth2-proxy.image.repository"
+      value: "cloudposse/oauth2-proxy"
+
+    - name: "oauth2-proxy.image.tag"
+      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_IMAGE_TAG") "2.2" }}'
+
+    - name: "oauth2-proxy.image.pullPolicy"
+      value: "Always"
+
+    - name: "oauth2-proxy.resources.limits.cpu"
+      value: "10m"
+
+    - name: "oauth2-proxy.resources.limits.memory"
+      value: "16Mi"
+
+    - name: "oauth2-proxy.requests.cpu"
+      value: "5m"
+
+    - name: "oauth2-proxy.requests.memory"
+      value: "8Mi"
+
+    ## Ingress
+    - name: "ingress.enabled"
+      value: "true"
+
+    - name: "ingress.dns.enabled"
+      value: "false"
+
+    - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
+      value: "nginx"
+
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
+
+    ### Required: PORTAL_HOSTNAME; e.g. e.g. portal.us-west-2.staging.cloudposse.org
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+      value: '{{ env "PORTAL_HOSTNAME" }}'
+
+    ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
+      value: '{{ env "PORTAL_INGRESS" }}'
+
+    # DNS TTL for PORTAL_HOSTNAME; e.g. 60
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: "60"
+
+    ### Required: PORTAL_HOSTNAME; e.g. portal.us-west-2.staging.cloudposse.org
+    - name: 'ingress.hosts.{{ env "PORTAL_HOSTNAME" | replace "." "\\." }}[0]'
+      value: "/"
+
+    - name: "ingress.tls.enabled"
+      value: "true"
+
+    ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
+    - name: "ingress.tls[0].secretName"
+      value: '{{ coalesce (env "PORTAL_SECRET_NAME") "portal-tls" }}'
+
+    ### Required: PORTAL_HOSTNAME; e.g. portal.us-west-2.staging.cloudposse.org
+    - name: "ingress.tls[0].hosts[0]"
+      value: '{{ env "PORTAL_HOSTNAME" }}'

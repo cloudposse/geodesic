@@ -959,7 +959,7 @@ releases:
   set:
       ## backends
     - name: "backends.dashboard.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Kubernetes Dashboard" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Dashboard" }}'
     - name: "backends.dashboard.endpoint"
       value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" }}'
     - name: "backends.dashboard.external"
@@ -980,7 +980,7 @@ releases:
       value: "false"
 
     - name: "backends.prometheus.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_NAME") "Alerts" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_NAME") "Prometheus" }}'
     - name: "backends.prometheus.endpoint"
       value: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" }}'
     - name: "backends.prometheus.external"

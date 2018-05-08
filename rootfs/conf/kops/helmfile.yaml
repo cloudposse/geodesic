@@ -1034,10 +1034,10 @@ releases:
     - name: "dashboard.resources.limits.memory"
       value: "16Mi"
 
-    - name: "dashboard.requests.cpu"
+    - name: "dashboard.resources.requests.cpu"
       value: "3m"
 
-    - name: "dashboard.requests.memory"
+    - name: "dashboard.resources.requests.memory"
       value: "8Mi"
 
     ## proxy
@@ -1068,10 +1068,10 @@ releases:
     - name: "proxy.resources.limits.memory"
       value: "64Mi"
 
-    - name: "proxy.requests.cpu"
+    - name: "proxy.resources.requests.cpu"
       value: "3m"
 
-    - name: "proxy.requests.memory"
+    - name: "proxy.resources.requests.memory"
       value: "32Mi"
 
     ## oauth2-proxy
@@ -1096,55 +1096,55 @@ releases:
     - name: "oauth2-proxy.app.githubTeam"
       value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM") "" }}'
 
-    - name: "oauth2-proxy.requestLogging"
+    - name: "oauth2-proxy.app.requestLogging"
       value: "false"
 
-    - name: "oauth2-proxy.passAccessToken"
+    - name: "oauth2-proxy.app.passAccessToken"
       value: "false"
 
-    - name: "oauth2-proxy.passBasicAuth"
+    - name: "oauth2-proxy.app.passBasicAuth"
       value: "false"
 
-    - name: "oauth2-proxy.passHostHeader"
+    - name: "oauth2-proxy.app.passHostHeader"
       value: "true"
 
-    - name: "oauth2-proxy.cookieName"
+    - name: "oauth2-proxy.app.cookieName"
       value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_NAME" }}'
 
-    - name: "oauth2-proxy.cookieSecret"
+    - name: "oauth2-proxy.app.cookieSecret"
       value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
 
-    - name: "oauth2-proxy.cookieDomain"
+    - name: "oauth2-proxy.app.cookieDomain"
       value: '.{{ env "PORTAL_HOSTNAME" }}'
 
-    - name: "oauth2-proxy.cookieSecure"
+    - name: "oauth2-proxy.app.cookieSecure"
       value: "true"
 
-    - name: "oauth2-proxy.cookieHttponly"
+    - name: "oauth2-proxy.app.cookieHttponly"
       value: "false"
 
-    - name: "oauth2-proxy.replicaCount"
+    - name: "oauth2-proxy.app.replicaCount"
       value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT") "2" }}'
 
-    - name: "oauth2-proxy.image.repository"
+    - name: "oauth2-proxy.app.image.repository"
       value: "cloudposse/oauth2-proxy"
 
-    - name: "oauth2-proxy.image.tag"
+    - name: "oauth2-proxy.app.image.tag"
       value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_IMAGE_TAG") "2.2" }}'
 
-    - name: "oauth2-proxy.image.pullPolicy"
+    - name: "oauth2-proxy.app.image.pullPolicy"
       value: "Always"
 
-    - name: "oauth2-proxy.resources.limits.cpu"
+    - name: "oauth2-proxy.app.resources.limits.cpu"
       value: "10m"
 
-    - name: "oauth2-proxy.resources.limits.memory"
+    - name: "oauth2-proxy.app.resources.limits.memory"
       value: "16Mi"
 
-    - name: "oauth2-proxy.requests.cpu"
+    - name: "oauth2-proxy.app.resources.requests.cpu"
       value: "5m"
 
-    - name: "oauth2-proxy.requests.memory"
+    - name: "oauth2-proxy.app.resources.requests.memory"
       value: "8Mi"
 
     ## Ingress
@@ -1153,6 +1153,9 @@ releases:
 
     - name: "ingress.dns.enabled"
       value: "false"
+
+    - name: "ingress.tls.enabled"
+      value: "true"
 
     - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"
@@ -1173,18 +1176,3 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
-
-    ### Required: PORTAL_HOSTNAME; e.g. portal.us-west-2.staging.cloudposse.org
-    - name: 'ingress.hosts.{{ env "PORTAL_HOSTNAME" | replace "." "\\." }}[0]'
-      value: "/"
-
-    - name: "ingress.tls.enabled"
-      value: "true"
-
-    ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
-    - name: "ingress.tls[0].secretName"
-      value: '{{ coalesce (env "PORTAL_SECRET_NAME") "portal-tls" }}'
-
-    ### Required: PORTAL_HOSTNAME; e.g. portal.us-west-2.staging.cloudposse.org
-    - name: "ingress.tls[0].hosts[0]"
-      value: '{{ env "PORTAL_HOSTNAME" }}'

@@ -1094,7 +1094,7 @@ releases:
       value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION" }}'
 
     - name: "oauth2-proxy.app.githubTeam"
-      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM") "" }}'
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM" }}'
 
     - name: "oauth2-proxy.app.requestLogging"
       value: "false"

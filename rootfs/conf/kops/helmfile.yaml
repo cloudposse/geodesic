@@ -1115,7 +1115,7 @@ releases:
       value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
 
     - name: "oauth2-proxy.app.cookieDomain"
-      value: '.{{ env "PORTAL_HOSTNAME" }}'
+      value: '{{ env "PORTAL_HOSTNAME" }}'
 
     - name: "oauth2-proxy.app.cookieSecure"
       value: "true"

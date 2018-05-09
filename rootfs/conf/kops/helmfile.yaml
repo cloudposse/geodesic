@@ -935,6 +935,103 @@ releases:
 
 
 #######################################################################################
+## heapster                                                                          ##
+## Compute Resource Usage Analysis and Monitoring of Container Clusters              ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/heapster
+#   - https://github.com/kubernetes/charts/blob/master/stable/heapster/values.yaml
+#
+- name: "heapster"
+  namespace: "kube-system"
+  labels:
+    chart: "heapster"
+    component: "monitoring"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "stable/heapster"
+  version: "0.2.10"
+  set:
+    - name: "replicaCount"
+      value: '{{ coalesce (env "HEAPSTER_REPLICA_COUNT") "1" }}'
+
+    - name: "image.repository"
+      value: "k8s.gcr.io/heapster"
+
+    - name: "image.tag"
+      value: '{{ coalesce (env "HEAPSTER_IMAGE_TAG") "v1.3.0" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "resources.limits.cpu"
+      value: "100m"
+
+    - name: "resources.limits.memory"
+      value: "256Mi"
+
+    - name: "resources.requests.cpu"
+      value: "50m"
+
+    - name: "resources.requests.memory"
+      value: "128Mi"
+
+
+
+#######################################################################################
+## kubernetes-dashboard                                                              ##
+## General-purpose web UI for Kubernetes clusters                                    ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/dashboard
+#   - https://github.com/kubernetes/charts/tree/master/stable/kubernetes-dashboard
+#
+- name: "kubernetes-dashboard"
+  namespace: "kube-system"
+  labels:
+    chart: "kubernetes-dashboard"
+    component: "monitoring"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "stable/kubernetes-dashboard"
+  version: "0.6.7"
+  set:
+    - name: "image.repository"
+      value: "k8s.gcr.io/kubernetes-dashboard-amd64"
+
+    - name: "image.tag"
+      value: '{{ coalesce (env "KUBERNETES_DASHBOARD_IMAGE_TAG") "v1.8.3" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "resources.limits.cpu"
+      value: "100m"
+
+    - name: "resources.limits.memory"
+      value: "100Mi"
+
+    - name: "resources.requests.cpu"
+      value: "50m"
+
+    - name: "resources.requests.memory"
+      value: "50Mi"
+
+    - name: "rbac.create"
+      value: "false"
+
+    - name: "serviceAccount.create"
+      value: "true"
+
+
+
+#######################################################################################
 ## portal                                                                            ##
 ## Portal for Kubernetes services                                                    ##
 #######################################################################################
@@ -959,7 +1056,7 @@ releases:
   set:
       ## backends
     - name: "backends.dashboard.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Dashboard" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Kubernetes" }}'
     - name: "backends.dashboard.endpoint"
       value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" }}'
     - name: "backends.dashboard.external"
@@ -987,7 +1084,7 @@ releases:
       value: "false"
 
     - name: "backends.docs.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_NAME") "Documentation" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_NAME") "Docs" }}'
     - name: "backends.docs.endpoint"
       value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_ENDPOINT") "https://docs.cloudposse.com/docs" }}'
     - name: "backends.docs.external"
@@ -1115,7 +1212,7 @@ releases:
       value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
 
     - name: "oauth2-proxy.app.cookieDomain"
-      value: '{{ env "PORTAL_HOSTNAME" }}'
+      value: '.{{ env "PORTAL_HOSTNAME" }}'
 
     - name: "oauth2-proxy.app.cookieSecure"
       value: "true"

@@ -1086,7 +1086,7 @@ releases:
     - name: "backends.docs.name"
       value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_NAME") "Docs" }}'
     - name: "backends.docs.endpoint"
-      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_ENDPOINT") "https://docs.cloudposse.com/docs" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_ENDPOINT") "https://docs.cloudposse.com/" }}'
     - name: "backends.docs.external"
       value: "true"
 

@@ -680,7 +680,7 @@ releases:
     vendor: "coreos"
     default: "true"
   chart: "coreos-stable/kube-prometheus"
-  version: "0.0.61"
+  version: "0.0.66"
   set:
     - name: "global.rbacEnable"
       value: "false"

@@ -46,6 +46,7 @@ releases:
     chart: "chartmuseum"
     component: "platform"
     namespace: "kube-system"
+    vendor: "kubernetes-helm"
     default: "true"
   chart: "stable/chartmuseum"
   version: "1.3.1"
@@ -131,6 +132,7 @@ releases:
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
+
 ################################################################################
 ## Chart Repo ##################################################################
 ################################################################################
@@ -145,6 +147,7 @@ releases:
     chart: "chart-repo"
     component: "platform"
     namespace: "kube-system"
+    vendor: "kubernetes-helm"
     default: "false"
   chart: "cloudposse-incubator/chart-repo"
   version: "0.2.1"
@@ -321,6 +324,7 @@ releases:
     - name: "server.replica.annotations.iam\\.amazonaws\\.com/role"
       value: '{{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}'
 
+
 ################################################################################
 ## External DNS ################################################################
 ################################################################################
@@ -329,13 +333,13 @@ releases:
 # References:
 #   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
 #
-
 - name: "dns"
   namespace: "kube-system"
   labels:
     chart: "external-dns"
     component: "ingress"
     namespace: "kube-system"
+    vendor: "kubernetes-incubator"
     default: "true"
   chart: "stable/external-dns"
   version: "0.5.4"
@@ -392,15 +396,14 @@ releases:
 # References:
 #   - https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
 #
-
 - name: "tls"
   namespace: "kube-system"
   labels:
     chart: "kube-lego"
     component: "ingress"
     namespace: "kube-system"
+    vendor: "jetstack"
     default: "true"
-
   chart: "cloudposse-incubator/kube-lego"
   version: "0.1.2"
   set:
@@ -463,6 +466,7 @@ releases:
     chart: "kube2iam"
     component: "iam"
     namespace: "kube-system"
+    vendor: "jtblin"
     default: "true"
   chart: "stable/kube2iam"
   version: "0.8.5"
@@ -512,6 +516,7 @@ releases:
     chart: "nginx-ingress"
     component: "ingress"
     namespace: "kube-system"
+    vendor: "kubernetes"
     default: "true"
   chart: "cloudposse-incubator/nginx-ingress"
   version: "0.1.7"
@@ -584,8 +589,9 @@ releases:
   namespace: "kube-system"
   labels:
     chart: "prometheus-operator"
-    component: "metrics"
+    component: "monitoring"
     namespace: "kube-system"
+    vendor: "coreos"
     default: "true"
   chart: "coreos-stable/prometheus-operator"
   version: "0.0.23"
@@ -675,9 +681,10 @@ releases:
     chart: "kube-prometheus"
     component: "monitoring"
     namespace: "monitoring"
+    vendor: "coreos"
     default: "true"
   chart: "coreos-stable/kube-prometheus"
-  version: "0.0.61"
+  version: "0.0.66"
   set:
     - name: "global.rbacEnable"
       value: "false"
@@ -885,11 +892,12 @@ releases:
 #   - https://github.com/kubernetes/charts/blob/master/stable/datadog/values.yaml
 #
 - name: "datadog"
-  namespace: "datadog"
+  namespace: "monitoring"
   labels:
     chart: "datadog"
-    component: "datadog"
-    namespace: "datadog"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "datadog"
     default: "false"
   chart: "stable/datadog"
   version: "0.11.2"
@@ -960,15 +968,15 @@ releases:
       value: "Always"
 
     - name: "resources.limits.cpu"
-      value: "100m"
-
+      value: "50m" 
+       
     - name: "resources.limits.memory"
       value: "512Mi"
 
-    - name: "requests.cpu"
+    - name: "resources.requests.cpu"
       value: "5m"
 
-    - name: "requests.memory"
+    - name: "resources.requests.memory"
       value: "256Mi"
 
     - name: "env.open.DATADOG_SOURCE"
@@ -979,3 +987,344 @@ releases:
 
     - name: "configDir"
       value: "/tmp/conf"
+
+#######################################################################################
+## heapster                                                                          ##
+## Compute Resource Usage Analysis and Monitoring of Container Clusters              ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/heapster
+#   - https://github.com/kubernetes/charts/blob/master/stable/heapster/values.yaml
+#
+- name: "heapster"
+  namespace: "kube-system"
+  labels:
+    chart: "heapster"
+    component: "monitoring"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "stable/heapster"
+  version: "0.2.10"
+  set:
+    - name: "replicaCount"
+      value: '{{ coalesce (env "HEAPSTER_REPLICA_COUNT") "1" }}'
+
+    - name: "image.repository"
+      value: "k8s.gcr.io/heapster"
+
+    - name: "image.tag"
+      value: '{{ coalesce (env "HEAPSTER_IMAGE_TAG") "v1.3.0" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "resources.limits.cpu"
+      value: "100m"
+
+    - name: "resources.limits.memory"
+      value: "256Mi"
+
+    - name: "resources.requests.cpu"
+      value: "50m"
+
+    - name: "resources.requests.memory"
+      value: "128Mi"
+
+
+#######################################################################################
+## kubernetes-dashboard                                                              ##
+## General-purpose web UI for Kubernetes clusters                                    ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/dashboard
+#   - https://github.com/kubernetes/charts/tree/master/stable/kubernetes-dashboard
+#
+- name: "kubernetes-dashboard"
+  namespace: "kube-system"
+  labels:
+    chart: "kubernetes-dashboard"
+    component: "monitoring"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "stable/kubernetes-dashboard"
+  version: "0.6.7"
+  set:
+    - name: "image.repository"
+      value: "k8s.gcr.io/kubernetes-dashboard-amd64"
+
+    - name: "image.tag"
+      value: '{{ coalesce (env "KUBERNETES_DASHBOARD_IMAGE_TAG") "v1.8.3" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "resources.limits.cpu"
+      value: "100m"
+
+    - name: "resources.limits.memory"
+
+      value: "100Mi"
+
+    - name: "resources.requests.cpu"
+      value: "50m"
+
+    - name: "resources.requests.memory"
+      value: "50Mi"
+
+    - name: "rbac.create"
+      value: "false"
+
+    - name: "serviceAccount.create"
+      value: "true"
+
+
+
+#######################################################################################
+## portal                                                                            ##
+## Portal for Kubernetes services                                                    ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/tree/master/incubator/portal
+#   - https://github.com/cloudposse/charts/blob/master/incubator/portal/values.yaml
+#
+- name: "portal"
+  namespace: "monitoring"
+  labels:
+    chart: "portal"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "cloudposse"
+    default: "true"
+  chart: "cloudposse-incubator/portal"
+  version: "0.1.0"
+  values:
+    - "values/portal.yaml"
+  set:
+      ## backends
+    - name: "backends.dashboard.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Kubernetes" }}'
+    - name: "backends.dashboard.endpoint"
+      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" }}'
+    - name: "backends.dashboard.external"
+      value: "false"
+
+    - name: "backends.grafana.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_GRAFANA_NAME") "Grafana" }}'
+    - name: "backends.grafana.endpoint"
+      value: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" }}'
+    - name: "backends.grafana.external"
+      value: "false"
+
+    - name: "backends.alerts.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_ALERTS_NAME") "Alerts" }}'
+    - name: "backends.alerts.endpoint"
+      value: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" }}'
+    - name: "backends.alerts.external"
+      value: "false"
+
+    - name: "backends.prometheus.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_NAME") "Prometheus" }}'
+    - name: "backends.prometheus.endpoint"
+      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" }}'
+    - name: "backends.prometheus.external"
+      value: "false"
+
+    - name: "backends.docs.name"
+      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_NAME") "Docs" }}'
+    - name: "backends.docs.endpoint"
+      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_ENDPOINT") "https://docs.cloudposse.com/" }}'
+    - name: "backends.docs.external"
+      value: "true"
+
+    - name: "config.title"
+      value: '{{ env "PORTAL_TITLE" }}'
+    - name: "config.brand"
+      value: '{{ env "PORTAL_BRAND" }}'
+    - name: "config.basehost"
+      value: '{{ env "PORTAL_HOSTNAME" }}'
+    - name: "config.image.favicon"
+      value: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" }}'
+    - name: "config.image.url"
+      value: '{{ env "PORTAL_BRAND_IMAGE_URL" }}'
+    - name: "config.image.width"
+      value: '{{ env "PORTAL_BRAND_IMAGE_WIDTH" }}'
+
+    ## dashboard
+    - name: "dashboard.replicaCount"
+      value: '{{ coalesce (env "PORTAL_DASHBOARD_REPLICA_COUNT") "2" }}'
+
+    - name: "dashboard.config.title"
+      value: '{{ env "PORTAL_DASHBOARD_TITLE" }}'
+
+    - name: "dashboard.image.repository"
+      value: "nginx"
+
+    - name: "dashboard.image.tag"
+      value: '{{ coalesce (env "PORTAL_DASHBOARD_IMAGE_TAG") "latest" }}'
+
+    - name: "dashboard.image.pullPolicy"
+      value: "Always"
+
+    - name: "dashboard.service.externalPort"
+      value: "80"
+
+    - name: "dashboard.service.internalPort"
+      value: "80"
+
+    - name: "dashboard.resources.limits.cpu"
+      value: "5m"
+
+    - name: "dashboard.resources.limits.memory"
+      value: "16Mi"
+
+    - name: "dashboard.resources.requests.cpu"
+      value: "3m"
+
+    - name: "dashboard.resources.requests.memory"
+      value: "8Mi"
+
+    ## proxy
+    - name: "proxy.enabled"
+      value: "true"
+
+    - name: "proxy.replicaCount"
+      value: '{{ coalesce (env "PORTAL_PROXY_REPLICA_COUNT") "2" }}'
+
+    - name: "proxy.image.repository"
+      value: "traefik"
+
+    - name: "proxy.image.tag"
+      value: '{{ coalesce (env "PORTAL_PROXY_IMAGE_TAG") "1.5.4" }}'
+
+    - name: "proxy.image.pullPolicy"
+      value: "Always"
+
+    - name: "proxy.service.externalPort"
+      value: "80"
+
+    - name: "proxy.service.internalPort"
+      value: "80"
+
+    - name: "proxy.resources.limits.cpu"
+      value: "5m"
+
+    - name: "proxy.resources.limits.memory"
+      value: "64Mi"
+
+    - name: "proxy.resources.requests.cpu"
+      value: "3m"
+
+    - name: "proxy.resources.requests.memory"
+      value: "32Mi"
+
+    ## oauth2-proxy
+    - name: "oauth2-proxy.app.useSSL"
+      value: "false"
+
+    - name: "oauth2-proxy.app.upstreams[0]"
+      value: "file:///dev/null"
+
+    - name: "oauth2-proxy.app.provider"
+      value: "github"
+
+    - name: "oauth2-proxy.app.clientID"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_ID" }}'
+
+    - name: "oauth2-proxy.app.clientSecret"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_SECRET" }}'
+
+    - name: "oauth2-proxy.app.githubOrg"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION" }}'
+
+    - name: "oauth2-proxy.app.githubTeam"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM" }}'
+
+    - name: "oauth2-proxy.app.requestLogging"
+      value: "false"
+
+    - name: "oauth2-proxy.app.passAccessToken"
+      value: "false"
+
+    - name: "oauth2-proxy.app.passBasicAuth"
+      value: "false"
+
+    - name: "oauth2-proxy.app.passHostHeader"
+      value: "true"
+
+    - name: "oauth2-proxy.app.cookieName"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_NAME" }}'
+
+    - name: "oauth2-proxy.app.cookieSecret"
+      value: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
+
+    - name: "oauth2-proxy.app.cookieDomain"
+      value: '.{{ env "PORTAL_HOSTNAME" }}'
+
+    - name: "oauth2-proxy.app.cookieSecure"
+      value: "true"
+
+    - name: "oauth2-proxy.app.cookieHttponly"
+      value: "false"
+
+    - name: "oauth2-proxy.app.replicaCount"
+      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT") "2" }}'
+
+    - name: "oauth2-proxy.app.image.repository"
+      value: "cloudposse/oauth2-proxy"
+
+    - name: "oauth2-proxy.app.image.tag"
+      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_IMAGE_TAG") "2.2" }}'
+
+    - name: "oauth2-proxy.app.image.pullPolicy"
+      value: "Always"
+
+    - name: "oauth2-proxy.app.resources.limits.cpu"
+      value: "10m"
+
+    - name: "oauth2-proxy.app.resources.limits.memory"
+      value: "16Mi"
+
+    - name: "oauth2-proxy.app.resources.requests.cpu"
+      value: "5m"
+
+    - name: "oauth2-proxy.app.resources.requests.memory"
+      value: "8Mi"
+
+    ## Ingress
+    - name: "ingress.enabled"
+      value: "true"
+
+    - name: "ingress.dns.enabled"
+      value: "false"
+
+    - name: "ingress.tls.enabled"
+      value: "true"
+
+    - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
+      value: "nginx"
+
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
+
+    ### Required: PORTAL_HOSTNAME; e.g. e.g. portal.us-west-2.staging.cloudposse.org
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+      value: '{{ env "PORTAL_HOSTNAME" }}'
+
+    ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
+      value: '{{ env "PORTAL_INGRESS" }}'
+
+    # DNS TTL for PORTAL_HOSTNAME; e.g. 60
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: "60"
+

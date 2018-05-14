@@ -26,6 +26,10 @@ repositories:
 - name: "incubator"
   url: "https://kubernetes-charts-incubator.storage.googleapis.com"
 
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
+
 # CoreOS Stable helm charts
 - name: "coreos-stable"
   url: "https://s3-eu-west-1.amazonaws.com/coreos-charts/stable"

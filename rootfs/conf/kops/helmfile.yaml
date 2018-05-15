@@ -22,6 +22,10 @@ repositories:
 - name: "stable"
   url: "https://kubernetes-charts.storage.googleapis.com"
 
+# Incubator repo of official helm charts
+- name: "incubator"
+  url: "https://kubernetes-charts-incubator.storage.googleapis.com"
+
 # Cloud Posse incubator repo of helm charts
 - name: "cloudposse-incubator"
   url: "https://charts.cloudposse.com/incubator/"
@@ -932,7 +936,57 @@ releases:
     - name: "kube-state-metrics.rbac.create"
       value: "false"
 
+#######################################################################################
+## Fluentd to datadog logs
+## Forward logs to Datadog with fluentd                                              ##
+#######################################################################################
 
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/incubator/fluentd/
+#   - https://github.com/kubernetes/charts/blob/master/incubator/fluentd/values.yaml
+#   - https://github.com/cloudposse/fluentd-datadog-logs
+#
+
+- name: "logs"
+  namespace: "kube-system"
+  labels:
+    chart: "fluentd"
+    component: "datadog"
+    namespace: "kube-system"
+    default: "false"
+  chart: "incubator/fluentd"
+  version: "0.2.0"
+  set:
+    - name: "image.repository"
+      value: "cloudposse/fluentd-datadog-logs"
+
+    - name: "image.tag"
+      value: "0.1.0"
+
+    - name: "image.pullPolicy"
+      value: "Always"
+
+    - name: "resources.limits.cpu"
+      value: "50m" 
+       
+    - name: "resources.limits.memory"
+      value: "512Mi"
+
+    - name: "resources.requests.cpu"
+      value: "5m"
+
+    - name: "resources.requests.memory"
+      value: "256Mi"
+
+    - name: "env.open.DATADOG_SOURCE"
+      value: '{{ coalesce (env "DATADOG_SOURCE") "k8s-staging" }}'
+
+    - name: "env.secret.DATADOG_API_KEY"
+      value: '{{ env "DATADOG_API_KEY" }}'
+
+    - name: "configDir"
+      value: "/tmp/conf"
 
 #######################################################################################
 ## heapster                                                                          ##
@@ -980,7 +1034,6 @@ releases:
       value: "128Mi"
 
 
-
 #######################################################################################
 ## kubernetes-dashboard                                                              ##
 ## General-purpose web UI for Kubernetes clusters                                    ##
@@ -1015,6 +1068,7 @@ releases:
       value: "100m"
 
     - name: "resources.limits.memory"
+
       value: "100Mi"
 
     - name: "resources.requests.cpu"
@@ -1273,3 +1327,4 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
+

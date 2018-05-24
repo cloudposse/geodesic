@@ -344,18 +344,8 @@ releases:
   chart: "stable/external-dns"
   version: "0.5.4"
   set:
-    - name: "nodeSelector.kubernetes\\.io/role"
-      value: "master"
-
     - name: "extraEnv.EXTERNAL_DNS_SOURCE"
       value: "service\ningress"
-
-    ## Tolerations
-    - name: "tolerations[0].key"
-      value: "node-role.kubernetes.io/master"
-
-    - name: "tolerations[0].effect"
-      value: "NoSchedule"
 
     ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org
     - name: "txtOwnerId"

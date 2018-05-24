@@ -16,7 +16,7 @@ Geodesic is composed of two parts:
 
 An organization may chose to leverage all of these components, or just the parts that make their life easier.
 
-Review our [documentation](https://docs.cloudposse.com/docs/geodesic) to get started!
+Review our [documentation](https://docs.cloudposse.com/geodesic/) to get started!
 
 ## Features
 * **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/99designs/aws-vault/), automatic key rotation, encryption at rest, and VPCs

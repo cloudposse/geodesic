@@ -675,6 +675,8 @@ releases:
     default: "true"
   chart: "coreos-stable/kube-prometheus"
   version: "0.0.66"
+  values:
+    - "custom_values/kube-prometheus.grafana.dashboards.yaml"
   set:
     - name: "global.rbacEnable"
       value: "false"
@@ -1097,33 +1099,34 @@ releases:
   version: "0.1.0"
   values:
     - "values/portal.yaml"
+    - "custom_values/portal.backends.yaml"
   set:
       ## backends
     - name: "backends.dashboard.name"
       value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Kubernetes" }}'
     - name: "backends.dashboard.endpoint"
-      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT") "https://kubernetes-dashboard.kube-system:443" }}'
     - name: "backends.dashboard.external"
       value: "false"
 
     - name: "backends.grafana.name"
       value: '{{ coalesce (env "PORTAL_BACKEND_GRAFANA_NAME") "Grafana" }}'
     - name: "backends.grafana.endpoint"
-      value: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_GRAFANA_ENDPOINT") "http://kube-prometheus-grafana.monitoring:80" }}'
     - name: "backends.grafana.external"
       value: "false"
 
     - name: "backends.alerts.name"
       value: '{{ coalesce (env "PORTAL_BACKEND_ALERTS_NAME") "Alerts" }}'
     - name: "backends.alerts.endpoint"
-      value: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_ALERTS_ENDPOINT") "http://kube-prometheus-alertmanager.monitoring:9093" }}'
     - name: "backends.alerts.external"
       value: "false"
 
     - name: "backends.prometheus.name"
       value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_NAME") "Prometheus" }}'
     - name: "backends.prometheus.endpoint"
-      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" }}'
+      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT") "http://kube-prometheus-prometheus.monitoring:9090" }}'
     - name: "backends.prometheus.external"
       value: "false"
 
@@ -1141,18 +1144,15 @@ releases:
     - name: "config.basehost"
       value: '{{ env "PORTAL_HOSTNAME" }}'
     - name: "config.image.favicon"
-      value: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" }}'
+      value: '{{ coalesce (env "PORTAL_BRAND_IMAGE_FAVICON_URL") "https://cloudposse.com/wp-content/uploads/sites/29/2016/04/favicon-152.png" }}'
     - name: "config.image.url"
-      value: '{{ env "PORTAL_BRAND_IMAGE_URL" }}'
+      value: '{{ coalesce (env "PORTAL_BRAND_IMAGE_URL") "https://raw.githubusercontent.com/cloudposse/helm-chart-scaffolding/master/logo.png" }}'
     - name: "config.image.width"
-      value: '{{ env "PORTAL_BRAND_IMAGE_WIDTH" }}'
+      value: '{{ coalesce (env "PORTAL_BRAND_IMAGE_WIDTH") "35" }}'
 
     ## dashboard
     - name: "dashboard.replicaCount"
       value: '{{ coalesce (env "PORTAL_DASHBOARD_REPLICA_COUNT") "2" }}'
-
-    - name: "dashboard.config.title"
-      value: '{{ env "PORTAL_DASHBOARD_TITLE" }}'
 
     - name: "dashboard.image.repository"
       value: "nginx"
@@ -1304,10 +1304,6 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
-
-    ### Required: PORTAL_HOSTNAME; e.g. e.g. portal.us-west-2.staging.cloudposse.org
-    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "PORTAL_HOSTNAME" }}'
 
     ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"

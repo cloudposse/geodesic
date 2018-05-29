@@ -253,7 +253,7 @@ ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
 VOLUME ["${CACHE_PATH}"]
 
-COPY ./rootfs/ /
+COPY rootfs/ /
 
 WORKDIR /conf
 

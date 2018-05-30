@@ -676,7 +676,7 @@ releases:
   chart: "coreos-stable/kube-prometheus"
   version: "0.0.66"
   values:
-    - "custom_values/kube-prometheus.grafana.dashboards.yaml"
+    - "values/kube-prometheus.grafana.dashboards.yaml"
   set:
     - name: "global.rbacEnable"
       value: "false"
@@ -1099,7 +1099,7 @@ releases:
   version: "0.1.0"
   values:
     - "values/portal.yaml"
-    - "custom_values/portal.backends.yaml"
+    - "values/portal.backends.yaml"
   set:
       ## backends
     - name: "backends.dashboard.name"

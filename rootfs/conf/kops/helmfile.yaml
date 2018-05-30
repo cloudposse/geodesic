@@ -735,14 +735,14 @@ releases:
 
     ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT; e.g. 4
     - name: "alertmanager.replicaCount"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT") "4" }}'
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT" | "4" }}'
 
     - name: "alertmanager.image.repository"
       value: "quay.io/prometheus/alertmanager"
 
     ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG; e.g. v0.14.0
     - name: "alertmanager.image.tag"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG") "v0.14.0" }}'
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG" | "v0.14.0" }}'
 
     - name: "alertmanager.image.pullPolicy"
       value: "IfNotPresent"
@@ -833,14 +833,14 @@ releases:
 
     ### Optional: KUBE_PROMETHEUS_REPLICA_COUNT; e.g. 4
     - name: "prometheus.replicaCount"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_REPLICA_COUNT") "4" }}'
+      value: '{{ env "KUBE_PROMETHEUS_REPLICA_COUNT" | "4" }}'
 
     - name: "prometheus.image.repository"
       value: "quay.io/prometheus/prometheus"
 
     ### Optional: KUBE_PROMETHEUS_IMAGE_TAG; e.g. v2.2.1
     - name: "prometheus.image.tag"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_IMAGE_TAG") "v2.2.1" }}'
+      value: '{{ env "KUBE_PROMETHEUS_IMAGE_TAG" | "v2.2.1" }}'
 
     - name: "prometheus.image.pullPolicy"
       value: "IfNotPresent"
@@ -899,7 +899,7 @@ releases:
 
     ### Optional: DATADOG_IMAGE_TAG; e.g. 6.1.2
     - name: "image.tag"
-      value: '{{ coalesce (env "DATADOG_IMAGE_TAG") "6.1.2" }}'
+      value: '{{ env "DATADOG_IMAGE_TAG" | "6.1.2" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -972,7 +972,7 @@ releases:
       value: "256Mi"
 
     - name: "env.open.DATADOG_SOURCE"
-      value: '{{ coalesce (env "DATADOG_SOURCE") "k8s-staging" }}'
+      value: '{{ env "DATADOG_SOURCE" | "k8s-staging" }}'
 
     - name: "env.secret.DATADOG_API_KEY"
       value: '{{ env "DATADOG_API_KEY" }}'
@@ -1002,13 +1002,13 @@ releases:
   version: "0.2.10"
   set:
     - name: "replicaCount"
-      value: '{{ coalesce (env "HEAPSTER_REPLICA_COUNT") "1" }}'
+      value: '{{ env "HEAPSTER_REPLICA_COUNT" | "1" }}'
 
     - name: "image.repository"
       value: "k8s.gcr.io/heapster"
 
     - name: "image.tag"
-      value: '{{ coalesce (env "HEAPSTER_IMAGE_TAG") "v1.3.0" }}'
+      value: '{{ env "HEAPSTER_IMAGE_TAG" | "v1.3.0" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -1051,7 +1051,7 @@ releases:
       value: "k8s.gcr.io/kubernetes-dashboard-amd64"
 
     - name: "image.tag"
-      value: '{{ coalesce (env "KUBERNETES_DASHBOARD_IMAGE_TAG") "v1.8.3" }}'
+      value: '{{ env "KUBERNETES_DASHBOARD_IMAGE_TAG" | "v1.8.3" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -1103,37 +1103,37 @@ releases:
   set:
       ## backends
     - name: "backends.dashboard.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Kubernetes" }}'
+      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_NAME" | "Kubernetes" }}'
     - name: "backends.dashboard.endpoint"
-      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT") "https://kubernetes-dashboard.kube-system:443" }}'
+      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" | "https://kubernetes-dashboard.kube-system:443" }}'
     - name: "backends.dashboard.external"
       value: "false"
 
     - name: "backends.grafana.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_GRAFANA_NAME") "Grafana" }}'
+      value: '{{ env "PORTAL_BACKEND_GRAFANA_NAME" | "Grafana" }}'
     - name: "backends.grafana.endpoint"
-      value: '{{ coalesce (env "PORTAL_BACKEND_GRAFANA_ENDPOINT") "http://kube-prometheus-grafana.monitoring:80" }}'
+      value: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" | "http://kube-prometheus-grafana.monitoring:80" }}'
     - name: "backends.grafana.external"
       value: "false"
 
     - name: "backends.alerts.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_ALERTS_NAME") "Alerts" }}'
+      value: '{{ env "PORTAL_BACKEND_ALERTS_NAME" | "Alerts" }}'
     - name: "backends.alerts.endpoint"
-      value: '{{ coalesce (env "PORTAL_BACKEND_ALERTS_ENDPOINT") "http://kube-prometheus-alertmanager.monitoring:9093" }}'
+      value: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" | "http://kube-prometheus-alertmanager.monitoring:9093" }}'
     - name: "backends.alerts.external"
       value: "false"
 
     - name: "backends.prometheus.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_NAME") "Prometheus" }}'
+      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_NAME" | "Prometheus" }}'
     - name: "backends.prometheus.endpoint"
-      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT") "http://kube-prometheus-prometheus.monitoring:9090" }}'
+      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" | "http://kube-prometheus-prometheus.monitoring:9090" }}'
     - name: "backends.prometheus.external"
       value: "false"
 
     - name: "backends.docs.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_NAME") "Docs" }}'
+      value: '{{ env "PORTAL_BACKEND_DOCS_NAME" | "Docs" }}'
     - name: "backends.docs.endpoint"
-      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_ENDPOINT") "https://docs.cloudposse.com/" }}'
+      value: '{{ env "PORTAL_BACKEND_DOCS_ENDPOINT" | "https://docs.cloudposse.com/" }}'
     - name: "backends.docs.external"
       value: "true"
 
@@ -1144,21 +1144,21 @@ releases:
     - name: "config.basehost"
       value: '{{ env "PORTAL_HOSTNAME" }}'
     - name: "config.image.favicon"
-      value: '{{ coalesce (env "PORTAL_BRAND_IMAGE_FAVICON_URL") "https://cloudposse.com/wp-content/uploads/sites/29/2016/04/favicon-152.png" }}'
+      value: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" | "https://cloudposse.com/wp-content/uploads/sites/29/2016/04/favicon-152.png" }}'
     - name: "config.image.url"
-      value: '{{ coalesce (env "PORTAL_BRAND_IMAGE_URL") "https://raw.githubusercontent.com/cloudposse/helm-chart-scaffolding/master/logo.png" }}'
+      value: '{{ env "PORTAL_BRAND_IMAGE_URL" | "https://raw.githubusercontent.com/cloudposse/helm-chart-scaffolding/master/logo.png" }}'
     - name: "config.image.width"
-      value: '{{ coalesce (env "PORTAL_BRAND_IMAGE_WIDTH") "35" }}'
+      value: '{{ env "PORTAL_BRAND_IMAGE_WIDTH" | "35" }}'
 
     ## dashboard
     - name: "dashboard.replicaCount"
-      value: '{{ coalesce (env "PORTAL_DASHBOARD_REPLICA_COUNT") "2" }}'
+      value: '{{ env "PORTAL_DASHBOARD_REPLICA_COUNT" | "2" }}'
 
     - name: "dashboard.image.repository"
       value: "nginx"
 
     - name: "dashboard.image.tag"
-      value: '{{ coalesce (env "PORTAL_DASHBOARD_IMAGE_TAG") "latest" }}'
+      value: '{{ env "PORTAL_DASHBOARD_IMAGE_TAG" | "latest" }}'
 
     - name: "dashboard.image.pullPolicy"
       value: "Always"
@@ -1186,13 +1186,13 @@ releases:
       value: "true"
 
     - name: "proxy.replicaCount"
-      value: '{{ coalesce (env "PORTAL_PROXY_REPLICA_COUNT") "2" }}'
+      value: '{{ env "PORTAL_PROXY_REPLICA_COUNT" | "2" }}'
 
     - name: "proxy.image.repository"
       value: "traefik"
 
     - name: "proxy.image.tag"
-      value: '{{ coalesce (env "PORTAL_PROXY_IMAGE_TAG") "1.5.4" }}'
+      value: '{{ env "PORTAL_PROXY_IMAGE_TAG" | "1.5.4" }}'
 
     - name: "proxy.image.pullPolicy"
       value: "Always"
@@ -1265,13 +1265,13 @@ releases:
       value: "false"
 
     - name: "oauth2-proxy.app.replicaCount"
-      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT") "2" }}'
+      value: '{{ env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT" | "2" }}'
 
     - name: "oauth2-proxy.app.image.repository"
       value: "cloudposse/oauth2-proxy"
 
     - name: "oauth2-proxy.app.image.tag"
-      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_IMAGE_TAG") "2.2" }}'
+      value: '{{ env "PORTAL_OAUTH2_PROXY_IMAGE_TAG" | "2.2" }}'
 
     - name: "oauth2-proxy.app.image.pullPolicy"
       value: "Always"

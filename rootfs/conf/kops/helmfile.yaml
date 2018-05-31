@@ -135,7 +135,7 @@ releases:
 
     ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
     - name: "ingress.tls[0].secretName"
-      value: '{{ env "CHARTMUSEUM_SECRET_NAME" | "chartmuseum-server-tls" }}'
+      value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
@@ -235,7 +235,7 @@ releases:
       value: "/api"
 
     - name: "ingress.tls[0].secretName"
-      value: '{{ env "CHARTMUSEUM_API_SECRET_NAME" | "chartmuseum-api-server-tls" }}'
+      value: '{{ coalesce (env "CHARTMUSEUM_API_SECRET_NAME") "chartmuseum-api-server-tls" }}'
 
     - name: "ingress.tls[0].hosts[0]"
       value: 'api.{{ env "CHARTMUSEUM_HOSTNAME" }}'

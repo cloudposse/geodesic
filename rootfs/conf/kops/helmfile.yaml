@@ -49,7 +49,7 @@ releases:
     vendor: "kubernetes-helm"
     default: "true"
   chart: "stable/chartmuseum"
-  version: "1.3.1"
+  version: "1.4.0"
   values:
     - "values/chartmuseum.yaml"
   set:
@@ -58,19 +58,39 @@ releases:
 
     # disable all routes prefixed with /api
     - name: "env.open.DISABLE_API"
-      value: "false"
+      value: "true"
 
     # allow chart versions to be re-uploaded
     - name: "env.open.ALLOW_OVERWRITE"
-      value: "true"
+      value: "false"
+
+    # use amazon s3 storage as backend
+    - name: "env.open.STORAGE"
+      value: "amazon"
+
+    ### Required: STORAGE_AMAZON_BUCKET;
+    - name: "env.open.STORAGE_AMAZON_BUCKET"
+      value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_BUCKET" }}'
+
+    ### Required: STORAGE_AMAZON_PREFIX; e.g. /
+    - name: "env.open.STORAGE_AMAZON_PREFIX"
+      value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_PREFIX" }}'
+
+    ### Required: STORAGE_AMAZON_REGION; e.g. us-west-2
+    - name: "env.open.STORAGE_AMAZON_REGION"
+      value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_REGION" }}'
 
     ### Required: CHARTMUSEUM_BASIC_AUTH_USER; e.g. server
     - name: "env.secret.BASIC_AUTH_USER"
       value: '{{ env "CHARTMUSEUM_BASIC_AUTH_USER" }}'
 
-    ### Required: CHARTMUSEUM_BASIC_AUTH_PASS; e.g. e.g. 15041434-3DC2-42F8-9358-F8AED8780A66
+    ### Required: CHARTMUSEUM_BASIC_AUTH_PASS; e.g. 15041434-3DC2-42F8-9358-F8AED8780A66
     - name: "env.secret.BASIC_AUTH_PASS"
       value: '{{ env "CHARTMUSEUM_BASIC_AUTH_PASS" }}'
+
+    ### Required: CHARTMUSEUM_IAM_ROLE;
+    - name: "replica.annotations.iam\\.amazonaws\\.com/role"
+      value: '{{ env "CHARTMUSEUM_IAM_ROLE" }}'
 
     ## Resources
     - name: "resources.limits.cpu"
@@ -85,17 +105,6 @@ releases:
     - name: "requests.memory"
       value: "256Mi"
 
-    ## Persistence
-    - name: "persistence.enabled"
-      value: "true"
-
-    - name: "persistence.accessMode"
-      value: "ReadWriteOnce"
-
-    ### Optional: CHARTMUSEUM_PERSISTENCE_SIZE; e.g. 10Gi
-    - name: "persistence.size"
-      value: '{{ coalesce (env "CHARTMUSEUM_PERSISTENCE_SIZE") "10Gi" }}'
-
     ## Ingress
     - name: "ingress.enabled"
       value: "true"
@@ -106,10 +115,6 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
-
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
-    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
     ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
@@ -122,11 +127,15 @@ releases:
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
-      value: "/"
+      value: "/charts"
+
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+    - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[1]'
+      value: "/index.yaml"
 
     ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
     - name: "ingress.tls[0].secretName"
-      value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
+      value: '{{ env "CHARTMUSEUM_SECRET_NAME" | "chartmuseum-server-tls" }}'
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
@@ -134,196 +143,102 @@ releases:
 
 
 ################################################################################
-## Chart Repo ##################################################################
+## Chart Museum API ############################################################
 ################################################################################
 
-# References:
-#   - https://github.com/cloudposse/charts/blob/master/incubator/chart-repo/values.yaml
-#   - https://github.com/kubernetes/charts/blob/master/stable/chartmuseum/values.yaml
-#
-- name: "charts"
+- name: "charts-api"
   namespace: "kube-system"
   labels:
-    chart: "chart-repo"
+    chart: "chartmuseum-api"
     component: "platform"
     namespace: "kube-system"
     vendor: "kubernetes-helm"
-    default: "false"
-  chart: "cloudposse-incubator/chart-repo"
-  version: "0.2.1"
+    default: "true"
+  chart: "stable/chartmuseum"
+  version: "1.4.0"
   values:
-    - "values/chart-repo.yaml"
+    - "values/chartmuseum.yaml"
   set:
-    ## Gateway config
-    - name: "gateway.enabled"
-      value: "true"
+    - name: "replicaCount"
+      value: "1"
 
-    - name: "gateway.ingress.enabled"
-      value: "true"
-
-    - name: "gateway.ingress.annotations.kubernetes\\.io/ingress\\.class"
-      value: "nginx"
-
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "gateway.ingress.annotations.kubernetes\\.io/tls-acme"
-    #  value: "true"
-
-    ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
-    - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "CHART_REPO_GATEWAY_HOSTNAME" }}'
-
-    ### Required: CHART_REPO_GATEWAY_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
-    - name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
-      value: '{{ env "CHART_REPO_GATEWAY_INGRESS" }}'
-
-    ### Optional: CHART_REPO_GATEWAY_TTL; e.g. 60
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}
-
-    ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
-    - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]'
-      value: "/api"
-
-    ### Optional: CHART_REPO_GATEWAY_SECRET_NAME; e.g. chart-repo-gateway-tls
-    - name: "gateway.ingress.tls.secretName"
-      value: '{{ coalesce (env "CHART_REPO_GATEWAY_SECRET_NAME") "chart-repo-gateway-tls" }}'
-
-    ### Required: CHART_REPO_GATEWAY_HOSTNAME"; e.g. gateway.charts.us-west-2.staging.cloudposse.org
-    - name: "gateway.ingress.tls.hosts[0]"
-      value: '{{ env "CHART_REPO_GATEWAY_HOSTNAME" }}'
-
-    ### Optional: CHART_REPO_GATEWAY_REPLICA_COUNT"; e.g. 2
-    - name: "gateway.replicaCount"
-      value: '{{ coalesce (env "CHART_REPO_GATEWAY_REPLICA_COUNT") "2" }}'
-
-    ### Optional: CHART_REPO_IMAGE_TAG; e.g. v0.4.2
-    - name: "gateway.image.tag"
-      value: '{{ coalesce (env "CHART_REPO_IMAGE_TAG") "v0.4.2" }}'
-
-    ### Optional: CHART_REPO_STORAGE; e.g. amazon
-    - name: "gateway.env.open.STORAGE"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE") "amazon" }}'
-
-    ### Required: CHART_REPO_STORAGE_AMAZON_BUCKET; e.g. cp-staging-chart-repo
-    - name: "gateway.env.open.STORAGE_AMAZON_BUCKET"
-      value: '{{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}'
-
-    ### Optional: CHART_REPO_STORAGE_AMAZON_PREFIX; e.g. /
-    - name: "gateway.env.open.STORAGE_AMAZON_PREFIX"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_PREFIX") "/" }}'
-
-    ### Optional: CHART_REPO_STORAGE_AMAZON_REGION; e.g. us-west-2
-    - name: "gateway.env.open.STORAGE_AMAZON_REGION"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_REGION") (env "AWS_REGION") }}'
-
-    ### Optional: CHART_REPO_DEBUG; e.g. true
-    - name: "gateway.env.open.DEBUG"
-      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
-
-    - name: "gateway.env.open.DISABLE_API"
-      value: false
-
-    - name: "gateway.env.open.ALLOW_OVERWRITE"
-      value: true
-
-    ### Optional: CHART_REPO_GATEWAY_BASIC_AUTH_USER; e.g. gateway
-    - name: "gateway.env.secret.BASIC_AUTH_USER"
-      value: '{{ coalesce (env "CHART_REPO_GATEWAY_BASIC_AUTH_USER") "gateway" }}'
-
-    ### Required: CHART_REPO_GATEWAY_BASIC_AUTH_PASS; e.g. 6D847893-6494-45FE-96D5-A46DB198E41A
-    - name: "gateway.env.secret.BASIC_AUTH_PASS"
-      value: '{{ env "CHART_REPO_GATEWAY_BASIC_AUTH_PASS" }}'
-
-    ### Required: CHART_REPO_STORAGE_AWS_IAM_ROLE; e.g. cp-staging-chart-repo
-    - name: "gateway.replica.annotations.iam\\.amazonaws\\.com/role"
-      value: '{{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}'
-
-    ## Server config
-    - name: "server.enabled"
-      value: "true"
-
-    - name: "server.ingress.enabled"
-      value: "true"
-
-    - name: "server.ingress.annotations.kubernetes\\.io/ingress\\.class"
-      value: "nginx"
-
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "server.ingress.annotations.kubernetes\\.io/tls-acme"
-    #  value: "true"
-
-    ### Required: CHART_REPO_SERVER_HOSTNAME; charts.us-west-2.staging.cloudposse.org
-    - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "CHART_REPO_SERVER_HOSTNAME" }}'
-
-    ### Required: CHART_REPO_SERVER_INGRESS; ingress.us-west-2.staging.cloudposse.org
-    - name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
-      value: '{{ env "CHART_REPO_SERVER_INGRESS" }}'
-
-    ### Optional: CHART_REPO_SERVER_TTL; e.g. 60
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}
-
-    ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
-    - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]'
-      value: "/api"
-
-    ### Required: CHART_REPO_SERVER_SECRET_NAME; e.g. chart-repo-server-tls
-    - name: "server.ingress.tls.secretName"
-      value: '{{ coalesce (env "CHART_REPO_SERVER_SECRET_NAME") "chart-repo-server-tls" }}'
-
-    ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
-    - name: "server.ingress.tls.hosts[0]"
-      value: '{{ env "CHART_REPO_SERVER_HOSTNAME" }}'
-
-    ### Optional: CHART_REPO_SERVER_REPLICA_COUNT; e.g. 2
-    - name: "server.replicaCount"
-      value: '{{ coalesce (env "CHART_REPO_SERVER_REPLICA_COUNT") "2" }}'
-
-    ### Optional: CHART_REPO_IMAGE_TAG; e.g. v0.4.2
-    - name: "server.image.tag"
-      value: '{{ coalesce (env "CHART_REPO_IMAGE_TAG") "v0.4.2" }}'
-
-    ### Optional: CHART_REPO_STORAGE; e.g. amazon
-    - name: "server.env.open.STORAGE"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE") "amazon" }}'
-
-    ### Required: CHART_REPO_STORAGE_AMAZON_BUCKET; e.g. cp-staging-chart-repo
-    - name: "server.env.open.STORAGE_AMAZON_BUCKET"
-      value: '{{ env "CHART_REPO_STORAGE_AMAZON_BUCKET" }}'
-
-    ### Optional: CHART_REPO_STORAGE_AMAZON_PREFIX; e.g. "/"
-    - name: "server.env.open.STORAGE_AMAZON_PREFIX"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_PREFIX") "/" }}'
-
-    ### Required: CHART_REPO_STORAGE_AMAZON_REGION; e.g. us-west-2
-    - name: "server.env.open.STORAGE_AMAZON_REGION"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_REGION") (env "AWS_REGION") }}'
-
-    ### Optional: CHART_REPO_DEBUG; e.g. true
-    - name: "server.env.open.DEBUG"
-      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
-
-    - name: "server.env.open.DISABLE_API"
-      value: "true"
-
-    - name: "server.env.open.ALLOW_OVERWRITE"
+    # disable all routes prefixed with /api
+    - name: "env.open.DISABLE_API"
       value: "false"
 
-    ### Optional: CHART_REPO_SERVER_BASIC_AUTH_USER; e.g. server
-    - name: "server.env.secret.BASIC_AUTH_USER"
-      value: '{{ coalesce (env "CHART_REPO_SERVER_BASIC_AUTH_USER") "server" }}'
+    # allow chart versions to be re-uploaded
+    - name: "env.open.ALLOW_OVERWRITE"
+      value: "true"
 
-    ### Required: CHART_REPO_SERVER_BASIC_AUTH_PASS; e.g. A11FF4E0-69A4-4F0F-9B74-A586A3C563C2
-    - name: "server.env.secret.BASIC_AUTH_PASS"
-      value: '{{ env "CHART_REPO_SERVER_BASIC_AUTH_PASS" }}'
+    # use amazon s3 storage as backend
+    - name: "env.open.STORAGE"
+      value: "amazon"
 
-    ### Required: CHART_REPO_STORAGE_AWS_IAM_ROLE; e.g. cp-staging-chart-repo
-    - name: "server.replica.annotations.iam\\.amazonaws\\.com/role"
-      value: '{{ env "CHART_REPO_STORAGE_AWS_IAM_ROLE" }}'
+    ### Required: STORAGE_AMAZON_BUCKET;
+    - name: "env.open.STORAGE_AMAZON_BUCKET"
+      value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_BUCKET" }}'
 
+    ### Required: STORAGE_AMAZON_PREFIX; e.g. /
+    - name: "env.open.STORAGE_AMAZON_PREFIX"
+      value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_PREFIX" }}'
+
+    ### Required: STORAGE_AMAZON_REGION; e.g. us-west-2
+    - name: "env.open.STORAGE_AMAZON_REGION"
+      value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_REGION" }}'
+
+    ### Required: CHARTMUSEUM_BASIC_AUTH_USER; e.g. server
+    - name: "env.secret.BASIC_AUTH_USER"
+      value: '{{ env "CHARTMUSEUM_API_BASIC_AUTH_USER" }}'
+
+    ### Required: CHARTMUSEUM_BASIC_AUTH_PASS; e.g. 15041434-3DC2-42F8-9358-F8AED8780A66
+    - name: "env.secret.BASIC_AUTH_PASS"
+      value: '{{ env "CHARTMUSEUM_API_BASIC_AUTH_PASS" }}'
+
+    ### Required: CHARTMUSEUM_IAM_ROLE;
+    - name: "replica.annotations.iam\\.amazonaws\\.com/role"
+      value: '{{ env "CHARTMUSEUM_IAM_ROLE" }}'
+
+    ## Resources
+    - name: "resources.limits.cpu"
+      value: "100m"
+
+    - name: "resources.limits.memory"
+      value: "512Mi"
+
+    - name: "requests.cpu"
+      value: "5m"
+
+    - name: "requests.memory"
+      value: "256Mi"
+
+    ## Ingress
+    - name: "ingress.enabled"
+      value: "true"
+
+    - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
+      value: "nginx"
+
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
+    #  value: "true"
+
+    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
+      value: '{{ env "CHARTMUSEUM_INGRESS" }}'
+
+    # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
+    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+    #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+    #  value: "60"
+
+    - name: 'ingress.hosts.api\\.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
+      value: "/api"
+
+    - name: "ingress.tls[0].secretName"
+      value: '{{ env "CHARTMUSEUM_API_SECRET_NAME" | "chartmuseum-api-server-tls" }}'
+
+    - name: "ingress.tls[0].hosts[0]"
+      value: 'api.{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
 ################################################################################
 ## External DNS ################################################################

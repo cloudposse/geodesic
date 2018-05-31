@@ -231,7 +231,7 @@ releases:
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
 
-    - name: 'ingress.hosts.api\\.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
+    - name: 'ingress.hosts.api\.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/api"
 
     - name: "ingress.tls[0].secretName"

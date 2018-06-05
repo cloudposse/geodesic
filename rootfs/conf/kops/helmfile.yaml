@@ -68,15 +68,15 @@ releases:
     - name: "env.open.STORAGE"
       value: "amazon"
 
-    ### Required: STORAGE_AMAZON_BUCKET;
+    ### Required: CHARTMUSEUM_STORAGE_AMAZON_BUCKET;
     - name: "env.open.STORAGE_AMAZON_BUCKET"
       value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_BUCKET" }}'
 
-    ### Required: STORAGE_AMAZON_PREFIX; e.g. /
+    ### Required: CHARTMUSEUM_STORAGE_AMAZON_PREFIX; e.g. /
     - name: "env.open.STORAGE_AMAZON_PREFIX"
       value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_PREFIX" }}'
 
-    ### Required: STORAGE_AMAZON_REGION; e.g. us-west-2
+    ### Required: CHARTMUSEUM_STORAGE_AMAZON_REGION; e.g. us-west-2
     - name: "env.open.STORAGE_AMAZON_REGION"
       value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_REGION" }}'
 
@@ -174,15 +174,15 @@ releases:
     - name: "env.open.STORAGE"
       value: "amazon"
 
-    ### Required: STORAGE_AMAZON_BUCKET;
+    ### Required: CHARTMUSEUM_STORAGE_AMAZON_BUCKET;
     - name: "env.open.STORAGE_AMAZON_BUCKET"
       value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_BUCKET" }}'
 
-    ### Required: STORAGE_AMAZON_PREFIX; e.g. /
+    ### Required: CHARTMUSEUM_STORAGE_AMAZON_PREFIX; e.g. /
     - name: "env.open.STORAGE_AMAZON_PREFIX"
       value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_PREFIX" }}'
 
-    ### Required: STORAGE_AMAZON_REGION; e.g. us-west-2
+    ### Required: CHARTMUSEUM_STORAGE_AMAZON_REGION; e.g. us-west-2
     - name: "env.open.STORAGE_AMAZON_REGION"
       value: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_REGION" }}'
 
@@ -231,12 +231,15 @@ releases:
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
 
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'ingress.hosts.api\.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/api"
 
+    ### Optional: CHARTMUSEUM_API_SECRET_NAME; e.g. chartmuseum-api-server-tls
     - name: "ingress.tls[0].secretName"
       value: '{{ env "CHARTMUSEUM_API_SECRET_NAME" | default "chartmuseum-api-server-tls" }}'
 
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
       value: 'api.{{ env "CHARTMUSEUM_HOSTNAME" }}'
 

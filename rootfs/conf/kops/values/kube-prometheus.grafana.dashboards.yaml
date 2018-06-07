@@ -1,0 +1,4 @@
+#grafana:
+# serverDashboardFiles:
+#   dashboard_unique_file_name.json: |-
+#     File content goes here

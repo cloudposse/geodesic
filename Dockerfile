@@ -16,7 +16,7 @@ USER root
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
                  iputils drill gcc libffi-dev python-dev musl-dev ncurses openssl-dev py-pip py-virtualenv \
-                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat"
+                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux"
 ENV APK_PACKAGES=${APK_PACKAGES}
 
 RUN apk update \
@@ -253,7 +253,7 @@ ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
 VOLUME ["${CACHE_PATH}"]
 
-ADD rootfs/ /
+COPY rootfs/ /
 
 WORKDIR /conf
 

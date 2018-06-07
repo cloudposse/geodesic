@@ -94,7 +94,7 @@ releases:
 
     ### Optional: CHARTMUSEUM_PERSISTENCE_SIZE; e.g. 10Gi
     - name: "persistence.size"
-      value: '{{ coalesce (env "CHARTMUSEUM_PERSISTENCE_SIZE") "10Gi" }}'
+      value: '{{ env "CHARTMUSEUM_PERSISTENCE_SIZE" | default "10Gi" }}'
 
     ## Ingress
     - name: "ingress.enabled"
@@ -126,7 +126,7 @@ releases:
 
     ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
     - name: "ingress.tls[0].secretName"
-      value: '{{ coalesce (env "CHARTMUSEUM_SECRET_NAME") "chartmuseum-server-tls" }}'
+      value: '{{ env "CHARTMUSEUM_SECRET_NAME" | default "chartmuseum-server-tls" }}'
 
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
@@ -179,7 +179,7 @@ releases:
     ### Optional: CHART_REPO_GATEWAY_TTL; e.g. 60
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "gateway.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: {{ coalesce (env "CHART_REPO_GATEWAY_TTL") "60" }}
+    #  value: {{ env "CHART_REPO_GATEWAY_TTL" | default "60" }}
 
     ### Required: CHART_REPO_GATEWAY_HOSTNAME; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_GATEWAY_HOSTNAME" | replace "." "\\." }}[0]'
@@ -187,7 +187,7 @@ releases:
 
     ### Optional: CHART_REPO_GATEWAY_SECRET_NAME; e.g. chart-repo-gateway-tls
     - name: "gateway.ingress.tls.secretName"
-      value: '{{ coalesce (env "CHART_REPO_GATEWAY_SECRET_NAME") "chart-repo-gateway-tls" }}'
+      value: '{{ env "CHART_REPO_GATEWAY_SECRET_NAME" | default "chart-repo-gateway-tls" }}'
 
     ### Required: CHART_REPO_GATEWAY_HOSTNAME"; e.g. gateway.charts.us-west-2.staging.cloudposse.org
     - name: "gateway.ingress.tls.hosts[0]"
@@ -195,15 +195,15 @@ releases:
 
     ### Optional: CHART_REPO_GATEWAY_REPLICA_COUNT"; e.g. 2
     - name: "gateway.replicaCount"
-      value: '{{ coalesce (env "CHART_REPO_GATEWAY_REPLICA_COUNT") "2" }}'
+      value: '{{ env "CHART_REPO_GATEWAY_REPLICA_COUNT" | default "2" }}'
 
     ### Optional: CHART_REPO_IMAGE_TAG; e.g. v0.4.2
     - name: "gateway.image.tag"
-      value: '{{ coalesce (env "CHART_REPO_IMAGE_TAG") "v0.4.2" }}'
+      value: '{{ env "CHART_REPO_IMAGE_TAG" | default "v0.4.2" }}'
 
     ### Optional: CHART_REPO_STORAGE; e.g. amazon
     - name: "gateway.env.open.STORAGE"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE") "amazon" }}'
+      value: '{{ env "CHART_REPO_STORAGE" | default "amazon" }}'
 
     ### Required: CHART_REPO_STORAGE_AMAZON_BUCKET; e.g. cp-staging-chart-repo
     - name: "gateway.env.open.STORAGE_AMAZON_BUCKET"
@@ -211,15 +211,15 @@ releases:
 
     ### Optional: CHART_REPO_STORAGE_AMAZON_PREFIX; e.g. /
     - name: "gateway.env.open.STORAGE_AMAZON_PREFIX"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_PREFIX") "/" }}'
+      value: '{{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" | default "/" }}'
 
     ### Optional: CHART_REPO_STORAGE_AMAZON_REGION; e.g. us-west-2
     - name: "gateway.env.open.STORAGE_AMAZON_REGION"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_REGION") (env "AWS_REGION") }}'
+      value: '{{ env "CHART_REPO_STORAGE_AMAZON_REGION" | default (env "AWS_REGION") }}'
 
     ### Optional: CHART_REPO_DEBUG; e.g. true
     - name: "gateway.env.open.DEBUG"
-      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
+      value: '{{ env "CHART_REPO_DEBUG" | default "true" }}'
 
     - name: "gateway.env.open.DISABLE_API"
       value: false
@@ -229,7 +229,7 @@ releases:
 
     ### Optional: CHART_REPO_GATEWAY_BASIC_AUTH_USER; e.g. gateway
     - name: "gateway.env.secret.BASIC_AUTH_USER"
-      value: '{{ coalesce (env "CHART_REPO_GATEWAY_BASIC_AUTH_USER") "gateway" }}'
+      value: '{{ env "CHART_REPO_GATEWAY_BASIC_AUTH_USER" | default "gateway" }}'
 
     ### Required: CHART_REPO_GATEWAY_BASIC_AUTH_PASS; e.g. 6D847893-6494-45FE-96D5-A46DB198E41A
     - name: "gateway.env.secret.BASIC_AUTH_PASS"
@@ -264,7 +264,7 @@ releases:
     ### Optional: CHART_REPO_SERVER_TTL; e.g. 60
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "server.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: {{ coalesce (env "CHART_REPO_SERVER_TTL") "60" }}
+    #  value: {{ env "CHART_REPO_SERVER_TTL" | default "60" }}
 
     ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: 'gateway.ingress.hosts.{{ env "CHART_REPO_SERVER_HOSTNAME" | replace "." "\\." }}[0]'
@@ -272,7 +272,7 @@ releases:
 
     ### Required: CHART_REPO_SERVER_SECRET_NAME; e.g. chart-repo-server-tls
     - name: "server.ingress.tls.secretName"
-      value: '{{ coalesce (env "CHART_REPO_SERVER_SECRET_NAME") "chart-repo-server-tls" }}'
+      value: '{{ env "CHART_REPO_SERVER_SECRET_NAME" | default "chart-repo-server-tls" }}'
 
     ### Required: CHART_REPO_SERVER_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "server.ingress.tls.hosts[0]"
@@ -280,15 +280,15 @@ releases:
 
     ### Optional: CHART_REPO_SERVER_REPLICA_COUNT; e.g. 2
     - name: "server.replicaCount"
-      value: '{{ coalesce (env "CHART_REPO_SERVER_REPLICA_COUNT") "2" }}'
+      value: '{{ env "CHART_REPO_SERVER_REPLICA_COUNT" | default "2" }}'
 
     ### Optional: CHART_REPO_IMAGE_TAG; e.g. v0.4.2
     - name: "server.image.tag"
-      value: '{{ coalesce (env "CHART_REPO_IMAGE_TAG") "v0.4.2" }}'
+      value: '{{ env "CHART_REPO_IMAGE_TAG" | default "v0.4.2" }}'
 
     ### Optional: CHART_REPO_STORAGE; e.g. amazon
     - name: "server.env.open.STORAGE"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE") "amazon" }}'
+      value: '{{ env "CHART_REPO_STORAGE" | default "amazon" }}'
 
     ### Required: CHART_REPO_STORAGE_AMAZON_BUCKET; e.g. cp-staging-chart-repo
     - name: "server.env.open.STORAGE_AMAZON_BUCKET"
@@ -296,15 +296,15 @@ releases:
 
     ### Optional: CHART_REPO_STORAGE_AMAZON_PREFIX; e.g. "/"
     - name: "server.env.open.STORAGE_AMAZON_PREFIX"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_PREFIX") "/" }}'
+      value: '{{ env "CHART_REPO_STORAGE_AMAZON_PREFIX" | default "/" }}'
 
     ### Required: CHART_REPO_STORAGE_AMAZON_REGION; e.g. us-west-2
     - name: "server.env.open.STORAGE_AMAZON_REGION"
-      value: '{{ coalesce (env "CHART_REPO_STORAGE_AMAZON_REGION") (env "AWS_REGION") }}'
+      value: '{{ env "CHART_REPO_STORAGE_AMAZON_REGION" | default (env "AWS_REGION") }}'
 
     ### Optional: CHART_REPO_DEBUG; e.g. true
     - name: "server.env.open.DEBUG"
-      value: '{{ coalesce (env "CHART_REPO_DEBUG") "true" }}'
+      value: '{{ env "CHART_REPO_DEBUG" | default "true" }}'
 
     - name: "server.env.open.DISABLE_API"
       value: "true"
@@ -314,7 +314,7 @@ releases:
 
     ### Optional: CHART_REPO_SERVER_BASIC_AUTH_USER; e.g. server
     - name: "server.env.secret.BASIC_AUTH_USER"
-      value: '{{ coalesce (env "CHART_REPO_SERVER_BASIC_AUTH_USER") "server" }}'
+      value: '{{ env "CHART_REPO_SERVER_BASIC_AUTH_USER" | default "server" }}'
 
     ### Required: CHART_REPO_SERVER_BASIC_AUTH_PASS; e.g. A11FF4E0-69A4-4F0F-9B74-A586A3C563C2
     - name: "server.env.secret.BASIC_AUTH_PASS"
@@ -399,11 +399,11 @@ releases:
   set:
     ### Optional: KUBE_LEGO_REPLICA_COUNT; e.g. 1
     - name: "replicaCount"
-      value: '{{ coalesce (env "KUBE_LEGO_REPLICA_COUNT") "1" }}'
+      value: '{{ env "KUBE_LEGO_REPLICA_COUNT" | default "1" }}'
 
     ### Optional: KUBE_LEGO_DEBUG; e.g. false
     - name: "debug"
-      value: '{{ coalesce (env "KUBE_LEGO_DEBUG") "false" }}'
+      value: '{{ env "KUBE_LEGO_DEBUG" | default "false" }}'
 
     ## Image
     - name: "image.repository"
@@ -411,7 +411,7 @@ releases:
 
     ### Optional: KUBE_LEGO_IMAGE_TAG; e.g. 0.1.2
     - name: "image.tag"
-      value: '{{ coalesce (env "KUBE_LEGO_IMAGE_TAG") "0.1.5" }}'
+      value: '{{ env "KUBE_LEGO_IMAGE_TAG" | default "0.1.5" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -423,7 +423,7 @@ releases:
 
     ### Optional: KUBE_LEGO_PROD; e.g. true
     - name: "lego.prod"
-      value: '{{ coalesce (env "KUBE_LEGO_PROD") "true" }}'
+      value: '{{ env "KUBE_LEGO_PROD" | default "true" }}'
 
     ## Pod Settings
     - name: "pod.internalPort"
@@ -515,14 +515,14 @@ releases:
   set:
     ### Optional: NGINX_INGRESS_REPLICA_COUNT; e.g. 4
     - name: "replicaCount"
-      value: '{{ coalesce (env "NGINX_INGRESS_REPLICA_COUNT") "4" }}'
+      value: '{{ env "NGINX_INGRESS_REPLICA_COUNT" | default "4" }}'
 
     - name: "image.repository"
       value: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
 
     ### Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.11.0
     - name: "image.tag"
-      value: '{{ coalesce (env "NGINX_INGRESS_IMAGE_TAG") "0.11.0" }}'
+      value: '{{ env "NGINX_INGRESS_IMAGE_TAG" | default "0.11.0" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -541,7 +541,7 @@ releases:
 
     ### Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT; e.g. 2
     - name: "nginx-default-backend.replicaCount"
-      value: '{{ coalesce (env "NGINX_INGRESS_BACKEND_REPLICA_COUNT") "2" }}'
+      value: '{{ env "NGINX_INGRESS_BACKEND_REPLICA_COUNT" | default "2" }}'
 
     - name: "nginx-default-backend.resources.limits.cpu"
       value: "200m"
@@ -562,7 +562,7 @@ releases:
     ### Optional: NGINX_INGRESS_TTL; e.g. 60
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: {{ coalesce (env "NGINX_INGRESS_TTL") "60" }}
+    #  value: {{ env "NGINX_INGRESS_TTL" | default "60" }}
 
 
 #######################################################################################
@@ -597,7 +597,7 @@ releases:
 
     ### Optional: PROMETHEUS_OPERATOR_IMAGE_TAG; e.g. v0.17.0
     - name: "image.tag"
-      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_IMAGE_TAG") "v0.17.0" }}'
+      value: '{{ env "PROMETHEUS_OPERATOR_IMAGE_TAG" | default "v0.17.0" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -619,7 +619,7 @@ releases:
 
     ### Optional: PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG; e.g. v1.7.6_coreos.0
     - name: "global.hyperkube.tag"
-      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG") "v1.7.6_coreos.0" }}'
+      value: '{{ env "PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG" | default "v1.7.6_coreos.0" }}'
 
     - name: "global.hyperkube.pullPolicy"
       value: "IfNotPresent"
@@ -629,14 +629,14 @@ releases:
 
     ### Optional: PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG; e.g. v0.0.3
     - name: "prometheusConfigReloader.tag"
-      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG") "v0.0.3" }}'
+      value: '{{ env "PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG" | default "v0.0.3" }}'
 
     - name: "configmapReload.repository"
       value: "quay.io/coreos/configmap-reload"
 
     ### Optional: PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG; e.g. v0.0.1
     - name: "configmapReload.tag"
-      value: '{{ coalesce (env "PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG") "v0.0.1" }}'
+      value: '{{ env "PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG" | default "v0.0.1" }}'
 
     ### If enabled, prometheus-operator will create a service for scraping kubelets
     - name: "kubeletService.enable"
@@ -675,6 +675,8 @@ releases:
     default: "true"
   chart: "coreos-stable/kube-prometheus"
   version: "0.0.66"
+  values:
+    - "values/kube-prometheus.grafana.dashboards.yaml"
   set:
     - name: "global.rbacEnable"
       value: "false"
@@ -733,14 +735,14 @@ releases:
 
     ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT; e.g. 4
     - name: "alertmanager.replicaCount"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT") "4" }}'
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT" | default "4" }}'
 
     - name: "alertmanager.image.repository"
       value: "quay.io/prometheus/alertmanager"
 
     ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG; e.g. v0.14.0
     - name: "alertmanager.image.tag"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG") "v0.14.0" }}'
+      value: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG" | default "v0.14.0" }}'
 
     - name: "alertmanager.image.pullPolicy"
       value: "IfNotPresent"
@@ -831,14 +833,14 @@ releases:
 
     ### Optional: KUBE_PROMETHEUS_REPLICA_COUNT; e.g. 4
     - name: "prometheus.replicaCount"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_REPLICA_COUNT") "4" }}'
+      value: '{{ env "KUBE_PROMETHEUS_REPLICA_COUNT" | default "4" }}'
 
     - name: "prometheus.image.repository"
       value: "quay.io/prometheus/prometheus"
 
     ### Optional: KUBE_PROMETHEUS_IMAGE_TAG; e.g. v2.2.1
     - name: "prometheus.image.tag"
-      value: '{{ coalesce (env "KUBE_PROMETHEUS_IMAGE_TAG") "v2.2.1" }}'
+      value: '{{ env "KUBE_PROMETHEUS_IMAGE_TAG" | default "v2.2.1" }}'
 
     - name: "prometheus.image.pullPolicy"
       value: "IfNotPresent"
@@ -897,7 +899,7 @@ releases:
 
     ### Optional: DATADOG_IMAGE_TAG; e.g. 6.1.2
     - name: "image.tag"
-      value: '{{ coalesce (env "DATADOG_IMAGE_TAG") "6.1.2" }}'
+      value: '{{ env "DATADOG_IMAGE_TAG" | default "6.1.2" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -958,8 +960,8 @@ releases:
       value: "Always"
 
     - name: "resources.limits.cpu"
-      value: "50m" 
-       
+      value: "50m"
+
     - name: "resources.limits.memory"
       value: "512Mi"
 
@@ -970,7 +972,7 @@ releases:
       value: "256Mi"
 
     - name: "env.open.DATADOG_SOURCE"
-      value: '{{ coalesce (env "DATADOG_SOURCE") "k8s-staging" }}'
+      value: '{{ env "DATADOG_SOURCE" | default "k8s-staging" }}'
 
     - name: "env.secret.DATADOG_API_KEY"
       value: '{{ env "DATADOG_API_KEY" }}'
@@ -1000,13 +1002,13 @@ releases:
   version: "0.2.10"
   set:
     - name: "replicaCount"
-      value: '{{ coalesce (env "HEAPSTER_REPLICA_COUNT") "1" }}'
+      value: '{{ env "HEAPSTER_REPLICA_COUNT" | default "1" }}'
 
     - name: "image.repository"
       value: "k8s.gcr.io/heapster"
 
     - name: "image.tag"
-      value: '{{ coalesce (env "HEAPSTER_IMAGE_TAG") "v1.3.0" }}'
+      value: '{{ env "HEAPSTER_IMAGE_TAG" | default "v1.3.0" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -1049,7 +1051,7 @@ releases:
       value: "k8s.gcr.io/kubernetes-dashboard-amd64"
 
     - name: "image.tag"
-      value: '{{ coalesce (env "KUBERNETES_DASHBOARD_IMAGE_TAG") "v1.8.3" }}'
+      value: '{{ env "KUBERNETES_DASHBOARD_IMAGE_TAG" | default "v1.8.3" }}'
 
     - name: "image.pullPolicy"
       value: "IfNotPresent"
@@ -1097,40 +1099,41 @@ releases:
   version: "0.1.0"
   values:
     - "values/portal.yaml"
+    - "values/portal.backends.yaml"
   set:
       ## backends
     - name: "backends.dashboard.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_K8S_DASHBOARD_NAME") "Kubernetes" }}'
+      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_NAME" | default "Kubernetes" }}'
     - name: "backends.dashboard.endpoint"
-      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" }}'
+      value: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" | default "https://kubernetes-dashboard.kube-system:443" }}'
     - name: "backends.dashboard.external"
       value: "false"
 
     - name: "backends.grafana.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_GRAFANA_NAME") "Grafana" }}'
+      value: '{{ env "PORTAL_BACKEND_GRAFANA_NAME" | default "Grafana" }}'
     - name: "backends.grafana.endpoint"
-      value: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" }}'
+      value: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" | default "http://kube-prometheus-grafana.monitoring:80" }}'
     - name: "backends.grafana.external"
       value: "false"
 
     - name: "backends.alerts.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_ALERTS_NAME") "Alerts" }}'
+      value: '{{ env "PORTAL_BACKEND_ALERTS_NAME" | default "Alerts" }}'
     - name: "backends.alerts.endpoint"
-      value: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" }}'
+      value: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" | default "http://kube-prometheus-alertmanager.monitoring:9093" }}'
     - name: "backends.alerts.external"
       value: "false"
 
     - name: "backends.prometheus.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_PROMETHEUS_NAME") "Prometheus" }}'
+      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_NAME" | default "Prometheus" }}'
     - name: "backends.prometheus.endpoint"
-      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" }}'
+      value: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" | default "http://kube-prometheus-prometheus.monitoring:9090" }}'
     - name: "backends.prometheus.external"
       value: "false"
 
     - name: "backends.docs.name"
-      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_NAME") "Docs" }}'
+      value: '{{ env "PORTAL_BACKEND_DOCS_NAME" | default "Docs" }}'
     - name: "backends.docs.endpoint"
-      value: '{{ coalesce (env "PORTAL_BACKEND_DOCS_ENDPOINT") "https://docs.cloudposse.com/" }}'
+      value: '{{ env "PORTAL_BACKEND_DOCS_ENDPOINT" | default "https://docs.cloudposse.com/" }}'
     - name: "backends.docs.external"
       value: "true"
 
@@ -1141,24 +1144,21 @@ releases:
     - name: "config.basehost"
       value: '{{ env "PORTAL_HOSTNAME" }}'
     - name: "config.image.favicon"
-      value: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" }}'
+      value: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" | default "https://cloudposse.com/wp-content/uploads/sites/29/2016/04/favicon-152.png" }}'
     - name: "config.image.url"
-      value: '{{ env "PORTAL_BRAND_IMAGE_URL" }}'
+      value: '{{ env "PORTAL_BRAND_IMAGE_URL" | default "https://raw.githubusercontent.com/cloudposse/helm-chart-scaffolding/master/logo.png" }}'
     - name: "config.image.width"
-      value: '{{ env "PORTAL_BRAND_IMAGE_WIDTH" }}'
+      value: '{{ env "PORTAL_BRAND_IMAGE_WIDTH" | default "35" }}'
 
     ## dashboard
     - name: "dashboard.replicaCount"
-      value: '{{ coalesce (env "PORTAL_DASHBOARD_REPLICA_COUNT") "2" }}'
-
-    - name: "dashboard.config.title"
-      value: '{{ env "PORTAL_DASHBOARD_TITLE" }}'
+      value: '{{ env "PORTAL_DASHBOARD_REPLICA_COUNT" | default "2" }}'
 
     - name: "dashboard.image.repository"
       value: "nginx"
 
     - name: "dashboard.image.tag"
-      value: '{{ coalesce (env "PORTAL_DASHBOARD_IMAGE_TAG") "latest" }}'
+      value: '{{ env "PORTAL_DASHBOARD_IMAGE_TAG" | default "latest" }}'
 
     - name: "dashboard.image.pullPolicy"
       value: "Always"
@@ -1186,13 +1186,13 @@ releases:
       value: "true"
 
     - name: "proxy.replicaCount"
-      value: '{{ coalesce (env "PORTAL_PROXY_REPLICA_COUNT") "2" }}'
+      value: '{{ env "PORTAL_PROXY_REPLICA_COUNT" | default "2" }}'
 
     - name: "proxy.image.repository"
       value: "traefik"
 
     - name: "proxy.image.tag"
-      value: '{{ coalesce (env "PORTAL_PROXY_IMAGE_TAG") "1.5.4" }}'
+      value: '{{ env "PORTAL_PROXY_IMAGE_TAG" | default "1.5.4" }}'
 
     - name: "proxy.image.pullPolicy"
       value: "Always"
@@ -1265,13 +1265,13 @@ releases:
       value: "false"
 
     - name: "oauth2-proxy.app.replicaCount"
-      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT") "2" }}'
+      value: '{{ env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT" | default "2" }}'
 
     - name: "oauth2-proxy.app.image.repository"
       value: "cloudposse/oauth2-proxy"
 
     - name: "oauth2-proxy.app.image.tag"
-      value: '{{ coalesce (env "PORTAL_OAUTH2_PROXY_IMAGE_TAG") "2.2" }}'
+      value: '{{ env "PORTAL_OAUTH2_PROXY_IMAGE_TAG" | default "2.2" }}'
 
     - name: "oauth2-proxy.app.image.pullPolicy"
       value: "Always"
@@ -1305,10 +1305,6 @@ releases:
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
 
-    ### Required: PORTAL_HOSTNAME; e.g. e.g. portal.us-west-2.staging.cloudposse.org
-    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "PORTAL_HOSTNAME" }}'
-
     ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "PORTAL_INGRESS" }}'
@@ -1317,4 +1313,3 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
-

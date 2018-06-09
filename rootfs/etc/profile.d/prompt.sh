@@ -46,10 +46,5 @@ function geodesic_prompt() {
     ROLE_PROMPT="(none)"
   fi
 
-  if [ -n "${BANNER}" ]; then
-    PS1=$' ${TWO_JOINED_SQUARES}'" ${BANNER}\n"$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
-  else
-    PS1=$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
-  fi
-  export PS1
+   export PS1=$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
 }

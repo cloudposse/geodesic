@@ -3,14 +3,14 @@ FROM alpine:3.7
 # Install all packages as root
 USER root
 
-RUN echo -e "http://nl.alpinelinux.org/alpine/v3.6/main\nhttp://nl.alpinelinux.org/alpine/v3.6/community" > /etc/apk/repositories
 # Install common packages
-RUN apk add --no-cache unzip curl tar \
-    python make bash vim jq figlet \
-    libressl openssh-client sshpass iputils drill \
-    gcc libffi-dev python-dev musl-dev libressl-dev py-pip py-virtualenv \
-    git coreutils less groff bash-completion \
-    fuse syslog-ng libc6-compat py2-lxml python-dev cython  \
+ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
+                 iputils drill gcc libffi-dev python-dev musl-dev ncurses openssl-dev py-pip py-virtualenv \
+                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux \
+                 py2-lxml python-dev cython"
+ENV APK_PACKAGES=${APK_PACKAGES}
+
+RUN apk add --no-cache ${APK_PACKAGES}
     && rm -rf /tmp/* /var/cache/apk/* /etc/apk/cache/* \
     && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
     && mkdir -p /conf \

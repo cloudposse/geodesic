@@ -1,4 +1,4 @@
-FROM nikiai/geodesic-stretch:alpine
+FROM nikiai/geodesic-base:latest
 
 ENV BANNER "geodesic"
 
@@ -28,6 +28,20 @@ RUN make -C /packages/install ${PACKAGES}
 
 
 #
+# Install github-commenter
+#
+ENV GITHUB_COMMENTER_VERSION 0.1.0
+RUN curl --fail -sSL -o /usr/local/bin/github-commenter https://github.com/cloudposse/github-commenter/releases/download/${GITHUB_COMMENTER_VERSION}/github-commenter_linux_amd64 \
+    && chmod +x /usr/local/bin/github-commenter
+
+#
+# Install gomplate
+#
+ENV GOMPLATE_VERSION 2.4.0
+RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
+    && chmod +x /usr/local/bin/gomplate
+
+#
 # Install Terraform
 #
 ENV TERRAFORM_VERSION 0.11.7
@@ -49,7 +63,7 @@ ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 #
 # Install kops
 #
-ENV KOPS_VERSION=1.9.0
+ENV KOPS_VERSION 1.9.1
 ENV KOPS_STATE_STORE s3://undefined
 ENV KOPS_STATE_STORE_REGION us-east-1
 ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
@@ -101,16 +115,16 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz;
 
 #
-# Install helm repos, need bit refactoring to pass repo list.
+# Install helm repos
 #
 RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
     && helm repo add incubator  https://kubernetes-charts-incubator.storage.googleapis.com/ \
     && helm repo add coreos-stable https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/ \
     && helm repo update
 
-#
+# 
 # Install helm plugins
-#
+# 
 ENV HELM_APPR_VERSION 0.7.0
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
@@ -176,7 +190,7 @@ ENV XDG_CONFIG_HOME=${CACHE_PATH}
 
 VOLUME ["${CACHE_PATH}"]
 
-ADD rootfs/ /
+COPY rootfs/ /
 
 WORKDIR /conf
 

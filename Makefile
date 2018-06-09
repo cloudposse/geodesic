@@ -1,5 +1,5 @@
 export DOCKER_IMAGE ?= nikiai/geodesic
-export DOCKER_TAG ?= alpine
+export DOCKER_TAG ?= latest
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
 export DOCKER_BUILD_FLAGS ?= --no-cache --rm
 

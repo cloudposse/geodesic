@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 if [ -z "${AWS_VAULT}" ]; then
   if [ -f "/etc/motd" ]; then
     cat "/etc/motd"

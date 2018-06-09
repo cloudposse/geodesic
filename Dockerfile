@@ -6,7 +6,6 @@ ENV BANNER "geodesic"
 ENV CACHE_PATH=/localhost/.geodesic
 
 ENV GEODESIC_PATH=/usr/local/include/toolbox
-ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
 ENV KOPS_CLUSTER_NAME=example.foo.bar
 ENV SECRETS_PATH=${HOME}
@@ -65,7 +64,7 @@ ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 #
 ENV KOPS_VERSION 1.9.1
 ENV KOPS_STATE_STORE s3://undefined
-ENV KOPS_STATE_STORE_REGION us-east-1
+ENV KOPS_STATE_STORE_REGION ap-south-1
 ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
 ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
 ENV KOPS_TEMPLATE=/templates/kops/default.yaml
@@ -161,7 +160,7 @@ RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/r
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
 ENV AWS_CONFIG_FILE=/localhost/.aws/config
-
+ENV AWS_SHARED_CREDENTIALS_FILE=/localhost/.aws/credentials
 #
 # Install aws cli bundle
 #

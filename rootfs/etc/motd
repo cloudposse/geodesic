@@ -1,7 +1,4 @@
 
 IMPORTANT:
 * Your $HOME directory has been mounted to `/localhost`
-* Use `aws-vault | aws-google-auth` to manage your sessions
-* Run `assume-role` to start a session
-
-
+* Use `aws-google-auth` to manage your sessions

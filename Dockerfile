@@ -1,9 +1,10 @@
 FROM nikiai/geodesic-stretch:alpine
 
-ENV BANNER="geodesic"
+ENV BANNER "geodesic"
 
 # Where to store state
 ENV CACHE_PATH=/localhost/.geodesic
+
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
@@ -11,13 +12,20 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 ENV SECRETS_PATH=${HOME}
 
 WORKDIR /tmp
+#
+# Install the simple cloudposse package manager
+#
+ARG PACKAGES_VERSION=0.1.7
+ENV PACKAGES_VERSION ${PACKAGES_VERSION}
+RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/packages.git /packages && rm -rf /packages/.git
 
 #
-# Install gomplate
+# Install packges using the package manager
 #
-ENV GOMPLATE_VERSION 2.4.0
-RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
-    && chmod +x /usr/local/bin/gomplate
+ARG PACKAGES="fetch kubectx kubens terragrunt"
+ENV PACKAGES ${PACKAGES}
+RUN make -C /packages/install ${PACKAGES}
+
 
 #
 # Install Terraform
@@ -78,7 +86,7 @@ RUN curl --fail -sSL -o /usr/local/bin/sops https://github.com/mozilla/sops/rele
 #
 # Install helm
 #
-ENV HELM_VERSION=2.8.2
+ENV HELM_VERSION 2.8.2
 ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
@@ -104,22 +112,21 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
 # Install helm plugins
 #
 ENV HELM_APPR_VERSION 0.7.0
-ENV HELM_DIFF_VERSION 2.9.0+1
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_SECRETS_VERSION 1.2.9
 
 RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --version v${HELM_APPR_VERSION} \
     && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
-    && helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}
 
 #
 # Install helmfile
 #
-ENV HELMFILE_VERSION 0.11
-RUN curl --fail -sSL -o /usr/local/bin/helmfile https://github.com/roboll/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 \
+ENV HELMFILE_VENDOR cloudposse
+ENV HELMFILE_VERSION 0.13.0-cloudposse
+RUN curl --fail -sSL -o /usr/local/bin/helmfile https://github.com/${HELMFILE_VENDOR}/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 \
     && chmod +x /usr/local/bin/helmfile
 
 # Install Chamber to manage secrets with SSM+KMS
@@ -139,9 +146,7 @@ RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/r
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
-ENV AWS_CONFIG_FILE=${AWS_DATA_PATH}config
-ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_CONFIG_FILE}
-ENV AWS_VAULT_ASSUME_ROLE_TTL=3300
+ENV AWS_CONFIG_FILE=/localhost/.aws/config
 
 #
 # Install aws cli bundle
@@ -164,13 +169,6 @@ RUN if [ "${AWSCLI_VERSION}" != "" ]; then \
     fi
 
 #
-# Install aws-google-auth
-#
-
-ENV AWS_GOOGLE_AUTH="0.0.24"
-RUN if [ -n "${AWS_GOOGLE_AUTH}" ]; then pip install --no-cache-dir botocore==1.10.10 aws-google-auth==${AWS_GOOGLE_AUTH} ; fi
-
-#
 # Shell
 #
 ENV HISTFILE=${CACHE_PATH}/history
@@ -182,8 +180,4 @@ ADD rootfs/ /
 
 WORKDIR /conf
 
-ENV GOOGLE_SP_ID 313486584448
-ENV GOOGLE_IDP_ID C01uo53i7
-
 CMD ["-c", "bootstrap"]
-

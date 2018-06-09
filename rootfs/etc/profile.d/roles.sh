@@ -4,12 +4,6 @@ export AWS_VAULT=${AWS_DEFAULT_PROFILE}
 function assume-role() {
   role=${1:-${AWS_DEFAULT_PROFILE}}
 
-  # Do not allow nested roles
-  if [ -n "${AWS_VAULT}" ]; then
-    echo "Type 'use-profile' to switch to another profile"
-    return 1
-  fi
-
   if [ -z "${role}" ]; then
     echo "Usage: $0 [role]"
     return 1

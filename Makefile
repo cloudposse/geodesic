@@ -1,4 +1,4 @@
-export DOCKER_IMAGE ?= nikiai/geodesic-base
+export DOCKER_IMAGE ?= nikiai/geodesic
 export DOCKER_TAG ?= alpine
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
 export DOCKER_BUILD_FLAGS ?= --no-cache --rm
@@ -32,4 +32,4 @@ run:
 	@geodesic
 
 base:
-	docker build $(DOCKER_BUILD_FLAGS) $$BUILD_ARGS -t nikiai/geodesic-stretch:$(DOCKER_TAG) -f $(DOCKER_FILE).base $(DOCKER_BUILD_PATH)
+	docker build $(DOCKER_BUILD_FLAGS) $$BUILD_ARGS -t ${DOCKER_IMAGE}-base:$(DOCKER_TAG) -f $(DOCKER_FILE).base $(DOCKER_BUILD_PATH)

@@ -10,7 +10,7 @@ ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-
                  py2-lxml python-dev cython"
 ENV APK_PACKAGES=${APK_PACKAGES}
 
-RUN apk add --no-cache ${APK_PACKAGES}
+RUN apk add --no-cache ${APK_PACKAGES} \
     && rm -rf /tmp/* /var/cache/apk/* /etc/apk/cache/* \
     && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
     && mkdir -p /conf \

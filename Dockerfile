@@ -23,7 +23,7 @@ RUN apk update \
     && apk add ${APK_PACKAGES} \
     && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
     && mkdir -p /conf \
-    && touch /conf/.gitconfig \
+    && touch /conf/.gitconfig
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 

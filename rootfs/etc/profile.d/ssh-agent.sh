@@ -12,7 +12,7 @@ if [ -z "${SSH_AUTH_SOCK}" ] || ! [ -e "${SSH_AUTH_SOCK}" ]; then
 
   # Add keys (if any) to the agent
   if [ -f /localhost/.ssh/id_rsa ]; then
-    echo "Add your local private SSH key to the key chain. Hit ^C to skip."
+    echo ". Add your local private SSH key to the key chain. Hit ^C to skip."
     ssh-add /localhost/.ssh/id_rsa
   fi
 fi

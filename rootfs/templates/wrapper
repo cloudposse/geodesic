@@ -74,8 +74,12 @@ function use() {
   fi
 
   if [ "${OS}" == "Darwin" ]; then
-    # Run in privleged mode to enable time synchronization of system clock with hardware clock
-    # Implement DNS fix related to https://github.com/docker/docker/issues/24344
+    # Run in privleged mode to enable time synchronization of system clock with hardware clock (Docker for Mac problem)
+    #   (related issue: https://github.com/docker/for-mac/issues/2076)
+    DOCKER_ARGS+=("--privileged")
+
+    # Implement DNS fix
+    #   (related issue: https://github.com/docker/docker/issues/24344)
     DOCKER_ARGS+=("--dns=${DOCKER_DNS}")
   fi
 
@@ -88,8 +92,7 @@ function use() {
     fi
   fi
 
-  DOCKER_ARGS+=(--privileged
-                --publish ${GEODESIC_PORT}:${GEODESIC_PORT}
+  DOCKER_ARGS+=(--publish ${GEODESIC_PORT}:${GEODESIC_PORT}
                 --name "${DOCKER_NAME}"
                 --rm 
                 --env KUBERNETES_API_PORT=${GEODESIC_PORT})

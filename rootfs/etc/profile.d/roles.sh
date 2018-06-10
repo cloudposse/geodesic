@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 export AWS_VAULT=${AWS_DEFAULT_PROFILE}
+export AWS_PROFILE=${AWS_DEFAULT_PROFILE}
 
 function assume-role() {
   role=${1:-${AWS_DEFAULT_PROFILE}}
@@ -19,6 +20,7 @@ function assume-role() {
   if [ $# -eq 0 ]; then
     export AWS_TEMP_PROFILE=${AWS_DEFAULT_PROFILE}
     export AWS_DEFAULT_PROFILE=${role}
+    export AWS_PROFILE=${role}
     export AWS_VAULT=${role}
   else
     aws-google-auth ${AWS_VAULT_ARGS[@]} -p ${role} -r ${AWS_REGION} && \
@@ -27,6 +29,7 @@ function assume-role() {
 }
 
 function leave-role() {
-    export AWS_DEFAULT_PROFILE=${AWS_TEMP_PROFILE:-none}
+    export AWS_DEFAULT_PROFILE=${AWS_TEMP_PROFILE:-default}
+    export AWS_PROFILE=${AWS_TEMP_PROFILE:-default}
     export AWS_VAULT=${AWS_DEFAULT_PROFILE}
 }

@@ -24,6 +24,7 @@ RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/pac
 ENV TERRAFORM_VERSION 0.11.7
 ENV CHAMBER_VERSION 2.1.0
 ENV HELMFILE_VERSION 0.19.0
+ENV SOPS_VERSION=3.0.5
 ARG PACKAGES="fetch kubectx kubens terragrunt github-commenter gomplate terraform chamber goofys helmfile sops"
 ENV PACKAGES ${PACKAGES}
 RUN make -C /packages/install ${PACKAGES}

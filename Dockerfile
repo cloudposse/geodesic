@@ -21,33 +21,12 @@ RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/pac
 #
 # Install packges using the package manager
 #
-ARG PACKAGES="fetch kubectx kubens terragrunt"
+ENV TERRAFORM_VERSION 0.11.7
+ENV CHAMBER_VERSION 2.1.0
+ENV HELMFILE_VERSION 0.19.0
+ARG PACKAGES="fetch kubectx kubens terragrunt github-commenter gomplate terraform chamber goofys helmfile sops"
 ENV PACKAGES ${PACKAGES}
 RUN make -C /packages/install ${PACKAGES}
-
-
-#
-# Install github-commenter
-#
-ENV GITHUB_COMMENTER_VERSION 0.1.0
-RUN curl --fail -sSL -o /usr/local/bin/github-commenter https://github.com/cloudposse/github-commenter/releases/download/${GITHUB_COMMENTER_VERSION}/github-commenter_linux_amd64 \
-    && chmod +x /usr/local/bin/github-commenter
-
-#
-# Install gomplate
-#
-ENV GOMPLATE_VERSION 2.4.0
-RUN curl --fail -sSL -o /usr/local/bin/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim \
-    && chmod +x /usr/local/bin/gomplate
-
-#
-# Install Terraform
-#
-ENV TERRAFORM_VERSION 0.11.7
-RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && mv terraform /usr/local/bin
 
 #
 # Install kubectl
@@ -90,16 +69,9 @@ ENV NODE_MAX_SIZE 20
 ENV NODE_MIN_SIZE 2
 
 #
-# Install sops (required by `helm-secrets`)
-#
-ARG SOPS_VERSION=3.0.3
-RUN curl --fail -sSL -o /usr/local/bin/sops https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux \
-    && chmod +x /usr/local/bin/sops
-
-#
 # Install helm
 #
-ENV HELM_VERSION 2.8.2
+ENV HELM_VERSION 2.9.1
 ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
@@ -133,27 +105,6 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}
-
-#
-# Install helmfile
-#
-ENV HELMFILE_VENDOR cloudposse
-ENV HELMFILE_VERSION 0.13.0-cloudposse
-RUN curl --fail -sSL -o /usr/local/bin/helmfile https://github.com/${HELMFILE_VENDOR}/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 \
-    && chmod +x /usr/local/bin/helmfile
-
-# Install Chamber to manage secrets with SSM+KMS
-#
-ENV CHAMBER_VERSION 2.0.0
-RUN curl --fail -sSL -o /usr/local/bin/chamber https://github.com/segmentio/chamber/releases/download/v${CHAMBER_VERSION}/chamber-v${CHAMBER_VERSION}-linux-amd64 \
-    && chmod +x /usr/local/bin/chamber
-
-#
-# Install goofys
-#
-ENV GOOFYS_VERSION 0.19.0
-RUN curl --fail -sSL -o /usr/local/bin/goofys https://github.com/kahing/goofys/releases/download/v${GOOFYS_VERSION}/goofys \
-    && chmod +x /usr/local/bin/goofys
 
 #
 # AWS

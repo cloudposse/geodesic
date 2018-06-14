@@ -40,7 +40,7 @@ function geodesic_prompt() {
       *)
           # unicode
           WHITE_HEAVY_CHECK_MARK=$'\u2714 '     # '✔'
-          BLACK_RIGHTWARDS_ARROWHEAD=$'\u25B6 ' # '▶'
+          BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 ' # '➤', suggest '▶' may be present in more fonts
           TWO_JOINED_SQUARES=$'\u29C9 '         # '⧉'
           CROSS_MARK=$'\u274C '                 # '❌'
           ;;

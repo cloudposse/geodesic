@@ -28,12 +28,25 @@ function terraform_prompt() {
 # Define our own prompt
 PROMPT_HOOKS+=("geodesic_prompt")
 function geodesic_prompt() {
+       
+  case $PROMPT_STYLE in
+      plain)
+          # 8859-1 codepoints:
+          WHITE_HEAVY_CHECK_MARK=$(tput bold)$(tput setab 2)$'X'$(tput sgr0)' '
+          BLACK_RIGHTWARDS_ARROWHEAD=$'=> '
+          TWO_JOINED_SQUARES=$'¤ '  # perhaps § instead?
+          CROSS_MARK=$'× '
+          ;;
+      *)
+          # unicode
+          WHITE_HEAVY_CHECK_MARK=$'\u2714 '     # '✔'
+          BLACK_RIGHTWARDS_ARROWHEAD=$'\u25B6 ' # '▶'
+          TWO_JOINED_SQUARES=$'\u29C9 '         # '⧉'
+          CROSS_MARK=$'\u274C '                 # '❌'
+          ;;
+  esac
 
-  WHITE_HEAVY_CHECK_MARK=$'\u2705 '
-  BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 '
-  TWO_JOINED_SQUARES=$'\u29C9 '
-  CROSS_MARK=$'\u274C '
-
+  # why do we 'export' STATUS?
   if [ -n "$AWS_VAULT" ]; then
     export STATUS=${WHITE_HEAVY_CHECK_MARK}
   else
@@ -46,10 +59,12 @@ function geodesic_prompt() {
     ROLE_PROMPT="(none)"
   fi
 
+  PS1=$'${STATUS}'
+  PS1+="  $ROLE_PROMPT \W "
+  PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
+
   if [ -n "${BANNER}" ]; then
-    PS1=$' ${TWO_JOINED_SQUARES}'" ${BANNER}\n"$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
-  else
-    PS1=$'${STATUS}'"  $ROLE_PROMPT \W "$'${BLACK_RIGHTWARDS_ARROWHEAD} '
+    PS1=$' ${TWO_JOINED_SQUARES}'" ${BANNER}\n"${PS1}
   fi
   export PS1
 }

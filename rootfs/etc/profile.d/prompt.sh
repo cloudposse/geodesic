@@ -60,7 +60,7 @@ function geodesic_prompt() {
   fi
 
   PS1=$'${STATUS}'
-  PS1+="  $ROLE_PROMPT \W "
+  PS1+="  ${ROLE_PROMPT} \W "
   PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
 
   if [ -n "${BANNER}" ]; then

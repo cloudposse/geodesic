@@ -142,7 +142,7 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && helm completion bash > /etc/bash_completion.d/helm.sh \
     && mkdir -p ${HELM_HOME} \
     && helm init --client-only \
-    && mkdir -p ${HELM_HOME}/plugins \
+    && mkdir -p ${HELM_HOME}/plugins
 
 #
 # Install helm repos

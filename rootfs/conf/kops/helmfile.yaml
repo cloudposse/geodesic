@@ -921,6 +921,9 @@ releases:
 
     - name: "datadog.collectEvents"
       value: "true"
+      
+    - name: "datadog.apmEnabled"
+      value: '{{ env "DATADOG_APM_ENABLED" }}'
 
     - name: "rbac.create"
       value: "false"

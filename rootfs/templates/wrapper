@@ -73,6 +73,12 @@ function use() {
     DOCKER_ARGS+=(--env-file ${ENV_FILE})
   fi
 
+  # allow users to override value of GEODESIC_DEFAULT_ENV_FILE
+  local geodesic_default_env_file=${GEODESIC_DEFAULT_ENV_FILE:-~/.geodesic/env}
+  if [ -f "${geodesic_default_env_file}" ]; then
+      DOCKER_ARGS+=(--env-file=${geodesic_default_env_file})
+  fi
+
   if [ "${OS}" == "Darwin" ]; then
     # Run in privleged mode to enable time synchronization of system clock with hardware clock
     # Implement DNS fix related to https://github.com/docker/docker/issues/24344

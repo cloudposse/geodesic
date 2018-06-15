@@ -30,27 +30,26 @@ PROMPT_HOOKS+=("geodesic_prompt")
 function geodesic_prompt() {
        
   case $PROMPT_STYLE in
-      plain)
-          # 8859-1 codepoints:
-          WHITE_HEAVY_CHECK_MARK=$(tput bold)$(tput setab 2)$'X'$(tput sgr0)' '
-          BLACK_RIGHTWARDS_ARROWHEAD=$'=> '
-          TWO_JOINED_SQUARES=$'¤ '  # perhaps § instead?
-          CROSS_MARK=$'× '
-          ;;
-      *)
-          # unicode
-          WHITE_HEAVY_CHECK_MARK=$'\u2714 '     # '✔'
-          BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 ' # '➤', suggest '▶' may be present in more fonts
-          TWO_JOINED_SQUARES=$'\u29C9 '         # '⧉'
-          CROSS_MARK=$'\u274C '                 # '❌'
-          ;;
+    plain)
+      # 8859-1 codepoints:
+      AWS_VAULT_ACTIVE_MARK=$(tput bold)$(tput setab 2)$'»'$(tput sgr0)' '  # green
+      AWS_VAULT_INACTIVE_MARK=$'· '
+      BLACK_RIGHTWARDS_ARROWHEAD=$'=> '
+      BANNER_MARK=$'§ '
+      ;;
+    *)
+      # unicode
+      AWS_VAULT_ACTIVE_MARK=$'\u2714 '      # '✔'
+      AWS_VAULT_INACTIVE_MARK=$'\u274C '    # '❌'
+      BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 ' # '➤', suggest '▶' may be present in more fonts
+      BANNER_MARK=$'\u29C9 '                # '⧉'
+      ;;
   esac
 
-  # why do we 'export' STATUS?
   if [ -n "$AWS_VAULT" ]; then
-    export STATUS=${WHITE_HEAVY_CHECK_MARK}
+    STATUS=${AWS_VAULT_ACTIVE_MARK}
   else
-    export STATUS=${CROSS_MARK}
+    STATUS=${AWS_VAULT_INACTIVE_MARK}
   fi
 
   if [ -n "${AWS_VAULT}" ]; then
@@ -64,7 +63,7 @@ function geodesic_prompt() {
   PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
 
   if [ -n "${BANNER}" ]; then
-    PS1=$' ${TWO_JOINED_SQUARES}'" ${BANNER}\n"${PS1}
+    PS1=$' ${BANNER_MARK}'" ${BANNER}\n"${PS1}
   fi
   export PS1
 }

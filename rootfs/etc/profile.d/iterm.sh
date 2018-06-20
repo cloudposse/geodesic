@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set_badge() {
   if [ "${TERM_PROGRAM}" == "iTerm.app" ]; then
     printf "\e]1337;SetBadgeFormat=%s\a" $(echo "$1" | base64)

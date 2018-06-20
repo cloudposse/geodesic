@@ -28,7 +28,7 @@ function terraform_prompt() {
 # Define our own prompt
 PROMPT_HOOKS+=("geodesic_prompt")
 function geodesic_prompt() {
-       
+
   case $PROMPT_STYLE in
     plain)
       # 8859-1 codepoints:
@@ -61,9 +61,5 @@ function geodesic_prompt() {
   PS1=$'${STATUS}'
   PS1+="  ${ROLE_PROMPT} \W "
   PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
-
-  if [ -n "${BANNER}" ]; then
-    PS1=$' ${BANNER_MARK}'" ${BANNER}\n"${PS1}
-  fi
   export PS1
 }

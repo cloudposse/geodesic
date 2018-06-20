@@ -1,0 +1,16 @@
+.build-harness
+build-harness/
+aws-assumed-role/
+.idea/
+*.iml
+
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+*.git

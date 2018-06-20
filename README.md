@@ -1,5 +1,5 @@
 
-# Geodesic [![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic)
+# Geodesic [![Build Status](https://travis-ci.org/cloudposse/geodesic.svg?branch=master)](https://travis-ci.org/cloudposse/geodesic) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
 ![Geodesic Logo](docs/geodesic-small.png)
 
@@ -50,7 +50,7 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 
 ## Documentation
 
-Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/docs/geodesic). 
+Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/geodesic). 
 
 ## Our Logo
 
@@ -67,7 +67,7 @@ But look a little closer and you’ll notice there’s much more to it. It's als
 
 **Got a question?**
 
-Review the [docs](https://docs.cloudposse.com/geodesic), ask a [question](https://docs.cloudposse.com/discuss-new), file a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Gitter](https://gitter.im/cloudposse/).
+Review the [docs](https://docs.cloudposse.com/geodesic), ask a [question](https://docs.cloudposse.com/discuss-new), file a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email](mailto:hello@cloudposse.com) or reach out to us on [Slack](https://slack.cloudposse.com).
 
 ## Contributing
 

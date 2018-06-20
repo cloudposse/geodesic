@@ -131,7 +131,7 @@ RUN curl --fail -sSL -o /usr/local/bin/sops https://github.com/mozilla/sops/rele
 #
 # Install helm
 #
-ENV HELM_VERSION 2.8.2
+ENV HELM_VERSION 2.9.1
 ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \

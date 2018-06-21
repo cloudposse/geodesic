@@ -1,0 +1,58 @@
+name: Geodesic
+license: APACHE2
+github_repo: cloudposse/geodesic
+
+logo_url: "docs/geodesic-small.png"
+
+# Badges to display
+badges:
+  - name: "Build Status"
+    image: "https://travis-ci.org/cloudposse/geodesic.svg?branch=master"
+    url: "https://travis-ci.org/cloudposse/geodesic"
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/geodesic.svg"
+    url: "https://github.com/cloudposse/geodesic/releases"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related:
+  - name: "Packages"
+    description: "Cloud Posse installer and distribution of native apps"
+    url: "https://github.com/cloudposse/packages"
+  - name: "Dev Harness"
+    description: "Cloud Posse Local Development Harness"
+    url: "https://github.com/cloudposse/dev"
+ 
+description: |-
+  Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform built entirely from Open Source technologies.
+
+  It’s a swiss army knife for creating and building consistent platforms to be shared across a team environment.
+
+  It easily versions staging environments in a repeatable manner that can be followed by any team member.
+
+  It provides a fully customizable framework for defining and building world-class cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security. 
+
+# Other files to include in this README from the project folder
+include:
+  - "docs/about.md"
+  - "docs/logo.md"
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    homepage: "https://github.com/osterman"
+    avatar: "http://s.gravatar.com/avatar/88c480d4f73b813904e00a5695a454cb?s=144"
+    github: "osterman"
+  - name: "Igor Rodionov"
+    homepage: "https://github.com/goruha/"
+    avatar: "http://s.gravatar.com/avatar/bc70834d32ed4517568a1feb0b9be7e2?s=144"
+    github: "goruha"
+  - name: "Andriy Knysh"
+    homepage: "https://github.com/aknysh/"
+    avatar: "https://avatars0.githubusercontent.com/u/7356997?v=4&u=ed9ce1c9151d552d985bdf5546772e14ef7ab617&s=144"
+    github: "aknysh"
+  - name: "Sarkis Varozian"
+    homepage: "https://github.com/sarkis"
+    avatar: "https://avatars3.githubusercontent.com/u/42673?s=144&v=4"
+    github: "sarkis"

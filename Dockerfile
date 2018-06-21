@@ -34,7 +34,7 @@ WORKDIR /tmp
 # 
 # Install the simple cloudposse package manager
 #
-ARG PACKAGES_VERSION=0.1.5
+ARG PACKAGES_VERSION=0.2.2
 ENV PACKAGES_VERSION ${PACKAGES_VERSION}
 RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/packages.git /packages && rm -rf /packages/.git
 

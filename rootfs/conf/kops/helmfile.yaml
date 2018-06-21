@@ -892,7 +892,7 @@ releases:
     vendor: "datadog"
     default: "false"
   chart: "stable/datadog"
-  version: "0.11.2"
+  version: "0.16.0"
   set:
     - name: "image.repository"
       value: "datadog/agent"
@@ -931,6 +931,14 @@ releases:
 
     - name: "kube-state-metrics.rbac.create"
       value: "false"
+      
+    ### Optional: DATADOG_USE_HOST_PORT; e.g. false
+    - name: "daemonset.useHostPort"
+      value: '{{ env "DATADOG_USE_HOST_PORT" | default "true" }}'
+
+    ### Optional: DATADOG_UPDATE_STRATEGY; e.g. RollingUpdate
+    - name: "daemonset.updateStrategy"
+      value: '{{ env "DATADOG_UPDATE_STRATEGY" | default "OnDelete" }}'
 
 #######################################################################################
 ## Fluentd to datadog logs

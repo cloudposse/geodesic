@@ -41,7 +41,7 @@ RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/pac
 #
 # Install packges using the package manager
 #
-ARG PACKAGES="fetch kubectx kubens terragrunt"
+ARG PACKAGES="fetch kubectx kubens stern terragrunt"
 ENV PACKAGES ${PACKAGES}
 RUN make -C /packages/install ${PACKAGES}
 

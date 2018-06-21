@@ -20,29 +20,37 @@ related:
   - name: "Packages"
     description: "Cloud Posse installer and distribution of native apps"
     url: "https://github.com/cloudposse/packages"
+
   - name: "Build Harness"
     description: "Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more"
     url: "https://github.com/cloudposse/dev"
+
   - name: "terraform-root-modules"
     description: "Collection of Terraform \"root module\" invocations for provisioning reference architectures"
     url: "https://github.com/cloudposse/terraform-root-modules"
+
   - name: "root.cloudposse.co"
     description: "Example Terraform Reference Architecture of a Geodesic Module for a Parent (\"Root\") Organization in AWS."
     url: "https://github.com/cloudposse/root.cloudposse.co"
+
   - name: "audit.cloudposse.co"
     description: "Example Terraform Reference Architecture of a Geodesic Module for an Audit Logs Organization in AWS."
     url: "https://github.com/cloudposse/audit.cloudposse.co"
+
   - name: "prod.cloudposse.co"
     description: "Example Terraform Reference Architecture of a Geodesic Module for a Production Organization in AWS."
-    url: "https://github.com/cloudposse/audit.cloudposse.co"
+    url: "https://github.com/cloudposse/prod.cloudposse.co"
+
   - name: "staging.cloudposse.co"
     description: "Example Terraform Reference Architecture of a Geodesic Module for a Staging Organization in AWS."
     url: "https://github.com/cloudposse/staging.cloudposse.co"
+
   - name: "dev.cloudposse.co"
     description: "Example Terraform Reference Architecture of a Geodesic Module for a Development Sandbox Organization in AWS."
     url: "https://github.com/cloudposse/dev.cloudposse.co"
       
 description: |-
+
   Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform built entirely from Open Source technologies.
 
   It’s a swiss army knife for creating and building consistent platforms to be shared across a team environment.

@@ -16,14 +16,14 @@ USER root
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
                  iputils drill gcc libffi-dev python-dev musl-dev ncurses openssl-dev py-pip py-virtualenv \
-                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat"
+                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux"
 ENV APK_PACKAGES=${APK_PACKAGES}
 
 RUN apk update \
     && apk add ${APK_PACKAGES} \
     && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
     && mkdir -p /conf \
-    && touch /conf/.gitconfig \
+    && touch /conf/.gitconfig
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -34,14 +34,14 @@ WORKDIR /tmp
 # 
 # Install the simple cloudposse package manager
 #
-ARG PACKAGES_VERSION=0.1.5
+ARG PACKAGES_VERSION=0.2.2
 ENV PACKAGES_VERSION ${PACKAGES_VERSION}
 RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/packages.git /packages && rm -rf /packages/.git
 
 #
 # Install packges using the package manager
 #
-ARG PACKAGES="fetch kubectx kubens terragrunt"
+ARG PACKAGES="fetch kubectx kubens stern terragrunt"
 ENV PACKAGES ${PACKAGES}
 RUN make -C /packages/install ${PACKAGES}
 
@@ -142,7 +142,7 @@ RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HE
     && helm completion bash > /etc/bash_completion.d/helm.sh \
     && mkdir -p ${HELM_HOME} \
     && helm init --client-only \
-    && mkdir -p ${HELM_HOME}/plugins \
+    && mkdir -p ${HELM_HOME}/plugins
 
 #
 # Install helm repos
@@ -253,7 +253,7 @@ ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
 VOLUME ["${CACHE_PATH}"]
 
-ADD rootfs/ /
+COPY rootfs/ /
 
 WORKDIR /conf
 

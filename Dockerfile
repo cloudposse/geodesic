@@ -41,7 +41,7 @@ RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/pac
 #
 # Install packges using the package manager
 #
-ARG PACKAGES="fetch kubectx kubens stern terragrunt"
+ARG PACKAGES="fetch helm kubectx kubens stern terragrunt"
 ENV PACKAGES ${PACKAGES}
 RUN make -C /packages/install ${PACKAGES}
 
@@ -131,15 +131,9 @@ RUN curl --fail -sSL -o /usr/local/bin/sops https://github.com/mozilla/sops/rele
 #
 # Install helm
 #
-ENV HELM_VERSION 2.8.2
 ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
-RUN curl --fail -sSL -O http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
-    && tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz \
-    && mv linux-amd64/helm /usr/local/bin/helm \
-    && rm -rf linux-amd64 \
-    && chmod +x /usr/local/bin/helm \
-    && helm completion bash > /etc/bash_completion.d/helm.sh \
+RUN helm completion bash > /etc/bash_completion.d/helm.sh \
     && mkdir -p ${HELM_HOME} \
     && helm init --client-only \
     && mkdir -p ${HELM_HOME}/plugins

@@ -43,7 +43,7 @@ RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/pac
 #
 ARG PACKAGES="fetch helm kubectx kubens stern terragrunt"
 ENV PACKAGES ${PACKAGES}
-RUN make -C /packages/install ${PACKAGES
+RUN make -C /packages/install ${PACKAGES}
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)

@@ -115,6 +115,10 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
+    
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
+    - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+      value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
     ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
@@ -149,7 +153,7 @@ releases:
 - name: "charts-api"
   namespace: "kube-system"
   labels:
-    chart: "chartmuseum-api"
+    chart: "chartmuseum"
     component: "platform"
     namespace: "kube-system"
     vendor: "kubernetes-helm"

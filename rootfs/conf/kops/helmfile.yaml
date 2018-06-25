@@ -379,7 +379,7 @@ releases:
     component: "iam"
     namespace: "kube-system"
     vendor: "jtblin"
-    default: "true"
+    default: "false"
   chart: "stable/kube2iam"
   version: "0.8.5"
   set:
@@ -413,6 +413,61 @@ releases:
 
     - name: "resources.requests.memory"
       value: "128Mi"
+
+################################################################################
+## kiam - AWS Assumed Roles for Pods #######################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/kiam/values.yaml
+#
+- name: "iam"
+  namespace: "kube-system"
+  labels:
+    chart: "kiam"
+    component: "iam"
+    namespace: "kube-system"
+    vendor: "uswitch"
+    default: "true"
+  chart: "stable/kiam"
+  version: "1.0.0"
+  set:
+    - name: "agent.tolerations[0].key"
+      value: "node-role.kubernetes.io/master"
+
+    - name: "agent.tolerations[0].effect"
+      value: "NoSchedule"
+
+    - name: "agent.host.iptables"
+      value: "false"
+
+    - name: "rbac.create"
+      value: "false"
+
+    ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem
+    - name: "agent.tlsFiles.ca"
+      value: '{{ env "KIAM_AGENT_TLS_CA" }}'
+
+    ### Required: KIAM_AGENT_TLS_CERT; e.g. base64-encoded agent.pem
+    - name: "agent.tlsFiles.cert"
+      value: '{{ env "KIAM_AGENT_TLS_CERT" }}'
+
+    ### Required: KIAM_AGENT_TLS_KEY; e.g. base64-encoded agent-key.pem
+    - name: "agent.tlsFiles.key"
+      value: '{{ env "KIAM_AGENT_TLS_KEY" }}'
+
+    ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem
+    - name: "server.tlsFiles.ca"
+      value: '{{ env "KIAM_SERVER_TLS_CA" }}'
+
+    ### Required: KIAM_SERVER_TLS_CERT; e.g. base64-encoded server.pem
+    - name: "server.tlsFiles.cert"
+      value: '{{ env "KIAM_SERVER_TLS_CERT" }}'
+
+    ### Required: KIAM_SERVER_TLS_KEY; e.g. base64-encoded server-key.pem
+    - name: "server.tlsFiles.key"
+      value: '{{ env "KIAM_SERVER_TLS_KEY" }}'
 
 ################################################################################
 ## NGINX Ingress Controller ####################################################

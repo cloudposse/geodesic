@@ -1,4 +1,4 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.2.6
+ARG PACKAGES_IMAGE=cloudposse/packages:0.2.7
 FROM ${PACKAGES_IMAGE} as packages
 
 FROM alpine:3.7
@@ -42,6 +42,8 @@ WORKDIR /tmp
 
 COPY --from=packages /packages/bin/awless            /usr/local/bin/
 COPY --from=packages /packages/bin/aws-vault         /usr/local/bin/
+COPY --from=packages /packages/bin/cfssl             /usr/local/bin/
+COPY --from=packages /packages/bin/cfssljson         /usr/local/bin/
 COPY --from=packages /packages/bin/chamber           /usr/local/bin/
 COPY --from=packages /packages/bin/fetch             /usr/local/bin/
 COPY --from=packages /packages/bin/github-commenter  /usr/local/bin/

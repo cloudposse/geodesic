@@ -1,5 +1,5 @@
-ARG PACKAGES_VERSION=0.2.6
-FROM cloudposse/packages:${PACKAGES_VERSION} as packages
+ARG PACKAGES_IMAGE=cloudposse/packages:0.2.6
+FROM ${PACKAGES_IMAGE} as packages
 
 FROM alpine:3.7
 
@@ -69,6 +69,7 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #
 # Install kubectl
 #
+ENV ENV KUBERNETES_VERSION 1.8.7
 ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 

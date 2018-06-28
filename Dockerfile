@@ -59,7 +59,7 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #
 # Install kubectl
 #
-ENV KUBERNETES_VERSION 1.8.7
+ENV KUBERNETES_VERSION 1.9.1
 ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 

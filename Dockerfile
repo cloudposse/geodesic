@@ -1,5 +1,17 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.2.7
+ARG PACKAGES_IMAGE=cloudposse/packages:0.2.8
 FROM ${PACKAGES_IMAGE} as packages
+
+WORKDIR /packages
+
+# 
+# Install the select packages from the cloudposse package manager image
+#
+# Repo: <https://github.com/cloudposse/packages>
+#
+
+ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
+ENV PACKAGES=${PACKAGES}
+RUN make dist
 
 FROM alpine:3.7
 
@@ -34,32 +46,8 @@ RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
-# 
-# Install the select packages from the cloudposse package manager image
-#
-# Repo: <https://github.com/cloudposse/packages>
-#
 
-COPY --from=packages /packages/bin/awless            /usr/local/bin/
-COPY --from=packages /packages/bin/aws-vault         /usr/local/bin/
-COPY --from=packages /packages/bin/cfssl             /usr/local/bin/
-COPY --from=packages /packages/bin/cfssljson         /usr/local/bin/
-COPY --from=packages /packages/bin/chamber           /usr/local/bin/
-COPY --from=packages /packages/bin/fetch             /usr/local/bin/
-COPY --from=packages /packages/bin/github-commenter  /usr/local/bin/
-COPY --from=packages /packages/bin/gomplate          /usr/local/bin/
-COPY --from=packages /packages/bin/goofys            /usr/local/bin/
-COPY --from=packages /packages/bin/helm              /usr/local/bin/
-COPY --from=packages /packages/bin/helmfile          /usr/local/bin/
-COPY --from=packages /packages/bin/kops              /usr/local/bin/
-COPY --from=packages /packages/bin/kubectl           /usr/local/bin/
-COPY --from=packages /packages/bin/kubectx           /usr/local/bin/
-COPY --from=packages /packages/bin/kubens            /usr/local/bin/
-COPY --from=packages /packages/bin/sops              /usr/local/bin/
-COPY --from=packages /packages/bin/stern             /usr/local/bin/
-COPY --from=packages /packages/bin/terraform         /usr/local/bin/
-COPY --from=packages /packages/bin/terragrunt        /usr/local/bin/
-COPY --from=packages /packages/bin/yq                /usr/local/bin/
+COPY --from=packages /dist/ /usr/local/bin/
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)

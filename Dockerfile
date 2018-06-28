@@ -59,7 +59,7 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #
 # Install kubectl
 #
-ENV ENV KUBERNETES_VERSION 1.8.7
+ENV KUBERNETES_VERSION 1.8.7
 ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
@@ -74,7 +74,7 @@ ENV KOPS_TEMPLATE=/templates/kops/default.yaml
 
 # https://github.com/kubernetes/kops/blob/master/channels/stable
 # https://github.com/kubernetes/kops/blob/master/docs/images.md
-ENV KOPS_BASE_IMAGE=kope.io/k8s-1.7-debian-jessie-amd64-hvm-ebs-2017-07-28
+ENV KOPS_BASE_IMAGE=kope.io/k8s-1.9-debian-jessie-amd64-hvm-ebs-2018-03-11
 
 ENV KOPS_BASTION_PUBLIC_NAME="bastion"
 ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"

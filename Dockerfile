@@ -82,7 +82,7 @@ RUN curl --fail -sSL -O https://releases.hashicorp.com/terraform/${TERRAFORM_VER
 # Install kubectl
 #
 ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
-ENV KUBERNETES_VERSION 1.8.7
+ENV KUBERNETES_VERSION 1.9.1
 RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl \
     && mv kubectl /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl \
@@ -91,7 +91,7 @@ RUN curl --fail -sSL -O https://storage.googleapis.com/kubernetes-release/releas
 #
 # Install kops
 #
-ENV KOPS_VERSION 1.8.0
+ENV KOPS_VERSION 1.9.1
 ENV KOPS_STATE_STORE s3://undefined
 ENV KOPS_STATE_STORE_REGION us-east-1
 ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
@@ -100,7 +100,7 @@ ENV KOPS_TEMPLATE=/templates/kops/default.yaml
 
 # https://github.com/kubernetes/kops/blob/master/channels/stable
 # https://github.com/kubernetes/kops/blob/master/docs/images.md
-ENV KOPS_BASE_IMAGE=kope.io/k8s-1.7-debian-jessie-amd64-hvm-ebs-2017-07-28
+ENV KOPS_BASE_IMAGE=kope.io/k8s-1.9-debian-jessie-amd64-hvm-ebs-2018-03-11
 
 ENV KOPS_BASTION_PUBLIC_NAME="bastion"
 ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"

@@ -44,4 +44,4 @@ chamber/write/agent:
 chamber/write/server:
 	chamber write $(CHAMBER_SERVICE) KIAM_SERVER_TLS_KEY `base64 -w 0 < keys/server-key.pem`
 	chamber write $(CHAMBER_SERVICE) KIAM_SERVER_TLS_CERT `base64 -w 0 < keys/server.pem`
-	chamber write $(CHAMBER_SERVICE) KIAM_SERVER_TLS_PA `base64 -w 0 < keys/ca.pem` 
+	chamber write $(CHAMBER_SERVICE) KIAM_SERVER_TLS_CA `base64 -w 0 < keys/ca.pem` 

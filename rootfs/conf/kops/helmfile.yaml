@@ -17,6 +17,14 @@
 #   - https://github.com/roboll/helmfile
 #
 
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
 repositories:
 # Stable repo of official helm charts
 - name: "stable"
@@ -421,8 +429,9 @@ releases:
 #
 # References:
 #   - https://github.com/kubernetes/charts/blob/master/stable/kiam/values.yaml
-#
-- name: "iam"
+
+# The release name must be "kiam" for chart to work properly with TLS/PKI certs
+- name: "kiam"
   namespace: "kube-system"
   labels:
     chart: "kiam"
@@ -433,7 +442,8 @@ releases:
   chart: "stable/kiam"
   version: "1.0.0"
   values:
-    - rbac.create: {{ env "KIAM_RBAC_CREATE" | default "false" }}
+    - rbac:
+        create: {{ env "KIAM_RBAC_CREATE" | default "false" }}
       agent:
         gatewayTimeoutCreation: "5s"
         host:
@@ -450,6 +460,7 @@ releases:
           ### Required: KIAM_AGENT_TLS_KEY; e.g. base64-encoded agent-key.pem
           key: '{{ env "KIAM_AGENT_TLS_KEY" }}'
       server:
+        gatewayTimeoutCreation: "5s"
         nodeSelector:
           kubernetes.io/role: "master"
         tolerations:
@@ -459,7 +470,7 @@ releases:
         extraHostPathMounts:
           - name: "ssl-certs"
             mountPath: "/etc/ssl/certs"
-            hostPath: "/usr/share/ca-certificates"
+            hostPath: '{{ env "KIAM_HOST_CERT_PATH" | default "/etc/ssl/certs" }}'
             readOnly: true 
         tlsFiles:
           ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem

@@ -1,3 +1,6 @@
+ARG PACKAGES_IMAGE=cloudposse/packages:0.2.7
+FROM ${PACKAGES_IMAGE} as packages
+
 FROM alpine:3.7
 
 ENV BANNER "geodesic"
@@ -44,6 +47,12 @@ RUN git clone --depth=1 -b ${PACKAGES_VERSION} https://github.com/cloudposse/pac
 ARG PACKAGES="fetch helm kubectx kubens stern terragrunt"
 ENV PACKAGES ${PACKAGES}
 RUN make -C /packages/install ${PACKAGES}
+
+#
+# Copy binaries from packages image 
+#
+COPY --from=packages /packages/bin/cfssl             /usr/local/bin/
+COPY --from=packages /packages/bin/cfssljson         /usr/local/bin/
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)

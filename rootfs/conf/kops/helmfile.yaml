@@ -845,10 +845,10 @@ releases:
     - name: "prometheus.resources.requests.memory"
       value: "512Mi"
 
-    - name: "prometheus.storageSpec.volumeClaimTemplate.spec.accessModes[0]"
+    - name: "prometheus.storage.volumeClaimTemplate.spec.accessModes[0]"
       value: "ReadWrite"
 
-    - name: "prometheus.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
+    - name: "prometheus.storage.volumeClaimTemplate.spec.resources.requests.storage"
       value: "50Gi"
 
     - name: "prometheus.service.type"

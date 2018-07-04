@@ -188,7 +188,7 @@ releases:
 
     # show debug messages
     - name: "env.open.DEBUG"
-      value: '{{ env "CHARTMUSEUM_DEBUG" | default "true" }}'
+      value: '{{ env "CHARTMUSEUM_DEBUG" | default "false" }}'
 
     # use amazon s3 storage as backend
     - name: "env.open.STORAGE"

@@ -70,7 +70,7 @@ releases:
 
     # show debug messages
     - name: "env.open.DEBUG"
-      value: '{{ env "CHARTMUSEUM_DEBUG" | default "true" }}'
+      value: '{{ env "CHARTMUSEUM_DEBUG" | default "false" }}'
 
     # allow chart versions to be re-uploaded
     - name: "env.open.ALLOW_OVERWRITE"

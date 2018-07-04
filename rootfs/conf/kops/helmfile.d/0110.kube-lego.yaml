@@ -1,0 +1,79 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
+
+
+releases:
+
+################################################################################
+## Kube Lego - Automatic Let's Encrypt for Ingress  ############################
+################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
+#
+- name: "tls"
+  namespace: "kube-system"
+  labels:
+    chart: "kube-lego"
+    component: "ingress"
+    namespace: "kube-system"
+    vendor: "jetstack"
+    default: "true"
+  chart: "cloudposse-incubator/kube-lego"
+  version: "0.1.2"
+  set:
+    ### Optional: KUBE_LEGO_REPLICA_COUNT; e.g. 1
+    - name: "replicaCount"
+      value: '{{ env "KUBE_LEGO_REPLICA_COUNT" | default "1" }}'
+
+    ### Optional: KUBE_LEGO_DEBUG; e.g. false
+    - name: "debug"
+      value: '{{ env "KUBE_LEGO_DEBUG" | default "false" }}'
+
+    ## Image
+    - name: "image.repository"
+      value: "jetstack/kube-lego"
+
+    ### Optional: KUBE_LEGO_IMAGE_TAG; e.g. 0.1.2
+    - name: "image.tag"
+      value: '{{ env "KUBE_LEGO_IMAGE_TAG" | default "0.1.5" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    ## Lego Settings
+    ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
+    - name: "lego.email"
+      value: '{{ env "KUBE_LEGO_EMAIL" }}'
+
+    ### Optional: KUBE_LEGO_PROD; e.g. true
+    - name: "lego.prod"
+      value: '{{ env "KUBE_LEGO_PROD" | default "true" }}'
+
+    ## Pod Settings
+    - name: "pod.internalPort"
+      value: "8080"
+
+    ## Resources
+    - name: "resources.limits.cpu"
+      value: "200m"
+
+    - name: "resources.limits.memory"
+      value: "256Mi"
+
+    - name: "resources.requests.cpu"
+      value: "50m"
+
+    - name: "resources.requests.memory"
+      value: "128Mi"

@@ -68,6 +68,10 @@ releases:
     - name: "env.open.DISABLE_API"
       value: "true"
 
+    # show debug messages
+    - name: "env.open.DEBUG"
+      value: '{{ env "CHARTMUSEUM_DEBUG" | default "false" }}'
+
     # allow chart versions to be re-uploaded
     - name: "env.open.ALLOW_OVERWRITE"
       value: "false"
@@ -181,6 +185,10 @@ releases:
     # allow chart versions to be re-uploaded
     - name: "env.open.ALLOW_OVERWRITE"
       value: "true"
+
+    # show debug messages
+    - name: "env.open.DEBUG"
+      value: '{{ env "CHARTMUSEUM_DEBUG" | default "false" }}'
 
     # use amazon s3 storage as backend
     - name: "env.open.STORAGE"
@@ -447,6 +455,7 @@ releases:
       agent:
         gatewayTimeoutCreation: "5s"
         host:
+          iptables: "true"
           interface: "cali+"
         nodeSelector:
           kubernetes.io/role: "node"

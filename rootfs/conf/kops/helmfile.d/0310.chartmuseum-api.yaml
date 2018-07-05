@@ -72,7 +72,7 @@ releases:
           # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
           external-dns.alpha.kubernetes.io/ttl: "60"
         hosts:
-          'api\.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}':
+          'api\.{{ env "CHARTMUSEUM_HOSTNAME" }}':
             ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
             - "/api"
         tls:

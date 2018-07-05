@@ -35,8 +35,8 @@ releases:
     - tolerations:
         - key: "node-role.kubernetes.io/master"
           effect: "NoSchedule"
-      ### Required: AWS_REGION; e.g. us-west-2
       aws:
+        ### Required: AWS_REGION; e.g. us-west-2
         region: '{{ env "AWS_REGION" }}'
       extraArgs:
         auto-discover-base-arn: "true"

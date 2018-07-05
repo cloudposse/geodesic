@@ -1,0 +1,81 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+#######################################################################################
+## datadog                                                                           ##
+## Datadog is a hosted infrastructure monitoring platform                            ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/tree/master/stable/datadog
+#   - https://github.com/kubernetes/charts/blob/master/stable/datadog/values.yaml
+#
+- name: "datadog"
+  namespace: "monitoring"
+  labels:
+    chart: "datadog"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "datadog"
+    default: "false"
+  chart: "stable/datadog"
+  version: "0.16.0"
+  set:
+    - name: "image.repository"
+      value: "datadog/agent"
+
+    ### Optional: DATADOG_IMAGE_TAG; e.g. 6.1.2
+    - name: "image.tag"
+      value: '{{ env "DATADOG_IMAGE_TAG" | default "6.1.2" }}'
+
+    - name: "image.pullPolicy"
+      value: "IfNotPresent"
+
+    - name: "resources.limits.cpu"
+      value: "256m"
+
+    - name: "resources.limits.memory"
+      value: "512Mi"
+
+    - name: "resources.requests.cpu"
+      value: "50m"
+
+    - name: "resources.requests.memory"
+      value: "64Mi"
+
+    - name: "datadog.apiKey"
+      value: '{{ env "DATADOG_API_KEY" }}'
+
+    - name: "datadog.collectEvents"
+      value: "true"
+    
+    ### Optional: DATADOG_APM_ENABLED; e.g. true
+    - name: "datadog.apmEnabled"
+      value: '{{ env "DATADOG_APM_ENABLED" | default "false" }}'
+
+    - name: "rbac.create"
+      value: "false"
+
+    - name: "kube-state-metrics.rbac.create"
+      value: "false"
+      
+    ### Optional: DATADOG_USE_HOST_PORT; e.g. false
+    - name: "daemonset.useHostPort"
+      value: '{{ env "DATADOG_USE_HOST_PORT" | default "true" }}'
+
+    ### Optional: DATADOG_UPDATE_STRATEGY; e.g. RollingUpdate
+    - name: "daemonset.updateStrategy"
+      value: '{{ env "DATADOG_UPDATE_STRATEGY" | default "OnDelete" }}'

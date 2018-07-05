@@ -31,34 +31,22 @@ releases:
     default: "false"
   chart: "stable/kube2iam"
   version: "0.8.5"
-  set:
-    - name: "tolerations[0].key"
-      value: "node-role.kubernetes.io/master"
-
-    - name: "tolerations[0].effect"
-      value: "NoSchedule"
-
-    ### Required: AWS_REGION; e.g. us-west-2
-    - name: "aws.region"
-      value: '{{ env "AWS_REGION" }}'
-
-    - name: "extraArgs.auto-discover-base-arn"
-      value: "true"
-
-    - name: "host.iptables"
-      value: "true"
-
-    - name: "host.interface"
-      value: "cali+"
-
-    - name: "resources.limits.cpu"
-      value: "200m"
-
-    - name: "resources.limits.memory"
-      value: "256Mi"
-
-    - name: "resources.requests.cpu"
-      value: "50m"
-
-    - name: "resources.requests.memory"
-      value: "128Mi"
+  values:
+    - tolerations:
+        - key: "node-role.kubernetes.io/master"
+          effect: "NoSchedule"
+      ### Required: AWS_REGION; e.g. us-west-2
+      aws:
+        region: '{{ env "AWS_REGION" }}'
+      extraArgs:
+        auto-discover-base-arn: "true"
+      host:
+        iptables: "true"
+        interface: "cali+"
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"

@@ -48,7 +48,7 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 WORKDIR /tmp
 
 COPY --from=packages /dist/ /usr/local/bin/
-ENV PATH="/usr/local/bin:${PATH}"
+
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)
 #

@@ -7,9 +7,9 @@ helmDefaults:
     - "--reset-values"
 
 repositories:
-# Incubator repo of official helm charts
-- name: "incubator"
-  url: "https://kubernetes-charts-incubator.storage.googleapis.com"
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
 
 releases:
 

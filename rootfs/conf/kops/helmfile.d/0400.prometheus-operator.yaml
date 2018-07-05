@@ -33,65 +33,37 @@ releases:
     default: "true"
   chart: "coreos-stable/prometheus-operator"
   version: "0.0.23"
-  set:
-    - name: "rbacEnable"
-      value: "false"
-
-    - name: "jobLabel"
-      value: "prometheus-operator"
-
-    - name: "image.repository"
-      value: "quay.io/coreos/prometheus-operator"
-
-    ### Optional: PROMETHEUS_OPERATOR_IMAGE_TAG; e.g. v0.17.0
-    - name: "image.tag"
-      value: '{{ env "PROMETHEUS_OPERATOR_IMAGE_TAG" | default "v0.17.0" }}'
-
-    - name: "image.pullPolicy"
-      value: "IfNotPresent"
-
-    - name: "resources.limits.cpu"
-      value: "10m"
-
-    - name: "resources.limits.memory"
-      value: "64Mi"
-
-    - name: "resources.requests.cpu"
-      value: "5m"
-
-    - name: "resources.requests.memory"
-      value: "32Mi"
-
-    - name: "global.hyperkube.repository"
-      value: "quay.io/coreos/hyperkube"
-
-    ### Optional: PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG; e.g. v1.7.6_coreos.0
-    - name: "global.hyperkube.tag"
-      value: '{{ env "PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG" | default "v1.7.6_coreos.0" }}'
-
-    - name: "global.hyperkube.pullPolicy"
-      value: "IfNotPresent"
-
-    - name: "prometheusConfigReloader.repository"
-      value: "quay.io/coreos/prometheus-config-reloader"
-
-    ### Optional: PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG; e.g. v0.0.3
-    - name: "prometheusConfigReloader.tag"
-      value: '{{ env "PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG" | default "v0.0.3" }}'
-
-    - name: "configmapReload.repository"
-      value: "quay.io/coreos/configmap-reload"
-
-    ### Optional: PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG; e.g. v0.0.1
-    - name: "configmapReload.tag"
-      value: '{{ env "PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG" | default "v0.0.1" }}'
-
-    ### If enabled, prometheus-operator will create a service for scraping kubelets
-    - name: "kubeletService.enable"
-      value: "true"
-
-    - name: "kubeletService.namespace"
-      value: "kube-system"
-
-    - name: "kubeletService.name"
-      value: "kubelet"
+  values:
+    - rbacEnable: "false"
+      jobLabel: "prometheus-operator"
+      image:
+        repository: "quay.io/coreos/prometheus-operator"
+        ### Optional: PROMETHEUS_OPERATOR_IMAGE_TAG; e.g. v0.17.0
+        tag: '{{ env "PROMETHEUS_OPERATOR_IMAGE_TAG" | default "v0.17.0" }}'
+        pullPolicy: "IfNotPresent"
+      resources:
+        limits:
+          cpu: "10m"
+          memory: "64Mi"
+        requests:
+          cpu: "5m"
+          memory: "32Mi"
+      global:
+        hyperkube:
+          repository: "quay.io/coreos/hyperkube"
+          ### Optional: PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG; e.g. v1.7.6_coreos.0
+          tag: '{{ env "PROMETHEUS_OPERATOR_GLOBAL_HYPERKUBE_IMAGE_TAG" | default "v1.7.6_coreos.0" }}'
+          pullPolicy: "IfNotPresent"
+      prometheusConfigReloader:
+        repository: "quay.io/coreos/prometheus-config-reloader"
+        ### Optional: PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG; e.g. v0.0.3
+        tag: '{{ env "PROMETHEUS_OPERATOR_PROMETHEUS_CONFIG_RELOADER_IMAGE_TAG" | default "v0.0.3" }}'
+      configmapReload:
+        repository: "quay.io/coreos/configmap-reload"
+        ### Optional: PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG; e.g. v0.0.1
+        tag: '{{ env "PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG" | default "v0.0.1" }}'
+      kubeletService:
+        ### If enabled, prometheus-operator will create a service for scraping kubelets
+        enable: "true"
+        namespace: "kube-system"
+        name: "kubelet"

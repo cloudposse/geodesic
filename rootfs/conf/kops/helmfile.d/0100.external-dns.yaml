@@ -34,13 +34,10 @@ releases:
   values:
     - extraEnv:
         EXTERNAL_DNS_SOURCE: "service\ningress"
-      
       ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org
       txtOwnerId: '{{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}'
-
       ### Required: EXTERNAL_DNS_TXT_PREFIX; e.g. 11591833-F9CE-407C-8519-35A947DB1D87-
       txtPrefix: '{{ env "EXTERNAL_DNS_TXT_PREFIX" }}'
-
       publishInternalServices: "true"
       provider: "aws"
       podAnnotations:

@@ -5,7 +5,7 @@ BUCKET=$2
 BUCKET_PREFIX=$3
 MOUNT_POINT=$4
 FSTAB="/etc/fstab"
-FSTYPE="/usr/local/bin/s3fs"
+FSTYPE="s3fs"
 FSTAB_ENTRY="%s#%s%s %s fuse _netdev,allow_other,rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions 0 0\n"
 
 # When mounting the root of the bucket, goofys requires us not to omit the prefix

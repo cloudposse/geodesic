@@ -32,48 +32,35 @@ releases:
     default: "true"
   chart: "cloudposse-incubator/kube-lego"
   version: "0.1.2"
-  set:
-    ### Optional: KUBE_LEGO_REPLICA_COUNT; e.g. 1
-    - name: "replicaCount"
-      value: '{{ env "KUBE_LEGO_REPLICA_COUNT" | default "1" }}'
+  values:
+    - image:
+        repository: "jetstack/kube-lego"
+        ### Optional: KUBE_LEGO_IMAGE_TAG; e.g. 0.1.2
+        tag: '{{ env "KUBE_LEGO_IMAGE_TAG" | default "0.1.5" }}'
+        pullPolicy: "IfNotPresent"
 
-    ### Optional: KUBE_LEGO_DEBUG; e.g. false
-    - name: "debug"
-      value: '{{ env "KUBE_LEGO_DEBUG" | default "false" }}'
+      ### Optional: KUBE_LEGO_REPLICA_COUNT; e.g. 1
+      replicaCount: '{{ env "KUBE_LEGO_REPLICA_COUNT" | default "1" }}'
 
-    ## Image
-    - name: "image.repository"
-      value: "jetstack/kube-lego"
+      ### Optional: KUBE_LEGO_DEBUG; e.g. false
+      debug: '{{ env "KUBE_LEGO_DEBUG" | default "false" }}'
 
-    ### Optional: KUBE_LEGO_IMAGE_TAG; e.g. 0.1.2
-    - name: "image.tag"
-      value: '{{ env "KUBE_LEGO_IMAGE_TAG" | default "0.1.5" }}'
+      ## Lego Settings
+      lego:
+        ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
+        email: '{{ env "KUBE_LEGO_EMAIL" }}'
 
-    - name: "image.pullPolicy"
-      value: "IfNotPresent"
+        ### Optional: KUBE_LEGO_PROD; e.g. true
+        prod: '{{ env "KUBE_LEGO_PROD" | default "true" }}'
 
-    ## Lego Settings
-    ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
-    - name: "lego.email"
-      value: '{{ env "KUBE_LEGO_EMAIL" }}'
+      ## Pod Settings
+      pod:
+        internalPort: "8080"
 
-    ### Optional: KUBE_LEGO_PROD; e.g. true
-    - name: "lego.prod"
-      value: '{{ env "KUBE_LEGO_PROD" | default "true" }}'
-
-    ## Pod Settings
-    - name: "pod.internalPort"
-      value: "8080"
-
-    ## Resources
-    - name: "resources.limits.cpu"
-      value: "200m"
-
-    - name: "resources.limits.memory"
-      value: "256Mi"
-
-    - name: "resources.requests.cpu"
-      value: "50m"
-
-    - name: "resources.requests.memory"
-      value: "128Mi"
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"

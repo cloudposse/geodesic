@@ -32,55 +32,34 @@ releases:
   chart: "cloudposse-incubator/nginx-ingress"
   version: "0.1.7"
   values:
-  - "values/nginx-ingress.yaml"
-  set:
-    ### Optional: NGINX_INGRESS_REPLICA_COUNT; e.g. 4
-    - name: "replicaCount"
-      value: '{{ env "NGINX_INGRESS_REPLICA_COUNT" | default "4" }}'
-
-    - name: "image.repository"
-      value: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
-
-    ### Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.11.0
-    - name: "image.tag"
-      value: '{{ env "NGINX_INGRESS_IMAGE_TAG" | default "0.11.0" }}'
-
-    - name: "image.pullPolicy"
-      value: "IfNotPresent"
-
-    - name: "resources.limits.cpu"
-      value: "200m"
-
-    - name: "resources.limits.memory"
-      value: "256Mi"
-
-    - name: "resources.requests.cpu"
-      value: "50m"
-
-    - name: "resources.requests.memory"
-      value: "128Mi"
-
-    ### Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT; e.g. 2
-    - name: "nginx-default-backend.replicaCount"
-      value: '{{ env "NGINX_INGRESS_BACKEND_REPLICA_COUNT" | default "2" }}'
-
-    - name: "nginx-default-backend.resources.limits.cpu"
-      value: "200m"
-
-    - name: "nginx-default-backend.resources.limits.memory"
-      value: "256Mi"
-
-    - name: "nginx-default-backend.resources.requests.cpu"
-      value: "50m"
-
-    - name: "nginx-default-backend.resources.requests.memory"
-      value: "128Mi"
-
-    ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
-    - name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-      value: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
-
-    ### Optional: NGINX_INGRESS_TTL; e.g. 60
-    # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
-    #- name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
-    #  value: {{ env "NGINX_INGRESS_TTL" | default "60" }}
+    - "values/nginx-ingress.yaml"
+    - image:
+        repository: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
+        ### Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.11.0
+        tag: '{{ env "NGINX_INGRESS_IMAGE_TAG" | default "0.11.0" }}'
+        pullPolicy: "IfNotPresent"
+      ### Optional: NGINX_INGRESS_REPLICA_COUNT; e.g. 4
+      replicaCount: '{{ env "NGINX_INGRESS_REPLICA_COUNT" | default "4" }}'
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"
+      nginx-default-backend:
+        ### Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT; e.g. 2
+        replicaCount: '{{ env "NGINX_INGRESS_BACKEND_REPLICA_COUNT" | default "2" }}'
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+      service:
+        annotations:
+          ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
+          external-dns.alpha.kubernetes.io/hostname: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
+          ### Optional: NGINX_INGRESS_TTL; e.g. 60
+          external-dns.alpha.kubernetes.io/ttl: '{{ env "NGINX_INGRESS_TTL" | default "60" }}'

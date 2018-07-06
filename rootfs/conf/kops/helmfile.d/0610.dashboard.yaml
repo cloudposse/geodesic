@@ -33,31 +33,20 @@ releases:
     default: "true"
   chart: "stable/kubernetes-dashboard"
   version: "0.6.7"
-  set:
-    - name: "image.repository"
-      value: "k8s.gcr.io/kubernetes-dashboard-amd64"
-
-    - name: "image.tag"
-      value: '{{ env "KUBERNETES_DASHBOARD_IMAGE_TAG" | default "v1.8.3" }}'
-
-    - name: "image.pullPolicy"
-      value: "IfNotPresent"
-
-    - name: "resources.limits.cpu"
-      value: "100m"
-
-    - name: "resources.limits.memory"
-
-      value: "100Mi"
-
-    - name: "resources.requests.cpu"
-      value: "50m"
-
-    - name: "resources.requests.memory"
-      value: "50Mi"
-
-    - name: "rbac.create"
-      value: "false"
-
-    - name: "serviceAccount.create"
-      value: "true"
+  values:
+    - image:
+        repository: "k8s.gcr.io/kubernetes-dashboard-amd64"
+        ### Optional: KUBERNETES_DASHBOARD_IMAGE_TAG;
+        tag: '{{ env "KUBERNETES_DASHBOARD_IMAGE_TAG" | default "v1.8.3" }}'
+        pullPolicy: "IfNotPresent"
+      resources:
+        limits:
+          cpu: "100m"
+          memory: "100Mi"
+        requests:
+          cpu: "50m"
+          memory: "50Mi"
+      rbac:
+        create: "false"
+      serviceAccount:
+        create: "true"

@@ -28,7 +28,6 @@ releases:
   chart: "stable/chartmuseum"
   version: "1.4.0"
   values:
-    - "values/chartmuseum.yaml"
     - replicaCount: "1"
       env:
         open:

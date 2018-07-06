@@ -34,7 +34,6 @@ releases:
   chart: "cloudposse-incubator/portal"
   version: "0.1.0"
   values:
-    - "values/portal.yaml"
     - "values/portal.backends.yaml"
     - backends:
         dashboard:

@@ -33,27 +33,18 @@ releases:
     default: "true"
   chart: "stable/heapster"
   version: "0.2.10"
-  set:
-    - name: "replicaCount"
-      value: '{{ env "HEAPSTER_REPLICA_COUNT" | default "1" }}'
-
-    - name: "image.repository"
-      value: "k8s.gcr.io/heapster"
-
-    - name: "image.tag"
-      value: '{{ env "HEAPSTER_IMAGE_TAG" | default "v1.3.0" }}'
-
-    - name: "image.pullPolicy"
-      value: "IfNotPresent"
-
-    - name: "resources.limits.cpu"
-      value: "100m"
-
-    - name: "resources.limits.memory"
-      value: "256Mi"
-
-    - name: "resources.requests.cpu"
-      value: "50m"
-
-    - name: "resources.requests.memory"
-      value: "128Mi"
+  values:
+      ### Optional: HEAPSTER_REPLICA_COUNT;
+    - replicaCount: '{{ env "HEAPSTER_REPLICA_COUNT" | default "1" }}'
+      image:
+        repository: "k8s.gcr.io/heapster"
+        ### Optional: HEAPSTER_IMAGE_TAG;
+        tag: '{{ env "HEAPSTER_IMAGE_TAG" | default "v1.3.0" }}'
+        pullPolicy: "IfNotPresent"
+      resources:
+        limits:
+          cpu: "100m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"

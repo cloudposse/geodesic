@@ -36,7 +36,7 @@ releases:
           DISABLE_API: "false"
           # allow chart versions to be re-uploaded
           ALLOW_OVERWRITE: "true"
-          # show debug messages
+          ### Optional: CHARTMUSEUM_DEBUG; show debug messages
           DEBUG: '{{ env "CHARTMUSEUM_DEBUG" | default "false" }}'
           # use amazon s3 storage as backend
           STORAGE: "amazon"
@@ -72,7 +72,7 @@ releases:
           # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
           external-dns.alpha.kubernetes.io/ttl: "60"
         hosts:
-          'api\.{{ env "CHARTMUSEUM_HOSTNAME" }}':
+          'api.{{ env "CHARTMUSEUM_HOSTNAME" }}':
             ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
             - "/api"
         tls:

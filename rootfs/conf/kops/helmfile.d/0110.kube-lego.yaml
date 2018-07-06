@@ -43,13 +43,13 @@ releases:
       replicaCount: '{{ env "KUBE_LEGO_REPLICA_COUNT" | default "1" }}'
       ### Optional: KUBE_LEGO_DEBUG; e.g. false
       debug: '{{ env "KUBE_LEGO_DEBUG" | default "false" }}'
-      ## Lego Settings
+      # Lego Settings
       lego:
         ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
         email: '{{ env "KUBE_LEGO_EMAIL" }}'
         ### Optional: KUBE_LEGO_PROD; e.g. true
         prod: '{{ env "KUBE_LEGO_PROD" | default "true" }}'
-      ## Pod Settings
+      # Pod Settings
       pod:
         internalPort: "8080"
       resources:

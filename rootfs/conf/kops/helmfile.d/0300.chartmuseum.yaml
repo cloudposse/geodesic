@@ -34,7 +34,7 @@ releases:
         open:
           # disable all routes prefixed with /api
           DISABLE_API: "true"
-          # show debug messages
+          ### Optional: CHARTMUSEUM_DEBUG; show debug messages
           DEBUG: '{{ env "CHARTMUSEUM_DEBUG" | default "false" }}'
           # allow chart versions to be re-uploaded
           ALLOW_OVERWRITE: "false"

@@ -63,7 +63,7 @@ releases:
         ### Optional: PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG; e.g. v0.0.1
         tag: '{{ env "PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG" | default "v0.0.1" }}'
       kubeletService:
-        ### If enabled, prometheus-operator will create a service for scraping kubelets
+        # If enabled, prometheus-operator will create a service for scraping kubelets
         enable: "true"
         namespace: "kube-system"
         name: "kubelet"

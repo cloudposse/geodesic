@@ -32,7 +32,6 @@ releases:
   chart: "cloudposse-incubator/nginx-ingress"
   version: "0.1.7"
   values:
-    - "values/nginx-ingress.yaml"
     - image:
         repository: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
         ### Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.11.0

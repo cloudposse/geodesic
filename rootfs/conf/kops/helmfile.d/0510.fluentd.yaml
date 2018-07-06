@@ -34,33 +34,23 @@ releases:
     default: "false"
   chart: "cloudposse-incubator/fluentd-kubernetes"
   version: "0.2.0"
-  set:
-    - name: "image.repository"
-      value: "cloudposse/fluentd-datadog-logs"
-
-    - name: "image.tag"
-      value: "0.1.1"
-
-    - name: "image.pullPolicy"
-      value: "Always"
-
-    - name: "resources.limits.cpu"
-      value: "50m"
-
-    - name: "resources.limits.memory"
-      value: "512Mi"
-
-    - name: "resources.requests.cpu"
-      value: "5m"
-
-    - name: "resources.requests.memory"
-      value: "256Mi"
-
-    - name: "env.open.DATADOG_SOURCE"
-      value: '{{ env "DATADOG_SOURCE" | default "k8s-staging" }}'
-
-    - name: "env.secret.DATADOG_API_KEY"
-      value: '{{ env "DATADOG_API_KEY" }}'
-
-    - name: "configDir"
-      value: "/tmp/conf"
+  values:
+    - image:
+        repository: "cloudposse/fluentd-datadog-logs"
+        tag: "0.1.1"
+        pullPolicy: "Always"
+      resources:
+        limits:
+          cpu: "50m"
+          memory: "512Mi"
+        requests:
+          cpu: "5m"
+          memory: "256Mi"
+      env:
+        open:
+          ### Optional: DATADOG_SOURCE;
+          DATADOG_SOURCE: '{{ env "DATADOG_SOURCE" | default "k8s-staging" }}'
+        secret:
+          ### Required: DATADOG_API_KEY;
+          DATADOG_API_KEY: '{{ env "DATADOG_API_KEY" }}'
+      configDir: "/tmp/conf"

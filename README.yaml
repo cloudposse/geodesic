@@ -11,7 +11,7 @@ badges:
     url: "https://travis-ci.org/cloudposse/geodesic"
   - name: "Latest Release"
     image: "https://img.shields.io/github/release/cloudposse/geodesic.svg"
-    url: "https://github.com/cloudposse/geodesic/releases"
+    url: "https://github.com/cloudposse/geodesic/releases/latest"
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/badge.svg"
     url: "https://slack.cloudposse.com"

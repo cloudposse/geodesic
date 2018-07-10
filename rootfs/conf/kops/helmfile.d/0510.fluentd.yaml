@@ -7,9 +7,9 @@ helmDefaults:
     - "--reset-values"
 
 repositories:
-# Incubator repo of official helm charts
-- name: "incubator"
-  url: "https://kubernetes-charts-incubator.storage.googleapis.com"
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
 
 releases:
 
@@ -28,11 +28,11 @@ releases:
 - name: "logs"
   namespace: "kube-system"
   labels:
-    chart: "fluentd"
+    chart: "fluentd-kubernetes"
     component: "datadog"
     namespace: "kube-system"
     default: "false"
-  chart: "incubator/fluentd"
+  chart: "cloudposse-incubator/fluentd-kubernetes"
   version: "0.2.0"
   set:
     - name: "image.repository"

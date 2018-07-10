@@ -952,18 +952,18 @@ releases:
 - name: "logs"
   namespace: "kube-system"
   labels:
-    chart: "fluentd"
+    chart: "fluentd-kubernetes"
     component: "datadog"
     namespace: "kube-system"
     default: "false"
-  chart: "incubator/fluentd"
+  chart: "cloudposse-incubator/fluentd-kubernetes"
   version: "0.2.0"
   set:
     - name: "image.repository"
       value: "cloudposse/fluentd-datadog-logs"
 
     - name: "image.tag"
-      value: "0.1.0"
+      value: "0.1.1"
 
     - name: "image.pullPolicy"
       value: "Always"

@@ -956,7 +956,7 @@ releases:
     component: "datadog"
     namespace: "kube-system"
     default: "false"
-  chart: "incubator/fluentd-kubernetes"
+  chart: "cloudposse-incubator/fluentd-kubernetes"
   version: "0.2.0"
   set:
     - name: "image.repository"

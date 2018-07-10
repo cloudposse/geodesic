@@ -39,7 +39,7 @@ releases:
       value: "cloudposse/fluentd-datadog-logs"
 
     - name: "image.tag"
-      value: "0.1.1"
+      value: "0.1.0"
 
     - name: "image.pullPolicy"
       value: "Always"

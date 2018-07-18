@@ -1304,8 +1304,9 @@ releases:
     - name: "ingress.dns.enabled"
       value: "false"
 
+    ### Optional: PORTAL_INGRESS_TLS_ENABLED; e.g. false
     - name: "ingress.tls.enabled"
-      value: "true"
+      value: '{{ env "PORTAL_INGRESS_TLS_ENABLED" | default "true" }}'
 
     - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
       value: "nginx"

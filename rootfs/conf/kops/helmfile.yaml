@@ -257,13 +257,16 @@ releases:
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_API_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/api"
 
-    ### Optional: CHARTMUSEUM_API_SECRET_NAME; e.g. chartmuseum-api-server-tls
+    ### Optional: CHARTMUSEUM_API_TLS_ENABLED; e.g. false
+{{ if eq (env "CHARTMUSEUM_API_TLS_ENABLED" | default "true") "true" }}
+     ### Optional: CHARTMUSEUM_API_SECRET_NAME; e.g. chartmuseum-api-server-tls
     - name: "ingress.tls[0].secretName"
       value: '{{ env "CHARTMUSEUM_API_SECRET_NAME" | default "chartmuseum-api-server-tls" }}'
 
     ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_API_HOSTNAME" }}'
+{{ end }}
 
 ################################################################################
 ## External DNS ################################################################

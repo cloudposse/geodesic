@@ -149,6 +149,8 @@ releases:
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[1]'
       value: "/index.yaml"
 
+    ### Optional: CHARTMUSEUM_TLS_ENABLED; e.g. false
+{{ if eq (env "CHARTMUSEUM_TLS_ENABLED" | default "true") "true" }}
     ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
     - name: "ingress.tls[0].secretName"
       value: '{{ env "CHARTMUSEUM_SECRET_NAME" | default "chartmuseum-server-tls" }}'
@@ -156,7 +158,7 @@ releases:
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
-
+{{ end }}
 
 ################################################################################
 ## Chart Museum API ############################################################

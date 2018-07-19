@@ -47,6 +47,10 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
 
+# Copy installer over to make package upgrades easy
+COPY --from=packages /packages/install/ /packages/install/
+
+# Copy select binary packages
 COPY --from=packages /dist/ /usr/local/bin/
 
 #

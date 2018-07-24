@@ -11,7 +11,7 @@ function prompter() {
 
 PROMPT_HOOKS+=("reload")
 function reload() {
-  eval $(resize)
+  kill -WINCH $$
 }
 
 PROMPT_HOOKS+=("terraform_prompt")

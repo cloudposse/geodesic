@@ -1,4 +1,4 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.2.9
+ARG PACKAGES_IMAGE=cloudposse/packages:0.2.12
 FROM ${PACKAGES_IMAGE} as packages
 
 WORKDIR /packages

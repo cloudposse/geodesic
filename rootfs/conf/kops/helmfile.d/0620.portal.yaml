@@ -41,31 +41,31 @@ releases:
           name: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_NAME" | default "Kubernetes" }}'
           ### Optional: PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT;
           endpoint: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" | default "https://kubernetes-dashboard.kube-system:443" }}'
-          external: "false"
+          external: false
         grafana:
           ### Optional: PORTAL_BACKEND_GRAFANA_NAME;
           name: '{{ env "PORTAL_BACKEND_GRAFANA_NAME" | default "Grafana" }}'
           ### Optional: PORTAL_BACKEND_GRAFANA_ENDPOINT;
           endpoint: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" | default "http://kube-prometheus-grafana.monitoring:80" }}'
-          external: "false"
+          external: false
         alerts:
           ### Optional: PORTAL_BACKEND_ALERTS_NAME;
           name: '{{ env "PORTAL_BACKEND_ALERTS_NAME" | default "Alerts" }}'
           ### Optional: PORTAL_BACKEND_ALERTS_ENDPOINT;
           endpoint: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" | default "http://kube-prometheus-alertmanager.monitoring:9093" }}'
-          external: "false"
+          external: false
         prometheus:
           ### Optional: PORTAL_BACKEND_PROMETHEUS_NAME;
           name: '{{ env "PORTAL_BACKEND_PROMETHEUS_NAME" | default "Prometheus" }}'
           ### Optional: PORTAL_BACKEND_PROMETHEUS_ENDPOINT;
           endpoint: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" | default "http://kube-prometheus-prometheus.monitoring:9090" }}'
-          external: "false"
+          external: false
         docs:
           ### Optional: PORTAL_BACKEND_DOCS_NAME;
           name: '{{ env "PORTAL_BACKEND_DOCS_NAME" | default "Docs" }}'
           ### Optional: PORTAL_BACKEND_DOCS_ENDPOINT;
           endpoint: '{{ env "PORTAL_BACKEND_DOCS_ENDPOINT" | default "https://docs.cloudposse.com/" }}'
-          external: "true"
+          external: true
       config:
         ### Required: PORTAL_TITLE;
         title: '{{ env "PORTAL_TITLE" }}'
@@ -99,7 +99,7 @@ releases:
             cpu: "3m"
             memory: "8Mi"
       proxy:
-        enabled: "true"
+        enabled: true
         ### Optional: PORTAL_PROXY_REPLICA_COUNT;
         replicaCount: '{{ env "PORTAL_PROXY_REPLICA_COUNT" | default "2" }}'
         image:
@@ -119,7 +119,7 @@ releases:
             memory: "32Mi"
       oauth2-proxy:
         app:
-          useSSL: "false"
+          useSSL: false
           upstreams:
             - "file:///dev/null"
           provider: "github"
@@ -131,18 +131,18 @@ releases:
           githubOrg: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION" }}'
           ### Required: PORTAL_OAUTH2_PROXY_GITHUB_TEAM;
           githubTeam: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM" }}'
-          requestLogging: "false"
-          passAccessToken: "false"
-          passBasicAuth: "false"
-          passHostHeader: "true"
+          requestLogging: false
+          passAccessToken: false
+          passBasicAuth: false
+          passHostHeader: true
           ### Required: PORTAL_OAUTH2_PROXY_COOKIE_NAME;
           cookieName: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_NAME" }}'
           ### Required: PORTAL_OAUTH2_PROXY_COOKIE_SECRET;
           cookieSecret: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
           ### Required: PORTAL_HOSTNAME;
           cookieDomain: '{{ env "PORTAL_HOSTNAME" }}'
-          cookieSecure: "true"
-          cookieHttponly: "false"
+          cookieSecure: true
+          cookieHttponly: false
           ### Optional: PORTAL_OAUTH2_PROXY_REPLICA_COUNT;
           replicaCount: '{{ env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT" | default "2" }}'
           image:
@@ -158,9 +158,9 @@ releases:
               cpu: "5m"
               memory: "8Mi"
       ingress:
-        enabled: "true"
+        enabled: true
         dns:
-          enabled: "false"
+          enabled: false
         tls:
           ### Optional: PORTAL_INGRESS_TLS_ENABLED; e.g. false
           enabled: '{{ env "PORTAL_INGRESS_TLS_ENABLED" | default "true" }}'

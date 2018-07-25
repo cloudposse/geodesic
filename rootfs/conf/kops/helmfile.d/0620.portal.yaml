@@ -162,7 +162,8 @@ releases:
         dns:
           enabled: "false"
         tls:
-          enabled: "true"
+          ### Optional: PORTAL_INGRESS_TLS_ENABLED; e.g. false
+          enabled: '{{ env "PORTAL_INGRESS_TLS_ENABLED" | default "true" }}'
         annotations:
           kubernetes.io/ingress.class: "nginx"
           kubernetes.io/tls-acme: "true"

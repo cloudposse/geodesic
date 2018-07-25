@@ -68,15 +68,15 @@ releases:
           kubernetes.io/tls-acme: "true"
           ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
           external-dns.alpha.kubernetes.io/target: '{{ env "CHARTMUSEUM_INGRESS" }}'
-          # DNS TTL for CHARTMUSEUM_HOSTNAME; e.g. 60
+          # DNS TTL for CHARTMUSEUM_API_HOSTNAME; e.g. 60
           external-dns.alpha.kubernetes.io/ttl: "60"
         hosts:
-          'api.{{ env "CHARTMUSEUM_HOSTNAME" }}':
-            ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+          '{{ env "CHARTMUSEUM_API_HOSTNAME" }}':
+            ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
             - "/api"
         tls:
             ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
           - secretName: '{{ env "CHARTMUSEUM_SECRET_NAME" | default "chartmuseum-server-tls" }}'
-            ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+            ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
             hosts:
-              - '{{ env "CHARTMUSEUM_HOSTNAME" }}'
+              - '{{ env "CHARTMUSEUM_API_HOSTNAME" }}'

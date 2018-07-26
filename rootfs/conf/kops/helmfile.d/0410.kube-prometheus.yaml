@@ -42,8 +42,8 @@ releases:
   values:
     - "values/kube-prometheus.grafana.dashboards.yaml"
     - global:
-        rbacEnable: "false"
-      deployExporterNode: "true"
+        rbacEnable: false
+      deployExporterNode: true
       exporter-node:
         resources:
           limits:
@@ -52,7 +52,7 @@ releases:
           requests:
             cpu: "5m"
             memory: "16Mi"
-      deployGrafana: "false"
+      deployGrafana: false
       grafana:
         resources:
           limits:
@@ -69,9 +69,9 @@ releases:
           requests:
             cpu: "10m"
             memory: "64Mi"
-      deployAlertManager: "true"
+      deployAlertManager: true
       alertmanager:
-        paused: "false"
+        paused: false
         podAntiAffinity: "soft"
         ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT; e.g. 4
         replicaCount: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT" | default "4" }}'
@@ -110,20 +110,20 @@ releases:
                 - api_url: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL" }}'
                   ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL; e.g. #alerts-staging
                   channel: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL" }}'
-                  send_resolved: "true"
+                  send_resolved: true
         service:
           type: "ClusterIP"
           port: "80"
         ingress:
-          enabled: "false"
+          enabled: false
       prometheus:
         retention: "31d"
         routePrefix: "/"
         config:
-          specifiedInValues: "true"
+          specifiedInValues: true
         rules:
-          specifiedInValues: "true"
-        paused: "false"
+          specifiedInValues: true
+        paused: false
         podAntiAffinity: "soft"
         ### Optional: KUBE_PROMETHEUS_REPLICA_COUNT; e.g. 4
         replicaCount: '{{ env "KUBE_PROMETHEUS_REPLICA_COUNT" | default "4" }}'
@@ -151,4 +151,4 @@ releases:
           type: "ClusterIP"
           port: "80"
         ingress:
-          enabled: "false"
+          enabled: false

@@ -21,7 +21,7 @@ helmDefaults:
   args:
     - "--wait"
     - "--recreate-pods"
-    - "--timeout=600" 
+    - "--timeout=600"
     - "--force"
     - "--reset-values"
 
@@ -127,7 +127,7 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
-    
+
     ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
@@ -480,7 +480,7 @@ releases:
           - name: "ssl-certs"
             mountPath: "/etc/ssl/certs"
             hostPath: '{{ env "KIAM_HOST_CERT_PATH" | default "/etc/ssl/certs" }}'
-            readOnly: true 
+            readOnly: true
         tlsFiles:
           ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem
           ca: '{{ env "KIAM_SERVER_TLS_CA" }}'
@@ -918,7 +918,7 @@ releases:
 
     - name: "datadog.collectEvents"
       value: "true"
-    
+
     ### Optional: DATADOG_APM_ENABLED; e.g. true
     - name: "datadog.apmEnabled"
       value: '{{ env "DATADOG_APM_ENABLED" | default "false" }}'
@@ -928,7 +928,7 @@ releases:
 
     - name: "kube-state-metrics.rbac.create"
       value: "false"
-      
+
     ### Optional: DATADOG_USE_HOST_PORT; e.g. false
     - name: "daemonset.useHostPort"
       value: '{{ env "DATADOG_USE_HOST_PORT" | default "true" }}'
@@ -938,7 +938,7 @@ releases:
       value: '{{ env "DATADOG_UPDATE_STRATEGY" | default "OnDelete" }}'
 
 #######################################################################################
-## Fluentd to datadog logs
+## Fluentd to datadog logs                                                           ##
 ## Forward logs to Datadog with fluentd                                              ##
 #######################################################################################
 
@@ -949,7 +949,7 @@ releases:
 #   - https://github.com/cloudposse/fluentd-datadog-logs
 #
 
-- name: "logs"
+- name: "fluentd-datadog-logs"
   namespace: "kube-system"
   labels:
     chart: "fluentd-kubernetes"
@@ -988,6 +988,64 @@ releases:
 
     - name: "configDir"
       value: "/tmp/conf"
+
+
+#######################################################################################
+## Fluentd to Elasticsearch logs                                                     ##
+## Forward logs to Elasticsearch with fluentd                                        ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/fluentd-kubernetes/values.yaml
+#
+
+- name: "fluentd-elasticsearch-logs"
+  namespace: "kube-system"
+  labels:
+    chart: "fluentd-kubernetes"
+    component: "elasticsearch"
+    namespace: "kube-system"
+    default: "false"
+  chart: "cloudposse-incubator/fluentd-kubernetes"
+  version: "0.2.0"
+  set:
+  - name: "image.repository"
+    value: "fluent/fluentd-kubernetes-daemonset"
+
+  - name: "image.tag"
+    value: "v0.12.33-elasticsearch"
+
+  - name: "image.pullPolicy"
+    value: "Always"
+
+  - name: "resources.limits.cpu"
+    value: "50m"
+
+  - name: "resources.limits.memory"
+    value: "512Mi"
+
+  - name: "resources.requests.cpu"
+    value: "5m"
+
+  - name: "resources.requests.memory"
+    value: "256Mi"
+
+  - name: "env.open.FLUENT_ELASTICSEARCH_HOST"
+    value: '{{ env "FLUENT_ELASTICSEARCH_HOST" }}'
+
+  - name: "env.open.FLUENT_ELASTICSEARCH_PORT"
+    value: '{{ env "FLUENT_ELASTICSEARCH_PORT" }}'
+
+  - name: "env.secret.FLUENT_ELASTICSEARCH_USER"
+    value: '{{ env "FLUENT_ELASTICSEARCH_USER" }}'
+
+  - name: "env.secret.FLUENT_ELASTICSEARCH_PASSWORD"
+    value: '{{ env "FLUENT_ELASTICSEARCH_PASSWORD" }}'
+
+  - name: "configDir"
+    value: "/tmp/conf"
+
 
 #######################################################################################
 ## heapster                                                                          ##

@@ -1,0 +1,67 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+################################################################################
+## External DNS ################################################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
+#
+- name: "dns"
+  namespace: "kube-system"
+  labels:
+    chart: "external-dns"
+    component: "ingress"
+    namespace: "kube-system"
+    vendor: "kubernetes-incubator"
+    default: "true"
+  chart: "stable/external-dns"
+  version: "0.5.4"
+  set:
+    - name: "extraEnv.EXTERNAL_DNS_SOURCE"
+      value: "service\ningress"
+
+    ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org
+    - name: "txtOwnerId"
+      value: '{{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}'
+
+    ### Required: EXTERNAL_DNS_TXT_PREFIX; e.g. 11591833-F9CE-407C-8519-35A947DB1D87-
+    - name: "txtPrefix"
+      value: '{{ env "EXTERNAL_DNS_TXT_PREFIX" }}'
+
+    - name: "publishInternalServices"
+      value: "true"
+
+    - name: "provider"
+      value: "aws"
+
+    ### Required: EXTERNAL_DNS_IAM_ROLE; e.g. cp-staging-external-dns
+    - name: "podAnnotations.iam\\.amazonaws\\.com/role"
+      value: '{{ env "EXTERNAL_DNS_IAM_ROLE" }}'
+
+    ## Resources
+    - name: "resources.limits.cpu"
+      value: "200m"
+
+    - name: "resources.limits.memory"
+      value: "256Mi"
+
+    - name: "resources.requests.cpu"
+      value: "100m"
+
+    - name: "resources.requests.memory"
+      value: "128Mi"

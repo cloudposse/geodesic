@@ -1,0 +1,66 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Incubator repo of official helm charts
+- name: "incubator"
+  url: "https://kubernetes-charts-incubator.storage.googleapis.com"
+
+releases:
+
+#######################################################################################
+## Fluentd to datadog logs
+## Forward logs to Datadog with fluentd                                              ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/incubator/fluentd/
+#   - https://github.com/kubernetes/charts/blob/master/incubator/fluentd/values.yaml
+#   - https://github.com/cloudposse/fluentd-datadog-logs
+#
+
+- name: "logs"
+  namespace: "kube-system"
+  labels:
+    chart: "fluentd-kubernetes"
+    component: "datadog"
+    namespace: "kube-system"
+    default: "false"
+  chart: "cloudposse-incubator/fluentd-kubernetes"
+  version: "0.2.0"
+  set:
+    - name: "image.repository"
+      value: "cloudposse/fluentd-datadog-logs"
+
+    - name: "image.tag"
+      value: "0.1.1"
+
+    - name: "image.pullPolicy"
+      value: "Always"
+
+    - name: "resources.limits.cpu"
+      value: "50m"
+
+    - name: "resources.limits.memory"
+      value: "512Mi"
+
+    - name: "resources.requests.cpu"
+      value: "5m"
+
+    - name: "resources.requests.memory"
+      value: "256Mi"
+
+    - name: "env.open.DATADOG_SOURCE"
+      value: '{{ env "DATADOG_SOURCE" | default "k8s-staging" }}'
+
+    - name: "env.secret.DATADOG_API_KEY"
+      value: '{{ env "DATADOG_API_KEY" }}'
+
+    - name: "configDir"
+      value: "/tmp/conf"

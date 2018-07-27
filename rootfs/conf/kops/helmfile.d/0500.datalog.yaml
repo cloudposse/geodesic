@@ -53,10 +53,10 @@ releases:
         ### Optional: DATADOG_APM_ENABLED; e.g. true
         apmEnabled: '{{ env "DATADOG_APM_ENABLED" | default "false" }}'
       rbac:
-        create: "false"
+        create: false
       kube-state-metrics:
         rbac:
-          create: "false"
+          create: false
       daemonset:
         ### Optional: DATADOG_USE_HOST_PORT; e.g. false
         useHostPort: '{{ env "DATADOG_USE_HOST_PORT" | default "true" }}'

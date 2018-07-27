@@ -38,7 +38,7 @@ releases:
       txtOwnerId: '{{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}'
       ### Required: EXTERNAL_DNS_TXT_PREFIX; e.g. 11591833-F9CE-407C-8519-35A947DB1D87-
       txtPrefix: '{{ env "EXTERNAL_DNS_TXT_PREFIX" }}'
-      publishInternalServices: "true"
+      publishInternalServices: true
       provider: "aws"
       podAnnotations:
         ### Required: EXTERNAL_DNS_IAM_ROLE; e.g. cp-staging-external-dns

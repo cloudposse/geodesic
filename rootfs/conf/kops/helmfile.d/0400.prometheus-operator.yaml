@@ -34,7 +34,7 @@ releases:
   chart: "coreos-stable/prometheus-operator"
   version: "0.0.23"
   values:
-    - rbacEnable: "false"
+    - rbacEnable: false
       jobLabel: "prometheus-operator"
       image:
         repository: "quay.io/coreos/prometheus-operator"
@@ -64,6 +64,6 @@ releases:
         tag: '{{ env "PROMETHEUS_OPERATOR_CONFIGMAP_RELOAD_IMAGE_TAG" | default "v0.0.1" }}'
       kubeletService:
         # If enabled, prometheus-operator will create a service for scraping kubelets
-        enable: "true"
+        enable: true
         namespace: "kube-system"
         name: "kubelet"

@@ -62,7 +62,7 @@ releases:
           cpu: "5m"
           memory: "256Mi"
       ingress:
-        enabled: "true"
+        enabled: true
         annotations:
           kubernetes.io/ingress.class: "nginx"
           kubernetes.io/tls-acme: "true"

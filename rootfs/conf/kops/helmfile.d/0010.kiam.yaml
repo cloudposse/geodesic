@@ -38,7 +38,7 @@ releases:
       agent:
         gatewayTimeoutCreation: "5s"
         host:
-          iptables: "true"
+          iptables: true
           interface: "cali+"
         nodeSelector:
           kubernetes.io/role: "node"

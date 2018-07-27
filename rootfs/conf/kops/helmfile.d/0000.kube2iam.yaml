@@ -39,9 +39,9 @@ releases:
         ### Required: AWS_REGION; e.g. us-west-2
         region: '{{ env "AWS_REGION" }}'
       extraArgs:
-        auto-discover-base-arn: "true"
+        auto-discover-base-arn: true
       host:
-        iptables: "true"
+        iptables: true
         interface: "cali+"
       resources:
         limits:

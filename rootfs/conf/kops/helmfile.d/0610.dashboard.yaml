@@ -47,6 +47,6 @@ releases:
           cpu: "50m"
           memory: "50Mi"
       rbac:
-        create: "false"
+        create: false
       serviceAccount:
-        create: "true"
+        create: true

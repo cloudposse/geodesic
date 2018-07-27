@@ -1,4 +1,6 @@
 export CHAMBER_SERVICE ?= kops
+export NAMESPACE ?= kube-system
+export IAM_ROLES ?= .*
 
 export CA_C ?= USA
 export CA_ST ?= CA
@@ -45,3 +47,7 @@ chamber/write/server:
 	chamber write $(CHAMBER_SERVICE) KIAM_SERVER_TLS_KEY `base64 -w 0 < keys/server-key.pem`
 	chamber write $(CHAMBER_SERVICE) KIAM_SERVER_TLS_CERT `base64 -w 0 < keys/server.pem`
 	chamber write $(CHAMBER_SERVICE) KIAM_SERVER_TLS_CA `base64 -w 0 < keys/ca.pem` 
+
+## Apply default annotation to namespace for permitted roles
+annotate:
+	kubectl annotate --overwrite namespace $(NAMESPACE) "iam.amazonaws.com/permitted=$(IAM_ROLES)"

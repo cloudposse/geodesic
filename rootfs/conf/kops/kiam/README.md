@@ -10,6 +10,21 @@ Run `make chamber/write/server` to write server secrets. All keys are read from 
 
 ## Troubleshooting
 
+
+### Assume Role Forbidden by Namespace Policy Expression
+
+```
+{"addr":"100.98.35.137:54990","level":"error","method":"GET","msg":"error processing request: assume role forbidden: namespace policy expression '(empty)' forbids role 'cpco-testing-external-dns'","path":"/latest/meta-data/iam/security-credentials/cpco-testing-external-dns","status":403,"time":"2018-07-25T02:39:17Z"}
+```
+
+This is easily fixed by running...
+```
+make annotate
+```
+
+
+### Kiam server readiness/liveness probe issues 
+
 <https://github.com/uswitch/kiam/issues/94> 
 
 ```

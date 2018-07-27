@@ -128,11 +128,11 @@ releases:
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
-    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
@@ -141,11 +141,11 @@ releases:
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.co
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/charts"
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.co
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[1]'
       value: "/index.yaml"
 
@@ -153,7 +153,7 @@ releases:
     - name: "ingress.tls[0].secretName"
       value: '{{ env "CHARTMUSEUM_SECRET_NAME" | default "chartmuseum-server-tls" }}'
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.co
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
@@ -242,7 +242,7 @@ releases:
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
 
-    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
@@ -251,7 +251,7 @@ releases:
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
 
-    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.co
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_API_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/api"
 
@@ -259,7 +259,7 @@ releases:
     - name: "ingress.tls[0].secretName"
       value: '{{ env "CHARTMUSEUM_API_SECRET_NAME" | default "chartmuseum-api-server-tls" }}'
 
-    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.co
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_API_HOSTNAME" }}'
 
@@ -285,7 +285,7 @@ releases:
     - name: "extraEnv.EXTERNAL_DNS_SOURCE"
       value: "service\ningress"
 
-    ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org
+    ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.co
     - name: "txtOwnerId"
       value: '{{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}'
 
@@ -355,7 +355,7 @@ releases:
       value: "IfNotPresent"
 
     ## Lego Settings
-    ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
+    ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.co
     - name: "lego.email"
       value: '{{ env "KUBE_LEGO_EMAIL" }}'
 
@@ -552,7 +552,7 @@ releases:
     - name: "nginx-default-backend.resources.requests.memory"
       value: "128Mi"
 
-    ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
+    ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.co
     - name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
 
@@ -1032,16 +1032,16 @@ releases:
     value: "256Mi"
 
   - name: "env.open.FLUENT_ELASTICSEARCH_HOST"
-    value: '{{ env "FLUENT_ELASTICSEARCH_HOST" }}'
+    value: '{{ env "ELASTICSEARCH_HOST" }}'
 
   - name: "env.open.FLUENT_ELASTICSEARCH_PORT"
-    value: '{{ env "FLUENT_ELASTICSEARCH_PORT" }}'
+    value: '{{ env "ELASTICSEARCH_PORT" }}'
 
   - name: "env.secret.FLUENT_ELASTICSEARCH_USER"
-    value: '{{ env "FLUENT_ELASTICSEARCH_USER" }}'
+    value: '{{ env "ELASTICSEARCH_USER" }}'
 
   - name: "env.secret.FLUENT_ELASTICSEARCH_PASSWORD"
-    value: '{{ env "FLUENT_ELASTICSEARCH_PASSWORD" }}'
+    value: '{{ env "ELASTICSEARCH_PASSWORD" }}'
 
   - name: "configDir"
     value: "/tmp/conf"
@@ -1373,7 +1373,7 @@ releases:
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
 
-    ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "PORTAL_INGRESS" }}'
 
@@ -1381,3 +1381,96 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
+
+
+#######################################################################################
+## Kibana                                                                            ##
+## Open source, browser-based analytics and search dashboard for Elasticsearch       ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/helm/charts/blob/master/stable/kibana/values.yaml
+#
+- name: "kibana"
+  namespace: "monitoring"
+  labels:
+    chart: "kibana"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "kubernetes-helm"
+    default: "false"
+  chart: "stable/kibana"
+  version: "0.10.0"
+  values:
+  - "values/kibana.yaml"
+  set:
+  - name: "replicaCount"
+    value: '{{ env "KIBANA_REPLICA_COUNT" | default "1" }}'
+
+  - name: "image.repository"
+    value: "docker.elastic.co/kibana/kibana-oss"
+
+  - name: "image.tag"
+    value: '{{ env "KIBANA_IMAGE_TAG" | default "6.3.1" }}'
+
+  - name: "image.pullPolicy"
+    value: "Always"
+
+  - name: "env.ELASTICSEARCH_URL"
+    value: '{{ env "ELASTICSEARCH_HOST" }}:{{ env "ELASTICSEARCH_PORT" }}'
+
+  - name: "env.SERVER_PORT"
+    value: '{{ env "KIBANA_SERVER_PORT" | default "5601" }}'
+
+  - name: "resources.limits.cpu"
+    value: "200m"
+
+  - name: "resources.limits.memory"
+    value: "512Mi"
+
+  - name: "resources.requests.cpu"
+    value: "100m"
+
+  - name: "resources.requests.memory"
+    value: "300Mi"
+
+  - name: "service.type"
+    value: "ClusterIP"
+
+  - name: "service.externalPort"
+    value: "443"
+
+  - name: "service.internalPort"
+    value: '{{ env "KIBANA_SERVER_PORT" | default "5601" }}'
+
+  ## Ingress
+  - name: "ingress.enabled"
+    value: "true"
+
+  - name: "ingress.annotations.kubernetes\\.io/ingress\\.class"
+    value: "nginx"
+
+  ### Required: KIBANA_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.co
+  - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
+    value: '{{ env "KIBANA_INGRESS" }}'
+
+  ### Required: KIBANA_HOSTNAME; e.g. kibana.us-west-2.staging.cloudposse.co
+  - name: 'ingress.hosts[0]'
+    value: '{{ env "KIBANA_HOSTNAME" }}'
+
+  ### Required: KIBANA_HOSTNAME; e.g. kibana.us-west-2.staging.cloudposse.co
+  - name: 'ingress.tls.hosts[0]'
+    value: '{{ env "KIBANA_HOSTNAME" }}'
+
+  ### Optional: KIBANA_SECRET_NAME; e.g. kibana-server-tls
+  - name: "ingress.tls.secretName"
+    value: '{{ env "KIBANA_SECRET_NAME" | default "kibana-server-tls" }}'
+
+  # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+  #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
+  #  value: "true"
+
+  # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
+  #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
+  #  value: "60"

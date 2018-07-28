@@ -1403,6 +1403,28 @@ releases:
   chart: "stable/kibana"
   version: "0.10.0"
   values:
+    - replicaCount: {{ env "KIBANA_REPLICA_COUNT" | default 1 }}
+    - image:
+        repository: "docker.elastic.co/kibana/kibana-oss"
+        tag: {{ env "KIBANA_IMAGE_TAG" | default "6.3.1" }}
+        pullPolicy: "Always"
+    - service:
+        type: ClusterIP
+        externalPort: 443
+        internalPort: {{ env "KIBANA_SERVER_PORT" | default "5601" }}
+    - resources:
+        limits:
+          cpu: 500m
+          memory: 1024Mi
+        requests:
+          cpu: 200m
+          memory: 512Mi
+    - env:
+      # All Kibana configuration options are adjustable via env vars.
+      # To adjust a config option to an env var uppercase + replace `.` with `_`
+      # Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
+      ELASTICSEARCH_URL: {{ env "ELASTICSEARCH_HOST" }}:{{ env "ELASTICSEARCH_PORT" }}
+      SERVER_PORT: {{ env "KIBANA_SERVER_PORT" | default "5601" }}
     - ingress:
         enabled: "true"
         annotations:
@@ -1416,42 +1438,3 @@ releases:
         - secretName: {{ env "KIBANA_SECRET_NAME" | default "kibana-server-tls" }}
           hosts:
           - {{ env "KIBANA_HOSTNAME" }}
-  set:
-  - name: "replicaCount"
-    value: '{{ env "KIBANA_REPLICA_COUNT" | default "1" }}'
-
-  - name: "image.repository"
-    value: "docker.elastic.co/kibana/kibana-oss"
-
-  - name: "image.tag"
-    value: '{{ env "KIBANA_IMAGE_TAG" | default "6.3.1" }}'
-
-  - name: "image.pullPolicy"
-    value: "Always"
-
-  - name: "env.ELASTICSEARCH_URL"
-    value: '{{ env "ELASTICSEARCH_HOST" }}:{{ env "ELASTICSEARCH_PORT" }}'
-
-  - name: "env.SERVER_PORT"
-    value: '{{ env "KIBANA_SERVER_PORT" | default "5601" }}'
-
-  - name: "resources.limits.cpu"
-    value: "200m"
-
-  - name: "resources.limits.memory"
-    value: "512Mi"
-
-  - name: "resources.requests.cpu"
-    value: "100m"
-
-  - name: "resources.requests.memory"
-    value: "300Mi"
-
-  - name: "service.type"
-    value: "ClusterIP"
-
-  - name: "service.externalPort"
-    value: "443"
-
-  - name: "service.internalPort"
-    value: '{{ env "KIBANA_SERVER_PORT" | default "5601" }}'

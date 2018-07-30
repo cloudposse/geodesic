@@ -13,7 +13,7 @@ ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch github-commenter go
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
-FROM alpine:3.7
+FROM alpine:3.8
 
 ENV BANNER "geodesic"
 

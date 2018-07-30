@@ -1207,6 +1207,13 @@ releases:
     - name: "backends.docs.external"
       value: "true"
 
+    - name: "backends.kibana.name"
+      value: '{{ env "PORTAL_BACKEND_KIBANA_NAME" | default "Kibana" }}'
+    - name: "backends.kibana.endpoint"
+      value: '{{ env "PORTAL_BACKEND_KIBANA_ENDPOINT" | default "http://kibana.monitoring:80" }}'
+    - name: "backends.kibana.external"
+      value: "false"
+
     - name: "config.title"
       value: '{{ env "PORTAL_TITLE" }}'
     - name: "config.brand"

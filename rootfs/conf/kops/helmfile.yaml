@@ -1210,7 +1210,7 @@ releases:
     - name: "backends.kibana.name"
       value: '{{ env "PORTAL_BACKEND_KIBANA_NAME" | default "Kibana" }}'
     - name: "backends.kibana.endpoint"
-      value: '{{ env "PORTAL_BACKEND_KIBANA_ENDPOINT" | default "http://kibana.monitoring:80" }}'
+      value: '{{ env "PORTAL_BACKEND_KIBANA_ENDPOINT" | default "https://kibana-elasticsearch.testing.cloudposse.co" }}'
     - name: "backends.kibana.external"
       value: "false"
 

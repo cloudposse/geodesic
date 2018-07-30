@@ -1444,13 +1444,13 @@ releases:
         kibana.yml:
           ## Default Kibana configuration from kibana-docker.
           server.name: kibana
-          server.host: "0"
+          server.host: "localhost"
           elasticsearch.url: {{ env "ELASTICSEARCH_HOST" }}:{{ env "ELASTICSEARCH_PORT" }}
 
           ## Custom config properties
           ## Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
           server.port: {{ env "KIBANA_SERVER_PORT" | default "5601" }}
-          logging.verbose: "true"
+          logging.verbose: "false"
           server.defaultRoute: "/app/kibana"
     - env:
       # All Kibana configuration options are adjustable via env vars.

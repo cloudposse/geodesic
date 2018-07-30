@@ -1412,6 +1412,11 @@ releases:
         type: ClusterIP
         externalPort: 443
         internalPort: {{ env "KIBANA_SERVER_PORT" | default "5601" }}
+        annotations:
+          iam.amazonaws.com/role: {{ env "ELASTICSEARCH_IAM_ROLE" }}
+        labels:
+          # Show service URL in `kubectl cluster-info`
+          kubernetes.io/cluster-service: "true"
     - resources:
         limits:
           cpu: 500m

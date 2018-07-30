@@ -1037,6 +1037,9 @@ releases:
   - name: "env.open.FLUENT_ELASTICSEARCH_PORT"
     value: '{{ env "ELASTICSEARCH_PORT" }}'
 
+  - name: "env.open.FLUENT_UID"
+    value: "0"
+
   - name: "env.secret.FLUENT_ELASTICSEARCH_USER"
     value: '{{ env "ELASTICSEARCH_USER" }}'
 
@@ -1401,13 +1404,12 @@ releases:
     vendor: "kubernetes-helm"
     default: "false"
   chart: "stable/kibana"
-  version: "0.10.0"
+  version: "0.6.0"
   values:
     - replicaCount: {{ env "KIBANA_REPLICA_COUNT" | default 1 }}
     - image:
         repository: "docker.elastic.co/kibana/kibana-oss"
-        tag: {{ env "KIBANA_IMAGE_TAG" | default "6.3.1" }}
-        pullPolicy: "Always"
+        pullPolicy: "IfNotPresent"
     - service:
         type: ClusterIP
         externalPort: 443

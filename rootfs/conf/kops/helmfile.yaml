@@ -1431,6 +1431,7 @@ releases:
           kubernetes.io/tls-acme: "true"
           external-dns.alpha.kubernetes.io/ttl: "60"
           external-dns.alpha.kubernetes.io/target: {{ env "KIBANA_INGRESS" }}
+          external-dns.alpha.kubernetes.io/hostname: {{ env "KIBANA_HOSTNAME" }}
         hosts:
         - {{ env "KIBANA_HOSTNAME" }}
         tls:

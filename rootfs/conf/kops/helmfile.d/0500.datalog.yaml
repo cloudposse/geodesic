@@ -49,7 +49,7 @@ releases:
       datadog:
         ### Required: DATADOG_API_KEY;
         apiKey: '{{ env "DATADOG_API_KEY" }}'
-        collectEvents: "true"
+        collectEvents: true
         ### Optional: DATADOG_APM_ENABLED; e.g. true
         apmEnabled: '{{ env "DATADOG_APM_ENABLED" | default "false" }}'
       rbac:

@@ -42,7 +42,7 @@ releases:
   values:
     - "values/kube-prometheus.grafana.dashboards.yaml"
     - global:
-        rbacEnable: "false
+        rbacEnable: false
       deployExporterNode: true
       exporter-node:
         resources:

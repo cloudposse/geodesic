@@ -61,25 +61,7 @@ releases:
             options:
               path: /var/lib/grafana/dashboards/default
       dashboards:
-        default:
-          deployment-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/deployment-dashboard.json
-          kubernetes-capacity-planning-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/kubernetes-capacity-planning-dashboard.json
-          kubernetes-cluster-health-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/kubernetes-cluster-health-dashboard.json
-          kubernetes-cluster-status-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/kubernetes-cluster-status-dashboard.json
-          kubernetes-control-plane-status-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/kubernetes-control-plane-status-dashboard.json
-          kubernetes-resource-requests-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/kubernetes-resource-requests-dashboard.json
-          nodes-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/nodes-dashboard.json
-          pods-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/pods-dashboard.json
-          statefulset-dashboard:
-            url: https://raw.githubusercontent.com/coreos/prometheus-operator/master/helm/grafana/dashboards/statefulset-dashboard.json
+        default: {}
       resources:
         limits:
           cpu: "50m"

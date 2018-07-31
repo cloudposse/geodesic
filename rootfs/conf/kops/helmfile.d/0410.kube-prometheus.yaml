@@ -52,7 +52,7 @@ releases:
           requests:
             cpu: "5m"
             memory: "16Mi"
-      deployGrafana: false
+      deployGrafana: true
       grafana:
         resources:
           limits:

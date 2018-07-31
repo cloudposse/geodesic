@@ -89,6 +89,11 @@ function use() {
     if [ "${HOME}" == "/localhost" ]; then
       echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"
     else
+      if [[ $(uname -r) =~ Microsoft$ ]]; then
+        WSL_USER_DIR=${WSL_USER_DIR:-$(ls -d /mnt/c/Users/* | head -1)} 
+        WSL_USER_NAME=${WSL_USER_NAME:-user} 
+        HOME="${WSL_USER_DIR}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc/LocalState/rootfs/home/${WSL_USER_NAME}"
+      fi
       echo "# Mounting ${HOME} into container"
       DOCKER_ARGS+=(--volume=${HOME}:/localhost)
     fi

@@ -52,5 +52,5 @@ releases:
           DATADOG_SOURCE: '{{ env "DATADOG_SOURCE" | default "k8s-staging" }}'
         secret:
           ### Required: DATADOG_API_KEY;
-          DATADOG_API_KEY: '{{ env "DATADOG_API_KEY" }}'
+          DATADOG_API_KEY: '{{ requiredEnv "DATADOG_API_KEY" }}'
       configDir: "/tmp/conf"

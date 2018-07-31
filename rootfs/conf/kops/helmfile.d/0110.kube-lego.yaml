@@ -46,7 +46,7 @@ releases:
       # Lego Settings
       lego:
         ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
-        email: '{{ env "KUBE_LEGO_EMAIL" }}'
+        email: '{{ requiredEnv "KUBE_LEGO_EMAIL" }}'
         ### Optional: KUBE_LEGO_PROD; e.g. true
         prod: '{{ env "KUBE_LEGO_PROD" | default "true" }}'
       # Pod Settings

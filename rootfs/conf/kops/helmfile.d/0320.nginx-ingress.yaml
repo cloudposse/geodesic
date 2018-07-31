@@ -59,6 +59,6 @@ releases:
       service:
         annotations:
           ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
-          external-dns.alpha.kubernetes.io/hostname: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
+          external-dns.alpha.kubernetes.io/hostname: '{{ requiredEnv "NGINX_INGRESS_HOSTNAME" }}'
           ### Optional: NGINX_INGRESS_TTL; e.g. 60
           external-dns.alpha.kubernetes.io/ttl: '{{ env "NGINX_INGRESS_TTL" | default "60" }}'

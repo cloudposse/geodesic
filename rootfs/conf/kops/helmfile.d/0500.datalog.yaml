@@ -48,7 +48,7 @@ releases:
           memory: "64Mi"
       datadog:
         ### Required: DATADOG_API_KEY;
-        apiKey: '{{ env "DATADOG_API_KEY" }}'
+        apiKey: '{{ requiredEnv "DATADOG_API_KEY" }}'
         collectEvents: true
         ### Optional: DATADOG_APM_ENABLED; e.g. true
         apmEnabled: '{{ env "DATADOG_APM_ENABLED" | default "false" }}'

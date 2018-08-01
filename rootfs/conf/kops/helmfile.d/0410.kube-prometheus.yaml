@@ -107,9 +107,9 @@ releases:
             - name: "slack_general"
               slack_configs:
                   ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL
-                - api_url: '{{ requiredEnv "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL" }}'
+                - api_url: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL" }}'
                   ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL; e.g. #alerts-staging
-                  channel: '{{ requiredEnv "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL" }}'
+                  channel: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL" }}'
                   send_resolved: true
         service:
           type: "ClusterIP"

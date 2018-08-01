@@ -46,11 +46,11 @@ releases:
           - operator: "Exists"
         tlsFiles:
           ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem
-          ca: '{{ requiredEnv "KIAM_AGENT_TLS_CA" }}'
+          ca: '{{ env "KIAM_AGENT_TLS_CA" }}'
           ### Required: KIAM_AGENT_TLS_CERT; e.g. base64-encoded agent.pem
-          cert: '{{ requiredEnv "KIAM_AGENT_TLS_CERT" }}'
+          cert: '{{ env "KIAM_AGENT_TLS_CERT" }}'
           ### Required: KIAM_AGENT_TLS_KEY; e.g. base64-encoded agent-key.pem
-          key: '{{ requiredEnv "KIAM_AGENT_TLS_KEY" }}'
+          key: '{{ env "KIAM_AGENT_TLS_KEY" }}'
       server:
         gatewayTimeoutCreation: "5s"
         nodeSelector:

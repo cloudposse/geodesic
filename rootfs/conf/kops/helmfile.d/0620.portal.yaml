@@ -68,11 +68,11 @@ releases:
           external: true
       config:
         ### Required: PORTAL_TITLE;
-        title: '{{ requiredEnv "PORTAL_TITLE" }}'
+        title: '{{ env "PORTAL_TITLE" }}'
         ### Required: PORTAL_BRAND;
-        brand: '{{ requiredEnv "PORTAL_BRAND" }}'
+        brand: '{{ env "PORTAL_BRAND" }}'
         ### Required: PORTAL_HOSTNAME;
-        basehost: '{{ requiredEnv "PORTAL_HOSTNAME" }}'
+        basehost: '{{ env "PORTAL_HOSTNAME" }}'
         image:
           ### Optional: PORTAL_BRAND_IMAGE_FAVICON_URL;
           favicon: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" | default "https://cloudposse.com/wp-content/uploads/sites/29/2016/04/favicon-152.png" }}'
@@ -124,23 +124,23 @@ releases:
             - "file:///dev/null"
           provider: "github"
           ### Required: PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_ID;
-          clientID: '{{ requiredEnv "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_ID" }}'
+          clientID: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_ID" }}'
           ### Required: PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_SECRET;
-          clientSecret: '{{ requiredEnv "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_SECRET" }}'
+          clientSecret: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_SECRET" }}'
           ### Required: PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION;
-          githubOrg: '{{ requiredEnv "PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION" }}'
+          githubOrg: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION" }}'
           ### Required: PORTAL_OAUTH2_PROXY_GITHUB_TEAM;
-          githubTeam: '{{ requiredEnv "PORTAL_OAUTH2_PROXY_GITHUB_TEAM" }}'
+          githubTeam: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM" }}'
           requestLogging: false
           passAccessToken: false
           passBasicAuth: false
           passHostHeader: true
           ### Required: PORTAL_OAUTH2_PROXY_COOKIE_NAME;
-          cookieName: '{{ requiredEnv "PORTAL_OAUTH2_PROXY_COOKIE_NAME" }}'
+          cookieName: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_NAME" }}'
           ### Required: PORTAL_OAUTH2_PROXY_COOKIE_SECRET;
-          cookieSecret: '{{ requiredEnv "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
+          cookieSecret: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
           ### Required: PORTAL_HOSTNAME;
-          cookieDomain: '{{ requiredEnv "PORTAL_HOSTNAME" }}'
+          cookieDomain: '{{ env "PORTAL_HOSTNAME" }}'
           cookieSecure: true
           cookieHttponly: false
           ### Optional: PORTAL_OAUTH2_PROXY_REPLICA_COUNT;
@@ -168,6 +168,6 @@ releases:
           kubernetes.io/ingress.class: "nginx"
           kubernetes.io/tls-acme: "true"
           ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
-          external-dns.alpha.kubernetes.io/target: '{{ requiredEnv "PORTAL_INGRESS" }}'
+          external-dns.alpha.kubernetes.io/target: '{{ env "PORTAL_INGRESS" }}'
           # DNS TTL for PORTAL_HOSTNAME; e.g. 60
           external-dns.alpha.kubernetes.io/ttl: "60"

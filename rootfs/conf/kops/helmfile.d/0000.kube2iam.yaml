@@ -37,7 +37,7 @@ releases:
           effect: "NoSchedule"
       aws:
         ### Required: AWS_REGION; e.g. us-west-2
-        region: '{{ requiredEnv "AWS_REGION" }}'
+        region: '{{ env "AWS_REGION" }}'
       extraArgs:
         auto-discover-base-arn: true
       host:

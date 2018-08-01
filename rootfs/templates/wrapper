@@ -91,7 +91,8 @@ function use() {
     else
       if [[ $(uname -r) =~ Microsoft$ ]]; then
         windows_username=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | sed -e 's/\r//g')
-        HOME="C:/Users/${windows_username}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc/LocalState/rootfs/home/${USER}"
+        wsl_app_dir=$(find /mnt/c/Users/${windows_username}/AppData/Local/Packages/ -maxdepth 1 -name "CanonicalGroupLimited\.*Ubuntu*onWindows*" | sed 's:.*/::')
+        HOME="C:/Users/${windows_username}/AppData/Local/Packages/${wsl_app_dir}/LocalState/rootfs/home/${USER}"
       fi
       echo "# Mounting ${HOME} into container"
       DOCKER_ARGS+=(--volume=${HOME}:/localhost)

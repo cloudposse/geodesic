@@ -1,0 +1,64 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
+
+releases:
+
+################################################################################
+## NGINX Ingress Controller ####################################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/nginx-ingress/values.yaml
+#
+- name: "ingress"
+  namespace: "kube-system"
+  labels:
+    chart: "nginx-ingress"
+    component: "ingress"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "cloudposse-incubator/nginx-ingress"
+  version: "0.1.7"
+  values:
+    - image:
+        repository: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
+        ### Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.11.0
+        tag: '{{ env "NGINX_INGRESS_IMAGE_TAG" | default "0.11.0" }}'
+        pullPolicy: "IfNotPresent"
+      ### Optional: NGINX_INGRESS_REPLICA_COUNT; e.g. 4
+      replicaCount: '{{ env "NGINX_INGRESS_REPLICA_COUNT" | default "4" }}'
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"
+      nginx-default-backend:
+        ### Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT; e.g. 2
+        replicaCount: '{{ env "NGINX_INGRESS_BACKEND_REPLICA_COUNT" | default "2" }}'
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+      service:
+        annotations:
+          ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
+          external-dns.alpha.kubernetes.io/hostname: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
+          ### Optional: NGINX_INGRESS_TTL; e.g. 60
+          external-dns.alpha.kubernetes.io/ttl: '{{ env "NGINX_INGRESS_TTL" | default "60" }}'

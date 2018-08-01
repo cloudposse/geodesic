@@ -1,0 +1,52 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+#######################################################################################
+## kubernetes-dashboard                                                              ##
+## General-purpose web UI for Kubernetes clusters                                    ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/dashboard
+#   - https://github.com/kubernetes/charts/tree/master/stable/kubernetes-dashboard
+#
+- name: "kubernetes-dashboard"
+  namespace: "kube-system"
+  labels:
+    chart: "kubernetes-dashboard"
+    component: "monitoring"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "stable/kubernetes-dashboard"
+  version: "0.6.7"
+  values:
+    - image:
+        repository: "k8s.gcr.io/kubernetes-dashboard-amd64"
+        ### Optional: KUBERNETES_DASHBOARD_IMAGE_TAG;
+        tag: '{{ env "KUBERNETES_DASHBOARD_IMAGE_TAG" | default "v1.8.3" }}'
+        pullPolicy: "IfNotPresent"
+      resources:
+        limits:
+          cpu: "100m"
+          memory: "100Mi"
+        requests:
+          cpu: "50m"
+          memory: "50Mi"
+      rbac:
+        create: false
+      serviceAccount:
+        create: true

@@ -1,0 +1,52 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+################################################################################
+## Kube2IAM - AWS Assumed Roles for Pods #######################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/kube2iam/values.yaml
+#
+- name: "iam"
+  namespace: "kube-system"
+  labels:
+    chart: "kube2iam"
+    component: "iam"
+    namespace: "kube-system"
+    vendor: "jtblin"
+    default: "false"
+  chart: "stable/kube2iam"
+  version: "0.8.5"
+  values:
+    - tolerations:
+        - key: "node-role.kubernetes.io/master"
+          effect: "NoSchedule"
+      aws:
+        ### Required: AWS_REGION; e.g. us-west-2
+        region: '{{ env "AWS_REGION" }}'
+      extraArgs:
+        auto-discover-base-arn: true
+      host:
+        iptables: true
+        interface: "cali+"
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"

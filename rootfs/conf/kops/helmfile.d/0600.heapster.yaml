@@ -1,0 +1,50 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+#######################################################################################
+## heapster                                                                          ##
+## Compute Resource Usage Analysis and Monitoring of Container Clusters              ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/heapster
+#   - https://github.com/kubernetes/charts/blob/master/stable/heapster/values.yaml
+#
+- name: "heapster"
+  namespace: "kube-system"
+  labels:
+    chart: "heapster"
+    component: "monitoring"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "stable/heapster"
+  version: "0.2.10"
+  values:
+      ### Optional: HEAPSTER_REPLICA_COUNT;
+    - replicaCount: '{{ env "HEAPSTER_REPLICA_COUNT" | default "1" }}'
+      image:
+        repository: "k8s.gcr.io/heapster"
+        ### Optional: HEAPSTER_IMAGE_TAG;
+        tag: '{{ env "HEAPSTER_IMAGE_TAG" | default "v1.3.0" }}'
+        pullPolicy: "IfNotPresent"
+      resources:
+        limits:
+          cpu: "100m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"

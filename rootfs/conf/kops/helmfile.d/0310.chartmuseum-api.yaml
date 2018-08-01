@@ -1,0 +1,82 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+################################################################################
+## Chart Museum API ############################################################
+################################################################################
+
+- name: "charts-api"
+  namespace: "kube-system"
+  labels:
+    chart: "chartmuseum"
+    component: "platform"
+    namespace: "kube-system"
+    vendor: "kubernetes-helm"
+    default: "true"
+  chart: "stable/chartmuseum"
+  version: "1.4.0"
+  values:
+    - replicaCount: "1"
+      env:
+        open:
+          # disable all routes prefixed with /api
+          DISABLE_API: "false"
+          # allow chart versions to be re-uploaded
+          ALLOW_OVERWRITE: "true"
+          ### Optional: CHARTMUSEUM_DEBUG; show debug messages
+          DEBUG: '{{ env "CHARTMUSEUM_DEBUG" | default "false" }}'
+          # use amazon s3 storage as backend
+          STORAGE: "amazon"
+          ### Required: CHARTMUSEUM_STORAGE_AMAZON_BUCKET;
+          STORAGE_AMAZON_BUCKET: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_BUCKET" }}'
+          ### Required: CHARTMUSEUM_STORAGE_AMAZON_PREFIX; e.g. /
+          STORAGE_AMAZON_PREFIX: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_PREFIX" }}'
+          ### Required: CHARTMUSEUM_STORAGE_AMAZON_REGION; e.g. us-west-2
+          STORAGE_AMAZON_REGION: '{{ env "CHARTMUSEUM_STORAGE_AMAZON_REGION" }}'
+        secret:
+          ### Required: CHARTMUSEUM_BASIC_AUTH_USER; e.g. server
+          BASIC_AUTH_USER: '{{ env "CHARTMUSEUM_API_BASIC_AUTH_USER" }}'
+          ### Required: CHARTMUSEUM_BASIC_AUTH_PASS; e.g. 15041434-3DC2-42F8-9358-F8AED8780A66
+          BASIC_AUTH_PASS: '{{ env "CHARTMUSEUM_API_BASIC_AUTH_PASS" }}'
+      replica:
+        annotations:
+          ### Required: CHARTMUSEUM_IAM_ROLE;
+          iam.amazonaws.com/role: '{{ env "CHARTMUSEUM_IAM_ROLE" }}'
+      resources:
+        limits:
+          cpu: "100m"
+          memory: "512Mi"
+        requests:
+          cpu: "5m"
+          memory: "256Mi"
+      ingress:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+          external-dns.alpha.kubernetes.io/target: '{{ env "CHARTMUSEUM_INGRESS" }}'
+          # DNS TTL for CHARTMUSEUM_API_HOSTNAME; e.g. 60
+          external-dns.alpha.kubernetes.io/ttl: "60"
+        hosts:
+          '{{ env "CHARTMUSEUM_API_HOSTNAME" }}':
+            ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
+            - "/api"
+        tls:
+            ### Optional: CHARTMUSEUM_SECRET_NAME; e.g. chartmuseum-server-tls
+          - secretName: '{{ env "CHARTMUSEUM_SECRET_NAME" | default "chartmuseum-server-tls" }}'
+            ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
+            hosts:
+              - '{{ env "CHARTMUSEUM_API_HOSTNAME" }}'

@@ -1,0 +1,64 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+#######################################################################################
+## datadog                                                                           ##
+## Datadog is a hosted infrastructure monitoring platform                            ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/tree/master/stable/datadog
+#   - https://github.com/kubernetes/charts/blob/master/stable/datadog/values.yaml
+#
+- name: "datadog"
+  namespace: "monitoring"
+  labels:
+    chart: "datadog"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "datadog"
+    default: "false"
+  chart: "stable/datadog"
+  version: "0.16.0"
+  values:
+    - image:
+        repository: "datadog/agent"
+        ### Optional: DATADOG_IMAGE_TAG; e.g. 6.1.2
+        tag: '{{ env "DATADOG_IMAGE_TAG" | default "6.1.2" }}'
+        pullPolicy: "IfNotPresent"
+      resources:
+        limits:
+          cpu: "256m"
+          memory: "512Mi"
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+      datadog:
+        ### Required: DATADOG_API_KEY;
+        apiKey: '{{ env "DATADOG_API_KEY" }}'
+        collectEvents: true
+        ### Optional: DATADOG_APM_ENABLED; e.g. true
+        apmEnabled: '{{ env "DATADOG_APM_ENABLED" | default "false" }}'
+      rbac:
+        create: false
+      kube-state-metrics:
+        rbac:
+          create: false
+      daemonset:
+        ### Optional: DATADOG_USE_HOST_PORT; e.g. false
+        useHostPort: '{{ env "DATADOG_USE_HOST_PORT" | default "true" }}'
+        ### Optional: DATADOG_UPDATE_STRATEGY; e.g. RollingUpdate
+        updateStrategy: '{{ env "DATADOG_UPDATE_STRATEGY" | default "OnDelete" }}'

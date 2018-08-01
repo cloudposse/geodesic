@@ -1,0 +1,73 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+################################################################################
+## kiam - AWS Assumed Roles for Pods #######################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/kiam/values.yaml
+
+# The release name must be "kiam" for chart to work properly with TLS/PKI certs
+- name: "kiam"
+  namespace: "kube-system"
+  labels:
+    chart: "kiam"
+    component: "iam"
+    namespace: "kube-system"
+    vendor: "uswitch"
+    default: "true"
+  chart: "stable/kiam"
+  version: "1.0.0"
+  values:
+    - rbac:
+        create: {{ env "KIAM_RBAC_CREATE" | default "false" }}
+      agent:
+        gatewayTimeoutCreation: "5s"
+        host:
+          iptables: true
+          interface: "cali+"
+        nodeSelector:
+          kubernetes.io/role: "node"
+        tolerations:
+          - operator: "Exists"
+        tlsFiles:
+          ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem
+          ca: '{{ env "KIAM_AGENT_TLS_CA" }}'
+          ### Required: KIAM_AGENT_TLS_CERT; e.g. base64-encoded agent.pem
+          cert: '{{ env "KIAM_AGENT_TLS_CERT" }}'
+          ### Required: KIAM_AGENT_TLS_KEY; e.g. base64-encoded agent-key.pem
+          key: '{{ env "KIAM_AGENT_TLS_KEY" }}'
+      server:
+        gatewayTimeoutCreation: "5s"
+        nodeSelector:
+          kubernetes.io/role: "master"
+        tolerations:
+          - key: "node-role.kubernetes.io/master"
+            effect: "NoSchedule"
+            operator: "Exists"
+        extraHostPathMounts:
+          - name: "ssl-certs"
+            mountPath: "/etc/ssl/certs"
+            hostPath: '{{ env "KIAM_HOST_CERT_PATH" | default "/etc/ssl/certs" }}'
+            readOnly: true 
+        tlsFiles:
+          ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem
+          ca: '{{ env "KIAM_SERVER_TLS_CA" }}'
+          ### Required: KIAM_SERVER_TLS_CERT; e.g. base64-encoded server.pem
+          cert: '{{ env "KIAM_SERVER_TLS_CERT" }}'
+          ### Required: KIAM_SERVER_TLS_KEY; e.g. base64-encoded server-key.pem
+          key: '{{ env "KIAM_SERVER_TLS_KEY" }}'

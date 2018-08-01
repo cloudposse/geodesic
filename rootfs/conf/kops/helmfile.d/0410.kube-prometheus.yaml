@@ -1,0 +1,154 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# CoreOS Stable helm charts
+- name: "coreos-stable"
+  url: "https://s3-eu-west-1.amazonaws.com/coreos-charts/stable"
+
+releases:
+
+#######################################################################################
+## kube-prometheus                                                                   ##
+## Collects Kubernetes manifests, Grafana dashboards, and Prometheus rules           ##
+## combined with documentation and scripts to provide single-command                 ##
+## deployments of end-to-end Kubernetes cluster monitoring with Prometheus operator  ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/coreos/prometheus-operator/tree/master/helm/kube-prometheus
+#   - https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus
+#   - https://prometheus.io/docs/alerting/configuration
+#   - https://medium.com/@timfpark/simple-kubernetes-cluster-monitoring-with-prometheus-and-grafana-dd27edb1641
+#   - https://www.weave.works/blog/monitoring-kubernetes-infrastructure
+#   - https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics
+#
+- name: "kube-prometheus"
+  namespace: "monitoring"
+  labels:
+    chart: "kube-prometheus"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "coreos"
+    default: "true"
+  chart: "coreos-stable/kube-prometheus"
+  version: "0.0.66"
+  values:
+    - "values/kube-prometheus.grafana.dashboards.yaml"
+    - global:
+        rbacEnable: false
+      deployExporterNode: true
+      exporter-node:
+        resources:
+          limits:
+            cpu: "10m"
+            memory: "32Mi"
+          requests:
+            cpu: "5m"
+            memory: "16Mi"
+      deployGrafana: true
+      grafana:
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "64Mi"
+          requests:
+            cpu: "10m"
+            memory: "64Mi"
+      exporter-kube-state:
+        resources:
+          limits:
+            cpu: "50m"
+            memory: "64Mi"
+          requests:
+            cpu: "10m"
+            memory: "64Mi"
+      deployAlertManager: true
+      alertmanager:
+        paused: false
+        podAntiAffinity: "soft"
+        ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT; e.g. 4
+        replicaCount: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_REPLICA_COUNT" | default "4" }}'
+        image:
+          repository: "quay.io/prometheus/alertmanager"
+          ### Optional: KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG; e.g. v0.14.0
+          tag: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_IMAGE_TAG" | default "v0.14.0" }}'
+          pullPolicy: "IfNotPresent"
+        resources:
+          limits:
+            cpu: "10m"
+            memory: "64Mi"
+          requests:
+            cpu: "5m"
+            memory: "32Mi"
+        config:
+          global:
+            resolve_timeout: "5m"
+          route:
+            group_by:
+              - "alertname"
+              - "namespace"
+            group_wait: "30s"
+            group_interval: "5m"
+            repeat_interval: "12h"
+            receiver: "slack_general"
+            routes:
+              - match:
+                  alertname: "DeadMansSwitch"
+                  receiver: "null"
+          receivers:
+            - name: "null"
+            - name: "slack_general"
+              slack_configs:
+                  ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL
+                - api_url: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_WEBHOOK_URL" }}'
+                  ### Required: KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL; e.g. #alerts-staging
+                  channel: '{{ env "KUBE_PROMETHEUS_ALERT_MANAGER_SLACK_CHANNEL" }}'
+                  send_resolved: true
+        service:
+          type: "ClusterIP"
+          port: "80"
+        ingress:
+          enabled: false
+      prometheus:
+        retention: "31d"
+        routePrefix: "/"
+        config:
+          specifiedInValues: true
+        rules:
+          specifiedInValues: true
+        paused: false
+        podAntiAffinity: "soft"
+        ### Optional: KUBE_PROMETHEUS_REPLICA_COUNT; e.g. 4
+        replicaCount: '{{ env "KUBE_PROMETHEUS_REPLICA_COUNT" | default "4" }}'
+        image:
+          repository: "quay.io/prometheus/prometheus"
+          ### Optional: KUBE_PROMETHEUS_IMAGE_TAG; e.g. v2.2.1
+          tag: '{{ env "KUBE_PROMETHEUS_IMAGE_TAG" | default "v2.2.1" }}'
+          pullPolicy: "IfNotPresent"
+        resources:
+          limits:
+            cpu: "400m"
+            memory: "2048Mi"
+          requests:
+            cpu: "100m"
+            memory: "512Mi"
+        storage:
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+                - "ReadWrite"
+              resources:
+                requests:
+                  storage: "50Gi"
+        service:
+          type: "ClusterIP"
+          port: "80"
+        ingress:
+          enabled: false

@@ -1,0 +1,61 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
+
+
+releases:
+
+################################################################################
+## Kube Lego - Automatic Let's Encrypt for Ingress  ############################
+################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/kube-lego/values.yaml
+#
+- name: "tls"
+  namespace: "kube-system"
+  labels:
+    chart: "kube-lego"
+    component: "ingress"
+    namespace: "kube-system"
+    vendor: "jetstack"
+    default: "true"
+  chart: "cloudposse-incubator/kube-lego"
+  version: "0.1.2"
+  values:
+    - image:
+        repository: "jetstack/kube-lego"
+        ### Optional: KUBE_LEGO_IMAGE_TAG; e.g. 0.1.2
+        tag: '{{ env "KUBE_LEGO_IMAGE_TAG" | default "0.1.5" }}'
+        pullPolicy: "IfNotPresent"
+
+      ### Optional: KUBE_LEGO_REPLICA_COUNT; e.g. 1
+      replicaCount: '{{ env "KUBE_LEGO_REPLICA_COUNT" | default "1" }}'
+      ### Optional: KUBE_LEGO_DEBUG; e.g. false
+      debug: '{{ env "KUBE_LEGO_DEBUG" | default "false" }}'
+      # Lego Settings
+      lego:
+        ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
+        email: '{{ env "KUBE_LEGO_EMAIL" }}'
+        ### Optional: KUBE_LEGO_PROD; e.g. true
+        prod: '{{ env "KUBE_LEGO_PROD" | default "true" }}'
+      # Pod Settings
+      pod:
+        internalPort: "8080"
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+        requests:
+          cpu: "50m"
+          memory: "128Mi"

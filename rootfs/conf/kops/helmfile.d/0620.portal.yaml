@@ -1,0 +1,173 @@
+helmDefaults:
+  args:
+    - "--wait"
+    - "--recreate-pods"
+    - "--timeout=600" 
+    - "--force"
+    - "--reset-values"
+
+repositories:
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
+
+releases:
+
+#######################################################################################
+## portal                                                                            ##
+## Portal for Kubernetes services                                                    ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/tree/master/incubator/portal
+#   - https://github.com/cloudposse/charts/blob/master/incubator/portal/values.yaml
+#
+- name: "portal"
+  namespace: "monitoring"
+  labels:
+    chart: "portal"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "cloudposse"
+    default: "true"
+  chart: "cloudposse-incubator/portal"
+  version: "0.1.0"
+  values:
+    - "values/portal.backends.yaml"
+    - backends:
+        dashboard:
+          ### Optional: PORTAL_BACKEND_K8S_DASHBOARD_NAME;
+          name: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_NAME" | default "Kubernetes" }}'
+          ### Optional: PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT;
+          endpoint: '{{ env "PORTAL_BACKEND_K8S_DASHBOARD_ENDPOINT" | default "https://kubernetes-dashboard.kube-system:443" }}'
+          external: false
+        grafana:
+          ### Optional: PORTAL_BACKEND_GRAFANA_NAME;
+          name: '{{ env "PORTAL_BACKEND_GRAFANA_NAME" | default "Grafana" }}'
+          ### Optional: PORTAL_BACKEND_GRAFANA_ENDPOINT;
+          endpoint: '{{ env "PORTAL_BACKEND_GRAFANA_ENDPOINT" | default "http://kube-prometheus-grafana.monitoring:80" }}'
+          external: false
+        alerts:
+          ### Optional: PORTAL_BACKEND_ALERTS_NAME;
+          name: '{{ env "PORTAL_BACKEND_ALERTS_NAME" | default "Alerts" }}'
+          ### Optional: PORTAL_BACKEND_ALERTS_ENDPOINT;
+          endpoint: '{{ env "PORTAL_BACKEND_ALERTS_ENDPOINT" | default "http://kube-prometheus-alertmanager.monitoring:9093" }}'
+          external: false
+        prometheus:
+          ### Optional: PORTAL_BACKEND_PROMETHEUS_NAME;
+          name: '{{ env "PORTAL_BACKEND_PROMETHEUS_NAME" | default "Prometheus" }}'
+          ### Optional: PORTAL_BACKEND_PROMETHEUS_ENDPOINT;
+          endpoint: '{{ env "PORTAL_BACKEND_PROMETHEUS_ENDPOINT" | default "http://kube-prometheus-prometheus.monitoring:9090" }}'
+          external: false
+        docs:
+          ### Optional: PORTAL_BACKEND_DOCS_NAME;
+          name: '{{ env "PORTAL_BACKEND_DOCS_NAME" | default "Docs" }}'
+          ### Optional: PORTAL_BACKEND_DOCS_ENDPOINT;
+          endpoint: '{{ env "PORTAL_BACKEND_DOCS_ENDPOINT" | default "https://docs.cloudposse.com/" }}'
+          external: true
+      config:
+        ### Required: PORTAL_TITLE;
+        title: '{{ env "PORTAL_TITLE" }}'
+        ### Required: PORTAL_BRAND;
+        brand: '{{ env "PORTAL_BRAND" }}'
+        ### Required: PORTAL_HOSTNAME;
+        basehost: '{{ env "PORTAL_HOSTNAME" }}'
+        image:
+          ### Optional: PORTAL_BRAND_IMAGE_FAVICON_URL;
+          favicon: '{{ env "PORTAL_BRAND_IMAGE_FAVICON_URL" | default "https://cloudposse.com/wp-content/uploads/sites/29/2016/04/favicon-152.png" }}'
+          ### Optional: PORTAL_BRAND_IMAGE_URL;
+          url: '{{ env "PORTAL_BRAND_IMAGE_URL" | default "https://raw.githubusercontent.com/cloudposse/helm-chart-scaffolding/master/logo.png" }}'
+          ### Optional: PORTAL_BRAND_IMAGE_WIDTH;
+          width: '{{ env "PORTAL_BRAND_IMAGE_WIDTH" | default "35" }}'
+      dashboard:
+        ### Optional: PORTAL_DASHBOARD_REPLICA_COUNT;
+        replicaCount: '{{ env "PORTAL_DASHBOARD_REPLICA_COUNT" | default "2" }}'
+        image:
+          repository: "nginx"
+          ### Optional: PORTAL_DASHBOARD_IMAGE_TAG;
+          tag: '{{ env "PORTAL_DASHBOARD_IMAGE_TAG" | default "latest" }}'
+          pullPolicy: "Always"
+        service:
+          externalPort: "80"
+          internalPort: "80"
+        resources:
+          limits:
+            cpu: "5m"
+            memory: "16Mi"
+          requests:
+            cpu: "3m"
+            memory: "8Mi"
+      proxy:
+        enabled: true
+        ### Optional: PORTAL_PROXY_REPLICA_COUNT;
+        replicaCount: '{{ env "PORTAL_PROXY_REPLICA_COUNT" | default "2" }}'
+        image:
+          repository: "traefik"
+          ### Optional: PORTAL_PROXY_IMAGE_TAG;
+          tag: '{{ env "PORTAL_PROXY_IMAGE_TAG" | default "1.5.4" }}'
+          pullPolicy: "Always"
+        service:
+          externalPort: "80"
+          internalPort: "80"
+        resources:
+          limits:
+            cpu: "5m"
+            memory: "64Mi"
+          requests:
+            cpu: "3m"
+            memory: "32Mi"
+      oauth2-proxy:
+        app:
+          useSSL: false
+          upstreams:
+            - "file:///dev/null"
+          provider: "github"
+          ### Required: PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_ID;
+          clientID: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_ID" }}'
+          ### Required: PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_SECRET;
+          clientSecret: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_CLIENT_SECRET" }}'
+          ### Required: PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION;
+          githubOrg: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_ORGANIZATION" }}'
+          ### Required: PORTAL_OAUTH2_PROXY_GITHUB_TEAM;
+          githubTeam: '{{ env "PORTAL_OAUTH2_PROXY_GITHUB_TEAM" }}'
+          requestLogging: false
+          passAccessToken: false
+          passBasicAuth: false
+          passHostHeader: true
+          ### Required: PORTAL_OAUTH2_PROXY_COOKIE_NAME;
+          cookieName: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_NAME" }}'
+          ### Required: PORTAL_OAUTH2_PROXY_COOKIE_SECRET;
+          cookieSecret: '{{ env "PORTAL_OAUTH2_PROXY_COOKIE_SECRET" }}'
+          ### Required: PORTAL_HOSTNAME;
+          cookieDomain: '{{ env "PORTAL_HOSTNAME" }}'
+          cookieSecure: true
+          cookieHttponly: false
+          ### Optional: PORTAL_OAUTH2_PROXY_REPLICA_COUNT;
+          replicaCount: '{{ env "PORTAL_OAUTH2_PROXY_REPLICA_COUNT" | default "2" }}'
+          image:
+            repository: "cloudposse/oauth2-proxy"
+            ### Optional: PORTAL_OAUTH2_PROXY_IMAGE_TAG;
+            tag: '{{ env "PORTAL_OAUTH2_PROXY_IMAGE_TAG" | default "2.2" }}'
+            pullPolicy: "Always"
+          resources:
+            limits:
+              cpu: "10m"
+              memory: "16Mi"
+            requests:
+              cpu: "5m"
+              memory: "8Mi"
+      ingress:
+        enabled: true
+        dns:
+          enabled: false
+        tls:
+          ### Optional: PORTAL_INGRESS_TLS_ENABLED; e.g. false
+          enabled: '{{ env "PORTAL_INGRESS_TLS_ENABLED" | default "true" }}'
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+          external-dns.alpha.kubernetes.io/target: '{{ env "PORTAL_INGRESS" }}'
+          # DNS TTL for PORTAL_HOSTNAME; e.g. 60
+          external-dns.alpha.kubernetes.io/ttl: "60"

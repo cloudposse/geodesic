@@ -21,7 +21,7 @@ helmDefaults:
   args:
     - "--wait"
     - "--recreate-pods"
-    - "--timeout=600" 
+    - "--timeout=600"
     - "--force"
     - "--reset-values"
 
@@ -127,12 +127,12 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
-    
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.org
+
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. e.g. charts.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
-    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
@@ -141,11 +141,11 @@ releases:
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.co
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/charts"
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.co
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_HOSTNAME" | replace "." "\\." }}[1]'
       value: "/index.yaml"
 
@@ -153,7 +153,7 @@ releases:
     - name: "ingress.tls[0].secretName"
       value: '{{ env "CHARTMUSEUM_SECRET_NAME" | default "chartmuseum-server-tls" }}'
 
-    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_HOSTNAME; e.g. charts.us-west-2.staging.cloudposse.co
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_HOSTNAME" }}'
 
@@ -242,7 +242,7 @@ releases:
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
 
-    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "CHARTMUSEUM_INGRESS" }}'
 
@@ -251,7 +251,7 @@ releases:
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
 
-    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.co
     - name: 'ingress.hosts.{{ env "CHARTMUSEUM_API_HOSTNAME" | replace "." "\\." }}[0]'
       value: "/api"
 
@@ -259,7 +259,7 @@ releases:
     - name: "ingress.tls[0].secretName"
       value: '{{ env "CHARTMUSEUM_API_SECRET_NAME" | default "chartmuseum-api-server-tls" }}'
 
-    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.org
+    ### Required: CHARTMUSEUM_API_HOSTNAME; e.g. api.charts.us-west-2.staging.cloudposse.co
     - name: "ingress.tls[0].hosts[0]"
       value: '{{ env "CHARTMUSEUM_API_HOSTNAME" }}'
 
@@ -285,7 +285,7 @@ releases:
     - name: "extraEnv.EXTERNAL_DNS_SOURCE"
       value: "service\ningress"
 
-    ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org
+    ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.co
     - name: "txtOwnerId"
       value: '{{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}'
 
@@ -355,7 +355,7 @@ releases:
       value: "IfNotPresent"
 
     ## Lego Settings
-    ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.org
+    ### Required: KUBE_LEGO_EMAIL; e.g. ops@cloudposse.co
     - name: "lego.email"
       value: '{{ env "KUBE_LEGO_EMAIL" }}'
 
@@ -480,7 +480,7 @@ releases:
           - name: "ssl-certs"
             mountPath: "/etc/ssl/certs"
             hostPath: '{{ env "KIAM_HOST_CERT_PATH" | default "/etc/ssl/certs" }}'
-            readOnly: true 
+            readOnly: true
         tlsFiles:
           ### Required: KIAM_AGENT_TLS_CA; e.g. base64-encoded ca.pem
           ca: '{{ env "KIAM_SERVER_TLS_CA" }}'
@@ -552,7 +552,7 @@ releases:
     - name: "nginx-default-backend.resources.requests.memory"
       value: "128Mi"
 
-    ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
+    ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.co
     - name: "service.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
       value: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
 
@@ -918,7 +918,7 @@ releases:
 
     - name: "datadog.collectEvents"
       value: "true"
-    
+
     ### Optional: DATADOG_APM_ENABLED; e.g. true
     - name: "datadog.apmEnabled"
       value: '{{ env "DATADOG_APM_ENABLED" | default "false" }}'
@@ -928,7 +928,7 @@ releases:
 
     - name: "kube-state-metrics.rbac.create"
       value: "false"
-      
+
     ### Optional: DATADOG_USE_HOST_PORT; e.g. false
     - name: "daemonset.useHostPort"
       value: '{{ env "DATADOG_USE_HOST_PORT" | default "true" }}'
@@ -938,7 +938,7 @@ releases:
       value: '{{ env "DATADOG_UPDATE_STRATEGY" | default "OnDelete" }}'
 
 #######################################################################################
-## Fluentd to datadog logs
+## Fluentd to datadog logs                                                           ##
 ## Forward logs to Datadog with fluentd                                              ##
 #######################################################################################
 
@@ -949,7 +949,7 @@ releases:
 #   - https://github.com/cloudposse/fluentd-datadog-logs
 #
 
-- name: "logs"
+- name: "fluentd-datadog-logs"
   namespace: "kube-system"
   labels:
     chart: "fluentd-kubernetes"
@@ -988,6 +988,67 @@ releases:
 
     - name: "configDir"
       value: "/tmp/conf"
+
+
+#######################################################################################
+## Fluentd to Elasticsearch logs                                                     ##
+## Forward logs to Elasticsearch with fluentd                                        ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/cloudposse/charts/blob/master/incubator/fluentd-kubernetes/values.yaml
+#
+
+- name: "fluentd-elasticsearch-logs"
+  namespace: "kube-system"
+  labels:
+    chart: "fluentd-kubernetes"
+    component: "elasticsearch"
+    namespace: "kube-system"
+    default: "false"
+  chart: "cloudposse-incubator/fluentd-kubernetes"
+  version: "0.2.0"
+  set:
+  - name: "image.repository"
+    value: "fluent/fluentd-kubernetes-daemonset"
+
+  - name: "image.tag"
+    value: "v0.12.33-elasticsearch"
+
+  - name: "image.pullPolicy"
+    value: "Always"
+
+  - name: "resources.limits.cpu"
+    value: "50m"
+
+  - name: "resources.limits.memory"
+    value: "512Mi"
+
+  - name: "resources.requests.cpu"
+    value: "5m"
+
+  - name: "resources.requests.memory"
+    value: "256Mi"
+
+  - name: "env.open.FLUENT_ELASTICSEARCH_HOST"
+    value: '{{ env "ELASTICSEARCH_HOST" }}'
+
+  - name: "env.open.FLUENT_ELASTICSEARCH_PORT"
+    value: '{{ env "ELASTICSEARCH_PORT" }}'
+
+  - name: "env.open.FLUENT_UID"
+    value: "0"
+
+  - name: "env.secret.FLUENT_ELASTICSEARCH_USER"
+    value: '{{ env "ELASTICSEARCH_USER" }}'
+
+  - name: "env.secret.FLUENT_ELASTICSEARCH_PASSWORD"
+    value: '{{ env "ELASTICSEARCH_PASSWORD" }}'
+
+  - name: "configDir"
+    value: "/tmp/conf"
+
 
 #######################################################################################
 ## heapster                                                                          ##
@@ -1145,6 +1206,13 @@ releases:
       value: '{{ env "PORTAL_BACKEND_DOCS_ENDPOINT" | default "https://docs.cloudposse.com/" }}'
     - name: "backends.docs.external"
       value: "true"
+
+    - name: "backends.kibana.name"
+      value: '{{ env "PORTAL_BACKEND_KIBANA_NAME" | default "Kibana" }}'
+    - name: "backends.kibana.endpoint"
+      value: '{{ env "PORTAL_BACKEND_KIBANA_ENDPOINT" | default "https://kibana-elasticsearch.testing.cloudposse.co" }}'
+    - name: "backends.kibana.external"
+      value: "false"
 
     - name: "config.title"
       value: '{{ env "PORTAL_TITLE" }}'
@@ -1315,7 +1383,7 @@ releases:
     #- name: "ingress.annotations.kubernetes\\.io/tls-acme"
     #  value: "true"
 
-    ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.org
+    ### Required: PORTAL_INGRESS; e.g. ingress.us-west-2.staging.cloudposse.co
     - name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/target"
       value: '{{ env "PORTAL_INGRESS" }}'
 
@@ -1323,3 +1391,78 @@ releases:
     # FIXME: this is blocked by https://github.com/roboll/helmfile/issues/119
     #- name: "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/ttl"
     #  value: "60"
+
+
+#######################################################################################
+## Kibana                                                                            ##
+## Open source, browser-based analytics and search dashboard for Elasticsearch       ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/helm/charts/blob/master/stable/kibana/values.yaml
+#
+- name: "kibana"
+  namespace: "monitoring"
+  labels:
+    chart: "kibana"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "kubernetes-helm"
+    default: "false"
+  chart: "stable/kibana"
+  version: "0.10.0"
+  values:
+    - replicaCount: {{ env "KIBANA_REPLICA_COUNT" | default 1 }}
+    - image:
+        repository: "docker.elastic.co/kibana/kibana-oss"
+        tag: {{ env "KIBANA_IMAGE_TAG" | default "6.3.1" }}
+        pullPolicy: "IfNotPresent"
+    - service:
+        type: ClusterIP
+        externalPort: 443
+        internalPort: {{ env "KIBANA_SERVER_PORT" | default "5601" }}
+        annotations:
+          iam.amazonaws.com/role: {{ env "ELASTICSEARCH_IAM_ROLE" }}
+        labels:
+          # Show service URL in `kubectl cluster-info`
+          kubernetes.io/cluster-service: "true"
+    - resources:
+        limits:
+          cpu: 500m
+          memory: 1024Mi
+        requests:
+          cpu: 200m
+          memory: 512Mi
+    - ingress:
+        enabled: "true"
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+          kubernetes.io/tls-acme: "true"
+          external-dns.alpha.kubernetes.io/ttl: "60"
+          external-dns.alpha.kubernetes.io/target: {{ env "KIBANA_INGRESS" }}
+          external-dns.alpha.kubernetes.io/hostname: {{ env "KIBANA_HOSTNAME" }}
+        hosts:
+        - {{ env "KIBANA_HOSTNAME" }}
+        tls:
+        - secretName: {{ env "KIBANA_SECRET_NAME" | default "kibana-server-tls" }}
+          hosts:
+          - {{ env "KIBANA_HOSTNAME" }}
+    - files:
+        kibana.yml:
+          ## Default Kibana configuration from kibana-docker.
+          server.name: kibana
+          server.host: "localhost"
+          elasticsearch.url: {{ env "ELASTICSEARCH_HOST" }}:{{ env "ELASTICSEARCH_PORT" }}
+
+          ## Custom config properties
+          ## Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
+          server.port: {{ env "KIBANA_SERVER_PORT" | default "5601" }}
+          logging.verbose: "false"
+          server.defaultRoute: "/app/kibana"
+    - env:
+      # All Kibana configuration options are adjustable via env vars.
+      # To adjust a config option to an env var uppercase + replace `.` with `_`
+      # Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
+      ELASTICSEARCH_URL: {{ env "ELASTICSEARCH_HOST" }}:{{ env "ELASTICSEARCH_PORT" }}
+      SERVER_PORT: {{ env "KIBANA_SERVER_PORT" | default "5601" }}

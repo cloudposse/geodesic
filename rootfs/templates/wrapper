@@ -84,18 +84,29 @@ function use() {
     # Implement DNS fix related to https://github.com/docker/docker/issues/24344
     DOCKER_ARGS+=("--dns=${DOCKER_DNS}")
   fi
-
+     
   if [ -n "${HOME}" ]; then
     if [ "${HOME}" == "/localhost" ]; then
       echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"
     else
-      if [[ $(uname -r) =~ Microsoft$ ]]; then
-        windows_username=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | sed -e 's/\r//g')
-        wsl_app_dir=$(find /mnt/c/Users/${windows_username}/AppData/Local/Packages/ -maxdepth 1 -name "CanonicalGroupLimited\.*Ubuntu*onWindows*" | sed 's:.*/::')
-        HOME="C:/Users/${windows_username}/AppData/Local/Packages/${wsl_app_dir}/LocalState/rootfs/home/${USER}"
+      if  [[ $(cat /proc/version) =~ Microsoft ]] ; 
+      then
+        windowsUserName=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
+
+        if [ -d "/mnt/c/Users/${windowsUserName}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc" ]; 
+        then 
+          localHome=C:/Users/${windowsUserName}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc/LocalState/rootfs${HOME}
+        elif [ -d "/mnt/c/Users/${windowsUserName}/AppData/Local/lxss/" ]
+        then 
+          localHome=C:/Users/${windowsUserName}/AppData/Local/lxss${HOME}
+        fi
+
+        echo Detected Windows Subsystem for Linux, mounting $localHome instead of $HOME
+      else
+        localHome=$HOME
       fi
-      echo "# Mounting ${HOME} into container"
-      DOCKER_ARGS+=(--volume=${HOME}:/localhost)
+      echo "# Mounting ${localHome} into container"
+      DOCKER_ARGS+=(--volume=${localHome}:/localhost)
     fi
   fi
 

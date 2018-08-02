@@ -58,7 +58,7 @@ function geodesic_prompt() {
     ROLE_PROMPT="(none)"
   fi
 
-  PS1=$'${STATUS}'
+  PS1="\["$'${STATUS}'"\]"
   PS1+="  ${ROLE_PROMPT} \W "
   PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
 

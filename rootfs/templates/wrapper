@@ -91,22 +91,42 @@ function use() {
     else
       if  [[ $(cat /proc/version) =~ Microsoft ]] ; 
       then
-        windowsUserName=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
+        if [ -z "${LOCAL_HOME}" ]; 
+        then
+          windows_user_name=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
+          user_local_app_data=$(cmd.exe /c echo %LOCALAPPDATA% | tr -d '\r' | sed -e 's/\\/\//g')
 
-        if [ -d "/mnt/c/Users/${windowsUserName}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc" ]; 
-        then 
-          localHome=C:/Users/${windowsUserName}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu18.04onWindows_79rhkp1fndgsc/LocalState/rootfs${HOME}
-        elif [ -d "/mnt/c/Users/${windowsUserName}/AppData/Local/lxss/" ]
-        then 
-          localHome=C:/Users/${windowsUserName}/AppData/Local/lxss${HOME}
+          if [ -d "/mnt/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; 
+          then 
+            local_home=${user_local_app_data}/lxss${HOME}
+          else 
+            for dir in /mnt/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu* 
+            do
+              if [ -d $dir ]
+              then
+                folder_name=$(echo ${dir} | sed 's:.*/::')
+                local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
+                break
+              fi
+            done
+          fi
+        else
+          local_home=$LOCAL_HOME
         fi
 
-        echo Detected Windows Subsystem for Linux, mounting $localHome instead of $HOME
+        if [ -z "${local_home}" ]; 
+        then
+          echo "ERROR: can't identify user home directory, you may specify path via LOCAL_HOME variable"
+          exit 1;
+        else
+          echo Detected Windows Subsystem for Linux, mounting $local_home instead of $HOME
+          echo "# Mounting ${local_home} into container"
+          DOCKER_ARGS+=(--volume=${local_home}:/localhost)
+        fi
       else
-        localHome=$HOME
+        echo "# Mounting ${HOME} into container"
+        DOCKER_ARGS+=(--volume=${HOME}:/localhost)
       fi
-      echo "# Mounting ${localHome} into container"
-      DOCKER_ARGS+=(--volume=${localHome}:/localhost)
     fi
   fi
 

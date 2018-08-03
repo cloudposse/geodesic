@@ -96,18 +96,17 @@ function use() {
           windows_user_name=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
           user_local_app_data=$(cmd.exe /c echo %LOCALAPPDATA% | tr -d '\r' | sed -e 's/\\/\//g')
 
+
           if [ -d "/mnt/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; 
           then 
             local_home=${user_local_app_data}/lxss${HOME}
           else 
+            shopt -s nullglob
             for dir in /mnt/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu* 
             do
-              if [ -d $dir ]
-              then
-                folder_name=$(echo ${dir} | sed 's:.*/::')
-                local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
-                break
-              fi
+              folder_name=$(basename ${dir})
+              local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
+              break
             done
           fi
         else

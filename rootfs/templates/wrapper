@@ -120,13 +120,14 @@ function use() {
           exit 1;
         else
           echo Detected Windows Subsystem for Linux, mounting $local_home instead of $HOME
-          echo "# Mounting ${local_home} into container"
-          DOCKER_ARGS+=(--volume=${local_home}:/localhost)
         fi
       else
-        echo "# Mounting ${HOME} into container"
-        DOCKER_ARGS+=(--volume=${HOME}:/localhost)
+        local_home=${HOME}
       fi
+
+
+      echo "# Mounting ${local_home} into container"
+      DOCKER_ARGS+=(--volume=${local_home}:/localhost)
     fi
   fi
 

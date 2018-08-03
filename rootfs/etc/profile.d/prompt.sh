@@ -2,6 +2,9 @@
 # Allow bash to check the window size to keep prompt with relative to window size
 shopt -s checkwinsize
 
+# Cache the current screen size
+export SCREEN_SIZE="${LINES}x${COLUMNS}"
+
 export PROMPT_COMMAND=prompter
 function prompter() {
     for hook in ${PROMPT_HOOKS[@]}; do
@@ -11,7 +14,14 @@ function prompter() {
 
 PROMPT_HOOKS+=("reload")
 function reload() {
-  kill -WINCH $$
+  local current_screen_size="${LINES}x${COLUMNS}"
+  # Detect changes in screensize
+  if [ "${current_screen_size}" != "${SCREEN_SIZE}" ]; then
+    echo "# Screen resized to ${current_screen_size}"
+    export SCREEN_SIZE=${current_screen_size}
+    # Instruct shell that window size has changed to ensure lines wrap correctly
+    kill -WINCH $$
+  fi
 }
 
 PROMPT_HOOKS+=("terraform_prompt")
@@ -58,7 +68,7 @@ function geodesic_prompt() {
     ROLE_PROMPT="(none)"
   fi
 
-  PS1="\["$'${STATUS}'"\]"
+  PS1=$'${STATUS}'
   PS1+="  ${ROLE_PROMPT} \W "
   PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
 

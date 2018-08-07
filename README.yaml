@@ -57,7 +57,24 @@ description: |-
 
   It easily versions staging environments in a repeatable manner that can be followed by any team member.
 
-  It provides a fully customizable framework for defining and building world-class cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security. 
+  It provides a fully customizable framework for defining and building cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security. 
+
+  It's works with Mac OSX, Linux, and [Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). 
+
+introduction: |-
+  These days, the typical software application is distributed as a docker image and run as a container. Why should infrastructure be any different? Since everything we write is "Infrastructure as Code", we believe that it should be treated the same way. This is the "Geodesic Way". Use containers+envs instead of unconventional wrappers. Use the Geodesic container for all your infrastructure automation needs to achieve truly SweetOps.
+  
+  Geodesic is composed of two parts:
+
+    1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools. Those tools are then integrated to work in concert with each other using a consistent framework. Installation of the shell is as easy as running a docker container.  
+    2. It is a distribution of essential services. The distribution includes a collection of Helm charts for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS,  Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up to work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
+
+  An organization may chose to leverage all of these components, or just the parts that make their life easier.
+
+  Let's roll...
+
+  Review our [documentation](https://docs.cloudposse.com/geodesic/) and [reference architectures](https://docs.cloudposse.com/reference-architectures/) to get started!
+
 
 # Other files to include in this README from the project folder
 include:

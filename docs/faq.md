@@ -1,5 +1,9 @@
 # FAQ
 
+## Does it work with Windows?
+
+Yes! Geodesic runs on Windows 10, under the Windows Subsystem for Linux (WSL) for Ubuntu. 
+
 ## Error: Cannot list directory
 
 ```
@@ -20,7 +24,6 @@ This means some process (maybe you) is in the directory. Try running `cd /` and 
 ## What are the caveats?
 
 * While the underlying tools support multiple cloud providers, we are currently only testing with AWS. Pull Requests welcome.
-* Geodesic is tested on Linux and OSX. If you use Windows, we'd be a happy to work with you to get it working there as well
 
 ## Problems with `aws-vault`
 

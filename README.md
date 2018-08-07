@@ -13,7 +13,9 @@ It’s a swiss army knife for creating and building consistent platforms to be s
 
 It easily versions staging environments in a repeatable manner that can be followed by any team member.
 
-It provides a fully customizable framework for defining and building world-class cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security. 
+It provides a fully customizable framework for defining and building cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security. 
+
+It's works with Mac OSX, Linux, and [Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). 
 
 
 ---
@@ -31,7 +33,9 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 
 
+## Introduction
 
+These days, the typical software application is distributed as a docker image and run as a container. Why should infrastructure be any different? Since everything we write is "Infrastructure as Code", we believe that it should be treated the same way. This is the "Geodesic Way". Use containers+envs instead of unconventional wrappers. Use the Geodesic container for all your infrastructure automation needs to achieve truly SweetOps.
 
 Geodesic is composed of two parts:
 
@@ -40,7 +44,15 @@ Geodesic is composed of two parts:
 
 An organization may chose to leverage all of these components, or just the parts that make their life easier.
 
-Review our [documentation](https://docs.cloudposse.com/geodesic/) to get started!
+Let's roll...
+
+Review our [documentation](https://docs.cloudposse.com/geodesic/) and [reference architectures](https://docs.cloudposse.com/reference-architectures/) to get started!
+
+
+
+
+
+
 
 ## Features
 
@@ -107,11 +119,11 @@ Check out these related projects.
 
 File a GitHub [issue](https://github.com/cloudposse/geodesic/issues), send us an [email][email] or join our [Slack Community][slack].
 
-## Commerical Support
+## Commercial Support
 
 Work directly with our team of DevOps experts via email, slack, and video conferencing. 
 
-We provide *commercial support* for all of our [Open Source][github] projects. As a *Dedicated Support* customer, you have access to our team of subject matter experts at a fraction of the cost of a fulltime engineer. 
+We provide [*commercial support*][commercial_support] for all of our [Open Source][github] projects. As a *Dedicated Support* customer, you have access to our team of subject matter experts at a fraction of the cost of a full-time engineer. 
 
 [![E-Mail](https://img.shields.io/badge/email-hello@cloudposse.com-blue.svg)](mailto:hello@cloudposse.com)
 
@@ -121,7 +133,7 @@ We provide *commercial support* for all of our [Open Source][github] projects. A
 - **Bug Fixes.** We'll rapidly work to fix any bugs in our projects.
 - **Build New Terraform Modules.** We'll develop original modules to provision infrastructure.
 - **Cloud Architecture.** We'll assist with your cloud strategy and design.
-- **Implementation.** We'll provide hands on support to implement our reference architectures. 
+- **Implementation.** We'll provide hands-on support to implement our reference architectures. 
 
 
 ## Community Forum
@@ -179,6 +191,13 @@ See [LICENSE](LICENSE) for full details.
     under the License.
 
 
+
+
+
+
+
+
+
 ## Trademarks
 
 All other trademarks referenced herein are the property of their respective owners.
@@ -198,6 +217,7 @@ Check out [our other projects][github], [apply for a job][jobs], or [hire us][hi
   [docs]: https://docs.cloudposse.com/
   [website]: https://cloudposse.com/
   [github]: https://github.com/cloudposse/
+  [commercial_support]: https://github.com/orgs/cloudposse/projects
   [jobs]: https://cloudposse.com/jobs/
   [hire]: https://cloudposse.com/contact/
   [slack]: https://slack.cloudposse.com/

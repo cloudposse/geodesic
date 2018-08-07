@@ -87,7 +87,7 @@ function use() {
 
   if [ -n "${LOCAL_HOME}" ]; then
     local_home=${LOCAL_HOME}
-  elif [[ $(cat /proc/version) =~ Microsoft ]]; then
+  elif [[ $(uname -r) =~ Microsoft$ ]]; then
     windows_user_name=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
     user_local_app_data=$(cmd.exe /c echo %LOCALAPPDATA% | tr -d '\r' | sed -e 's/\\/\//g')
 

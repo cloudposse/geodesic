@@ -476,6 +476,9 @@ releases:
           - key: "node-role.kubernetes.io/master"
             effect: "NoSchedule"
             operator: "Exists"
+        extraEnv:
+          GRPC_GO_LOG_SEVERITY_LEVEL: info
+          GRPC_GO_LOG_VERBOSITY_LEVEL: 8
         extraHostPathMounts:
           - name: "ssl-certs"
             mountPath: "/etc/ssl/certs"

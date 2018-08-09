@@ -88,25 +88,33 @@ function use() {
   if [ -n "${LOCAL_HOME}" ]; then
     local_home=${LOCAL_HOME}
   elif [[ $(uname -r) =~ Microsoft$ ]]; then
-    windows_user_name=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
+    
+    wsl_config=`cat /etc/wsl.conf`
+    mount_path_regex="\[automount\](.|\n|\r)*root\s+=\s+(\S+)"
+
+    # If wsl.conf has a non-default mount path configured, use it.
+    if [[ $wsl_config =~ $mount_path_regex ]]; then    
+        # Get matched mount path
+        mount_path="${BASH_REMATCH[2]}"    
+        # Trim trailing slash.
+        mount_path=${mount_path%/}
+    else
+        # Default to WSL's default path
+        mount_path="/mnt"
+    fi
+
+    windows_user_name=$($mount_path/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
     user_local_app_data=$(cmd.exe /c echo %LOCALAPPDATA% | tr -d '\r' | sed -e 's/\\/\//g')
 
-    if [ -d "/mnt/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then 
-      local_home=${user_local_app_data}/lxss${HOME}
+    if [ -d "$mount_path/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then 
+        local_home=${user_local_app_data}/lxss${HOME}
     else 
-      shopt -s nullglob
-      for dir in /mnt/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu* ; do
+        shopt -s nullglob
+        for dir in $mount_path/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu* ; do
         folder_name=$(basename ${dir})
         local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
         break
-      done
-    fi
-
-    if [ -z "${local_home}" ]; then
-      echo "ERROR: can't identify user home directory, you may specify path via LOCAL_HOME variable"
-      exit 1;
-    else
-      echo "Detected Windows Subsystem for Linux, mounting $local_home instead of $HOME"
+        done
     fi
 
   else

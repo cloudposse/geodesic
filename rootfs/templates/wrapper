@@ -117,6 +117,13 @@ function use() {
         done
     fi
 
+    if [ -z "${local_home}" ]; then	
+      echo "ERROR: can't identify user home directory, you may specify path via LOCAL_HOME variable"	
+      exit 1;	
+    else	
+      echo "Detected Windows Subsystem for Linux, mounting $local_home instead of $HOME"	
+    fi
+
   else
     local_home=${HOME}
   fi

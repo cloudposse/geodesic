@@ -53,11 +53,6 @@ COPY --from=packages /packages/install/ /packages/install/
 # Copy select binary packages
 COPY --from=packages /dist/ /usr/local/bin/
 
-# Copy helmfiles and kiam scripts
-COPY --from=cloudposse/helmfiles:0.2.1 / /conf/kops
-RUN mv /conf/kops/scripts/* /conf/kops \
-    && rm -rf /conf/kops/scripts
-
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)
 #

@@ -89,19 +89,8 @@ function use() {
     local_home=${LOCAL_HOME}
   elif [[ $(uname -r) =~ Microsoft$ ]]; then
     
-    wsl_config=`cat /etc/wsl.conf`
-    mount_path_regex="\[automount\](.|\n|\r)*root\s+=\s+(\S+)"
-
-    # If wsl.conf has a non-default mount path configured, use it.
-    if [[ $wsl_config =~ $mount_path_regex ]]; then    
-        # Get matched mount path
-        mount_path="${BASH_REMATCH[2]}"    
-        # Trim trailing slash.
-        mount_path=${mount_path%/}
-    else
-        # Default to WSL's default path
-        mount_path="/mnt"
-    fi
+    # Lookup correct mount path for WSL
+    mount_path=$(dirname $(findmnt -S C: -t drvfs -no target))
 
     windows_user_name=$($mount_path/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
     user_local_app_data=$(cmd.exe /c echo %LOCALAPPDATA% | tr -d '\r' | sed -e 's/\\/\//g')

@@ -88,25 +88,29 @@ function use() {
   if [ -n "${LOCAL_HOME}" ]; then
     local_home=${LOCAL_HOME}
   elif [[ $(uname -r) =~ Microsoft$ ]]; then
-    windows_user_name=$(/mnt/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
+    
+    # Lookup correct mount path for WSL
+    mount_path=$(dirname $(findmnt -S C: -t drvfs -no target))
+
+    windows_user_name=$($mount_path/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
     user_local_app_data=$(cmd.exe /c echo %LOCALAPPDATA% | tr -d '\r' | sed -e 's/\\/\//g')
 
-    if [ -d "/mnt/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then 
-      local_home=${user_local_app_data}/lxss${HOME}
+    if [ -d "$mount_path/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then 
+        local_home=${user_local_app_data}/lxss${HOME}
     else 
-      shopt -s nullglob
-      for dir in /mnt/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu* ; do
+        shopt -s nullglob
+        for dir in $mount_path/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu* ; do
         folder_name=$(basename ${dir})
         local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
         break
-      done
+        done
     fi
 
-    if [ -z "${local_home}" ]; then
-      echo "ERROR: can't identify user home directory, you may specify path via LOCAL_HOME variable"
-      exit 1;
-    else
-      echo "Detected Windows Subsystem for Linux, mounting $local_home instead of $HOME"
+    if [ -z "${local_home}" ]; then	
+      echo "ERROR: can't identify user home directory, you may specify path via LOCAL_HOME variable"	
+      exit 1;	
+    else	
+      echo "Detected Windows Subsystem for Linux, mounting $local_home instead of $HOME"	
     fi
 
   else

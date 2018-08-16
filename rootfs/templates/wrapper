@@ -85,13 +85,43 @@ function use() {
     DOCKER_ARGS+=("--dns=${DOCKER_DNS}")
   fi
 
-  if [ -n "${HOME}" ]; then
-    if [ "${HOME}" == "/localhost" ]; then
-      echo "WARNING: not mounting ${HOME} because it conflicts with geodesic"
-    else
-      echo "# Mounting ${HOME} into container"
-      DOCKER_ARGS+=(--volume=${HOME}:/localhost)
+  if [ -n "${LOCAL_HOME}" ]; then
+    local_home=${LOCAL_HOME}
+  elif [[ $(uname -r) =~ Microsoft$ ]]; then
+    
+    # Lookup correct mount path for WSL
+    mount_path=$(dirname $(findmnt -S C: -t drvfs -no target))
+
+    windows_user_name=$($mount_path/c/Windows/System32/cmd.exe /c 'echo %USERNAME%' | tr -d '\r')
+    user_local_app_data=$(cmd.exe /c echo %LOCALAPPDATA% | tr -d '\r' | sed -e 's/\\/\//g')
+
+    if [ -d "$mount_path/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then 
+        local_home=${user_local_app_data}/lxss${HOME}
+    else 
+        shopt -s nullglob
+        for dir in $mount_path/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu* ; do
+        folder_name=$(basename ${dir})
+        local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
+        break
+        done
     fi
+
+    if [ -z "${local_home}" ]; then	
+      echo "ERROR: can't identify user home directory, you may specify path via LOCAL_HOME variable"	
+      exit 1;	
+    else	
+      echo "Detected Windows Subsystem for Linux, mounting $local_home instead of $HOME"	
+    fi
+
+  else
+    local_home=${HOME}
+  fi
+
+  if [ "${local_home}" == "/localhost" ]; then
+    echo "WARNING: not mounting ${local_home} because it conflicts with geodesic"
+  else
+    echo "# Mounting ${local_home} into container"
+    DOCKER_ARGS+=(--volume=${local_home}:/localhost)
   fi
 
   DOCKER_ARGS+=(--privileged

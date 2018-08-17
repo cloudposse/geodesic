@@ -17,7 +17,7 @@ function reload() {
   local current_screen_size="${LINES}x${COLUMNS}"
   # Detect changes in screensize
   if [ "${current_screen_size}" != "${SCREEN_SIZE}" ]; then
-    echo "# Screen resized to ${current_screen_size}"
+    echo "* Screen resized to ${current_screen_size}"
     export SCREEN_SIZE=${current_screen_size}
     # Instruct shell that window size has changed to ensure lines wrap correctly
     kill -WINCH $$
@@ -47,12 +47,21 @@ function geodesic_prompt() {
       BLACK_RIGHTWARDS_ARROWHEAD=$'=> '
       BANNER_MARK=$'§ '
       ;;
-    *)
+
+    unicode)
       # unicode
       AWS_VAULT_ACTIVE_MARK=$'\u2705 '      # '✅'
       AWS_VAULT_INACTIVE_MARK=$'\u274C '    # '❌'
       BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 ' # '➤', suggest '▶' may be present in more fonts
       BANNER_MARK=$'\u29C9 '                # '⧉'
+      ;;
+
+    *)
+      # default
+      AWS_VAULT_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u2713 \x01'$(tput sgr0)$'\x02';    # green bold '✓'
+      AWS_VAULT_INACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 1)$'\x02\u2717 \x01'$(tput sgr0)$'\x02';  # red bold '✗'
+      BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 '; # '⨠'
+      BANNER_MARK='⧉ '
       ;;
   esac
 

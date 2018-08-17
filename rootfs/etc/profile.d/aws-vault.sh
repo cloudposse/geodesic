@@ -15,7 +15,7 @@ else
     aws-vault server &
     AWS_VAULT_ARGS+=("--server")
   else
-    echo "Metadata server already running"
+    echo "* Metadata server already running"
   fi
 fi
 

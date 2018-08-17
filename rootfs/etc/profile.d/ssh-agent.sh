@@ -24,5 +24,6 @@ if [ -z "${SSH_AUTH_SOCK}" ] || ! [ -e "${SSH_AUTH_SOCK}" ]; then
   fi
 fi
 
+# Clean up
 trap - INT
-
+unset -f ctrl_c

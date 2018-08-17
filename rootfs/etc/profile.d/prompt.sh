@@ -30,7 +30,7 @@ function terraform_prompt() {
   TF_FILES=(*.tf)
   if [ ! -z "${TF_FILES}" ]; then
     if [ ! -d ".terraform" ]; then
-      echo -e "-> Run 'init-terraform' to use this project"
+      echo -e "-> Run '$(green init-terraform)' to use this project"
     fi
   fi
 }

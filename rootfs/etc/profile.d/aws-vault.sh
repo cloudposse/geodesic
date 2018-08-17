@@ -3,13 +3,13 @@
 if [ -n "${AWS_VAULT}" ]; then
   # Set the Terraform `aws_assume_role_arn` based on our current context
   export TF_VAR_aws_assume_role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
-  echo "* Assumed role ${TF_VAR_aws_assume_role_arn}"
+  echo "* Assumed role $(green ${TF_VAR_aws_assume_role_arn})"
 else
   AWS_VAULT_ARGS=("--assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL}")
   [ -d /localhost/.awsvault ] || mkdir /localhost/.awsvault
   ln -sf /localhost/.awsvault ${HOME}
   if [ "${VAULT_SERVER_ENABLED:-true}" == "true" ]; then
-    echo "* Started EC2 metadata service at http://169.254.169.254/latest"
+    echo "* Started EC2 metadata service at $(green http://169.254.169.254/latest)"
     aws-vault server &
     AWS_VAULT_ARGS+=("--server")
   fi
@@ -18,7 +18,7 @@ fi
 PROMPT_HOOKS+=("aws_vault_prompt")
 function aws_vault_prompt() {
   if [ -z "${AWS_VAULT}" ]; then
-    echo -e "-> Run 'assume-role' to login to AWS"
+    echo -e "-> Run '$(green assume-role)' to login to AWS"
   fi
 }
 
@@ -28,7 +28,7 @@ function assume-role() {
 
   # Do not allow nested roles
   if [ -n "${AWS_VAULT}" ]; then
-    echo "Type 'exit' before attempting to assume another role"
+    echo "Type '$(green exit)' before attempting to assume another role"
     return 1
   fi
 
@@ -40,7 +40,7 @@ function assume-role() {
   # (Only works in privileged mode)
   hwclock -s >/dev/null 2>&1 
   if [ $? -ne 0 ]; then
-    echo "* Failed to sync system time from hardware clock"
+    echo "* $(yellow Failed to sync system time from hardware clock)"
   fi
 
   shift

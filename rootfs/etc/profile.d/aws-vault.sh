@@ -12,7 +12,7 @@ else
     curl -sSL -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
     result=$?
     if [ $result -ne 0 ]; then
-        echo "* Started EC2 metadata service at http://169.254.169.254/latest"
+        echo "* Started EC2 metadata service at $(green http://169.254.169.254/latest)"
         aws-vault server &
         AWS_VAULT_ARGS+=("--server")
      else

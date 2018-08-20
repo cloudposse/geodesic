@@ -20,6 +20,10 @@ if [[ "$ACTION" = "fstab" ]]; then
 	# Create mount point directory
 	mkdir -p "${MOUNT_POINT}"
 elif [[ "$ACTION" = "mount" ]]; then
+	if [ ! -w /dev/fuse ]; then 
+		echo "* FUSE not available; not attempting to mount filesystems"
+		exit 1
+	fi
 	mount -a
 	echo "Mounted buckets"
 	# Display all mounted filesystems of fstype

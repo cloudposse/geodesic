@@ -8,14 +8,16 @@ else
   AWS_VAULT_ARGS=("--assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL}")
   [ -d /localhost/.awsvault ] || mkdir /localhost/.awsvault
   ln -sf /localhost/.awsvault ${HOME}
-  curl -sSL -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
-  result=$?
-  if [ "${VAULT_SERVER_ENABLED:-true}" == "true" ] && [ $result -ne 0 ]; then
-    echo "* Started EC2 metadata service at $(green http://169.254.169.254/latest)"
-    aws-vault server &
-    AWS_VAULT_ARGS+=("--server")
-  else
-    echo "* Metadata server already running"
+  if [ "${VAULT_SERVER_ENABLED:-true}" == "true" ]; then
+    curl -sSL -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
+    result=$?
+    if [ $result -ne 0 ]; then
+        echo "* Started EC2 metadata service at http://169.254.169.254/latest"
+        aws-vault server &
+        AWS_VAULT_ARGS+=("--server")
+     else
+        echo "* Metadata server already running"
+     fi
   fi
 fi
 

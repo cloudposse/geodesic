@@ -10,4 +10,6 @@ if [ ! -w /dev/fuse ]; then
 fi
 
 # Evaluate the bash envs passed in via args and then execute goofys
-exec goofys --file-mode=0600 --dir-mode=0700 --region=${BUCKET_REGION} --sse --acl=private ${DEVICE##s3://} ${MOUNT_POINT}
+if ! mountpoint -q "${MOUNT_POINT}"; then
+  exec goofys --file-mode=0600 --dir-mode=0700 --region=${BUCKET_REGION} --sse --acl=private ${DEVICE##s3://} ${MOUNT_POINT}
+fi

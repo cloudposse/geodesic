@@ -192,8 +192,6 @@ ENV LESS=-Xr
 ENV XDG_CONFIG_HOME=${CACHE_PATH}
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
-VOLUME ["${CACHE_PATH}"]
-
 COPY rootfs/ /
 
 WORKDIR /conf

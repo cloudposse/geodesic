@@ -1,4 +1,4 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.2.12
+ARG PACKAGES_IMAGE=cloudposse/packages:0.6.0
 FROM ${PACKAGES_IMAGE} as packages
 
 WORKDIR /packages
@@ -9,7 +9,7 @@ WORKDIR /packages
 # Repo: <https://github.com/cloudposse/packages>
 #
 
-ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
+ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
@@ -191,8 +191,6 @@ ENV SHELL=/bin/bash
 ENV LESS=-Xr
 ENV XDG_CONFIG_HOME=${CACHE_PATH}
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
-
-VOLUME ["${CACHE_PATH}"]
 
 COPY rootfs/ /
 

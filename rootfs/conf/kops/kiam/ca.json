@@ -1,7 +1,0 @@
-{
-    "CN": "Kiam CA",
-    "key": {
-        "algo": "rsa",
-        "size": 2048
-    }
-}

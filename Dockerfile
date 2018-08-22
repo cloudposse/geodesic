@@ -128,15 +128,6 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}
 
 #
-# Install packer
-#
-ENV PACKER_VERSION 1.1.1
-RUN curl --fail -sSL -O https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
-    && unzip packer_${PACKER_VERSION}_linux_amd64.zip \
-    && rm packer_${PACKER_VERSION}_linux_amd64.zip \
-    && mv packer /usr/local/bin
-
-#
 # Install Ansible
 #
 ENV ANSIBLE_VERSION 2.4.1.0

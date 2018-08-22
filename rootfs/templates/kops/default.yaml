@@ -18,8 +18,16 @@ spec:
   api:
     loadBalancer:
       type: Public
+  {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED") }}
+  kubeAPIServer:
+    authorizationRbacSuperUser: {{ getenv "KOPS_AUTHORIZATION_RBAC_SUPER_USER" | default "admin" }}
+  {{- end }}
   authorization:
-      alwaysAllow: {}
+    {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED") }}
+    rbac: {}
+    {{- else }}
+    alwaysAllow: {}
+    {{- end }}
   channel: stable
   cloudLabels:
     Cluster: {{ getenv "KOPS_CLUSTER_NAME" }}

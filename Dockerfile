@@ -42,7 +42,7 @@ RUN apk update \
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
-# Disable vim from reating a swapfile (incompatible with goofys)
+# Disable vim from reading a swapfile (incompatible with goofys)
 RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp

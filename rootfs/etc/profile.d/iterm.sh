@@ -6,9 +6,10 @@ set_badge() {
 
 ## Display an exit greeting
 function _exit() {
+  local status=$?
   set_badge ""
   echo 'Goodbye'
-  exit 0
+  exit $status
 }
 trap _exit EXIT
 

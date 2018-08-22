@@ -1,7 +1,7 @@
 apiVersion: kops/v1alpha2
 kind: Cluster
 metadata:
-  name: {{getenv "KOPS_CLUSTER_NAME"}}
+  name: {{ getenv "KOPS_CLUSTER_NAME" }}
 spec:
   additionalPolicies:
       nodes: |
@@ -19,36 +19,36 @@ spec:
     loadBalancer:
       type: Public
   authorization:
-    alwaysAllow: {}
+      alwaysAllow: {}
   channel: stable
   cloudLabels:
-    Cluster: {{getenv "KOPS_CLUSTER_NAME"}}
+    Cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
   cloudProvider: aws
-  configBase: {{getenv "KOPS_STATE_STORE" }}/{{getenv "KOPS_CLUSTER_NAME"}}
-  {{if getenv "KOPS_DNS_ZONE" }}
-  dnsZone: {{getenv "KOPS_DNS_ZONE"}}
-  {{else}}
-  dnsZone: {{getenv "KOPS_CLUSTER_NAME" | regexp.Replace "^[^.]+\\." ""}}
-  {{end}}
+  configBase: {{ getenv "KOPS_STATE_STORE" }}/{{ getenv "KOPS_CLUSTER_NAME" }}
+  {{- if getenv "KOPS_DNS_ZONE" }}
+  dnsZone: {{ getenv "KOPS_DNS_ZONE" }}
+  {{- else }}
+  dnsZone: {{ getenv "KOPS_CLUSTER_NAME" | regexp.Replace "^[^.]+\\." "" }}
+  {{- end }}
   etcdClusters:
   - etcdMembers:
     {{- range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
     - encryptedVolume: true
       instanceGroup: master-{{.}}
-      name: {{. | regexp.Replace "^.*[0-9]" ""}}
+      name: {{ . | regexp.Replace "^.*[0-9]" "" }}
     {{- end }}
     name: main
   - etcdMembers:
     {{- range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
     - encryptedVolume: true
       instanceGroup: master-{{.}}
-      name: {{. | regexp.Replace "^.*[0-9]" ""}}
+      name: {{ . | regexp.Replace "^.*[0-9]" "" }}
     {{- end }}
     name: events
   kubernetesApiAccess:
   - 0.0.0.0/0
-  kubernetesVersion: {{getenv "KUBERNETES_VERSION"}}
-  masterPublicName: api.{{getenv "KOPS_CLUSTER_NAME"}}
+  kubernetesVersion: {{ getenv "KUBERNETES_VERSION" }}
+  masterPublicName: api.{{ getenv "KOPS_CLUSTER_NAME" }}
   networkCIDR: 172.20.0.0/16
   networking:
     calico: {}
@@ -74,7 +74,7 @@ spec:
   {{- end }}
   topology:
     bastion:
-      bastionPublicName: {{ getenv "KOPS_BASTION_PUBLIC_NAME"}}.{{getenv "KOPS_CLUSTER_NAME"}}
+      bastionPublicName: {{ getenv "KOPS_BASTION_PUBLIC_NAME" }}.{{ getenv "KOPS_CLUSTER_NAME" }}
     dns:
       type: Public
     masters: private
@@ -85,11 +85,11 @@ apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
-    kops.k8s.io/cluster: {{getenv "KOPS_CLUSTER_NAME"}}
+    kops.k8s.io/cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
   name: bastions
 spec:
-  image: {{getenv "KOPS_BASE_IMAGE"}}
-  machineType: {{getenv "BASTION_MACHINE_TYPE"}}
+  image: {{ getenv "KOPS_BASE_IMAGE" }}
+  machineType: {{ getenv "BASTION_MACHINE_TYPE" }}
   maxSize: 1
   minSize: 1
   role: Bastion
@@ -105,12 +105,12 @@ apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
-    kops.k8s.io/cluster: {{getenv "KOPS_CLUSTER_NAME"}}
+    kops.k8s.io/cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
   name: master-{{.}}
 spec:
   associatePublicIp: false
-  image: {{getenv "KOPS_BASE_IMAGE"}}
-  machineType: {{getenv "MASTER_MACHINE_TYPE"}}
+  image: {{ getenv "KOPS_BASE_IMAGE" }}
+  machineType: {{ getenv "MASTER_MACHINE_TYPE" }}
   maxSize: 1
   minSize: 1
   role: Master
@@ -123,16 +123,16 @@ apiVersion: kops/v1alpha2
 kind: InstanceGroup
 metadata:
   labels:
-    kops.k8s.io/cluster: {{getenv "KOPS_CLUSTER_NAME"}}
+    kops.k8s.io/cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
   name: nodes
 spec:
   associatePublicIp: false
-  image: {{getenv "KOPS_BASE_IMAGE"}}
-  machineType: {{getenv "NODE_MACHINE_TYPE"}}
-  maxSize: {{getenv "NODE_MAX_SIZE"}}
-  minSize: {{getenv "NODE_MIN_SIZE"}}
+  image: {{ getenv "KOPS_BASE_IMAGE" }}
+  machineType: {{ getenv "NODE_MACHINE_TYPE" }}
+  maxSize: {{ getenv "NODE_MAX_SIZE" }}
+  minSize: {{ getenv "NODE_MIN_SIZE" }}
   role: Node
   subnets:
   {{- range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
-  - {{.}}
+  - {{ . }}
   {{- end }}

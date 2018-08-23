@@ -79,7 +79,6 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`gcloud`, `gsutil`](https://cloud.google.com/sdk/) for integration with Google Cloud (e.g. GKE, GCE, Google Storage)
 * [`gomplate`](https://github.com/hairyhenderson/gomplate/) for template rendering configuration files using the GoLang template engine. Supports lots of local and remote datasources
 * [`goofys`](https://github.com/kahing/goofys/) a high-performance Amazon S3 file system for mounting encrypted S3 buckets that store cluster configurations and secrets
-* [`packer`](https://github.com/hashicorp/packer/) for creating identical machine images for multiple platforms
 * [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
 
 [](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)

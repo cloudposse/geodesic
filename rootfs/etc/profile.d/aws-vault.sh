@@ -9,7 +9,7 @@ else
   [ -d /localhost/.awsvault ] || mkdir -p /localhost/.awsvault
   ln -sf /localhost/.awsvault ${HOME}
   if [ "${VAULT_SERVER_ENABLED:-true}" == "true" ]; then
-    curl -sSL -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
+    curl -sSL --connect-timeout 0.1 -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
     result=$?
     if [ $result -ne 0 ]; then
         echo "* Started EC2 metadata service at $(green http://169.254.169.254/latest)"

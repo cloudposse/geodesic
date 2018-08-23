@@ -6,6 +6,7 @@
 
 
 ![Geodesic](docs/geodesic-small.png)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic?ref=badge_shield)
 
 Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform built entirely from Open Source technologies. 
 
@@ -199,6 +200,9 @@ See [LICENSE](LICENSE) for full details.
 
 
 
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic?ref=badge_large)
+
 ## Trademarks
 
 All other trademarks referenced herein are the property of their respective owners.
@@ -247,6 +251,3 @@ Check out [our other projects][github], [apply for a job][jobs], or [hire us][hi
 
   [sarkis_homepage]: https://github.com/sarkis
   [sarkis_avatar]: https://avatars3.githubusercontent.com/u/42673?s=144&v=4
-
-
-

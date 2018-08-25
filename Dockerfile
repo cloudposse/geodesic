@@ -1,9 +1,9 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.6.0
+ARG PACKAGES_IMAGE=cloudposse/packages:0.8.0
 FROM ${PACKAGES_IMAGE} as packages
 
 WORKDIR /packages
 
-# 
+#
 # Install the select packages from the cloudposse package manager image
 #
 # Repo: <https://github.com/cloudposse/packages>
@@ -114,9 +114,9 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
     && helm repo add coreos-stable https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/ \
     && helm repo update
 
-# 
+#
 # Install helm plugins
-# 
+#
 ENV HELM_APPR_VERSION 0.7.0
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
@@ -173,6 +173,14 @@ RUN pip install awscli==${AWSCLI_VERSION} && \
     find / -type f -regex '.*\.py[co]' -delete && \
     ln -s /usr/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
     ln -s /usr/bin/aws_completer /usr/local/bin/
+
+#
+# Install oath-toolkit
+# https://www.nongnu.org/oath-toolkit/
+# https://www.nongnu.org/oath-toolkit/oathtool.1.html
+#
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
+    && apk add --no-cache oath-toolkit-oathtool
 
 #
 # Shell

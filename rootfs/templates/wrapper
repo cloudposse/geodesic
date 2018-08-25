@@ -81,6 +81,7 @@ function use() {
                        --volume "/var/run/docker.sock:/var/run/docker.sock")
     else
       echo "Not supported on $(uname -s)"
+      exit 1
     fi
   fi
 

@@ -1,8 +1,0 @@
-#!/bin/bash
-# This script is used to mount filesystems from `/etc/fstab`
-export DEVICE="$(eval echo ${1})"
-export MOUNT_POINT="$(eval echo ${2})"
-export BUCKET_REGION="${BUCKET_REGION:-${AWS_REGION}}"
-
-# Evaluate the bash envs passed in via args and then execute goofys
-exec goofys --file-mode=0600 --dir-mode=0700 --region=${BUCKET_REGION} --sse --acl=private ${DEVICE##s3://} ${MOUNT_POINT}

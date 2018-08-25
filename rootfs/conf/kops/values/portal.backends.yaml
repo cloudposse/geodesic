@@ -1,5 +1,0 @@
-#backends:
-#  subdomain:
-#    name: "SET NAME HERE"
-#    endpoint: "SET https://domain:port HERE"
-#    external: false

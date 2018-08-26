@@ -8,7 +8,6 @@ WORKDIR /packages
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-
 ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
@@ -28,10 +27,17 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 # Install all packages as root
 USER root
 
+# oath-toolkit
+# https://www.nongnu.org/oath-toolkit/
+# https://www.nongnu.org/oath-toolkit/oathtool.1.html
+RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
                  iputils drill gcc libffi-dev python-dev musl-dev ncurses openssl-dev py-pip py-virtualenv \
-                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl"
+                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl \
+                 oath-toolkit-oathtool@testing"
+
 ENV APK_PACKAGES=${APK_PACKAGES}
 
 RUN apk update \
@@ -173,14 +179,6 @@ RUN pip install awscli==${AWSCLI_VERSION} && \
     find / -type f -regex '.*\.py[co]' -delete && \
     ln -s /usr/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
     ln -s /usr/bin/aws_completer /usr/local/bin/
-
-#
-# Install oath-toolkit
-# https://www.nongnu.org/oath-toolkit/
-# https://www.nongnu.org/oath-toolkit/oathtool.1.html
-#
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
-    && apk add --no-cache oath-toolkit-oathtool
 
 #
 # Shell

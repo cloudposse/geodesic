@@ -4,5 +4,5 @@ KOPS_MANIFEST="${2:-$KOPS_MANIFEST}"
 
 mkdir -p `dirname ${KOPS_MANIFEST}`
 
-gomplate -f ${KOPS_TEMPLATE} > ${KOPS_MANIFEST}
+gomplate ${@:3} -f ${KOPS_TEMPLATE} > ${KOPS_MANIFEST}
 echo "Wrote manifest to ${KOPS_MANIFEST}..."

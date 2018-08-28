@@ -1,14 +1,13 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.6.0
+ARG PACKAGES_IMAGE=cloudposse/packages:0.8.1
 FROM ${PACKAGES_IMAGE} as packages
 
 WORKDIR /packages
 
-# 
+#
 # Install the select packages from the cloudposse package manager image
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-
 ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
@@ -28,10 +27,17 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 # Install all packages as root
 USER root
 
+# oath-toolkit
+# https://www.nongnu.org/oath-toolkit/
+# https://www.nongnu.org/oath-toolkit/oathtool.1.html
+RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
                  iputils drill gcc libffi-dev python-dev musl-dev ncurses openssl-dev py-pip py-virtualenv \
-                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl"
+                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl \
+                 oath-toolkit-oathtool@testing"
+
 ENV APK_PACKAGES=${APK_PACKAGES}
 
 RUN apk update \
@@ -114,15 +120,17 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
     && helm repo add coreos-stable https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/ \
     && helm repo update
 
-# 
+#
 # Install helm plugins
-# 
+#
 ENV HELM_APPR_VERSION 0.7.0
+ENV HELM_DIFF_VERSION 2.10.0+1
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_SECRETS_VERSION 1.2.9
 
 RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --version v${HELM_APPR_VERSION} \
+    && helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
     && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}

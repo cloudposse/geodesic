@@ -127,7 +127,7 @@ metadata:
     kops.k8s.io/cluster: {{getenv "KOPS_CLUSTER_NAME"}}
   name: nodes
 spec:
-  detailedInstanceMonitoring: {{ getenv "KOPS_CLOUDWATCH_DETAILED_MONITORING" "true" }}
+  detailedInstanceMonitoring: {{ getenv "KOPS_CLOUDWATCH_DETAILED_MONITORING" "false" }}
   associatePublicIp: false
   image: {{getenv "KOPS_BASE_IMAGE"}}
   machineType: {{getenv "NODE_MACHINE_TYPE"}}

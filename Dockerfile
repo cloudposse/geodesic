@@ -135,14 +135,8 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}
 
-#
-# Install Ansible
-#
-ENV ANSIBLE_VERSION 2.4.1.0
-ENV JINJA2_VERSION 2.10
-RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete
+COPY requirements.txt /requirements.txt
+RUN pip install -r /requirements.txt
 
 #
 # Install Google Cloud SDK
@@ -163,24 +157,6 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
 ENV AWS_CONFIG_FILE=/localhost/.aws/config
-
-#
-# Install AWS Elastic Beanstalk CLI
-#
-ENV AWSEBCLI_VERSION 3.12.0
-RUN pip install awsebcli==${AWSEBCLI_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete
-
-#
-# Install aws cli bundle
-#
-ENV AWSCLI_VERSION 1.11.185
-RUN pip install awscli==${AWSCLI_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete && \
-    ln -s /usr/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
-    ln -s /usr/bin/aws_completer /usr/local/bin/
 
 #
 # Shell

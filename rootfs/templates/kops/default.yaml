@@ -138,3 +138,9 @@ spec:
   {{- range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
   - {{.}}
   {{- end }}
+    
+{{/* Allow the manifest to be extended via a datasource */}}
+{{- if (datasourceExists "extensions") -}}
+---
+{{ include "extensions" }}
+{{- end -}}

@@ -1,4 +1,4 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.8.0
+ARG PACKAGES_IMAGE=cloudposse/packages:0.24.0
 FROM ${PACKAGES_IMAGE} as packages
 
 WORKDIR /packages
@@ -124,11 +124,13 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
 # Install helm plugins
 #
 ENV HELM_APPR_VERSION 0.7.0
+ENV HELM_DIFF_VERSION 2.10.0+1
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_SECRETS_VERSION 1.2.9
 
 RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --version v${HELM_APPR_VERSION} \
+    && helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
     && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}

@@ -116,6 +116,7 @@ metadata:
     kops.k8s.io/cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
   name: master-{{.}}
 spec:
+  detailedInstanceMonitoring: {{ getenv "KOPS_CLOUDWATCH_DETAILED_MONITORING" "false" }}
   associatePublicIp: false
   image: {{ getenv "KOPS_BASE_IMAGE" }}
   machineType: {{ getenv "MASTER_MACHINE_TYPE" }}
@@ -134,6 +135,7 @@ metadata:
     kops.k8s.io/cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
   name: nodes
 spec:
+  detailedInstanceMonitoring: {{ getenv "KOPS_CLOUDWATCH_DETAILED_MONITORING" "false" }}
   associatePublicIp: false
   image: {{ getenv "KOPS_BASE_IMAGE" }}
   machineType: {{ getenv "NODE_MACHINE_TYPE" }}

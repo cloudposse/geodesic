@@ -1,4 +1,4 @@
-FROM alpine:3.8 as python 
+FROM alpine:3.8 as python
 
 COPY requirements.txt /requirements.txt
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
@@ -13,7 +13,7 @@ WORKDIR /packages
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
+ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq shellcheck shfmt"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
@@ -146,7 +146,7 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
 #
 # Install Google Cloud SDK
 #
-ENV GCLOUD_SDK_VERSION=179.0.0
+ENV GCLOUD_SDK_VERSION=214.0.0
 RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar -zxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     mv google-cloud-sdk /usr/local/ && \

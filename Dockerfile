@@ -1,4 +1,4 @@
-FROM alpine:3.8 as python 
+FROM alpine:3.8 as python
 
 COPY requirements.txt /requirements.txt
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
@@ -13,7 +13,7 @@ WORKDIR /packages
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
+ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq shellcheck shfmt"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 

@@ -1,4 +1,4 @@
-ansible == 2.4.1.0
+ansible ==2.6.3
 boto == 2.49.0
 Jinja2 == 2.10
 awsebcli == 3.12.0

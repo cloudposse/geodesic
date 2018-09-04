@@ -1,5 +1,10 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.24.0
-FROM ${PACKAGES_IMAGE} as packages
+FROM alpine:3.8 as python 
+
+COPY requirements.txt /requirements.txt
+RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
+RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
+
+FROM cloudposse/packages:0.24.0 as packages
 
 WORKDIR /packages
 
@@ -34,7 +39,7 @@ RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/ap
 
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
-                 iputils drill gcc libffi-dev python-dev musl-dev ncurses openssl-dev py-pip py-virtualenv \
+                 iputils drill musl-dev ncurses \
                  git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl \
                  oath-toolkit-oathtool@testing"
 
@@ -52,6 +57,9 @@ RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
+
+# Copy python dependencies
+COPY --from=python /dist/ /usr/
 
 # Copy installer over to make package upgrades easy
 COPY --from=packages /packages/install/ /packages/install/
@@ -136,15 +144,6 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}
 
 #
-# Install Ansible
-#
-ENV ANSIBLE_VERSION 2.4.1.0
-ENV JINJA2_VERSION 2.10
-RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete
-
-#
 # Install Google Cloud SDK
 #
 ENV GCLOUD_SDK_VERSION=179.0.0
@@ -163,24 +162,6 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
 ENV AWS_CONFIG_FILE=/localhost/.aws/config
-
-#
-# Install AWS Elastic Beanstalk CLI
-#
-ENV AWSEBCLI_VERSION 3.12.0
-RUN pip install awsebcli==${AWSEBCLI_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete
-
-#
-# Install aws cli bundle
-#
-ENV AWSCLI_VERSION 1.11.185
-RUN pip install awscli==${AWSCLI_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete && \
-    ln -s /usr/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
-    ln -s /usr/bin/aws_completer /usr/local/bin/
 
 #
 # Shell

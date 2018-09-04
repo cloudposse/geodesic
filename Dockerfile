@@ -158,7 +158,7 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
     ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
 #
-# Install bats-core
+# Install bats-core for automated testing
 # https://github.com/bats-core/bats-core
 #
 ENV BATS_CORE_VERSION=1.1.0

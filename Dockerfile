@@ -158,6 +158,17 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
     ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
 #
+# Install bats-core for automated testing
+# https://github.com/bats-core/bats-core
+#
+ENV BATS_CORE_VERSION=1.1.0
+RUN curl --fail -sSL -O https://github.com/bats-core/bats-core/archive/v${BATS_CORE_VERSION}.tar.gz && \
+    tar -C /tmp -zxf v${BATS_CORE_VERSION}.tar.gz && \
+    /tmp/bats-core-${BATS_CORE_VERSION}/install.sh /usr/local && \
+    rm -rf v${BATS_CORE_VERSION}.tar.gz && \
+    rm -rf /tmp/bats-core-${BATS_CORE_VERSION}
+
+#
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/

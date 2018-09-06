@@ -20,6 +20,7 @@ spec:
       type: Public
   {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED") }}
   kubeAPIServer:
+    authorizationMode: RBAC,AlwaysAllow
     authorizationRbacSuperUser: {{ getenv "KOPS_AUTHORIZATION_RBAC_SUPER_USER" | default "admin" }}
   {{- end }}
   authorization:

@@ -1,4 +1,4 @@
-FROM alpine:3.8 as python 
+FROM alpine:3.8 as python
 
 COPY requirements.txt /requirements.txt
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
@@ -14,7 +14,7 @@ WORKDIR /packages
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
+ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq shellcheck shfmt"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
@@ -148,7 +148,7 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
 #
 # Install Google Cloud SDK
 #
-ENV GCLOUD_SDK_VERSION=179.0.0
+ENV GCLOUD_SDK_VERSION=214.0.0
 RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar -zxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     mv google-cloud-sdk /usr/local/ && \
@@ -158,6 +158,17 @@ RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloa
     ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
+
+#
+# Install bats-core for automated testing
+# https://github.com/bats-core/bats-core
+#
+ENV BATS_CORE_VERSION=1.1.0
+RUN curl --fail -sSL -O https://github.com/bats-core/bats-core/archive/v${BATS_CORE_VERSION}.tar.gz && \
+    tar -C /tmp -zxf v${BATS_CORE_VERSION}.tar.gz && \
+    /tmp/bats-core-${BATS_CORE_VERSION}/install.sh /usr/local && \
+    rm -rf v${BATS_CORE_VERSION}.tar.gz && \
+    rm -rf /tmp/bats-core-${BATS_CORE_VERSION}
 
 #
 # AWS

@@ -1,6 +1,7 @@
 FROM alpine:3.8 as python
 
 COPY requirements.txt /requirements.txt
+RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
 RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
 
@@ -35,7 +36,8 @@ USER root
 # oath-toolkit
 # https://www.nongnu.org/oath-toolkit/
 # https://www.nongnu.org/oath-toolkit/oathtool.1.html
-RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories \
+    && echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
 
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \

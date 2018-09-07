@@ -5,7 +5,7 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
 RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
 
-FROM cloudposse/packages:0.24.0 as packages
+FROM cloudposse/packages:0.24.1 as packages
 
 WORKDIR /packages
 

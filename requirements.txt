@@ -2,4 +2,4 @@ ansible ==2.6.3
 boto == 2.49.0
 Jinja2 == 2.10
 awsebcli ==3.14.4
-awscli ==1.16.6
+awscli ==1.16.9

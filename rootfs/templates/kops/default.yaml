@@ -18,13 +18,13 @@ spec:
   api:
     loadBalancer:
       type: Public
-  {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED") }}
+  {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}
   kubeAPIServer:
-    authorizationMode: RBAC,AlwaysAllow
-    authorizationRbacSuperUser: {{ getenv "KOPS_AUTHORIZATION_RBAC_SUPER_USER" | default "admin" }}
+    authorizationMode: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE" "RBAC,AlwaysAllow" }}
+    authorizationRbacSuperUser: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER" "admin" }}
   {{- end }}
   authorization:
-    {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED") }}
+    {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}
     rbac: {}
     {{- else }}
     alwaysAllow: {}
@@ -104,10 +104,10 @@ spec:
   role: Bastion
   subnets:
   {{- range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
-  - utility-{{.}}
+  - utility-{{ . }}
   {{- end }}
 
-{{range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
+{{ range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
 
 ---
 apiVersion: kops/v1alpha2
@@ -115,7 +115,7 @@ kind: InstanceGroup
 metadata:
   labels:
     kops.k8s.io/cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
-  name: master-{{.}}
+  name: master-{{ . }}
 spec:
   detailedInstanceMonitoring: {{ getenv "KOPS_CLOUDWATCH_DETAILED_MONITORING" "false" }}
   associatePublicIp: false
@@ -125,7 +125,7 @@ spec:
   minSize: 1
   role: Master
   subnets:
-  - {{.}}
+  - {{ . }}
 {{- end }}
 
 ---

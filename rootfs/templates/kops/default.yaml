@@ -13,6 +13,19 @@ spec:
             ],
             "Effect": "Allow",
             "Resource": ["*"]
+          {{- if bool (getenv "KOPS_CLUSTER_AUTOSCALER_ENABLED" "false") }}
+          },
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "autoscaling:DescribeAutoScalingGroups",
+                  "autoscaling:DescribeAutoScalingInstances",
+                  "autoscaling:DescribeTags",
+                  "autoscaling:SetDesiredCapacity",
+                  "autoscaling:TerminateInstanceInAutoScalingGroup"
+              ],
+              "Resource": "*"
+          {{- end }}
           }
         ]
   api:
@@ -32,6 +45,10 @@ spec:
   channel: stable
   cloudLabels:
     Cluster: {{ getenv "KOPS_CLUSTER_NAME" }}
+    {{- if bool (getenv "KOPS_CLUSTER_AUTOSCALER_ENABLED" "false") }}
+    k8s.io/cluster-autoscaler/enabled: "true"
+    kubernetes.io/cluster/{{ getenv "KOPS_CLUSTER_NAME" }}: "owned"
+    {{- end }}
   cloudProvider: aws
   configBase: {{ getenv "KOPS_STATE_STORE" }}/{{ getenv "KOPS_CLUSTER_NAME" }}
   {{- if getenv "KOPS_DNS_ZONE" }}

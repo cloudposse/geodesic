@@ -1,3 +1,6 @@
+#
+# Python Dependencies
+#
 FROM alpine:3.8 as python
 
 COPY requirements.txt /requirements.txt
@@ -5,9 +8,18 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
 RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
 
+
+#
+# Cloud Posse Package Distribution
+#
 FROM cloudposse/packages:0.24.1 as packages
 
 WORKDIR /packages
+
+#
+# Google Cloud SDK
+#
+FROM google/cloud-sdk:216.0.0-alpine as google-cloud-sdk
 
 #
 # Install the select packages from the cloudposse package manager image
@@ -68,6 +80,15 @@ COPY --from=packages /packages/install/ /packages/install/
 
 # Copy select binary packages
 COPY --from=packages /dist/ /usr/local/bin/
+
+#
+# Install Google Cloud SDK
+#
+COPY --from=google-cloud-sdk /google-cloud-sdk/ /usr/local/google-cloud-sdk/
+RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d/gcloud.sh && \
+    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)
@@ -146,20 +167,6 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION}
-
-#
-# Install Google Cloud SDK
-#
-ENV GCLOUD_SDK_VERSION=214.0.0
-RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    tar -zxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    mv google-cloud-sdk /usr/local/ && \
-    /usr/local/google-cloud-sdk/install.sh --quiet --rc-path /etc/bash_completion.d/gcloud.sh && \
-    rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    rm -rf /root/.config/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
 #
 # Install bats-core for automated testing

@@ -8,6 +8,10 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
 RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
 
+#
+# Google Cloud SDK
+#
+FROM google/cloud-sdk:216.0.0-alpine as google-cloud-sdk
 
 #
 # Cloud Posse Package Distribution
@@ -15,11 +19,6 @@ RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
 FROM cloudposse/packages:0.24.1 as packages
 
 WORKDIR /packages
-
-#
-# Google Cloud SDK
-#
-FROM google/cloud-sdk:216.0.0-alpine as google-cloud-sdk
 
 #
 # Install the select packages from the cloudposse package manager image
@@ -30,6 +29,10 @@ ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-com
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
+
+#
+# Geodesic base image
+#
 FROM alpine:3.8
 
 ENV BANNER "geodesic"
@@ -45,11 +48,8 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 # Install all packages as root
 USER root
 
-# oath-toolkit
-# https://www.nongnu.org/oath-toolkit/
-# https://www.nongnu.org/oath-toolkit/oathtool.1.html
-RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories \
-    && echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
+RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
+    echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
 
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass pwgen\
@@ -84,11 +84,17 @@ COPY --from=packages /dist/ /usr/local/bin/
 #
 # Install Google Cloud SDK
 #
+ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
+
 COPY --from=google-cloud-sdk /google-cloud-sdk/ /usr/local/google-cloud-sdk/
+
 RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d/gcloud.sh && \
     ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
+    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/ && \
+    gcloud config set core/disable_usage_reporting true --installation && \
+    gcloud config set component_manager/disable_update_check true --installation && \
+    gcloud config set metrics/environment github_docker_image --installation
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)

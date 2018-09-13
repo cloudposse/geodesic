@@ -24,17 +24,6 @@ function reload() {
   fi
 }
 
-PROMPT_HOOKS+=("terraform_prompt")
-function terraform_prompt() {
-  shopt -s nullglob
-  TF_FILES=(*.tf)
-  if [ ! -z "${TF_FILES}" ]; then
-    if [ ! -d ".terraform" ]; then
-      echo -e "-> Run '$(green init-terraform)' to use this project"
-    fi
-  fi
-}
-
 # Define our own prompt
 PROMPT_HOOKS+=("geodesic_prompt")
 function geodesic_prompt() {

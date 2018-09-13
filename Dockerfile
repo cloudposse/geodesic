@@ -1,18 +1,38 @@
-ARG PACKAGES_IMAGE=cloudposse/packages:0.6.0
-FROM ${PACKAGES_IMAGE} as packages
+#
+# Python Dependencies
+#
+FROM alpine:3.8 as python
+
+COPY requirements.txt /requirements.txt
+RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
+RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
+RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
+
+#
+# Google Cloud SDK
+#
+FROM google/cloud-sdk:216.0.0-alpine as google-cloud-sdk
+
+#
+# Cloud Posse Package Distribution
+#
+FROM cloudposse/packages:0.24.1 as packages
 
 WORKDIR /packages
 
-# 
+#
 # Install the select packages from the cloudposse package manager image
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-
-ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq"
+ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq shellcheck shfmt"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
+
+#
+# Geodesic base image
+#
 FROM alpine:3.8
 
 ENV BANNER "geodesic"
@@ -28,10 +48,15 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 # Install all packages as root
 USER root
 
+RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
+    echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
+
 # Install common packages
-ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass \
-                 iputils drill gcc libffi-dev python-dev musl-dev ncurses openssl-dev py-pip py-virtualenv \
-                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux"
+ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass pwgen\
+                 iputils drill musl-dev ncurses \
+                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl \
+                 oath-toolkit-oathtool@testing"
+
 ENV APK_PACKAGES=${APK_PACKAGES}
 
 RUN apk update \
@@ -47,11 +72,29 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
 
+# Copy python dependencies
+COPY --from=python /dist/ /usr/
+
 # Copy installer over to make package upgrades easy
 COPY --from=packages /packages/install/ /packages/install/
 
 # Copy select binary packages
 COPY --from=packages /dist/ /usr/local/bin/
+
+#
+# Install Google Cloud SDK
+#
+ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
+
+COPY --from=google-cloud-sdk /google-cloud-sdk/ /usr/local/google-cloud-sdk/
+
+RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d/gcloud.sh && \
+    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
+    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/ && \
+    gcloud config set core/disable_usage_reporting true --installation && \
+    gcloud config set component_manager/disable_update_check true --installation && \
+    gcloud config set metrics/environment github_docker_image --installation
 
 #
 # Install aws-vault to easily assume roles (not related to HashiCorp Vault)
@@ -114,65 +157,40 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
     && helm repo add coreos-stable https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/ \
     && helm repo update
 
-# 
+#
 # Install helm plugins
-# 
+#
 ENV HELM_APPR_VERSION 0.7.0
+ENV HELM_DIFF_VERSION 2.10.0+1
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_SECRETS_VERSION 1.2.9
+ENV HELM_S3_VERSION 0.7.0
+ENV HELM_PUSH_VERSION 0.7.1
 
 RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --version v${HELM_APPR_VERSION} \
+    && helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
     && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
-    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION}
-
+    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
+    && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \ 
+    && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
 #
-# Install Ansible
+# Install bats-core for automated testing
+# https://github.com/bats-core/bats-core
 #
-ENV ANSIBLE_VERSION 2.4.1.0
-ENV JINJA2_VERSION 2.10
-RUN pip install ansible==${ANSIBLE_VERSION} boto Jinja2==${JINJA2_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete
-
-#
-# Install Google Cloud SDK
-#
-ENV GCLOUD_SDK_VERSION=179.0.0
-RUN curl --fail -sSL -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    tar -zxf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    mv google-cloud-sdk /usr/local/ && \
-    /usr/local/google-cloud-sdk/install.sh --quiet --rc-path /etc/bash_completion.d/gcloud.sh && \
-    rm -rf google-cloud-sdk-${GCLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    rm -rf /root/.config/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
+ENV BATS_CORE_VERSION=1.1.0
+RUN curl --fail -sSL -O https://github.com/bats-core/bats-core/archive/v${BATS_CORE_VERSION}.tar.gz && \
+    tar -C /tmp -zxf v${BATS_CORE_VERSION}.tar.gz && \
+    /tmp/bats-core-${BATS_CORE_VERSION}/install.sh /usr/local && \
+    rm -rf v${BATS_CORE_VERSION}.tar.gz && \
+    rm -rf /tmp/bats-core-${BATS_CORE_VERSION}
 
 #
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
 ENV AWS_CONFIG_FILE=/localhost/.aws/config
-
-#
-# Install AWS Elastic Beanstalk CLI
-#
-ENV AWSEBCLI_VERSION 3.12.0
-RUN pip install awsebcli==${AWSEBCLI_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete
-
-#
-# Install aws cli bundle
-#
-ENV AWSCLI_VERSION 1.11.185
-RUN pip install awscli==${AWSCLI_VERSION} && \
-    rm -rf /root/.cache && \
-    find / -type f -regex '.*\.py[co]' -delete && \
-    ln -s /usr/bin/aws_bash_completer /etc/bash_completion.d/aws.sh && \
-    ln -s /usr/bin/aws_completer /usr/local/bin/
 
 #
 # Shell

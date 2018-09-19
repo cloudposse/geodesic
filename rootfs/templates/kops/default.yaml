@@ -36,8 +36,9 @@ spec:
     - name: kops-hook-authenticator-config.service
       before:
         - kubelet.service
-      roles: [Master]
-      manifest: |
+      roles: 
+        - Master
+      manifest: |-
         [Unit]
         Description=Download AWS Authenticator configs from S3
         [Service]

@@ -36,6 +36,20 @@ spec:
     authorizationMode: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE" "RBAC,AlwaysAllow" }}
     authorizationRbacSuperUser: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER" "admin" }}
   {{- end }}
+  {{- if bool (getenv "KOPS_ADMISSION_CONTROL_ENABLED" "true") }}
+    admissionControl:
+    - NamespaceLifecycle
+    - LimitRanger
+    - ServiceAccount
+    - PersistentVolumeLabel
+    - DefaultStorageClass
+    - DefaultTolerationSeconds
+    - MutatingAdmissionWebhook
+    - ValidatingAdmissionWebhook
+    - ResourceQuota
+    - NodeRestriction
+    - Priority
+  {{- end }}
   authorization:
     {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}
     rbac: {}

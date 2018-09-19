@@ -25,7 +25,7 @@ WORKDIR /packages
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-ARG PACKAGES="awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt yq shellcheck shfmt aws-iam-authenticator"
+ARG PACKAGES="aws-iam-authenticator awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt shellcheck shfmt yq"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 

@@ -31,10 +31,28 @@ spec:
   api:
     loadBalancer:
       type: Public
-  {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}
+  hooks:
+  {{- if bool (getenv "KOPS_AWS_IAM_AUTHENTICATOR_ENABLED" "false") }}
+    - name: kops-hook-authenticator-config.service
+      before:
+        - kubelet.service
+      roles: 
+        - Master
+      manifest: |-
+        [Unit]
+        Description=Download AWS Authenticator configs from S3
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/mkdir -p /srv/kubernetes/aws-iam-authenticator
+        ExecStart=/usr/local/bin/aws s3 cp --recursive {{ getenv "KOPS_STATE_STORE" }}/{{ getenv "KOPS_CLUSTER_NAME" }}/addons/authenticator /srv/kubernetes/aws-iam-authenticator/
+  {{- end }}
   kubeAPIServer:
+  {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}
     authorizationMode: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE" "RBAC,AlwaysAllow" }}
     authorizationRbacSuperUser: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER" "admin" }}
+    {{- if bool (getenv "KOPS_AWS_IAM_AUTHENTICATOR_ENABLED" "false") }}
+    authenticationTokenWebhookConfigFile: /srv/kubernetes/aws-iam-authenticator/kubeconfig.yaml
+    {{- end }}
   {{- end }}
   {{- if bool (getenv "KOPS_ADMISSION_CONTROL_ENABLED" "true") }}
     admissionControl:

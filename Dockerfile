@@ -3,10 +3,12 @@
 #
 FROM alpine:3.8 as python
 
-COPY requirements.txt /requirements.txt
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
-RUN pip install -r /requirements.txt --install-option="--prefix=/dist"
+
+COPY requirements.txt /requirements.txt
+
+RUN pip install -r /requirements.txt --install-option="--prefix=/dist" --no-build-isolation
 
 #
 # Google Cloud SDK

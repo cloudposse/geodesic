@@ -55,7 +55,7 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 
 # Install common packages
 ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass pwgen\
-                 iputils drill musl-dev ncurses \
+                 iputils drill musl-dev ncurses gettext \
                  git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl \
                  oath-toolkit-oathtool@testing"
 

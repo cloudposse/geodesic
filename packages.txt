@@ -1,5 +1,4 @@
 # Essential alpine packages
-atlantis@cloudposse==0.4.10-r0
 aws-iam-authenticator@cloudposse
 bash
 bash-completion

@@ -18,7 +18,7 @@ FROM google/cloud-sdk:218.0.0-alpine as google-cloud-sdk
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:0.26.2 as packages
+FROM cloudposse/packages:0.34.0 as packages
 
 WORKDIR /packages
 
@@ -27,7 +27,7 @@ WORKDIR /packages
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-ARG PACKAGES="aws-iam-authenticator awless aws-vault cfssl cfssljson chamber fetch figurine github-commenter gomplate goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt shellcheck shfmt yq"
+ARG PACKAGES="awless cfssl cfssljson fetch figurine github-commenter goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt shellcheck shfmt yq"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
@@ -50,22 +50,21 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 # Install all packages as root
 USER root
 
+# Install the cloudposse alpine repository
+ADD https://apk.cloudposse.com/ops@cloudposse.com.rsa.pub /etc/apk/keys/
+RUN echo "@cloudposse https://apk.cloudposse.com/3.8/vendor" >> /etc/apk/repositories
+
+# Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
     echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
 
-# Install common packages
-ARG APK_PACKAGES="unzip curl tar python make bash vim jq figlet openssl openssh-client sshpass pwgen\
-                 iputils drill musl-dev ncurses gettext \
-                 git coreutils less groff bash-completion fuse syslog-ng libc6-compat util-linux libltdl \
-                 oath-toolkit-oathtool@testing"
+# Install alpine package manifest
+COPY packages.txt /etc/apk/
 
-ENV APK_PACKAGES=${APK_PACKAGES}
-
-RUN apk update \
-    && apk add ${APK_PACKAGES} \
-    && mkdir -p /etc/bash_completion.d/ /etc/profile.d/ \
-    && mkdir -p /conf \
-    && touch /conf/.gitconfig
+RUN apk update && \
+    apk add $(grep -v '^#' /etc/apk/packages.txt) && \
+    mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
+    touch /conf/.gitconfig
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 

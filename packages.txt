@@ -1,5 +1,6 @@
 # Essential alpine packages
 aws-iam-authenticator@cloudposse
+aws-vault@cloudposse
 bash
 bash-completion
 coreutils

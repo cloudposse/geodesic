@@ -3,6 +3,7 @@ aws-iam-authenticator@cloudposse
 aws-vault@cloudposse
 bash
 bash-completion
+busybox-extras
 coreutils
 chamber@cloudposse
 curl

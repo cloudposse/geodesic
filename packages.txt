@@ -16,6 +16,7 @@ gomplate@cloudposse
 groff
 iputils
 jq
+keybase-client@testing
 less
 libc6-compat
 libltdl

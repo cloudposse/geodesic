@@ -1,5 +1,4 @@
 # Essential alpine packages
-#ARG PACKAGES="cfssl cfssljson"
 awless@cloudposse
 aws-iam-authenticator@cloudposse
 aws-vault@cloudposse

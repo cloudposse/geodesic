@@ -27,7 +27,7 @@ WORKDIR /packages
 #
 # Repo: <https://github.com/cloudposse/packages>
 #
-ARG PACKAGES="awless cfssl cfssljson fetch figurine github-commenter goofys helm helmfile kops kubectl kubectx kubens sops stern terraform terragrunt shellcheck shfmt yq"
+ARG PACKAGES="cfssl cfssljson"
 ENV PACKAGES=${PACKAGES}
 RUN make dist
 
@@ -129,7 +129,7 @@ ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.12
 ENV KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
 ENV KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
 ENV KUBECONFIG=/dev/shm/kubecfg
-RUN /usr/local/bin/kops completion bash > /etc/bash_completion.d/kops.sh
+RUN /usr/bin/kops completion bash > /etc/bash_completion.d/kops.sh
 
 # Instance sizes
 ENV BASTION_MACHINE_TYPE "t2.medium"

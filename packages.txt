@@ -1,4 +1,5 @@
 # Essential alpine packages
+awless@cloudposse
 aws-iam-authenticator@cloudposse
 aws-vault@cloudposse
 bash
@@ -8,14 +9,24 @@ chamber@cloudposse
 curl
 drill
 dumb-init
+fetch@cloudposse
 figlet
+figurine@cloudposse
 fuse
 gettext
 git
+github-commenter@cloudposse
 gomplate@cloudposse
+goofys@cloudposse
 groff
+helm@cloudposse
+helmfile@cloudposse
 iputils
 jq
+kops@cloudposse
+kubectl@cloudposse
+kubectx@cloudposse
+kubens@cloudposse
 less
 libc6-compat
 libltdl
@@ -27,9 +38,16 @@ openssh-client
 openssl
 pwgen
 python
+shellcheck@cloudposse
+shfmt@cloudposse
+sops@cloudposse
 sshpass
+stern@cloudposse
 syslog-ng
 tar
+terraform@cloudposse
+terragrunt@cloudposse
 unzip
 util-linux
 vim
+yq@cloudposse

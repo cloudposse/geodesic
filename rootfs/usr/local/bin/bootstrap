@@ -1,2 +1,7 @@
 #!/bin/bash
+
+# Start atlantis server if enabled
+source /usr/local/bin/atlantis-server
+
+# Otherwise present user with bootstrap script to stdout
 gomplate -f /templates/bootstrap

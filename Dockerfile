@@ -162,7 +162,7 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
 # Install helm plugins
 #
 ENV HELM_APPR_VERSION 0.7.0
-ENV HELM_DIFF_VERSION 2.10.0+1
+ENV HELM_DIFF_VERSION 2.11.0+2
 ENV HELM_EDIT_VERSION 0.2.0
 ENV HELM_GITHUB_VERSION 0.2.0
 ENV HELM_SECRETS_VERSION 1.2.9
@@ -201,6 +201,10 @@ ENV SHELL=/bin/bash
 ENV LESS=-Xr
 ENV XDG_CONFIG_HOME=${CACHE_PATH}
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
+
+# TEMP HACK
+ADD https://github.com/cloudposse/atlantis/releases/download/0.5.2/atlantis_linux_amd64 /usr/bin/atlantis
+RUN chmod 755 /usr/bin/atlantis
 
 COPY rootfs/ /
 

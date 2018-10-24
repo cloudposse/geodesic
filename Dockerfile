@@ -207,4 +207,4 @@ COPY rootfs/ /
 WORKDIR /conf
 
 ENTRYPOINT ["/bin/bash"]
-CMD ["-c", "bootstrap"]
+CMD ["-c", "init"]

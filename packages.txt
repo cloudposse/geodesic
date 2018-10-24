@@ -11,6 +11,7 @@ curl
 drill
 dumb-init
 fetch@cloudposse
+emailcli@cloudposse
 figlet
 figurine@cloudposse
 fuse
@@ -19,6 +20,7 @@ git
 github-commenter@cloudposse
 gomplate@cloudposse
 goofys@cloudposse
+gosu@cloudposse
 groff
 helm@cloudposse
 helmfile@cloudposse

@@ -11,6 +11,7 @@ curl
 drill
 dumb-init
 fetch@cloudposse
+emailcli@cloudposse
 figlet
 figurine@cloudposse
 fuse

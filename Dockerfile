@@ -202,13 +202,9 @@ ENV LESS=-Xr
 ENV XDG_CONFIG_HOME=${CACHE_PATH}
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
-# TEMP HACK
-ADD https://github.com/cloudposse/atlantis/releases/download/0.5.2/atlantis_linux_amd64 /usr/bin/atlantis
-RUN chmod 755 /usr/bin/atlantis
-
 COPY rootfs/ /
 
 WORKDIR /conf
 
 ENTRYPOINT ["/bin/bash"]
-CMD ["-c", "bootstrap"]
+CMD ["-c", "init"]

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /etc/init.d
+for i in *.sh; do
+	source $i
+done

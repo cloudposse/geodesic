@@ -5,14 +5,14 @@ BANNER_INDENT="${BANNER_INDENT:-    }"
 BANNER_FONT="${BANNER_FONT:-Nancyj.flf}"
 
 if [ -z "${AWS_VAULT}" ]; then
-  # Display a banner message for interactive shells (if we're not in aws-vault)
-  if [ -n "${BANNER}" ]; then
-    if [ "$BANNER_COMMAND" == "figlet" ]; then
-      echo "${BANNER_COLOR}"
-      ${BANNER_COMMAND} -w 200 "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
-      echo "${COLOR_RESET}"
-    elif [ "$BANNER_COMMAND" == "figurine" ]; then
-      ${BANNER_COMMAND} -f "${BANNER_FONT}" "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
-    fi
-  fi
+	# Display a banner message for interactive shells (if we're not in aws-vault)
+	if [ -n "${BANNER}" ]; then
+		if [ "$BANNER_COMMAND" == "figlet" ]; then
+			echo "${BANNER_COLOR}"
+			${BANNER_COMMAND} -w 200 "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
+			echo "${COLOR_RESET}"
+		elif [ "$BANNER_COMMAND" == "figurine" ]; then
+			${BANNER_COMMAND} -f "${BANNER_FONT}" "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
+		fi
+	fi
 fi

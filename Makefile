@@ -25,3 +25,6 @@ install:
 
 run:
 	@geodesic
+
+bash/fmt:
+	shfmt -l -w $(PWD)

@@ -3,7 +3,7 @@
 # From https://docs.codefresh.io/v1.0/docs/adding-non-gke-kubernetes-cluster
 echo "Configure a new cluster here:"
 echo "      https://g.codefresh.io/account/integration/kubernetes"
-echo 
+echo
 
 echo "API Host"
 echo "=============="

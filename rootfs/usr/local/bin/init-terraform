@@ -10,7 +10,7 @@ TF_ARGS=("-backend=true" "-backend-config=key=${TF_BUCKET_PREFIX}/${TF_FILE}")
 
 # Disable color if not running in a TTY
 if [ ! -t 1 ]; then
-  TF_ARGS+=("-no-color")
+	TF_ARGS+=("-no-color")
 fi
 
 [ ! -z ${TF_FILES} ] || (
@@ -18,13 +18,12 @@ fi
 	exit 1
 )
 
-[ -z "${TF_BUCKET}" ]           || TF_ARGS+=("-backend-config=bucket=${TF_BUCKET}")
-[ -z "${TF_BUCKET_REGION}" ]    || TF_ARGS+=("-backend-config=region=${TF_BUCKET_REGION}")
-[ -z "${TF_DYNAMODB_TABLE}" ]   || TF_ARGS+=("-backend-config=dynamodb_table=${TF_DYNAMODB_TABLE}")
-[ -z "${AWS_PROFILE}" ]         || TF_ARGS+=("-backend-config=profile=${AWS_PROFILE}")
-[ -z "${AWS_ROLE_ARN}" ]        || TF_ARGS+=("-backend-config=role_arn=${AWS_ROLE_ARN}")
+[ -z "${TF_BUCKET}" ] || TF_ARGS+=("-backend-config=bucket=${TF_BUCKET}")
+[ -z "${TF_BUCKET_REGION}" ] || TF_ARGS+=("-backend-config=region=${TF_BUCKET_REGION}")
+[ -z "${TF_DYNAMODB_TABLE}" ] || TF_ARGS+=("-backend-config=dynamodb_table=${TF_DYNAMODB_TABLE}")
+[ -z "${AWS_PROFILE}" ] || TF_ARGS+=("-backend-config=profile=${AWS_PROFILE}")
+[ -z "${AWS_ROLE_ARN}" ] || TF_ARGS+=("-backend-config=role_arn=${AWS_ROLE_ARN}")
 
 s3 mount
 
 exec terraform init ${TF_ARGS[@]}
-

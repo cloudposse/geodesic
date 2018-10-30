@@ -236,9 +236,9 @@ parse_args "$@"
 options_to_env
 
 # Docker settings
-export DOCKER_IMAGE={{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}
-export DOCKER_TAG={{getenv "DOCKER_TAG" "${DOCKER_TAG:-dev}"}}
-export DOCKER_NAME=${DOCKER_NAME:-`basename $DOCKER_IMAGE`}
+export DOCKER_IMAGE="{{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}"
+export DOCKER_TAG="{{getenv "DOCKER_TAG" "${DOCKER_TAG:-dev}"}}"
+export DOCKER_NAME=${DOCKER_NAME:-$(basename $DOCKER_IMAGE)}
 
 if [ -n "${NAME}" ]; then
 	export DOCKER_NAME=$(basename "${NAME:-}")

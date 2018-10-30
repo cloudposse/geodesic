@@ -1,74 +1,74 @@
 #!/bin/bash
-export DOCKER_IMAGE={{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}
-export DOCKER_TAG={{getenv "DOCKER_TAG" "${1:-dev}"}}
-export APP_NAME=${APP_NAME:-`basename $DOCKER_IMAGE`}
+export DOCKER_IMAGE="{{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}"
+export DOCKER_TAG="{{getenv "DOCKER_TAG" "${1:-dev}"}}"
+export APP_NAME=${APP_NAME:-$(basename $DOCKER_IMAGE)}
 export INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 export INSTALLER_NAME="${APP_NAME}-installer"
-export OUTPUT=${OUTPUT:-/dev/null}  # Replace with /dev/stdout to audit output
+export OUTPUT=${OUTPUT:-/dev/null} # Replace with /dev/stdout to audit output
 export REQUIRE_PULL=${REQUIRE_PULL:-false}
 
-if [ -z "${DOCKER_IMAGE}" ]; then 
-  echo "Docker image cannot be empty" >&2
-  exit 1
+if [ -z "${DOCKER_IMAGE}" ]; then
+	echo "Docker image cannot be empty" >&2
+	exit 1
 fi
 
 if [ -z "${DOCKER_TAG}" ]; then
-  DOCKER_TAG=latest
+	DOCKER_TAG=latest
 fi
 
 if [ "${GEODESIC_SHELL}" == "true" ]; then
-  echo "Installer cannot be run from inside a geodesic shell" >&2
-  exit 1
+	echo "Installer cannot be run from inside a geodesic shell" >&2
+	exit 1
 fi
 
 # Check if docker is installed
 which docker >/dev/null
 if [ $? -ne 0 ]; then
-  echo "Docker is required to run ${APP_NAME}" >&2
-  exit 1
+	echo "Docker is required to run ${APP_NAME}" >&2
+	exit 1
 fi
 
 # Check that we can connect to docker
 docker ps >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again." >&2
-  exit 1
+	echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again." >&2
+	exit 1
 fi
 
 # Check if tee is installed
 which tee >/dev/null
 if [ $? -ne 0 ]; then
-  echo "Tee is required to install ${APP_NAME}" >&2
-  exit 1
+	echo "Tee is required to install ${APP_NAME}" >&2
+	exit 1
 fi
 
 # Check that we can write to install path
 if [ ! -w "${INSTALL_PATH}" ]; then
-  echo "Cannot write to ${INSTALL_PATH}. Please retry using sudo." 2>&1
-  exit 1
+	echo "Cannot write to ${INSTALL_PATH}. Please retry using sudo." 2>&1
+	exit 1
 fi
 
 # Proceed with installation
 echo "# Installing ${APP_NAME} from ${DOCKER_IMAGE}:${DOCKER_TAG}..."
 if [ "${REQUIRE_PULL}" == "true" ]; then
-  docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
-  if [ $? -ne 0 ]; then
-    echo "Failed to pull down ${DOCKER_IMAGE}:${DOCKER_TAG}"
-    exit 1
-  fi
-fi 
+	docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
+	if [ $? -ne 0 ]; then
+		echo "Failed to pull down ${DOCKER_IMAGE}:${DOCKER_TAG}"
+		exit 1
+	fi
+fi
 
-# Sometimes docker might not exit cleanly 
+# Sometimes docker might not exit cleanly
 docker rm -f "${INSTALLER_NAME}" >/dev/null 2>&1
 
-(docker run --name "${INSTALLER_NAME}" --rm -e DOCKER_IMAGE -e DOCKER_TAG "${DOCKER_IMAGE}:${DOCKER_TAG}" -c wrapper | tee "${INSTALL_PATH}/${APP_NAME}" > ${OUTPUT}) && \
-  chmod 755 "${INSTALL_PATH}/${APP_NAME}"
+(docker run --name "${INSTALLER_NAME}" --rm -e DOCKER_IMAGE -e DOCKER_TAG "${DOCKER_IMAGE}:${DOCKER_TAG}" -c wrapper | tee "${INSTALL_PATH}/${APP_NAME}" >${OUTPUT}) &&
+	chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 
 if [ $? -eq 0 ]; then
-  echo "# Installed ${APP_NAME} to ${INSTALL_PATH}/${APP_NAME}"
-  exit 0
+	echo "# Installed ${APP_NAME} to ${INSTALL_PATH}/${APP_NAME}"
+	exit 0
 else
-  echo "# Failed to install ${APP_NAME}"
-  echo "# Please let us know! Send an email to < hello@cloudposse.com > with what went wrong."
-  exit 1
+	echo "# Failed to install ${APP_NAME}"
+	echo "# Please let us know! Send an email to < hello@cloudposse.com > with what went wrong."
+	exit 1
 fi

@@ -25,3 +25,9 @@ install:
 
 run:
 	@geodesic
+
+bash/fmt:
+	shfmt -l -w $(PWD)
+
+bash/fmt/check:
+	shfmt -d $(PWD)/rootfs

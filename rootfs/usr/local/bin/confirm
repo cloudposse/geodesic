@@ -1,13 +1,13 @@
 #!/bin/bash
 
 if [ $# -lt 1 ]; then
-  echo "usage: $0 [env] [msg]"
-  exit 1
+	echo "usage: $0 [env] [msg]"
+	exit 1
 fi
 
 sigint() {
-  echo -e "\nAborted"
-  exit 1
+	echo -e "\nAborted"
+	exit 1
 }
 
 trap sigint SIGINT
@@ -16,9 +16,9 @@ ASSERT_ENV=$1
 ASSERT_MSG=${2:-Are you sure you wish to modify \"${!ASSERT_ENV}\"?}
 
 echo "${ASSERT_MSG}"
-until [[ ${CONFIRMATION} == ${!ASSERT_ENV} ]]; do 
-  echo "Enter \"${!ASSERT_ENV}\" to continue, or ^C to abort"
-  echo -n "> ";
-  read CONFIRMATION
+until [[ ${CONFIRMATION} == ${!ASSERT_ENV} ]]; do
+	echo "Enter \"${!ASSERT_ENV}\" to continue, or ^C to abort"
+	echo -n "> "
+	read CONFIRMATION
 done
 echo "Confirmed"

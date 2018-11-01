@@ -1,22 +1,22 @@
 #!/bin/bash
 SLEEP=${SLEEP:-1}
 EXIT_CODE=0
-set -o pipefail 
+set -o pipefail
 
 SPINNER_TEMPLATE='-\|/'
 COLOR_GREEN="\033[32;01m"
 COLOR_RESET="\033[0m"
 
 while true; do
-  OUTPUT=`($* 2>/dev/null | grep -v '^Makefile') | tr -d '\n'`
-  EXIT_CODE=$?
-  if [ $EXIT_CODE -eq 0 ]; then
-    break;
-  else
-    printf "\r%b%c%b %-100s" "${COLOR_GREEN}" "${SPINNER_TEMPLATE:$i}" "${COLOR_RESET}" "${OUTPUT}";
-    sleep ${SLEEP}
-  fi
-  i=$(( (i+1)%4 ))
+	OUTPUT=$( ($* 2>/dev/null | grep -v '^Makefile') | tr -d '\n')
+	EXIT_CODE=$?
+	if [ $EXIT_CODE -eq 0 ]; then
+		break
+	else
+		printf "\r%b%c%b %-100s" "${COLOR_GREEN}" "${SPINNER_TEMPLATE:$i}" "${COLOR_RESET}" "${OUTPUT}"
+		sleep ${SLEEP}
+	fi
+	i=$(((i + 1) % 4))
 done
 
 echo

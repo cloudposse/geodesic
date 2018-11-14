@@ -31,7 +31,7 @@ spec:
   api:
     loadBalancer:
       type: Public
-      idleTimeoutSeconds: {{ getenv "KOPS_API_SERVER_ELB_TIMEOUT" "300" }}
+      idleTimeoutSeconds: {{ getenv "KOPS_API_LOAD_BALANCER_IDLE_TIMEOUT_SECONDS" "300" }}
   hooks:
   {{- if bool (getenv "KOPS_AWS_IAM_AUTHENTICATOR_ENABLED" "false") }}
     - name: kops-hook-authenticator-config.service

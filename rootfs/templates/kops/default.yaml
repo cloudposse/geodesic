@@ -31,12 +31,13 @@ spec:
   api:
     loadBalancer:
       type: Public
+      idleTimeoutSeconds: {{ getenv "KOPS_API_LOAD_BALANCER_IDLE_TIMEOUT_SECONDS" "600" }}
   hooks:
   {{- if bool (getenv "KOPS_AWS_IAM_AUTHENTICATOR_ENABLED" "false") }}
     - name: kops-hook-authenticator-config.service
       before:
         - kubelet.service
-      roles: 
+      roles:
         - Master
       manifest: |-
         [Unit]
@@ -196,7 +197,7 @@ spec:
   {{- range (getenv "KOPS_AVAILABILITY_ZONES" | strings.Split ",") }}
   - {{ . }}
   {{- end }}
-    
+
 {{/* Allow the manifest to be extended via a datasource */}}
 {{- if (datasourceExists "extensions") -}}
 ---

@@ -16,6 +16,11 @@ if [ -z "${AWS_ACCOUNT_ID}" ]; then
 	exit 1
 fi
 
+if [ -z "${AWS_ROOT_ACCOUNT_ID}" ]; then
+	echo "AWS_ROOT_ACCOUNT_ID not defined"
+	exit 1
+fi
+
 # Derive the source profile from the prefix of the default profile
 export AWS_SOURCE_PROFILE=$(echo ${AWS_DEFAULT_PROFILE} | cut -d- -f1)
 
@@ -32,6 +37,20 @@ crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" region "${AW
 crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_DEFAULT_PROFILE}"
 crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" source_profile "${AWS_SOURCE_PROFILE}"
 
-aws-vault add "${AWS_SOURCE_PROFILE}"
+read SETUP_MFA -p "Setup MFA? [y/n] "
 
-echo "Configured ${AWS_DEFAULT_PROFILE} for ${AWS_REGION} region with ${AWS_ACCOUNT_ID} AWS account id"
+if [ "${SETUP_MFA}" == "y" ]; then
+	read AWS_USERNAME -p "AWS Username: "
+	export AWS_MFA_SERIAL="arn:aws:iam::${AWS_ROOT_ACCOUNT_ID}:mfa/${AWS_USERNAME}"
+	crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" mfa_serial "${AWS_MFA_SERIAL}"
+else
+	crudini --del "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" mfa_serial
+fi
+
+read SETUP_VAULT -p "Setup AWS Credentials? [y/n] "
+
+if [ "${SETUP_MFA}" == "y" ]; then
+	aws-vault add "${AWS_SOURCE_PROFILE}"
+fi
+
+echo "Configured AWS ${AWS_DEFAULT_PROFILE} profile for ${AWS_REGION} region for ${AWS_ACCOUNT_ID} account ID"

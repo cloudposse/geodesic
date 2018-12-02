@@ -1,0 +1,37 @@
+#!/bin/bash
+export AWS_REGION="${AWS_REGION:-us-east-1}"
+
+if [ -z "${AWS_CONFIG_FILE}" ]; then
+	echo "AWS_CONFIG_FILE not defined"
+	exit 1
+fi
+
+if [ -z "${AWS_DEFAULT_PROFILE}" ]; then
+	echo "AWS_DEFAULT_PROFILE not defined"
+	exit 1
+fi
+
+if [ -z "${AWS_ACCOUNT_ID}" ]; then
+	echo "AWS_ACCOUNT_ID not defined"
+	exit 1
+fi
+
+# Derive the source profile from the prefix of the default profile
+export AWS_SOURCE_PROFILE=$(echo ${AWS_DEFAULT_PROFILE} | cut -d- -f1)
+
+if [ "${AWS_SOURCE_PROFILE}" == "${AWS_DEFAULT_PROFILE}" ]; then
+	echo "AWS_DEFAULT_PROFILE should look like namespace-stage-role (e.g. eg-testing-admin)"
+	exit 1
+fi
+
+# Define empty source profile
+crudini --set ${AWS_CONFIG_FILE} "profile ${AWS_SOURCE_PROFILE}"
+
+# Define default profile
+crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" region "${AWS_REGION}"
+crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_DEFAULT_PROFILE}"
+crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" source_profile "${AWS_SOURCE_PROFILE}"
+
+aws-vault add "${AWS_SOURCE_PROFILE}"
+
+echo "Configured ${AWS_DEFAULT_PROFILE} for ${AWS_REGION} region with ${AWS_ACCOUNT_ID} AWS account id"

@@ -37,10 +37,10 @@ crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" region "${AW
 crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_DEFAULT_PROFILE}"
 crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" source_profile "${AWS_SOURCE_PROFILE}"
 
-read SETUP_MFA -p "Setup MFA? [y/n] "
+read SETUP_MFA -p "Use MFA? [y/n] "
 
 if [ "${SETUP_MFA}" == "y" ]; then
-	read AWS_USERNAME -p "AWS Username: "
+	read AWS_USERNAME -p "AWS IAM Username: "
 	export AWS_MFA_SERIAL="arn:aws:iam::${AWS_ROOT_ACCOUNT_ID}:mfa/${AWS_USERNAME}"
 	crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" mfa_serial "${AWS_MFA_SERIAL}"
 else

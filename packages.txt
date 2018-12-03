@@ -8,6 +8,7 @@ busybox-extras
 coreutils
 chamber@cloudposse
 curl
+direnv@testing
 drill
 dumb-init
 fetch@cloudposse

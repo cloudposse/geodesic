@@ -13,7 +13,7 @@ RUN pip install -r /requirements.txt --install-option="--prefix=/dist" --no-buil
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:218.0.0-alpine as google-cloud-sdk
+FROM google/cloud-sdk:223.0.0-alpine as google-cloud-sdk
 
 #
 # Cloud Posse Package Distribution

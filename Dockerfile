@@ -179,6 +179,11 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
 
 #
+# Terraform defaults
+#
+ENV TF_PLUGIN_CACHE_DIR=/localhost/.terraform.d/plugins
+
+#
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/

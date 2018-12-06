@@ -4,6 +4,7 @@ aws-iam-authenticator@cloudposse
 aws-vault@cloudposse
 bash
 bash-completion
+bats@community
 busybox-extras
 coreutils
 chamber@cloudposse

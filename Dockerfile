@@ -176,6 +176,7 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
+
 #
 # Install bats-core for automated testing
 # https://github.com/bats-core/bats-core
@@ -186,6 +187,11 @@ RUN curl --fail -sSL -O https://github.com/bats-core/bats-core/archive/v${BATS_C
     /tmp/bats-core-${BATS_CORE_VERSION}/install.sh /usr/local && \
     rm -rf v${BATS_CORE_VERSION}.tar.gz && \
     rm -rf /tmp/bats-core-${BATS_CORE_VERSION}
+
+#
+# Terraform defaults
+#
+ENV TF_PLUGIN_CACHE_DIR=/localhost/.terraform.d/plugins
 
 #
 # AWS

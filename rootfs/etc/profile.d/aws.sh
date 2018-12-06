@@ -13,3 +13,8 @@ if [ ! -f "${AWS_CONFIG_FILE}" ]; then
 	# Required for AWS_PROFILE=default
 	echo '[default]' >${AWS_CONFIG_FILE}
 fi
+
+# Install autocompletion rules
+if [ -x "/usr/bin/aws_completer" ]; then
+	complete -C '/usr/bin/aws_completer' aws
+fi

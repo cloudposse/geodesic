@@ -10,6 +10,6 @@ function terraform_prompt() {
 }
 
 # Install autocompletion rules
-if which terraform >/dev/null 2>&1; then
-	complete -C /usr/local/bin/terraform terraform
+if [ -x '/usr/bin/terraform' ]; then
+	complete -C /usr/bin/terraform terraform
 fi

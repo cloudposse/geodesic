@@ -56,13 +56,14 @@ RUN echo "@cloudposse https://apk.cloudposse.com/3.8/vendor" >> /etc/apk/reposit
 
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
-    echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
+    echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories && \
+    echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories && \
+    apk update
 
 # Install alpine package manifest
 COPY packages.txt /etc/apk/
 
-RUN apk update && \
-    apk add $(grep -v '^#' /etc/apk/packages.txt) && \
+RUN apk add $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
@@ -176,16 +177,6 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
-#
-# Install bats-core for automated testing
-# https://github.com/bats-core/bats-core
-#
-ENV BATS_CORE_VERSION=1.1.0
-RUN curl --fail -sSL -O https://github.com/bats-core/bats-core/archive/v${BATS_CORE_VERSION}.tar.gz && \
-    tar -C /tmp -zxf v${BATS_CORE_VERSION}.tar.gz && \
-    /tmp/bats-core-${BATS_CORE_VERSION}/install.sh /usr/local && \
-    rm -rf v${BATS_CORE_VERSION}.tar.gz && \
-    rm -rf /tmp/bats-core-${BATS_CORE_VERSION}
 
 #
 # AWS

@@ -91,9 +91,7 @@ function use() {
 		DOCKER_ARGS+=(--env-file=${geodesic_default_env_file})
 	fi
 
-	if [ "${OS}" == "Darwin" ]; then
-		# Run in privleged mode to enable time synchronization of system clock with hardware clock
-		# Implement DNS fix related to https://github.com/docker/docker/issues/24344
+	if [ -n "${DOCKER_DNS}" ]; then
 		DOCKER_ARGS+=("--dns=${DOCKER_DNS}")
 	fi
 
@@ -258,7 +256,7 @@ if [ -n "${PORT}" ]; then
 	export GEODESIC_PORT=${PORT}
 fi
 
-export DOCKER_DNS=${DNS:-8.8.8.8}
+export DOCKER_DNS=${DNS:-${DOCKER_DNS}}
 
 if [ "${GEODESIC_SHELL}" == "true" ]; then
 	echo "Cannot run while in a geodesic shell"

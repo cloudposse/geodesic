@@ -123,7 +123,7 @@ ENV KOPS_TEMPLATE=/templates/kops/default.yaml
 
 # https://github.com/kubernetes/kops/blob/master/channels/stable
 # https://github.com/kubernetes/kops/blob/master/docs/images.md
-ENV KOPS_BASE_IMAGE=kope.io/k8s-1.9-debian-jessie-amd64-hvm-ebs-2018-03-11
+ENV KOPS_BASE_IMAGE=kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17
 
 ENV KOPS_BASTION_PUBLIC_NAME="bastion"
 ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"

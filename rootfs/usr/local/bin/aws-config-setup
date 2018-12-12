@@ -34,7 +34,12 @@ crudini --set ${AWS_CONFIG_FILE} "profile ${AWS_SOURCE_PROFILE}"
 
 # Define default profile
 crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" region "${AWS_REGION}"
-crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_DEFAULT_PROFILE}"
+
+if [ "${AWS_ACCOUNT_ID}" == "${AWS_ROOT_ACOUNT_ID}" ]; then
+	crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_DEFAULT_PROFILE}"
+else
+	crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/OrganizationAccountAccessRole"
+fi
 
 # Prompt the user to setup MFA
 read -p "Use MFA? [y/n] " SETUP_MFA

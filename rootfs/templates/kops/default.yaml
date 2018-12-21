@@ -108,10 +108,10 @@ spec:
   - 0.0.0.0/0
   kubernetesVersion: {{ getenv "KUBERNETES_VERSION" }}
   masterPublicName: api.{{ getenv "KOPS_CLUSTER_NAME" }}
-  networkCIDR: 172.20.0.0/16
+  networkCIDR: {{ getenv "KOPS_NETWORK_CIDR" "172.20.0.0/16" }}
   networking:
     calico: {}
-  nonMasqueradeCIDR: 100.64.0.0/10
+  nonMasqueradeCIDR: {{ getenv "KOPS_NON_MASQUERADE_CIDR" "100.64.0.0/10" }}
   sshAccess:
   - 0.0.0.0/0
   subnets:

@@ -1,3 +1,5 @@
+export SSH_KEY="${SSH_KEY:-/localhost/.ssh/id_rsa}"
+
 # Attempt Re-use existing agent if one exists
 if [ -f "${SSH_AGENT_CONFIG}" ]; then
 	echo "* Found SSH agent config"
@@ -18,9 +20,9 @@ if [ -z "${SSH_AUTH_SOCK}" ] || ! [ -e "${SSH_AUTH_SOCK}" ]; then
 	. "${SSH_AGENT_CONFIG}"
 
 	# Add keys (if any) to the agent
-	if [ -f /localhost/.ssh/id_rsa ]; then
+	if [ -n "${SSH_KEY}" ] && [ -f "${SSH_KEY}" ]; then
 		echo "Add your local private SSH key to the key chain. Hit ^C to skip."
-		ssh-add /localhost/.ssh/id_rsa
+		ssh-add "${SSH_KEY}"
 	fi
 fi
 

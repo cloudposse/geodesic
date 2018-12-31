@@ -4,6 +4,7 @@ aws-iam-authenticator@cloudposse
 aws-vault@cloudposse
 bash
 bash-completion
+bats@community
 busybox-extras
 coreutils
 chamber@cloudposse
@@ -52,6 +53,7 @@ syslog-ng
 tar
 terraform@cloudposse
 terragrunt@cloudposse
+tfenv@cloudposse
 unzip
 util-linux
 vim

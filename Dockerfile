@@ -56,13 +56,14 @@ RUN echo "@cloudposse https://apk.cloudposse.com/3.8/vendor" >> /etc/apk/reposit
 
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
-    echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
+    echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories && \
+    echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories && \
+    apk update
 
 # Install alpine package manifest
 COPY packages.txt /etc/apk/
 
-RUN apk update && \
-    apk add $(grep -v '^#' /etc/apk/packages.txt) && \
+RUN apk add $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
@@ -107,7 +108,7 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #
 # Install kubectl
 #
-ENV KUBERNETES_VERSION 1.10.8
+ENV KUBERNETES_VERSION 1.10.11
 ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
@@ -122,7 +123,7 @@ ENV KOPS_TEMPLATE=/templates/kops/default.yaml
 
 # https://github.com/kubernetes/kops/blob/master/channels/stable
 # https://github.com/kubernetes/kops/blob/master/docs/images.md
-ENV KOPS_BASE_IMAGE=kope.io/k8s-1.9-debian-jessie-amd64-hvm-ebs-2018-03-11
+ENV KOPS_BASE_IMAGE=kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17
 
 ENV KOPS_BASTION_PUBLIC_NAME="bastion"
 ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
@@ -176,16 +177,11 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
+
 #
-# Install bats-core for automated testing
-# https://github.com/bats-core/bats-core
+# Terraform defaults
 #
-ENV BATS_CORE_VERSION=1.1.0
-RUN curl --fail -sSL -O https://github.com/bats-core/bats-core/archive/v${BATS_CORE_VERSION}.tar.gz && \
-    tar -C /tmp -zxf v${BATS_CORE_VERSION}.tar.gz && \
-    /tmp/bats-core-${BATS_CORE_VERSION}/install.sh /usr/local && \
-    rm -rf v${BATS_CORE_VERSION}.tar.gz && \
-    rm -rf /tmp/bats-core-${BATS_CORE_VERSION}
+ENV TF_PLUGIN_CACHE_DIR=/localhost/.terraform.d/plugins
 
 #
 # AWS

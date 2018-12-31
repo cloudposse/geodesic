@@ -15,7 +15,7 @@ ENV KOPS_STATE_STORE_REGION "{{ getenv "KOPS_STATE_STORE_REGION" "us-east-1" }}"
 
 # https://github.com/kubernetes/kops/blob/master/channels/stable
 # https://github.com/kubernetes/kops/blob/master/docs/images.md
-ENV KOPS_BASE_IMAGE="{{ getenv "KOPS_BASE_IMAGE" "kope.io/k8s-1.7-debian-jessie-amd64-hvm-ebs-2017-07-28" }}"
+ENV KOPS_BASE_IMAGE="{{ getenv "KOPS_BASE_IMAGE" "kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17" }}"
 ENV KOPS_DNS_ZONE "{{ getenv "KOPS_DNS_ZONE" "kops.example.com" }}"
 ENV KOPS_BASTION_PUBLIC_NAME="{{ getenv "KOPS_BASTION_PUBLIC_NAME" "bastion" }}"
 ENV KOPS_PRIVATE_SUBNETS="{{ getenv "KOPS_PRIVATE_SUBNETS" "172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19" }}"

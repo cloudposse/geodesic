@@ -3,3 +3,7 @@ nohup.out
 terraform.tfstate*
 .git
 .idea
+*.iml
+.editorconfig
+build-harness
+.build-harness

@@ -65,6 +65,7 @@ COPY packages.txt /etc/apk/
 
 RUN apk add $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
+    ln -s /usr/share/bash-completion/completions/fzf /etc/bash_completion.d/fzf.sh && \
     touch /conf/.gitconfig
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
@@ -111,6 +112,8 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 ENV KUBERNETES_VERSION 1.10.11
 ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
+ADD https://raw.githubusercontent.com/ahmetb/kubectx/v0.6.2/completion/kubens.bash /etc/bash_completion.d/kubens.sh
+ADD https://raw.githubusercontent.com/ahmetb/kubectx/v0.6.2/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
 
 #
 # Install kops

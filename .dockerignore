@@ -1,0 +1,5 @@
+nohup.out
+.terraform
+terraform.tfstate*
+.git
+.idea

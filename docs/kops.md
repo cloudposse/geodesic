@@ -205,7 +205,7 @@ kops export kubecfg
 
 See the documentation for [`kubecfg` settings for `kubectl`](https://github.com/kubernetes/kops/blob/master/docs/kubectl.md) for more details.
 
-<details><summary>Show Output</summary>
+<details><summary>Show Example Output</summary>
 
 Below is an example of what it should _roughly_ look like (IPs and Availability Zones may differ).
 
@@ -242,7 +242,7 @@ Run the following command to list all nodes:
 kubectl get nodes
 ```
 
-<details><summary>Show Output</summary>
+<details><summary>Show Exaple Output</summary>
 
 Below is an example of what it should _roughly_ look like (IPs and Availability Zones may differ).
 
@@ -265,7 +265,7 @@ Run the following command to list all pods:
 kubectl get pods --all-namespaces
 ```
 
-<details><summary>Show Output</summary>
+<details><summary>Show Exapmle Output</summary>
 
 Below is an example of what it should _roughly_ look like (IPs and Availability Zones may differ).
 
@@ -320,8 +320,10 @@ To upgrade the cluster or change settings (_e.g_. number of nodes, instance type
 
 1. Update the settings in the `.envrc` for the corresponding kops project
 2. Rebuild Docker image (`make docker/build`)
-3. Run `geodesic` shell (e.g. by running the wrapper script `example.company.co`), assume role (`assume-role`) and change directory to `/conf/kops` folder
-4. Run `kops export kubecfg`
+3. Run `geodesic` shell (e.g. by running the wrapper script `example.company.co`)
+   - assume role (`assume-role`) 
+   - change directory to the `/conf/kops` folder (or which ever project folder contains your kops configurations)
+4. Run `kops export kubecfg` to get the cluster context
 5. Run `kops replace -f manifest.yaml` to replace the cluster resources (update state)
 6. Run `kops update cluster` to view a plan of changes
 7. Run `kops update cluster --yes` to apply pending changes

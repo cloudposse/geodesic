@@ -9,47 +9,23 @@ Any settings in this file will be automatically loaded when you `cd` in to the d
 
 - [Kubernetes Operations (kops)](#kubernetes-operations-kops)
   - [Table of Contents](#table-of-contents)
-  - [Example Configuration](#example-configuration)
   - [Configuration Settings](#configuration-settings)
   - [Provision a Kops Cluster](#provision-a-kops-cluster)
-    - [Configure Settings](#configure-settings)
-    - [Create a Cluster](#create-a-cluster)
+    - [Configure Environment Settings](#configure-environment-settings)
+    - [Create the Cluster](#create-the-cluster)
   - [Operating the Cluster](#operating-the-cluster)
-  - [Upgrade a Cluster](#upgrade-a-cluster)
+    - [Tips & Tricks](#tips--tricks)
+    - [Upgrade a Cluster](#upgrade-a-cluster)
+  - [References](#references)
+  - [Getting Help](#getting-help)
 
-## Example Configuration
-
-KOPS_TEMPLATE
-KOPS_MANIFEST
-
-Here is an example `.envrc`. Stick this in a project folder like `/conf/kops/` to enable kops support.
-
-```bash
-export KOPS_MANIFEST=/conf/kops/manifest.yaml
-export KOPS_TEMPLATE=/templates/kops/default.yaml
-
-export KOPS_CLUSTER_NAME=example.foo.bar
-export KOPS_STATE_STORE=s3://example-kops-state
-export KOPS_STATE_STORE_REGION=us-east-1
-export KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
-export KOPS_BASE_IMAGE=kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17
-
-export KOPS_BASTION_PUBLIC_NAME="bastion"
-export KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
-export KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
-export KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
-
-# Instance sizes
-export BASTION_MACHINE_TYPE="t2.medium"
-export MASTER_MACHINE_TYPE="t2.medium"
-export NODE_MACHINE_TYPE="t2.medium"
-
-# Min/Max number of nodes (aka workers)
-export NODE_MAX_SIZE=2
-export NODE_MIN_SIZE=2
-```
 
 ## Configuration Settings
+
+We create a [`kops`](https://github.com/kubernetes/kops) cluster from a manifest.
+
+The default manifest template is located in [`/templates/kops/default.yaml`](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml)
+and is compiled by running `build-kops-manifest` in the [`Dockerfile`](Dockerfile).
 
 Most configuration settings are defined as environment variables. These can be set using the `.envrc` pattern.
 
@@ -78,7 +54,7 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_NON_MASQUERADE_CIDR                           | A list of strings in CIDR notation that specify the non-masquerade ranges.                    |
 | KOPS_PRIVATE_SUBNETS                               | Subnet CIDRs for all EC2 instances                                                            |
 | KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `${aws_region}.${image_name}`)   |
-| KOPS_TEMPLATE                                      |                                                                                               |
+| KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that descri                                                                                              |
 | KOPS_UTILITY_SUBNETS                               | Subnet CIDRs for the publically facing services (e.g. ingress ELBs)                           |
 | KUBERNETES_VERSION                                 | Version of Kubernetes to deploy. Must be compatible with the `kops` release.                  |
 | NODE_MACHINE_TYPE                                  | AWS EC2 instance type for the _default_ node pool                                             |
@@ -96,18 +72,19 @@ Most configuration settings are defined as environment variables. These can be s
 
 ## Provision a Kops Cluster
 
-### Configure Settings
+High-level, the process of provisioning a new `kops` cluster takes (3) steps. Here's what it looks like:
 
-We create a [`kops`](https://github.com/kubernetes/kops) cluster from a manifest.
+1. Configure the environment settings
+   - Create a new project (e.g. `/conf/kops`) with an `.envrc`
+   - Rebuild the `geodesic` image to generate a new `kops` manifest file. Then restart the shell
+2. Provision the `kops` dependencies using Terraform
+   - State backend (S3 bucket)
+   - Cluster DNS zone
+   - SSH key-pair to access the Kubernetes masters and nodes
+3. Execute the `kops create` on the manifest file to create the `kops` cluster
 
-The manifest template is located in [`/templates/kops/default.yaml`](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml)
-and is compiled by running `build-kops-manifest` in the [`Dockerfile`](Dockerfile).
 
-Provisioning a `kops` cluster takes three steps:
-
-1. Provision the `kops` backend (config S3 bucket, cluster DNS zone, and SSH keypair to access the k8s masters and nodes) in Terraform
-2. Update the [`Dockerfile`](Dockerfile) and rebuild/restart the `geodesic` shell to generate a `kops` manifest file
-3. Execute the `kops` manifest file to create the `kops` cluster
+### Configure Environment Settings
 
 Run Terraform to provision the `kops` backend (S3 bucket, DNS zone, and SSH keypair):
 
@@ -117,39 +94,46 @@ make -C /conf/kops init apply
 
 From the Terraform outputs, copy the `zone_name` and `bucket_name` into the ENV vars `KOPS_CLUSTER_NAME` and `KOPS_STATE_STORE` in the [`Dockerfile`](Dockerfile).
 
-The `Dockerfile` `kops` config should look like this:
+Here is an example `.envrc`. Stick this in a project folder like `/conf/kops/` to enable kops support. 
 
-```docker
-# kops config
-ENV KOPS_CLUSTER_NAME="${aws_region}.${image_name}"
-ENV KOPS_DNS_ZONE=${KOPS_CLUSTER_NAME}
-ENV KOPS_STATE_STORE="s3://${namepsace}-${stage}-kops-state"
-ENV KOPS_STATE_STORE_REGION="${aws_region}"
-ENV KOPS_AVAILABILITY_ZONES="${aws_region}a,${aws_region}d,${aws_region}c"
-ENV KOPS_BASTION_PUBLIC_NAME="bastion"
-ENV BASTION_MACHINE_TYPE="t2.medium"
-ENV MASTER_MACHINE_TYPE="t2.medium"
-ENV NODE_MACHINE_TYPE="t2.medium"
-ENV NODE_MAX_SIZE="2"
-ENV NODE_MIN_SIZE="2"
+```bash
+export KOPS_MANIFEST=/conf/kops/manifest.yaml
+export KOPS_TEMPLATE=/templates/kops/default.yaml
+
+export KOPS_CLUSTER_NAME=$(terraform output zone_name)
+export KOPS_STATE_STORE=s3://$(terraform output bucket_name)
+export KOPS_STATE_STORE_REGION=us-east-1
+export KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
+export KOPS_BASE_IMAGE=kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17
+
+export KOPS_BASTION_PUBLIC_NAME="bastion"
+export KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
+export KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
+export KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
+
+# Instance sizes
+export BASTION_MACHINE_TYPE="t2.medium"
+export MASTER_MACHINE_TYPE="t2.medium"
+export NODE_MACHINE_TYPE="t2.medium"
+
+# Min/Max number of nodes (aka workers)
+export NODE_MAX_SIZE=2
+export NODE_MIN_SIZE=2
 ```
 
-Type `exit` (or hit ^D) to leave the shell.
+**NOTE:** For a full list of options, see the [Configuration Settings](#configuration-settings).
 
-Note, if you've assumed a role, you'll first need to leave that also by typing `exit` (or hit ^D).
-
-Rebuild the Docker image:
+After makign any changes, rebuild the Docker image:
 
 ```bash
 make docker/build
 ```
 
-### Create a Cluster
+### Create the Cluster
 
 Run the `geodesic` shell again and assume role to login to AWS:
 
 ```bash
-${image_name}
 assume-role
 ```
 
@@ -159,7 +143,9 @@ Change directory to `kops` folder:
 cd /conf/kops
 ```
 
-In this directory, there should be a `manifest.yaml` file which gets generated by running `build-kops-manifest` which renders [the template](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml) using your current environment settings (note, you can specify `KOPS_TEMPLATE` to specify an alternative manifest template file). Typically, we add `RUN build-kops-manifest` as one of the last steps in the `Dockerfile`.
+In this directory, there should be a `manifest.yaml` file which gets generated by running `build-kops-manifest` which renders [the template](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml) using your current environment settings. Typically, we add `RUN build-kops-manifest` as one of the last steps in the `Dockerfile`.
+
+__NOTE__: you can specify `KOPS_TEMPLATE` to specify an alternative manifest template file)
 
 Run the following command to create the cluster. This will just initialize the cluster state and store it in the S3 bucket, but not actually provision any AWS resources for the cluster.
 
@@ -200,7 +186,6 @@ kops export kubecfg
 **IMPORTANT:** You need to run this command every time you start a new shell and before you work with the cluster (e.g. before running `kubectl`). By default, we set the `KUBECONFIG=/dev/shm/kubecfg` so that it never touhces disk and is wiped out when the shell exits.
 
 See the documentation for [`kubecfg` settings for `kubectl`](https://github.com/kubernetes/kops/blob/master/docs/kubectl.md) for more details.
-<br>
 
 <details><summary>Show Output</summary>
 
@@ -304,11 +289,17 @@ kube-system   kube-scheduler-ip-172-20-74-158.${aws_region}.compute.internal    
 <br>
 <br>
 
-## Upgrade a Cluster
+### Tips & Tricks
+
+1. Use `kubens` to easily change your namespace context
+2. Use `kubectx` to easily change between kubernetes cluster contexts
+3. Use `kubeon` and `kubeoff` to enable the fancy kubernetes prompt
+
+### Upgrade a Cluster
 
 To upgrade the cluster or change settings (_e.g_. number of nodes, instance types, Kubernetes version, etc.):
 
-1. Modify the `kops` settings in the [`Dockerfile`](Dockerfile)
+1. Update the settings in the `.envrc` for the corresponding kops project
 2. Rebuild Docker image (`make docker/build`)
 3. Run `geodesic` shell (`${image_name}`), assume role (`assume-role`) and change directory to `/conf/kops` folder
 4. Run `kops export kubecfg`
@@ -317,3 +308,12 @@ To upgrade the cluster or change settings (_e.g_. number of nodes, instance type
 7. Run `kops update cluster --yes` to apply pending changes
 8. Run `kops rolling-update cluster` to view a plan of changes
 9. Run `kops rolling-update cluster --yes --force` to force a rolling update (replace EC2 instances)
+
+
+## References
+* https://github.com/kubernetes/kops/blob/master/docs/manifests_and_customizing_via_api.md
+
+
+## Getting Help
+
+Did you get stuck? Find us on [slack](https://slack.cloudposse.com) in the `#geodesic` channel.

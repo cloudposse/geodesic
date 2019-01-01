@@ -14,6 +14,7 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`aws-vault`](https://github.com/99designs/aws-vault) for securely storing and accessing AWS credentials in an encrypted vault for the purpose of assuming IAM roles
 * [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
 * [`chamber`](https://github.com/segmentio/chamber) for managing secrets with AWS SSM+KMS and exposing them as environment variables
+* [`direnv`](https://direnv.net) for managing environment variables per project or globally
 * [`helm`](https://github.com/kubernetes/helm/) for installing packages like Varnish or Apache on the Kubernetes cluster
 * [`helmfile`](https://github.com/roboll/helmfile) for 12-factorizing chart values and installing chart collections
 * [`kops`](https://github.com/kubernetes/kops/) for Kubernetes cluster orchestration

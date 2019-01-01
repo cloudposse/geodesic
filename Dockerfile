@@ -45,7 +45,6 @@ ENV CACHE_PATH=/localhost/.geodesic
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
-ENV KOPS_CLUSTER_NAME=example.foo.bar
 
 # Install all packages as root
 USER root
@@ -109,37 +108,13 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 # Install kubectl
 #
 ENV KUBERNETES_VERSION 1.10.11
-ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
+ENV KUBECONFIG=/dev/shm/kubecfg
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
 #
 # Install kops
 #
-ENV KOPS_STATE_STORE s3://undefined
-ENV KOPS_STATE_STORE_REGION us-east-1
-ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
-ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
-ENV KOPS_TEMPLATE=/templates/kops/default.yaml
-
-# https://github.com/kubernetes/kops/blob/master/channels/stable
-# https://github.com/kubernetes/kops/blob/master/docs/images.md
-ENV KOPS_BASE_IMAGE=kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17
-
-ENV KOPS_BASTION_PUBLIC_NAME="bastion"
-ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
-ENV KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
-ENV KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
-ENV KUBECONFIG=/dev/shm/kubecfg
 RUN /usr/bin/kops completion bash > /etc/bash_completion.d/kops.sh
-
-# Instance sizes
-ENV BASTION_MACHINE_TYPE "t2.medium"
-ENV MASTER_MACHINE_TYPE "t2.medium"
-ENV NODE_MACHINE_TYPE "t2.medium"
-
-# Min/Max number of nodes (aka workers)
-ENV NODE_MAX_SIZE 2
-ENV NODE_MIN_SIZE 2
 
 #
 # Install helm
@@ -147,9 +122,8 @@ ENV NODE_MIN_SIZE 2
 ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 RUN helm completion bash > /etc/bash_completion.d/helm.sh \
-    && mkdir -p ${HELM_HOME} \
+    && mkdir -p ${HELM_HOME} ${HELM_HOME}/plugins \
     && helm init --client-only \
-    && mkdir -p ${HELM_HOME}/plugins
 
 #
 # Install helm repos

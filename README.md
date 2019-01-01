@@ -17,7 +17,7 @@ It's a way of doing things that allows companies to collaborate on infrastructur
 
 It provides a fully customizable framework for defining and building cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security. 
 
-It's works with Mac OSX, Linux, and [Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10). 
+It's works natively with Mac OSX, Linux, and [Windows 10 (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10) or anywhere you can run Docker. 
 
 
 ---
@@ -39,7 +39,7 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 These days, the typical software application is distributed as a docker image and run as a container. Why should infrastructure be any different? Since everything we write is "Infrastructure as Code", we believe that it should be treated the same way. This is the "Geodesic Way". Use containers+envs instead of unconventional wrappers, complicated folder structures and symlink hacks. Geodesic is the container for all your infrastructure automation needs that enables you to truly achieve SweetOps.
 
-Geodesic is composed of two parts:
+**Geodesic is composed of two parts:**
 
   1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools. Those tools are then integrated to work in concert with each other using a consistent framework. Installation of the shell is as easy as running a docker container.  
   2. It is a distribution of essential services and [reference architectures](https://github.com/cloudposse?q=cloudposse.co). The distribution includes a collection of [100+ Free Terraform Modules](https://github.com/cloudposse?q=terraform-) and their [invocations](https://github.com/cloudposse/terraform-root-modules), dozens of preconfigured [Helmfiles](https://github.com/cloudposse/helmfiles), [Helm charts](https://github.com/cloudposse/charts) for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS, Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up to work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
@@ -48,7 +48,10 @@ An organization may chose to leverage all of these components, or just the parts
 
 Let's roll...
 
-Review our [documentation](https://docs.cloudposse.com/geodesic/) and [reference architectures](https://docs.cloudposse.com/reference-architectures/) to get started!
+1. Review our [documentation](https://docs.cloudposse.com/geodesic/)
+2. Check our [reference architectures](https://docs.cloudposse.com/reference-architectures/) to learn how we architect the infrastructure
+3. Use our [coldstart automation](https://github.com/cloudposse/reference-architectures) to get started quickly
+4. Quickly provision [kops clusters](docs/kops.md) 
 
 
 

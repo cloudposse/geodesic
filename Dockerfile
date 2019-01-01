@@ -181,7 +181,8 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
 # 
 # Install fancy Kube PS1 Prompt
 #
-ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/0.6.0/kube-ps1.sh /etc/profile.d/
+ENV KUBE_PS1_VERSION 0.6.0
+ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/
 
 
 #

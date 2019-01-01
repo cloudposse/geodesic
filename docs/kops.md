@@ -1,9 +1,9 @@
 # Kubernetes Operations (kops)
 
-Kops is one of the easiest ways to get a production grade Kubernetes cluster up and running. The `kops` cli tool is like `kubectl` for clusters. It handles all the CRUD operations from the command line. It is possible to run any number of [kops clusters](http://github.com/kubernetes/kops) within an account.
+Kops is one of the easiest ways to get a production grade Kubernetes cluster up and running. The `kops` command line tool (cli) is like `kubectl` for clusters. It handles all the standard CRUD operations necessary to manage the complete life cycle of a cluster.
 
-Our "best practice" is to define one cluster per project directory. Then define a `.envrc` ([direnv](https://direnv.net/)) configuration per directory.
-Any settings in this file will be automatically loaded when you `cd` in to the directory. Alternatively, they can be executed explicitly by running `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD pipeline.
+It is possible to run any number of [kops clusters](http://github.com/kubernetes/kops) within an account. Our "best practice" is to define one cluster per project directory in the `/conf` folder. Then define a `.envrc` ([direnv](https://direnv.net/)) configuration per directory.
+Any settings in this file will be automatically loaded when you `cd` in to the directory. Alternatively, they can be executed explicitly by running `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD GitOps-style pipeline.
 
 ## Table of Contents
 
@@ -13,6 +13,7 @@ Any settings in this file will be automatically loaded when you `cd` in to the d
   - [Configuration Settings](#configuration-settings)
   - [Provision a Kops Cluster](#provision-a-kops-cluster)
     - [Configure Environment Settings](#configure-environment-settings)
+    - [Provision Dependencies](#provision-dependencies)
     - [Create the Cluster](#create-the-cluster)
   - [Operating the Cluster](#operating-the-cluster)
     - [Tips & Tricks](#tips--tricks)
@@ -23,7 +24,7 @@ Any settings in this file will be automatically loaded when you `cd` in to the d
 ## Features
 
 - **Automated Provisioning** of Kubernetes clusters in [AWS](https://github.com/kubernetes/kops/blob/master/docs/aws.md) and [GCE](https://github.com/kubernetes/kops/blob/master/docs/tutorial/gce.md)
-- **Highly Available (HA)** Kubernetes Masters and nodes using autoscaling groups
+- **Highly Available (HA)** Kubernetes masters and nodes by using auto-scaling groups
 - **Dry-runs & Idempotency** ensure predictable cluster operations
 - **Kubernetes Addons** extend the default functionality [add-ons](https://github.com/kubernetes/kops/blob/master/docs/addons.md)
 - **Command line Tool** supports all CRUD operations and has [autocompletion](https://github.com/kubernetes/kops/blob/master/docs/cli/kops_completion.md)
@@ -86,27 +87,23 @@ Most configuration settings are defined as environment variables. These can be s
 
 The process of provisioning a new `kops` cluster takes (3) steps. Here's what it looks like:
 
-1. Configure the environment settings
+1. **Configure the environment settings**
    - Create a new project (e.g. `/conf/kops`) with an `.envrc`
    - Rebuild the `geodesic` image to generate a new `kops` manifest file. Then restart the shell
-2. Provision the `kops` dependencies using Terraform
-   - State backend (S3 bucket)
-   - Cluster DNS zone
+2. **Provision the `kops` dependencies using the [`terraform-aws-kops-state-backend`](https://github.com/cloudposse/terraform-aws-kops-state-backend) module with Terraform**
+   - State backend (S3 bucket) that will store the YAML state
+   - Cluster DNS zone that will be used by kops for service discovery
    - SSH key-pair to access the Kubernetes masters and nodes
-3. Execute the `kops create` on the manifest file to create the `kops` cluster
-   - Validate cluster is healthy
+3. **Execute the `kops create` on the manifest file to create the `kops` cluster**
+   - Validate cluster is healthyo
+
+We provide a reference example here in our [`terraform-root-modules/aws/kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) service catalog.
 
 ### Configure Environment Settings
 
-Run Terraform to provision the `kops` backend (S3 bucket, DNS zone, and SSH keypair):
-
-```bash
-make -C /conf/kops init apply
-```
-
-From the Terraform outputs, copy the `zone_name` and `bucket_name` into the ENV vars `KOPS_CLUSTER_NAME` and `KOPS_STATE_STORE` in the [`Dockerfile`](Dockerfile).
-
 Here is an example `.envrc`. Stick this in a project folder like `/conf/kops/` to enable kops support.
+
+**NOTE:** For a full list of options, see the [Configuration Settings](#configuration-settings).
 
 ```bash
 export KOPS_MANIFEST=/conf/kops/manifest.yaml
@@ -133,12 +130,21 @@ export NODE_MAX_SIZE=2
 export NODE_MIN_SIZE=2
 ```
 
-**NOTE:** For a full list of options, see the [Configuration Settings](#configuration-settings).
+**IMPORTANT** The `KOPS_CLUSTER_NAME=$(terraform output zone_name)` and `KOPS_STATE_STORE=s3://$(terraform output bucket_name)` settings must correspond to those provisioned by the `terraform-aws-kops-state-backend` module. 
 
-After makign any changes, rebuild the Docker image:
+
+After making any changes, rebuild the Docker image:
 
 ```bash
 make docker/build
+```
+
+### Provision Dependencies
+
+Run Terraform to provision the `kops` backend (S3 bucket, DNS zone, and SSH keypair):
+
+```bash
+make -C /conf/kops init apply
 ```
 
 ### Create the Cluster

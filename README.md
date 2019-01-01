@@ -169,7 +169,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 ## Copyright
 
-Copyright © 2017-2018 [Cloud Posse, LLC](https://cloudposse.com)
+Copyright © 2017-2019 [Cloud Posse, LLC](https://cloudposse.com)
 
 
 

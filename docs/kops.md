@@ -1,7 +1,21 @@
+# Kubernetes Operations (kops)
+
 It is possible to run any number of kops clusters within an account.
 
 Our "best practice" is to define one cluster per project directory. Then define a `.envrc` ([direnv](https://direnv.net/)) configuration per directory.
 Any settings in this file will be automatically loaded when you `cd` in to the directory. Alternatively, they can be executed explicitly by running `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD pipeline.
+
+## Table of Contents
+
+- [Kubernetes Operations (kops)](#kubernetes-operations-kops)
+  - [Table of Contents](#table-of-contents)
+  - [Example Configuration](#example-configuration)
+  - [Configuration Settings](#configuration-settings)
+  - [Provision a Kops Cluster](#provision-a-kops-cluster)
+    - [Configure Settings](#configure-settings)
+    - [Create a Cluster](#create-a-cluster)
+  - [Operating the Cluster](#operating-the-cluster)
+  - [Upgrade a Cluster](#upgrade-a-cluster)
 
 ## Example Configuration
 
@@ -11,15 +25,13 @@ KOPS_MANIFEST
 Here is an example `.envrc`. Stick this in a project folder like `/conf/kops/` to enable kops support.
 
 ```bash
+export KOPS_MANIFEST=/conf/kops/manifest.yaml
+export KOPS_TEMPLATE=/templates/kops/default.yaml
+
 export KOPS_CLUSTER_NAME=example.foo.bar
 export KOPS_STATE_STORE=s3://example-kops-state
 export KOPS_STATE_STORE_REGION=us-east-1
 export KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
-export KOPS_MANIFEST=/conf/kops/manifest.yaml
-export KOPS_TEMPLATE=/templates/kops/default.yaml
-
-# https://github.com/kubernetes/kops/blob/master/channels/stable
-# https://github.com/kubernetes/kops/blob/master/docs/images.md
 export KOPS_BASE_IMAGE=kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17
 
 export KOPS_BASTION_PUBLIC_NAME="bastion"
@@ -58,7 +70,7 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_CLUSTER_AUTOSCALER_ENABLED                    | Toggle the Kubernetes node autoscaler capability                                              |
 | KOPS_CLUSTER_NAME                                  | Cluster base hostname (E.g. `${aws_region}.${image_name}`)                                    |
 | KOPS_DNS_ZONE                                      | Authoritative DNS Zone that will be populated automatic with hostnames                        |
-| KOPS_FEATURE_FLAGS                                 | Enable experimental features that not available by default                                                                                              |
+| KOPS_FEATURE_FLAGS                                 | Enable experimental features that not available by default                                    |
 | KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE            | Ordered list of plug-ins to do authorization on secure port                                   |
 | KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER | Username of the Kubernetes Super User                                                         |
 | KOPS_MANIFEST                                      |                                                                                               |
@@ -75,11 +87,10 @@ Most configuration settings are defined as environment variables. These can be s
 
 **IMPORTANT:**
 
-1.  `KOPS_NETWORK_CIDR` and `KOPS_NON_MASQUERADE_CIDR` **MUST NOT** overlap
-2.  `KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE` is a comma-separated list (e.g.`AlwaysAllow`,`AlwaysDeny`,`ABAC`,`Webhook`,`RBAC`,`Node`)
-3.  `KOPS_BASE_IMAGE` refers to one of the official AWS AMI's provided by `kops`. For more details, refer to the [official documentation](https://github.com/kubernetes/kops/blob/master/docs/images.md). Additionally, the [latest stable images](https://github.com/kubernetes/kops/blob/master/channels/stable) are published on their GitHub 
-4.  `KOPS_FEATURE_FLAGS` are [published on their GitHub](https://github.com/kubernetes/kops/blob/master/docs/experimental.md)
-
+1. `KOPS_NETWORK_CIDR` and `KOPS_NON_MASQUERADE_CIDR` **MUST NOT** overlap
+2. `KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE` is a comma-separated list (e.g.`AlwaysAllow`,`AlwaysDeny`,`ABAC`,`Webhook`,`RBAC`,`Node`)
+3. `KOPS_BASE_IMAGE` refers to one of the official AWS AMI's provided by `kops`. For more details, refer to the [official documentation](https://github.com/kubernetes/kops/blob/master/docs/images.md). Additionally, the [latest stable images](https://github.com/kubernetes/kops/blob/master/channels/stable) are published on their GitHub
+4. `KOPS_FEATURE_FLAGS` are [published on their GitHub](https://github.com/kubernetes/kops/blob/master/docs/experimental.md)
 
 </details>
 
@@ -190,8 +201,6 @@ kops export kubecfg
 
 See the documentation for [`kubecfg` settings for `kubectl`](https://github.com/kubernetes/kops/blob/master/docs/kubectl.md) for more details.
 <br>
-
-
 
 <details><summary>Show Output</summary>
 
@@ -308,4 +317,3 @@ To upgrade the cluster or change settings (_e.g_. number of nodes, instance type
 7. Run `kops update cluster --yes` to apply pending changes
 8. Run `kops rolling-update cluster` to view a plan of changes
 9. Run `kops rolling-update cluster --yes --force` to force a rolling update (replace EC2 instances)
-

@@ -123,7 +123,7 @@ ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 RUN helm completion bash > /etc/bash_completion.d/helm.sh \
     && mkdir -p ${HELM_HOME} ${HELM_HOME}/plugins \
-    && helm init --client-only \
+    && helm init --client-only
 
 #
 # Install helm repos

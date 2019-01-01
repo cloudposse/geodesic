@@ -18,7 +18,7 @@ FROM google/cloud-sdk:223.0.0-alpine as google-cloud-sdk
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:0.34.0 as packages
+FROM cloudposse/packages:0.42.0 as packages
 
 WORKDIR /packages
 
@@ -187,7 +187,8 @@ ENV TF_PLUGIN_CACHE_DIR=/localhost/.terraform.d/plugins
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/
-ENV AWS_CONFIG_FILE=/localhost/.aws/config
+ENV AWS_CONFIG_FILE=${AWS_DATA_PATH}/config
+ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_DATA_PATH}/credentials
 
 #
 # Shell
@@ -195,8 +196,11 @@ ENV AWS_CONFIG_FILE=/localhost/.aws/config
 ENV HISTFILE=${CACHE_PATH}/history
 ENV SHELL=/bin/bash
 ENV LESS=-Xr
-ENV XDG_CONFIG_HOME=${CACHE_PATH}
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
+
+# This is not a "multi-user" system, so we'll use `/etc` as the global configuration dir
+# Read more: <https://wiki.archlinux.org/index.php/XDG_Base_Directory>
+ENV XDG_CONFIG_HOME=/etc
 
 COPY rootfs/ /
 

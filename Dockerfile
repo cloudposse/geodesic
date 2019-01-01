@@ -112,7 +112,8 @@ ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 ENV KUBERNETES_VERSION 1.10.11
 ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
-ADD https://raw.githubusercontent.com/ahmetb/kubectx/v0.6.2/completion/kubens.bash /etc/bash_completion.d/kubens.sh
+ENV KUBECTX_COMPLETION_VERSION 0.6.2
+ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v0.6.2/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
 
 #

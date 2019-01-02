@@ -165,7 +165,7 @@ In this directory, there should be a `manifest.yaml` file which gets generated b
 
 **NOTE**: you can override the `KOPS_TEMPLATE` to specify an alternative path to the manifest template file.
 
-Run the following command to create the cluster. This will just initialize the cluster state, which involves writing writing a state file to the S3 bucket. It does not actually provision any AWS resources for the cluster.
+Run the following command to create the cluster. This will just initialize the cluster state, which involves writing a state file to the S3 bucket. It does not actually provision any AWS resources for the cluster.
 
 ```bash
 kops create -f manifest.yaml

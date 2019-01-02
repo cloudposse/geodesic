@@ -38,9 +38,9 @@ Any settings in this file will be automatically loaded when you `cd` in to the d
 We create a [`kops`](https://github.com/kubernetes/kops) cluster from a manifest.
 
 The default manifest go-template is located in [`/templates/kops/default.yaml`](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml)
-and is compiled by running `build-kops-manifest`. We recommend adding this command as a build step in the [`Dockerfile`](Dockerfile) (e.g. `RUN build-kops-manifest`).
+and is compiled by running `build-kops-manifest`. 
 
-Most configuration settings are defined as environment variables. These can be set using the `.envrc` pattern.
+Most configuration settings are defined as environment variables. These can be set using the `.envrc` pattern or sourced from AWS SSM Parameter Store using `chamber`.
 
 <details>
 <summary>List of Supported Environment Variables</summary>
@@ -57,7 +57,7 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_BASTION_PUBLIC_NAME                           | Hostname that will be used for the bastion instance                                            |
 | KOPS_CLOUDWATCH_DETAILED_MONITORING                | Toggle detailed CloudWatch monitoring (increases operating costs)                              |
 | KOPS_CLUSTER_AUTOSCALER_ENABLED                    | Toggle the Kubernetes node autoscaler capability                                               |
-| KOPS_CLUSTER_NAME                                  | Cluster base hostname (E.g. `${AWS_REGION}.${DNS_ZONE}`)                                       |
+| KOPS_CLUSTER_NAME                                  | Cluster base hostname (E.g. `us-west-2.${DNS_ZONE}`)                                       |
 | KOPS_DNS_ZONE                                      | Authoritative DNS Zone that will be populated automatic with hostnames                         |
 | KOPS_FEATURE_FLAGS                                 | Enable experimental features that not available by default                                     |
 | KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE            | Ordered list of plug-ins to do authorization on secure port                                    |
@@ -66,7 +66,7 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_NETWORK_CIDR                                  | The network used by kubernetes for `Pods` and `Services` in the cluster                        |
 | KOPS_NON_MASQUERADE_CIDR                           | A list of strings in CIDR notation that specify the non-masquerade ranges.                     |
 | KOPS_PRIVATE_SUBNETS                               | Subnet CIDRs for all EC2 instances                                                             |
-| KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `s3://${AWS_REGION}.${DNS_ZONE}`) |
+| KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `s3://us-west-2.${DNS_ZONE}`) |
 | KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that descri                                               |
 | KOPS_UTILITY_SUBNETS                               | Subnet CIDRs for the publically facing services (e.g. ingress ELBs)                            |
 | KUBERNETES_VERSION                                 | Version of Kubernetes to deploy. Must be compatible with the `kops` release.                   |
@@ -83,21 +83,33 @@ Most configuration settings are defined as environment variables. These can be s
 
 </details>
 
+Other settings can be generated automatically by using the [`kops` terraform "root" module](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops). This module will write the computed settings to AWS SSM Parameter Store for use with `chamber`.  
+
+**NOTE** In order to build the manifest as a step in the [`Dockerfile`](Dockerfile) (e.g. `RUN build-kops-manifest`), the settings should be stored in the `.envrc` rather than in `chamber`.
+
+
 ## Provision a Kops Cluster
 
 The process of provisioning a new `kops` cluster takes (3) steps. Here's what it looks like:
 
 1. **Configure the environment settings**
-   - Create a new project (e.g. `/conf/kops`) with an `.envrc`
-   - Rebuild the `geodesic` image to generate a new `kops` manifest file. Then restart the shell
-2. **Provision the `kops` dependencies using the [`terraform-aws-kops-state-backend`](https://github.com/cloudposse/terraform-aws-kops-state-backend) module with Terraform**
-   - State backend (S3 bucket) that will store the YAML state
-   - Cluster DNS zone that will be used by kops for service discovery
-   - SSH key-pair to access the Kubernetes masters and nodes
+   - Create a new project (e.g. `/conf/kops`). Optionally define an `.envrc`.
+   - Rebuild the `geodesic` image. Then restart the shell.
+2. **Provision the `kops` dependencies using the [`kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) terraform root module**
+   - State backend (S3 bucket) that will store the YAML state.
+   - Cluster DNS zone that will be used by kops for service discovery.
+   - SSH key-pair to access the Kubernetes masters and nodes.
+   - Write settings to SSM Parameter Store.
 3. **Execute the `kops create` on the manifest file to create the `kops` cluster**
-   - Validate cluster is healthyo
+   - Build the manifest.
+   - Validate the cluster is health.
 
-We provide a reference example here in our [`terraform-root-modules/aws/kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) service catalog.
+
+We provide a reference example here in our [`terraform-root-modules/aws/kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) service catalog for provisioning everything needed by `kops` on AWS.
+
+
+**IMPORTANT** For the purpose of this documentation, we will assume all the settings are in the `.envrc`. If you want to use `chamber` (recommended), then prefix all commands below with `chamber exec kops --`. (E.g. `chamber exec kops -- build-kops-manifest` or `chamber exec kops -- kops export kubecfg`). This will export the environment variables found in the `kops` service namespace using chamber.
+
 
 ### Configure Environment Settings
 
@@ -161,7 +173,11 @@ Change directory to `kops` folder:
 cd /conf/kops
 ```
 
-In this directory, there should be a `manifest.yaml` file which gets generated by running `build-kops-manifest` which renders [the template](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml) using your current environment settings. Typically, we add `RUN build-kops-manifest` as one of the last steps in the `Dockerfile`.
+Compile the `manifest.yaml` by running `build-kops-manifest` which renders [the template](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml) using your current environment settings. 
+
+```bash
+build-kops-manifest
+```
 
 **NOTE**: you can override the `KOPS_TEMPLATE` to specify an alternative path to the manifest template file.
 
@@ -174,8 +190,9 @@ kops create -f manifest.yaml
 In AWS, it's required that all AWS EC2 instances have a master SSH key. Run the following command to add the SSH public key to the cluster:
 
 ```bash
-kops create secret sshpublickey admin -i /secrets/tf/ssh/${NAMESPACE}-${STAGE}-kops-${AWS_REGION}.pub --name $KOPS_CLUSTER_NAME
+kops create secret sshpublickey admin -i ${KOPS_SSH_PUBLIC_KEY_PATH} --name ${KOPS_CLUSTER_NAME}
 ```
+**IMPORTANT** this assumes `/secrets/tf` has been mounted using `goofys`
 
 Run the following command to provision the AWS resources for the cluster:
 
@@ -216,19 +233,19 @@ Validating cluster us-west-2.example.company.co
 
 INSTANCE GROUPS
 NAME			ROLE	MACHINETYPE	MIN	MAX	SUBNETS
-bastions		Bastion	t2.medium	1	1	utility-${aws_region}a,utility-${aws_region}d,utility-${aws_region}c
-master-${aws_region}a	Master	t2.medium	1	1	${aws_region}a
-master-${aws_region}c	Master	t2.medium	1	1	${aws_region}c
-master-${aws_region}d	Master	t2.medium	1	1	${aws_region}d
-nodes			Node	t2.medium	2	2	${aws_region}a,${aws_region}d,${aws_region}c
+bastions		Bastion	t2.medium	1	1	utility-us-west-2a,utility-us-west-2d,utility-us-west-2c
+master-us-west-2a	Master	t2.medium	1	1	us-west-2a
+master-us-west-2c	Master	t2.medium	1	1	us-west-2c
+master-us-west-2d	Master	t2.medium	1	1	us-west-2d
+nodes			Node	t2.medium	2	2	us-west-2a,us-west-2d,us-west-2c
 
 NODE STATUS
 NAME							                  ROLE	  READY
-ip-172-20-108-58.${aws_region}.compute.internal	  node	  True
-ip-172-20-125-166.${aws_region}.compute.internal  master  True
-ip-172-20-62-206.${aws_region}.compute.internal	  master  True
-ip-172-20-74-158.${aws_region}.compute.internal	  master  True
-ip-172-20-88-143.${aws_region}.compute.internal	  node    True
+ip-172-20-108-58.us-west-2.compute.internal	  node	  True
+ip-172-20-125-166.us-west-2.compute.internal  master  True
+ip-172-20-62-206.us-west-2.compute.internal	  master  True
+ip-172-20-74-158.us-west-2.compute.internal	  master  True
+ip-172-20-88-143.us-west-2.compute.internal	  node    True
 
 Your cluster us-west-2.example.company.co is ready
 ```
@@ -249,11 +266,11 @@ Below is an example of what it should _roughly_ look like (IPs and Availability 
 ```
 ⨠ kubectl get nodes
 NAME                                                STATUS   ROLES    AGE   VERSION
-ip-172-20-108-58.${aws_region}.compute.internal    Ready    node     15m   v1.10.8
-ip-172-20-125-166.${aws_region}.compute.internal   Ready    master   17m   v1.10.8
-ip-172-20-62-206.${aws_region}.compute.internal    Ready    master   18m   v1.10.8
-ip-172-20-74-158.${aws_region}.compute.internal    Ready    master   17m   v1.10.8
-ip-172-20-88-143.${aws_region}.compute.internal    Ready    node     16m   v1.10.8
+ip-172-20-108-58.us-west-2.compute.internal    Ready    node     15m   v1.10.8
+ip-172-20-125-166.us-west-2.compute.internal   Ready    master   17m   v1.10.8
+ip-172-20-62-206.us-west-2.compute.internal    Ready    master   18m   v1.10.8
+ip-172-20-74-158.us-west-2.compute.internal    Ready    master   17m   v1.10.8
+ip-172-20-88-143.us-west-2.compute.internal    Ready    node     16m   v1.10.8
 ```
 
 </details>
@@ -279,29 +296,29 @@ kube-system   calico-node-jddc9                                                 
 kube-system   calico-node-pszd8                                                           2/2     Running   0          1h
 kube-system   calico-node-rqfbk                                                           2/2     Running   0          1h
 kube-system   dns-controller-75b75f6f5d-tdg9s                                             1/1     Running   0          1h
-kube-system   etcd-server-events-ip-172-20-125-166.${aws_region}.compute.internal         1/1     Running   0          1h
-kube-system   etcd-server-events-ip-172-20-62-206.${aws_region}.compute.internal          1/1     Running   2          1h
-kube-system   etcd-server-events-ip-172-20-74-158.${aws_region}.compute.internal          1/1     Running   0          1h
-kube-system   etcd-server-ip-172-20-125-166.${aws_region}.compute.internal                1/1     Running   0          1h
-kube-system   etcd-server-ip-172-20-62-206.${aws_region}.compute.internal                 1/1     Running   2          1h
-kube-system   etcd-server-ip-172-20-74-158.${aws_region}.compute.internal                 1/1     Running   0          1h
-kube-system   kube-apiserver-ip-172-20-125-166.${aws_region}.compute.internal             1/1     Running   0          1h
-kube-system   kube-apiserver-ip-172-20-62-206.${aws_region}.compute.internal              1/1     Running   3          1h
-kube-system   kube-apiserver-ip-172-20-74-158.${aws_region}.compute.internal              1/1     Running   0          1h
-kube-system   kube-controller-manager-ip-172-20-125-166.${aws_region}.compute.internal    1/1     Running   0          1h
-kube-system   kube-controller-manager-ip-172-20-62-206.${aws_region}.compute.internal     1/1     Running   0          1h
-kube-system   kube-controller-manager-ip-172-20-74-158.${aws_region}.compute.internal     1/1     Running   0          1h
+kube-system   etcd-server-events-ip-172-20-125-166.us-west-2.compute.internal         1/1     Running   0          1h
+kube-system   etcd-server-events-ip-172-20-62-206.us-west-2.compute.internal          1/1     Running   2          1h
+kube-system   etcd-server-events-ip-172-20-74-158.us-west-2.compute.internal          1/1     Running   0          1h
+kube-system   etcd-server-ip-172-20-125-166.us-west-2.compute.internal                1/1     Running   0          1h
+kube-system   etcd-server-ip-172-20-62-206.us-west-2.compute.internal                 1/1     Running   2          1h
+kube-system   etcd-server-ip-172-20-74-158.us-west-2.compute.internal                 1/1     Running   0          1h
+kube-system   kube-apiserver-ip-172-20-125-166.us-west-2.compute.internal             1/1     Running   0          1h
+kube-system   kube-apiserver-ip-172-20-62-206.us-west-2.compute.internal              1/1     Running   3          1h
+kube-system   kube-apiserver-ip-172-20-74-158.us-west-2.compute.internal              1/1     Running   0          1h
+kube-system   kube-controller-manager-ip-172-20-125-166.us-west-2.compute.internal    1/1     Running   0          1h
+kube-system   kube-controller-manager-ip-172-20-62-206.us-west-2.compute.internal     1/1     Running   0          1h
+kube-system   kube-controller-manager-ip-172-20-74-158.us-west-2.compute.internal     1/1     Running   0          1h
 kube-system   kube-dns-5fbcb4d67b-kp2pp                                                   3/3     Running   0          1h
 kube-system   kube-dns-5fbcb4d67b-wg6gv                                                   3/3     Running   0          1h
 kube-system   kube-dns-autoscaler-6874c546dd-tvbhq                                        1/1     Running   0          1h
-kube-system   kube-proxy-ip-172-20-108-58.${aws_region}.compute.internal                  1/1     Running   0          1h
-kube-system   kube-proxy-ip-172-20-125-166.${aws_region}.compute.internal                 1/1     Running   0          1h
-kube-system   kube-proxy-ip-172-20-62-206.${aws_region}.compute.internal                  1/1     Running   0          1h
-kube-system   kube-proxy-ip-172-20-74-158.${aws_region}.compute.internal                  1/1     Running   0          1h
-kube-system   kube-proxy-ip-172-20-88-143.${aws_region}.compute.internal                  1/1     Running   0          1h
-kube-system   kube-scheduler-ip-172-20-125-166.${aws_region}.compute.internal             1/1     Running   0          1h
-kube-system   kube-scheduler-ip-172-20-62-206.${aws_region}.compute.internal              1/1     Running   0          1h
-kube-system   kube-scheduler-ip-172-20-74-158.${aws_region}.compute.internal              1/1     Running   0          1h
+kube-system   kube-proxy-ip-172-20-108-58.us-west-2.compute.internal                  1/1     Running   0          1h
+kube-system   kube-proxy-ip-172-20-125-166.us-west-2.compute.internal                 1/1     Running   0          1h
+kube-system   kube-proxy-ip-172-20-62-206.us-west-2.compute.internal                  1/1     Running   0          1h
+kube-system   kube-proxy-ip-172-20-74-158.us-west-2.compute.internal                  1/1     Running   0          1h
+kube-system   kube-proxy-ip-172-20-88-143.us-west-2.compute.internal                  1/1     Running   0          1h
+kube-system   kube-scheduler-ip-172-20-125-166.us-west-2.compute.internal             1/1     Running   0          1h
+kube-system   kube-scheduler-ip-172-20-62-206.us-west-2.compute.internal              1/1     Running   0          1h
+kube-system   kube-scheduler-ip-172-20-74-158.us-west-2.compute.internal              1/1     Running   0          1h
 ```
 
 </details>

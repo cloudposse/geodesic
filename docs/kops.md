@@ -67,7 +67,7 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_NON_MASQUERADE_CIDR                           | A list of strings in CIDR notation that specify the non-masquerade ranges.                     |
 | KOPS_PRIVATE_SUBNETS                               | Subnet CIDRs for all EC2 instances                                                             |
 | KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `s3://${AWS_REGION}.${DNS_ZONE}`) |
-| KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that descri                                               |
+| KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that describes the cluster                                               |
 | KOPS_UTILITY_SUBNETS                               | Subnet CIDRs for the publically facing services (e.g. ingress ELBs)                            |
 | KUBERNETES_VERSION                                 | Version of Kubernetes to deploy. Must be compatible with the `kops` release.                   |
 | NODE_MACHINE_TYPE                                  | AWS EC2 instance type for the _default_ node pool                                              |

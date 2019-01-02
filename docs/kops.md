@@ -242,7 +242,7 @@ Run the following command to list all nodes:
 kubectl get nodes
 ```
 
-<details><summary>Show Exaple Output</summary>
+<details><summary>Show Example Output</summary>
 
 Below is an example of what it should _roughly_ look like (IPs and Availability Zones may differ).
 

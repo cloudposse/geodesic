@@ -59,7 +59,7 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_CLUSTER_AUTOSCALER_ENABLED                    | Toggle the Kubernetes node autoscaler capability                                               |
 | KOPS_CLUSTER_NAME                                  | Cluster base hostname (E.g. `${AWS_REGION}.${DNS_ZONE}`)                                       |
 | KOPS_DNS_ZONE                                      | Authoritative DNS Zone that will be populated automatically with hostnames                         |
-| KOPS_FEATURE_FLAGS                                 | Enable experimental features that not available by default                                     |
+| KOPS_FEATURE_FLAGS                                 | Enable experimental features that are not available by default                                     |
 | KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE            | Ordered list of plug-ins to do authorization on secure port                                    |
 | KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER | Username of the Kubernetes Super User                                                          |
 | KOPS_MANIFEST                                      | The path to the manifest. Used by `build-kops-manifest`.                                       |

@@ -95,7 +95,7 @@ The process of provisioning a new `kops` cluster takes (3) steps. Here's what it
    - Cluster DNS zone that will be used by kops for service discovery
    - SSH key-pair to access the Kubernetes masters and nodes
 3. **Execute the `kops create` on the manifest file to create the `kops` cluster**
-   - Validate cluster is healthyo
+   - Validate the cluster is healthy
 
 We provide a reference example here in our [`terraform-root-modules/aws/kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) service catalog.
 

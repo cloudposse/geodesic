@@ -1,0 +1,9 @@
+nohup.out
+.terraform
+terraform.tfstate*
+.git
+.idea
+*.iml
+.editorconfig
+build-harness
+.build-harness

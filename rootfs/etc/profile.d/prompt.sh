@@ -71,7 +71,7 @@ function geodesic_prompt() {
 	PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
 
 	if [ -n "${BANNER}" ]; then
-		PS1=$' ${BANNER_MARK}'" ${BANNER}\n"${PS1}
+		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)\n"${PS1}
 	fi
 	export PS1
 }

@@ -17,6 +17,7 @@ emailcli@cloudposse
 figlet
 figurine@cloudposse
 fuse
+fzf
 gettext
 git
 github-commenter@cloudposse

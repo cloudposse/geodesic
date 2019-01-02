@@ -3,7 +3,7 @@
 Kops is one of the easiest ways to get a production grade Kubernetes cluster up and running. The `kops` command line tool (cli) is like `kubectl` for clusters. It handles all the standard CRUD operations necessary to manage the complete life cycle of a cluster.
 
 It is possible to run any number of [kops clusters](http://github.com/kubernetes/kops) within an account. Our "best practice" is to define one cluster per project directory in the `/conf` folder. Then define a `.envrc` ([direnv](https://direnv.net/)) configuration per directory.
-Any settings in this file will be automatically loaded when you `cd` in to the directory. Alternatively, they can be executed explicitly by running `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD GitOps-style pipeline.
+Any settings in this file will be automatically loaded when you `cd` into the directory. Alternatively, they can be executed explicitly by running `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD GitOps-style pipeline.
 
 ## Table of Contents
 
@@ -57,17 +57,17 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_BASTION_PUBLIC_NAME                           | Hostname that will be used for the bastion instance                                            |
 | KOPS_CLOUDWATCH_DETAILED_MONITORING                | Toggle detailed CloudWatch monitoring (increases operating costs)                              |
 | KOPS_CLUSTER_AUTOSCALER_ENABLED                    | Toggle the Kubernetes node autoscaler capability                                               |
-| KOPS_CLUSTER_NAME                                  | Cluster base hostname (E.g. `us-west-2.${DNS_ZONE}`)                                       |
-| KOPS_DNS_ZONE                                      | Authoritative DNS Zone that will be populated automatic with hostnames                         |
-| KOPS_FEATURE_FLAGS                                 | Enable experimental features that not available by default                                     |
+| KOPS_CLUSTER_NAME                                  | Cluster base hostname (E.g. `${AWS_REGION}.${DNS_ZONE}`)                                       |
+| KOPS_DNS_ZONE                                      | Authoritative DNS Zone that will be populated automatically with hostnames                         |
+| KOPS_FEATURE_FLAGS                                 | Enable experimental features that are not available by default                                     |
 | KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE            | Ordered list of plug-ins to do authorization on secure port                                    |
 | KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER | Username of the Kubernetes Super User                                                          |
 | KOPS_MANIFEST                                      | The path to the manifest. Used by `build-kops-manifest`.                                       |
 | KOPS_NETWORK_CIDR                                  | The network used by kubernetes for `Pods` and `Services` in the cluster                        |
 | KOPS_NON_MASQUERADE_CIDR                           | A list of strings in CIDR notation that specify the non-masquerade ranges.                     |
 | KOPS_PRIVATE_SUBNETS                               | Subnet CIDRs for all EC2 instances                                                             |
-| KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `s3://us-west-2.${DNS_ZONE}`) |
-| KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that descri                                               |
+| KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `s3://${AWS_REGION}.${DNS_ZONE}`) |
+| KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that describes the cluster                                               |
 | KOPS_UTILITY_SUBNETS                               | Subnet CIDRs for the publically facing services (e.g. ingress ELBs)                            |
 | KUBERNETES_VERSION                                 | Version of Kubernetes to deploy. Must be compatible with the `kops` release.                   |
 | NODE_MACHINE_TYPE                                  | AWS EC2 instance type for the _default_ node pool                                              |
@@ -102,14 +102,13 @@ The process of provisioning a new `kops` cluster takes (3) steps. Here's what it
    - Write settings to SSM Parameter Store.
 3. **Execute the `kops create` on the manifest file to create the `kops` cluster**
    - Build the manifest.
-   - Validate the cluster is health.
+   - Validate the cluster is healthy.
 
 
 We provide a reference example here in our [`terraform-root-modules/aws/kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) service catalog for provisioning everything needed by `kops` on AWS.
 
 
 **IMPORTANT** For the purpose of this documentation, we will assume all the settings are in the `.envrc`. If you want to use `chamber` (recommended), then prefix all commands below with `chamber exec kops --`. (E.g. `chamber exec kops -- build-kops-manifest` or `chamber exec kops -- kops export kubecfg`). This will export the environment variables found in the `kops` service namespace using chamber.
-
 
 ### Configure Environment Settings
 
@@ -181,7 +180,7 @@ build-kops-manifest
 
 **NOTE**: you can override the `KOPS_TEMPLATE` to specify an alternative path to the manifest template file.
 
-Run the following command to create the cluster. This will just initialize the cluster state, which involves writing writing a state file to the S3 bucket. It does not actually provision any AWS resources for the cluster.
+Run the following command to create the cluster. This will just initialize the cluster state, which involves writing a state file to the S3 bucket. It does not actually provision any AWS resources for the cluster.
 
 ```bash
 kops create -f manifest.yaml
@@ -259,7 +258,7 @@ Run the following command to list all nodes:
 kubectl get nodes
 ```
 
-<details><summary>Show Exaple Output</summary>
+<details><summary>Show Example Output</summary>
 
 Below is an example of what it should _roughly_ look like (IPs and Availability Zones may differ).
 
@@ -282,7 +281,7 @@ Run the following command to list all pods:
 kubectl get pods --all-namespaces
 ```
 
-<details><summary>Show Exapmle Output</summary>
+<details><summary>Show Example Output</summary>
 
 Below is an example of what it should _roughly_ look like (IPs and Availability Zones may differ).
 
@@ -339,7 +338,7 @@ To upgrade the cluster or change settings (_e.g_. number of nodes, instance type
 2. Rebuild Docker image (`make docker/build`)
 3. Run `geodesic` shell (e.g. by running the wrapper script `example.company.co`)
    - assume role (`assume-role`) 
-   - change directory to the `/conf/kops` folder (or which ever project folder contains your kops configurations)
+   - change directory to the `/conf/kops` folder (or whichever project folder contains your kops configurations)
 4. Run `kops export kubecfg` to get the cluster context
 5. Run `kops replace -f manifest.yaml` to replace the cluster resources (update state)
 6. Run `kops update cluster` to view a plan of changes

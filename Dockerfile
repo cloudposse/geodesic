@@ -178,6 +178,13 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
 
+# 
+# Install fancy Kube PS1 Prompt
+#
+ENV KUBE_PS1_VERSION 0.6.0
+ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/
+
+
 #
 # Terraform defaults
 #

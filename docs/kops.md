@@ -3,7 +3,7 @@
 Kops is one of the easiest ways to get a production grade Kubernetes cluster up and running. The `kops` command line tool (cli) is like `kubectl` for clusters. It handles all the standard CRUD operations necessary to manage the complete life cycle of a cluster.
 
 It is possible to run any number of [kops clusters](http://github.com/kubernetes/kops) within an account. Our "best practice" is to define one cluster per project directory in the `/conf` folder. Then define a `.envrc` ([direnv](https://direnv.net/)) configuration per directory.
-Any settings in this file will be automatically loaded when you `cd` in to the directory. Alternatively, they can be executed explicitly by running `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD GitOps-style pipeline.
+Any settings in this file will be automatically loaded when you `cd` into the directory. Alternatively, they can be executed explicitly by running `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD GitOps-style pipeline.
 
 ## Table of Contents
 

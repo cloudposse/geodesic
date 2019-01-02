@@ -265,7 +265,7 @@ Run the following command to list all pods:
 kubectl get pods --all-namespaces
 ```
 
-<details><summary>Show Exapmle Output</summary>
+<details><summary>Show Example Output</summary>
 
 Below is an example of what it should _roughly_ look like (IPs and Availability Zones may differ).
 

@@ -322,7 +322,7 @@ To upgrade the cluster or change settings (_e.g_. number of nodes, instance type
 2. Rebuild Docker image (`make docker/build`)
 3. Run `geodesic` shell (e.g. by running the wrapper script `example.company.co`)
    - assume role (`assume-role`) 
-   - change directory to the `/conf/kops` folder (or which ever project folder contains your kops configurations)
+   - change directory to the `/conf/kops` folder (or whichever project folder contains your kops configurations)
 4. Run `kops export kubecfg` to get the cluster context
 5. Run `kops replace -f manifest.yaml` to replace the cluster resources (update state)
 6. Run `kops update cluster` to view a plan of changes

@@ -18,6 +18,7 @@ fi
 	exit 1
 )
 
+[ -z "${TF_MODULE}" ] || TF_ARGS+=("-from-module=${TF_MODULE}")
 [ -z "${TF_BUCKET}" ] || TF_ARGS+=("-backend-config=bucket=${TF_BUCKET}")
 [ -z "${TF_BUCKET_REGION}" ] || TF_ARGS+=("-backend-config=region=${TF_BUCKET_REGION}")
 [ -z "${TF_DYNAMODB_TABLE}" ] || TF_ARGS+=("-backend-config=dynamodb_table=${TF_DYNAMODB_TABLE}")
@@ -26,4 +27,4 @@ fi
 
 s3 mount
 
-exec terraform init ${TF_ARGS[@]}
+exec terraform init ${TF_ARGS[@]} $*

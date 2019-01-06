@@ -4,6 +4,7 @@
 shopt -s nullglob
 TF_BUCKET_REGION=${TF_BUCKET_REGION:-${AWS_REGION}}
 TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename $(pwd))}
+TF_DIR=${@:-1}
 TF_FILE=${TF_FILE:-terraform.tfstate}
 TF_FILES=(*.tf *.tfvars)
 TF_ARGS=("-backend=true")
@@ -28,4 +29,9 @@ fi
 
 s3 mount
 
-exec terraform init ${TF_ARGS[@]} $*
+terraform init ${TF_ARGS[@]} $*
+
+if [ -d "${TF_DIR}" ] && [ -n "${TF_FILES}" ]; then
+	cp ${TF_FILES} "${TF_DIR}"
+fi
+

@@ -5,20 +5,21 @@ shopt -s nullglob
 TF_BUCKET_REGION=${TF_BUCKET_REGION:-${AWS_REGION}}
 TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename $(pwd))}
 TF_FILE=${TF_FILE:-terraform.tfstate}
-TF_FILES=(*.tf)
-TF_ARGS=("-backend=true" "-backend-config=key=${TF_BUCKET_PREFIX}/${TF_FILE}")
+TF_FILES=(*.tf *.tfvars)
+TF_ARGS=("-backend=true")
 
 # Disable color if not running in a TTY
 if [ ! -t 1 ]; then
 	TF_ARGS+=("-no-color")
 fi
 
-[ ! -z ${TF_FILES} ] || (
+if [ ! -z ${TF_FILES} ] && [ -z "${TF_FROM_MODULE}" ]; then
 	echo "Run $0 from a terraform project directory"
 	exit 1
-)
+fi
 
 [ -z "${TF_FROM_MODULE}" ] || TF_ARGS+=("-from-module=${TF_FROM_MODULE}")
+[ -z "${TF_FILE}" ] || TF_ARGS+=("-backend-config=key=${TF_BUCKET_PREFIX}/${TF_FILE}")
 [ -z "${TF_BUCKET}" ] || TF_ARGS+=("-backend-config=bucket=${TF_BUCKET}")
 [ -z "${TF_BUCKET_REGION}" ] || TF_ARGS+=("-backend-config=region=${TF_BUCKET_REGION}")
 [ -z "${TF_DYNAMODB_TABLE}" ] || TF_ARGS+=("-backend-config=dynamodb_table=${TF_DYNAMODB_TABLE}")

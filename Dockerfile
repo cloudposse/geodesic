@@ -189,11 +189,6 @@ ENV KUBE_PS1_VERSION 0.6.0
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #
-# Terraform defaults
-#
-ENV TF_PLUGIN_CACHE_DIR=/localhost/.terraform.d/plugins
-
-#
 # AWS
 #
 ENV AWS_DATA_PATH=/localhost/.aws/

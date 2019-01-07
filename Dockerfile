@@ -160,8 +160,7 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
 # Install fancy Kube PS1 Prompt
 #
 ENV KUBE_PS1_VERSION 0.6.0
-ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/
-
+ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #
 # Terraform defaults

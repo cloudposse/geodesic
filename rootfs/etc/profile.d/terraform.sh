@@ -13,3 +13,6 @@ function terraform_prompt() {
 if [ -x '/usr/bin/terraform' ]; then
 	complete -C /usr/bin/terraform terraform
 fi
+
+# Set default plugin cache dir
+export TF_PLUGIN_CACHE_DIR="${TF_PLUGIN_CACHE_DIR:-/localhost/.terraform.d/plugins}"

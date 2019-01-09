@@ -10,6 +10,9 @@ TF_FILES=(*.tf *.tfvars)
 TF_ARGS=("-backend=true")
 shopt -u nullglob
 
+# Exit on all errors
+set -e
+
 # Disable color if not running in a TTY (e.g. CI/CD context)
 if [ ! -t 1 ]; then
 	TF_ARGS+=("-no-color")
@@ -36,9 +39,10 @@ mount -a
 # Initialize terraform state
 terraform init ${TF_ARGS[*]} $*
 
-# Copy the current directory configuration & state to the module
-if [ -d "${TF_DIR}" ] && [ -n "${TF_FILES}" ] && [ -n "${TF_FROM_MODULE}" ]; then
+# Provision the module directory (unless it's our current directory)
+if [ -d "${TF_DIR}" ] && [ -n "${TF_FROM_MODULE}" ] && [ "$(cd ${TF_DIR} && pwd)" != "$(pwd)" ]; then
+	# Overlay our configuration files in the module directory
+	[ -n "${TF_FILES}" ] && cp -a ${TF_FILES} "${TF_DIR}"
+	# Move the terraform state directory
 	mv -f .terraform "${TF_DIR}"
-	cp -a ${TF_FILES} "${TF_DIR}"
 fi
-

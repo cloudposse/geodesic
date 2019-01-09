@@ -8,17 +8,20 @@ TF_DIR=${@:-1}
 TF_FILE=${TF_FILE:-terraform.tfstate}
 TF_FILES=(*.tf *.tfvars)
 TF_ARGS=("-backend=true")
+shopt -u nullglob
 
-# Disable color if not running in a TTY
+# Disable color if not running in a TTY (e.g. CI/CD context)
 if [ ! -t 1 ]; then
 	TF_ARGS+=("-no-color")
 fi
 
-if [ ! -z ${TF_FILES} ] && [ -z "${TF_FROM_MODULE}" ]; then
+# Do not attempt to initialize non-terraform projects
+if [ -z "${TF_FILES}" ] && [ -z "${TF_FROM_MODULE}" ]; then
 	echo "Run $0 from a terraform project directory"
 	exit 1
 fi
 
+# Translate environment variables to terraform arguments
 [ -z "${TF_FROM_MODULE}" ] || TF_ARGS+=("-from-module=${TF_FROM_MODULE}")
 [ -z "${TF_FILE}" ] || TF_ARGS+=("-backend-config=key=${TF_BUCKET_PREFIX}/${TF_FILE}")
 [ -z "${TF_BUCKET}" ] || TF_ARGS+=("-backend-config=bucket=${TF_BUCKET}")
@@ -27,11 +30,15 @@ fi
 [ -z "${AWS_PROFILE}" ] || TF_ARGS+=("-backend-config=profile=${AWS_PROFILE}")
 [ -z "${AWS_ROLE_ARN}" ] || TF_ARGS+=("-backend-config=role_arn=${AWS_ROLE_ARN}")
 
-s3 mount
+# Mount all filesystems (E.g. `goofys`)
+mount -a
 
-terraform init ${TF_ARGS[@]} $*
+# Initialize terraform state
+terraform init ${TF_ARGS[*]} $*
 
-if [ -d "${TF_DIR}" ] && [ -n "${TF_FILES}" ]; then
-	cp ${TF_FILES} "${TF_DIR}"
+# Copy the current directory configuration & state to the module
+if [ -d "${TF_DIR}" ] && [ -n "${TF_FILES}" ] && [ -n "${TF_FROM_MODULE}" ]; then
+	mv -f .terraform "${TF_DIR}"
+	cp -a ${TF_FILES} "${TF_DIR}"
 fi
 

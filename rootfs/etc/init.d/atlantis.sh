@@ -36,7 +36,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	export ATLANTIS_CHAMBER_SERVICE=${ATLANTIS_CHAMBER_SERVICE:-atlantis}
 
 	# Export environment from chamber to shell
-	eval $(chamber exec ${ATLANTIS_CHAMBER_SERVICE} -- sh -c "export -p")
+	source <(chamber exec ${ATLANTIS_CHAMBER_SERVICE} -- sh -c "export -p")
 
 	# Set some defaults if none provided
 	export ATLANTIS_USER=${ATLANTIS_USER:-atlantis}
@@ -55,7 +55,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 
 	# Add SSH key to agent, if one is configured so we can pull from private git repos
 	if [ -n "${ATLANTIS_SSH_PRIVATE_KEY}" ]; then
-		eval $(ssh-agent -s)
+		source <(ssh-agent -s)
 		ssh-add - <<<${ATLANTIS_SSH_PRIVATE_KEY}
 		# Sanitize environment
 		unset ATLANTIS_SSH_PRIVATE_KEY
@@ -66,7 +66,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	fi
 
 	# Export current environment to terraform style environment variables
-	eval $(tfenv sh -c "export -p")
+	source <(tfenv sh -c "export -p")
 
 	exec dumb-init gosu ${ATLANTIS_USER} atlantis server
 fi

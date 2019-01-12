@@ -2,7 +2,7 @@
 
 # Start the atlantis server
 if [ "${ATLANTIS_ENABLED}" == "true" ]; then
-	which -s atlantis
+	which atlantis >/dev/null
 	if [ $? -ne 0 ]; then
 		echo "Atlantis is not installed"
 		exit 1

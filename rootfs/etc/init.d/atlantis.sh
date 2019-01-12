@@ -27,6 +27,12 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 		echo "WARN: TF_LOG is set which may expose secrets"
 	fi
 
+	# Disable prompts for variables that haven't had their values specified
+	export TF_INPUT=false
+
+	# Disable color terminals (direnv)
+	export TERM=dumb
+
 	# Export environment from chamber to shell
 	eval $(chamber exec ${ATLANTIS_CHAMBER_SERVICE} -- sh -c "export -p")
 

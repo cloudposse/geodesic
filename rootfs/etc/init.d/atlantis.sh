@@ -56,11 +56,11 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	fi
 
 	# Add SSH key to agent, if one is configured so we can pull from private git repos
-	if [ -n "${ATLANTIS_SSH_KEY}" ]; then
+	if [ -n "${ATLANTIS_SSH_PRIVATE_KEY}" ]; then
 		eval $(ssh-agent -s)
-		ssh-add - <<<${ATLANTIS_SSH_KEY}
+		ssh-add - <<<${ATLANTIS_SSH_PRIVATE_KEY}
 		# Sanitize environment
-		unset ATLANTIS_SSH_KEY
+		unset ATLANTIS_SSH_PRIVATE_KEY
 	fi
 
 	if [ -n "${ATLANTIS_ALLOW_PRIVILEGED_PORTS}" ]; then

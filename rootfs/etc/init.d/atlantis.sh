@@ -5,7 +5,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	which -s atlantis
 	if [ $? -ne 0 ]; then
 		echo "Atlantis is not installed"
-		exit 0
+		exit 1
 	fi
 
 	echo "Starting atlantis server..."
@@ -16,13 +16,14 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	export ATLANTIS_CHAMBER_SERVICE=${ATLANTIS_CHAMBER_SERVICE:-atlantis}
 	export ATLANTIS_HOME=${ATLANTIS_HOME:-/conf/atlantis}
 
+	# Add SSH key to agent if one configured so we can pull from private git repos
 	if [ -n "${ATLANTIS_SSH_KEY}" ]; then
 		eval $(ssh-agent -s)
 		ssh-add - <<<${ATLANTIS_SSH_KEY}
 		unset ATLANTIS_SSH_KEY
 	fi
 
-	# Unset settings which don't make sense when operating as a standalone server
+	# Unset settings which don't make sense when operating as a standalone server that should use IAM roles
 	unset AWS_DEFAULT_PROFILE
 	unset AWS_PROFILE
 	unset AWS_MFA_PROFILE
@@ -31,9 +32,15 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 		echo "WARN: CHAMBER_KMS_KEY_ALIAS is not set"
 	fi
 
+	# Download plugins to /var/lib/cache to speed up applies
+	export TF_PLUGIN_CACHE_DIR=${TF_PLUGIN_CACHE_DIR:-/var/lib/terraform}
+
 	if [ -n "${TF_LOG}" ]; then
 		echo "WARN: TF_LOG is set which may expose secrets"
 	fi
+
+	# Export current environment to terraform style environment variables
+	eval $(tfenv sh -c "export -p")
 
 	# create atlantis user & group
 	(getent group ${ATLANTIS_GROUP} || addgroup ${ATLANTIS_GROUP}) >/dev/null

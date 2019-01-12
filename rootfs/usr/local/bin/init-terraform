@@ -8,6 +8,8 @@ TF_DIR=${@:-1}
 TF_FILE=${TF_FILE:-terraform.tfstate}
 TF_FILES=(*.tf *.tfvars)
 TF_ARGS=("-backend=true")
+
+# When using globs, return an empty string when no files found
 shopt -u nullglob
 
 # Exit on all errors
@@ -33,8 +35,8 @@ fi
 [ -z "${AWS_PROFILE}" ] || TF_ARGS+=("-backend-config=profile=${AWS_PROFILE}")
 [ -z "${AWS_ROLE_ARN}" ] || TF_ARGS+=("-backend-config=role_arn=${AWS_ROLE_ARN}")
 
-# Mount all filesystems (E.g. `goofys`)
-mount -a
+# Mount all filesystems (E.g. `goofys` S3 filesystem)
+[ $UID -ne 0 ] || mount -a
 
 # Initialize terraform state
 terraform init ${TF_ARGS[*]} $*

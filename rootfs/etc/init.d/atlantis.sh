@@ -33,16 +33,14 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	# Disable color terminals (direnv)
 	export TERM=dumb
 
+	export ATLANTIS_CHAMBER_SERVICE=${ATLANTIS_CHAMBER_SERVICE:-atlantis}
+
 	# Export environment from chamber to shell
 	eval $(chamber exec ${ATLANTIS_CHAMBER_SERVICE} -- sh -c "export -p")
-
-	# Export current environment to terraform style environment variables
-	eval $(tfenv sh -c "export -p")
 
 	# Set some defaults if none provided
 	export ATLANTIS_USER=${ATLANTIS_USER:-atlantis}
 	export ATLANTIS_GROUP=${ATLANTIS_GROUP:-atlantis}
-	export ATLANTIS_CHAMBER_SERVICE=${ATLANTIS_CHAMBER_SERVICE:-atlantis}
 	export ATLANTIS_HOME=${ATLANTIS_HOME:-/conf/atlantis}
 
 	# create atlantis user & group
@@ -66,5 +64,9 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	if [ -n "${ATLANTIS_ALLOW_PRIVILEGED_PORTS}" ]; then
 		setcap "cap_net_bind_service=+ep" $(which atlantis)
 	fi
+
+	# Export current environment to terraform style environment variables
+	eval $(tfenv sh -c "export -p")
+
 	exec dumb-init gosu ${ATLANTIS_USER} atlantis server
 fi

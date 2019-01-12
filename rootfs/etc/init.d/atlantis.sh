@@ -47,6 +47,9 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	(getent group ${ATLANTIS_GROUP} || addgroup ${ATLANTIS_GROUP}) >/dev/null
 	(getent passwd ${ATLANTIS_USER} || adduser -h ${ATLANTIS_HOME} -S -G ${ATLANTIS_GROUP} ${ATLANTIS_USER}) >/dev/null
 
+	# Provision terraform cache directory
+	install --directory ${TF_PLUGIN_CACHE_DIR} --owner ${ATLANTIS_USER} --group ${ATLANTIS_GROUP}
+
 	# Allow atlantis to use /dev/shm
 	if [ -d /dev/shm ]; then
 		chown "${ATLANTIS_USER}:${ATLANTIS_GROUP}" /dev/shm

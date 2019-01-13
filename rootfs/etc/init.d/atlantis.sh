@@ -30,6 +30,9 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	# Disable prompts for variables that haven't had their values specified
 	export TF_INPUT=false
 
+	# Disable color on all terraform commands
+	export TF_CLI_ARGS="${TF_CLI_ARGS:--no-color}"
+
 	# Disable color terminals (direnv)
 	export TERM=dumb
 
@@ -72,6 +75,9 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	if [ -n "${ATLANTIS_ALLOW_PRIVILEGED_PORTS}" ]; then
 		setcap "cap_net_bind_service=+ep" $(which atlantis)
 	fi
+
+	# Do not export these as Terraform environment variables
+	export TFENV_BLACKLIST="^(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|AWS_SECURITY_TOKEN|AWS_SESSION_TOKEN|ATLANTIS_.*|GITHUB_.*)$"
 
 	# Export current environment to terraform style environment variables
 	source <(tfenv sh -c "export -p")

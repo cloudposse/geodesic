@@ -38,6 +38,11 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	# Export environment from chamber to shell
 	source <(chamber exec ${ATLANTIS_CHAMBER_SERVICE} -- sh -c "export -p")
 
+	if [ -n "${ATLANTIS_IAM_ROLE_ARN}" ]; then
+		# Map the Atlantis IAM Role ARN to the env we use everywhere in our root modules
+		export TF_VAR_aws_assume_role_arn=${ATLANTIS_IAM_ROLE_ARN}
+	fi
+
 	# Set some defaults if none provided
 	export ATLANTIS_USER=${ATLANTIS_USER:-atlantis}
 	export ATLANTIS_GROUP=${ATLANTIS_GROUP:-atlantis}

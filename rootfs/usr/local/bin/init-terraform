@@ -1,29 +1,44 @@
 #!/usr/bin/env bash
 # This script sets up a Terraform backend for a given project using envs
 
+echo "DEPRECATED: $0 is no longer needed. Use \`tfenv\` instead."
+
 shopt -s nullglob
 TF_BUCKET_REGION=${TF_BUCKET_REGION:-${AWS_REGION}}
 TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename $(pwd))}
 TF_FILE=${TF_FILE:-terraform.tfstate}
-TF_FILES=(*.tf)
-TF_ARGS=("-backend=true" "-backend-config=key=${TF_BUCKET_PREFIX}/${TF_FILE}")
+TF_FILES=(*.tf *.tfvars)
 
-# Disable color if not running in a TTY
+# When using globs, return an empty string when no files found
+shopt -u nullglob
+
+# Exit on all errors
+set -e
+
+# Disable color if not running in a TTY (e.g. CI/CD context)
 if [ ! -t 1 ]; then
-	TF_ARGS+=("-no-color")
+	export TF_CLI_DEFAULT_NO_COLOR=true
 fi
 
-[ ! -z ${TF_FILES} ] || (
+# Do not attempt to initialize non-terraform projects
+if [ -z "${TF_FILES}" ] && [ -z "${TF_FROM_MODULE}" ]; then
 	echo "Run $0 from a terraform project directory"
 	exit 1
-)
+fi
 
-[ -z "${TF_BUCKET}" ] || TF_ARGS+=("-backend-config=bucket=${TF_BUCKET}")
-[ -z "${TF_BUCKET_REGION}" ] || TF_ARGS+=("-backend-config=region=${TF_BUCKET_REGION}")
-[ -z "${TF_DYNAMODB_TABLE}" ] || TF_ARGS+=("-backend-config=dynamodb_table=${TF_DYNAMODB_TABLE}")
-[ -z "${AWS_PROFILE}" ] || TF_ARGS+=("-backend-config=profile=${AWS_PROFILE}")
-[ -z "${AWS_ROLE_ARN}" ] || TF_ARGS+=("-backend-config=role_arn=${AWS_ROLE_ARN}")
+# Translate environment variables to terraform arguments
+[ -z "${TF_FROM_MODULE}" ] || export TF_CLI_INIT_FROM_MODULE="${TF_FROM_MODULE}"
+[ -z "${TF_FILE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_KEY="${TF_BUCKET_PREFIX}/${TF_FILE}"
+[ -z "${TF_BUCKET}" ] || export TF_CLI_INIT_BACKEND_CONFIG_BUCKET="${TF_BUCKET}"
+[ -z "${TF_BUCKET_REGION}" ] || export TF_CLI_INIT_BACKEND_CONFIG_REGION="${TF_BUCKET_REGION}"
+[ -z "${TF_DYNAMODB_TABLE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_DYNAMODB_TABLE="${TF_DYNAMODB_TABLE}"
+[ -z "${AWS_PROFILE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_PROFILE="${AWS_PROFILE}"
+[ -z "${AWS_ROLE_ARN}" ] || export TF_CLI_INIT_BACKEND_CONFIG_ROLE_ARN="${AWS_ROLE_ARN}"
 
-s3 mount
+# Mount all filesystems (E.g. `goofys` S3 filesystem)
+[ $UID -ne 0 ] || mount -a
 
-exec terraform init ${TF_ARGS[@]}
+source <(tfenv)
+
+# Initialize terraform state
+terraform init

@@ -80,7 +80,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	export TFENV_BLACKLIST="^(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|AWS_SECURITY_TOKEN|AWS_SESSION_TOKEN|ATLANTIS_.*|GITHUB_.*)$"
 
 	# Export current environment to terraform style environment variables
-	source <(tfenv sh -c "export -p")
+	source <(tfenv)
 
 	exec dumb-init gosu ${ATLANTIS_USER} atlantis server
 fi

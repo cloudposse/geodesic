@@ -54,7 +54,7 @@ syslog-ng
 tar
 terraform@cloudposse
 terragrunt@cloudposse
-tfenv@cloudposse==0.2.1-r0
+tfenv@cloudposse==0.2.2-r0
 unzip
 util-linux
 vim

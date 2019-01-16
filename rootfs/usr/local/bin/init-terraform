@@ -24,6 +24,8 @@ fi
 # Mount all filesystems (E.g. `goofys` S3 filesystem)
 [ $UID -ne 0 ] || mount -a
 
+use_terraform
+
 source <(tfenv)
 
 # Initialize terraform state

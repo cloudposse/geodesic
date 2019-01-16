@@ -79,5 +79,9 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	# Do not export these as Terraform environment variables
 	export TFENV_BLACKLIST="^(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|AWS_SECURITY_TOKEN|AWS_SESSION_TOKEN|ATLANTIS_.*|GITHUB_.*)$"
 
-	exec dumb-init gosu ${ATLANTIS_USER} atlantis server
+	# Use a primitive init handler to catch signals and handle them properly
+	# Use gosu to drop privileges
+	# Use env to setup the shell environment for atlantis
+	# Then lastly, start the atlantis server
+	exec dumb-init gosu ${ATLANTIS_USER} env BASH_ENV=/etc/direnv/bash atlantis server
 fi

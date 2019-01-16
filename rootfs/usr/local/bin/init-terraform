@@ -8,7 +8,6 @@ source /etc/direnv/direnvrc
 
 # When using globs, return an empty string when no files found
 shopt -s nullglob
-TF_FILE=${TF_FILE:-terraform.tfstate}
 TF_FILES=(*.tf *.tfvars)
 shopt -u nullglob
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# This script sets up defaults
+
+# This file extends the `direnv` stdlib.
+# Read more: <https://direnv.net/#man/direnv-stdlib.1>
 
 # Terraform backend for a given project using envs
 export TF_BUCKET_REGION=${TF_BUCKET_REGION:-${AWS_REGION}}

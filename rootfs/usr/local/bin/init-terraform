@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # This script sets up a Terraform backend for a given project using envs
 
-source tfconfig
-
 echo "DEPRECATED: $0 is no longer needed. Use \`tfenv\` instead."
+
+# Settings have moved to `direnvrc`
+source /etc/direnv/direnvrc
 
 # When using globs, return an empty string when no files found
 shopt -s nullglob

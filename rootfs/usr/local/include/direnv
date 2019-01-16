@@ -1,0 +1,4 @@
+ifeq ($(DIRENV_DIR),)
+# Use `direnv` as a shell, unless we're already running in a `direnv` context
+export SHELL:=direnv exec . $(SHELL)
+endif

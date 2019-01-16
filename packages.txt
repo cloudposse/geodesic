@@ -45,6 +45,7 @@ openssh-client
 openssl
 pwgen
 python
+scenery@cloudposse
 shellcheck@cloudposse
 shfmt@cloudposse
 sops@cloudposse
@@ -54,8 +55,10 @@ syslog-ng
 tar
 terraform@cloudposse
 terragrunt@cloudposse
+terrahelp@cloudposse
 tfenv@cloudposse==0.2.2-r0
 unzip
 util-linux
+variant@cloudposse
 vim
 yq@cloudposse

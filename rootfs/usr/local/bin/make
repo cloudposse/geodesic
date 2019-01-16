@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# This implements a FreeBSD-style `make.conf`
+# Read more: <https://www.freebsd.org/cgi/man.cgi?make.conf(5)>
+exec /usr/bin/make --file=${MAKE_CONF:-/etc/make.conf} $@

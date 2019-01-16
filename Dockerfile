@@ -203,6 +203,9 @@ ENV SHELL=/bin/bash
 ENV LESS=-Xr
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
+# Silence make debug output
+ENV MAKEFLAGS=-s
+
 # This is not a "multi-user" system, so we'll use `/etc` as the global configuration dir
 # Read more: <https://wiki.archlinux.org/index.php/XDG_Base_Directory>
 ENV XDG_CONFIG_HOME=/etc

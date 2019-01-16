@@ -1,0 +1,14 @@
+# This is a `BASH_ENV` script to load `direnv` configuration inside of shell scripts
+# https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html
+
+# Prevent recursion
+unset BASH_ENV
+
+# Disable `direnv` output
+export DIRENV_LOG_FORMAT=
+
+# Allow current working directory
+[ ! -f .envrc ] || direnv allow .
+
+# Process the `.envrc`
+eval "$(direnv export bash)"

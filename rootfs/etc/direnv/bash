@@ -4,11 +4,13 @@
 # Prevent recursion
 unset BASH_ENV
 
-# Disable `direnv` output
+# Disable `direnv` output for scripts
 export DIRENV_LOG_FORMAT=
 
-# Allow current working directory
-[ ! -f .envrc ] || direnv allow .
+# Allow current working directory (if we have permission)
+if [ -f .envrc ] && [ -w /etc/direnv/allow ]; then
+	direnv allow .
+fi
 
 # Process the `.envrc`
 eval "$(direnv export bash)"

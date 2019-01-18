@@ -31,7 +31,10 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	export TF_INPUT=false
 
 	# Disable color on all terraform commands
-	export TF_CLI_ARGS="${TF_CLI_ARGS:--no-color}"
+	export TF_CLI_DEFAULT_NO_COLOR=true
+
+	# Auto approve apply
+	export TF_CLI_APPLY_AUTO_APPROVE=true
 
 	# Disable color terminals (direnv)
 	export TERM=dumb

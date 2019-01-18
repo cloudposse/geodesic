@@ -45,6 +45,7 @@ openssh-client
 openssl
 pwgen
 python
+retry@cloudposse
 scenery@cloudposse
 shellcheck@cloudposse
 shfmt@cloudposse

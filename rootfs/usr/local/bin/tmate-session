@@ -1,14 +1,5 @@
 #!/usr/bin/env bash
 
-export TMATE_SOCK=${TMATE_SOCK:-/tmp/tmate.sock}
-export HOME=/root
-export TMATE_SSH_KEY="${TMATE_SSH_KEY:-/root/.ssh/id_rsa}"
-export TMATE_SESSION_TIMEOUT=${TMATE_SESSION_TIMEOUT:-600}
-export TMATE_START_TIME=$(date +%s)
-
-# Ensure that `tmate` is installed
-which tmate >/dev/null 2>&1 || (echo "tmate not installed" && exit 1)
-
 function parse_args() {
 	while [[ $1 ]]; do
 		case "$1" in
@@ -30,6 +21,12 @@ function parse_args() {
 			;;
 		esac
 	done
+}
+
+function home() {
+	# `tmate` strictly expects SSH keys to reside in the current user's home directory
+	# It does not appear to respect the `HOME` environment variable
+	getent passwd $(whoami) | cut -d: -f6
 }
 
 function elapsed() {
@@ -120,12 +117,29 @@ function tmate_server() {
 	done
 }
 
-# Handle interrupts
-trap ctrl_c INT
+function main() {
 
-# Part command line arguments
-parse_args $@
+	# Ensure that `tmate` is installed
+	if ! which tmate >/dev/null 2>&1; then
+		echo "[ERROR] tmate not installed"
+		exit 1
+	fi
 
-# Clean up
-trap - INT
-unset -f ctrl_c
+	# Handle interrupts
+	trap ctrl_c INT
+
+	export TMATE_SOCK=${TMATE_SOCK:-/tmp/tmate.sock}
+	export HOME=$(home)
+	export TMATE_SSH_KEY="${TMATE_SSH_KEY:-${HOME}/.ssh/id_rsa}"
+	export TMATE_SESSION_TIMEOUT=${TMATE_SESSION_TIMEOUT:-600}
+	export TMATE_START_TIME=$(date +%s)
+
+	# Part command line arguments
+	parse_args $@
+
+	# Clean up
+	trap - INT
+	unset -f ctrl_c
+}
+
+main $@

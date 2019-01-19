@@ -3,6 +3,8 @@
 export TMATE_SOCK=${TMATE_SOCK:-/tmp/tmate.sock}
 export HOME=/root
 export TMATE_SSH_KEY="${TMATE_SSH_KEY:-/root/.ssh/id_rsa}"
+export TMATE_SESSION_TIMEOUT=${TMATE_SESSION_TIMEOUT:-600}
+export TMATE_START_TIME=$(date +%s)
 
 # Ensure that `tmate` is installed
 which tmate >/dev/null 2>&1 || (echo "tmate not installed" && exit 1)
@@ -10,16 +12,16 @@ which tmate >/dev/null 2>&1 || (echo "tmate not installed" && exit 1)
 function parse_args() {
 	while [[ $1 ]]; do
 		case "$1" in
-		-d | --server-mode)
-			server_mode
+		-d | --server)
+			tmate_server
 			shift
 			;;
-		-1 | --once)
-			tmate_session
+		-1 | --start)
+			tmate_start
 			shift
 			;;
 		-k | --stop)
-			killall tmate
+			tmate_stop
 			shift
 			;;
 		*)
@@ -28,6 +30,20 @@ function parse_args() {
 			;;
 		esac
 	done
+}
+
+function elapsed() {
+	local NOW=$(date +%s)
+	echo $((NOW - TMATE_START_TIME))
+}
+
+function timeout() {
+	local elapsed=$(elapsed)
+  if [ $elapsed -gt ${TMATE_SESSION_TIMEOUT} ]; then
+		echo "[INFO] Session expired after $elapsed seconds"
+    tmate_stop
+		exit 1
+	fi
 }
 
 function ssh_keygen() {
@@ -46,11 +62,17 @@ function wait_pid() {
 		exit 1
 	fi
 	while [ -e /proc/$1 ]; do
+		timeout
 		sleep 1
 	done
 }
 
-function tmate_session() {
+function tmate_stop() {
+  killall tmate
+	echo "[INFO] Server stopped"
+}
+
+function tmate_start() {
 	if [ -e "${TMATE_SOCK}" ]; then
 		echo "[ERROR] tmate session running"
 		exit 1
@@ -76,13 +98,14 @@ function tmate_session() {
 
 	# Prints the read-only web connection strin
 	tmate -S ${TMATE_SOCK} display -p '#{tmate_web_ro}'
+	echo "[INFO] Server started"
 }
 
-function server_mode() {
+function tmate_server() {
 	while true; do
 		echo "[INFO] Starting tmate server..."
 		# Start a tmate session
-		tmate_session
+		tmate_start
 
 		# Wait for session to complete
 		wait_pid $(pgrep tmate)

@@ -211,6 +211,9 @@ ENV MAKE_INCLUDES="Makefile Makefile.*"
 # Read more: <https://wiki.archlinux.org/index.php/XDG_Base_Directory>
 ENV XDG_CONFIG_HOME=/etc
 
+# Clean up file modes for scripts
+RUN find ${XDG_CONFIG_HOME} -type f -name '*.sh' -exec chmod 755 {} \;
+
 COPY rootfs/ /
 
 WORKDIR /conf

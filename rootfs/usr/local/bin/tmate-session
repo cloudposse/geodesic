@@ -39,9 +39,9 @@ function elapsed() {
 
 function timeout() {
 	local elapsed=$(elapsed)
-  if [ $elapsed -gt ${TMATE_SESSION_TIMEOUT} ]; then
+	if [ $elapsed -gt ${TMATE_SESSION_TIMEOUT} ]; then
 		echo "[INFO] Session expired after $elapsed seconds"
-    tmate_stop
+		tmate_stop
 		exit 1
 	fi
 }
@@ -68,7 +68,7 @@ function wait_pid() {
 }
 
 function tmate_stop() {
-  killall tmate
+	killall tmate
 	echo "[INFO] Server stopped"
 }
 

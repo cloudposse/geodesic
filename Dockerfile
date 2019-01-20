@@ -63,7 +63,7 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 # Install alpine package manifest
 COPY packages.txt /etc/apk/
 
-RUN apk add $(grep -v '^#' /etc/apk/packages.txt) && \
+RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     ln -s /usr/share/bash-completion/completions/fzf /etc/bash_completion.d/fzf.sh && \
     touch /conf/.gitconfig

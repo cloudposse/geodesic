@@ -93,7 +93,7 @@ function tmate_start() {
 	# Prints the web connection string
 	tmate -S ${TMATE_SOCK} display -p '#{tmate_web}'
 
-	# Prints the read-only web connection strin
+	# Prints the read-only web connection string
 	tmate -S ${TMATE_SOCK} display -p '#{tmate_web_ro}'
 	echo "[INFO] Server started"
 }

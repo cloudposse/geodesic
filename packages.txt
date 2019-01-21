@@ -58,7 +58,7 @@ terraform@cloudposse
 terragrunt@cloudposse
 terrahelp@cloudposse
 tfenv@cloudposse==0.3.0-r0
-tfmask@cloudposse
+tfmask@cloudposse==0.2.0-r0
 unzip
 util-linux
 variant@cloudposse

@@ -134,7 +134,7 @@ function main() {
 	export TMATE_SESSION_TIMEOUT=${TMATE_SESSION_TIMEOUT:-600}
 	export TMATE_START_TIME=$(date +%s)
 
-	# Part command line arguments
+	# Parse command line arguments
 	parse_args $@
 
 	# Clean up

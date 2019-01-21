@@ -2,10 +2,12 @@
 #
 # Load environment variables for a `terraform` project.
 # Any arguments given will be passed to the terraform project.
+# This should be called before `use tfenv`
 # 
 function use_terraform() {
 
 	# The environment mapping below is not strictly necessary. Setting the `TF_CLI_*` envs is recommended.
+	# The `TF_CLI_*` envs are handled by <https://github.com/cloudposse/tfenv>
 	# This is done to preserve backwards compatibility with older environments and should eventually be deprecated.
 	#
 	# Terraform backend for a given project using envs

@@ -100,11 +100,17 @@ RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d
     gcloud config set metrics/environment github_docker_image --installation
 
 #
-# Install aws-vault to easily assume roles (not related to HashiCorp Vault)
+# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
 #
-ENV AWS_VAULT_BACKEND file
+ENV AWS_VAULT_ENABLED=true
+ENV AWS_VAULT_BACKEND=file
 ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #ENV AWS_VAULT_FILE_PASSPHRASE=
+
+#
+# Configure aws-okta to easily assume roles
+#
+ENV AWS_OKTA_ENABLED=false
 
 #
 # Install kubectl

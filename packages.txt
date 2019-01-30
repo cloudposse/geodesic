@@ -2,6 +2,7 @@
 awless@cloudposse
 aws-iam-authenticator@cloudposse
 aws-vault@cloudposse
+aws-okta@cloudposse
 bash
 bash-completion
 bats@community

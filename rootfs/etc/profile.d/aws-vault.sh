@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
-	if ! which aws-vault >/dev/null ; then
+	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"
 		exit 1
 	fi
@@ -34,7 +34,6 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 			echo -e "-> Run '$(green assume-role)' to login to AWS with aws-vault"
 		fi
 	}
-
 
 	# Start a shell or run a command with an assumed role
 	function aws_vault_assume_role() {

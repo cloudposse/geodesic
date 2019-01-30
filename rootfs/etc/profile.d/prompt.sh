@@ -39,8 +39,8 @@ function geodesic_prompt() {
 
 	unicode)
 		# unicode
-		ASSUME_ROLE_ACTIVE_MARK=$'\u2705 '      # '✅'
-		ASSUME_ROLE_INACTIVE_MARK=$'\u274C '    # '❌'
+		ASSUME_ROLE_ACTIVE_MARK=$'\u2705 '    # '✅'
+		ASSUME_ROLE_INACTIVE_MARK=$'\u274C '  # '❌'
 		BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 ' # '➤', suggest '▶' may be present in more fonts
 		BANNER_MARK=$'\u29C9 '                # '⧉'
 		;;
@@ -49,7 +49,7 @@ function geodesic_prompt() {
 		# default
 		ASSUME_ROLE_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u2713 \x01'$(tput sgr0)$'\x02'   # green bold '✓'
 		ASSUME_ROLE_INACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 1)$'\x02\u2717 \x01'$(tput sgr0)$'\x02' # red bold '✗'
-		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 '                                                            # '⨠'
+		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 '                                                              # '⨠'
 		BANNER_MARK='⧉ '
 		;;
 	esac

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
-	if ! which aws-okta >/dev/null ; then
+	if ! which aws-okta >/dev/null; then
 		echo "aws-okta not installed"
 		exit 1
 	fi

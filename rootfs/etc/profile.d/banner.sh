@@ -5,7 +5,7 @@ BANNER_INDENT="${BANNER_INDENT:-    }"
 BANNER_FONT="${BANNER_FONT:-Nancyj.flf}"
 
 if [ -z "${ASSUME_ROLE}" ]; then
-	# Display a banner message for interactive shells (if we're not in aws-vault)
+	# Display a banner message for interactive shells (if we're not in aws-vault or aws-okta)
 	if [ -n "${BANNER}" ]; then
 		if [ "$BANNER_COMMAND" == "figlet" ]; then
 			echo "${BANNER_COLOR}"

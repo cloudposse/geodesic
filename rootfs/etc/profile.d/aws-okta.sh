@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
 	if ! which aws-okta >/dev/null; then

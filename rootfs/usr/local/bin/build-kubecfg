@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -eo pipefail
+
+KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config}"
+KUBECONFIG_DIR="$(dirname "$KUBECONFIG")"
+EXTRA_ARGS=${@:1}
+GOMPLATE_EXTRA_ARGS=${EXTRA_ARGS:-$GOMPLATE_EXTRA_ARGS}
+
+mkdir -p ${KUBECONFIG_DIR}
+
+function ensure_env_vars() {
+	export KOPS_API_SERVER="${KOPS_API_SERVER:-api.$KOPS_CLUSTER_NAME}"
+	export KOPS_CLUSTER_CA="$(cluster_ca)"
+
+	if [ -z "$KOPS_API_SERVER" ]; then
+		echo "KOPS_API_SERVER not defined"
+		exit 1
+	fi
+
+	if [ -z "$KOPS_CLUSTER_CA" ]; then
+		echo "KOPS_CLUSTER_CA not defined"
+		exit 1
+	fi
+}
+
+function cluster_ca() {
+	openssl s_client -connect "$KOPS_API_SERVER":443 2>&1 </dev/null | sed -ne '/BEGIN CERT/,/END CERT/p'
+}
+
+function write_kube_config() {
+	direnv exec ${KUBECONFIG_DIR} gomplate ${GOMPLATE_EXTRA_ARGS} -f ${KUBECONFIG_TEMPLATE} >${KUBECONFIG}
+}
+
+ensure_env_vars
+write_kube_config
+
+echo "Wrote configuration to ${KUBECONFIG}..."

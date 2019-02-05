@@ -85,6 +85,7 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`gomplate`](https://github.com/hairyhenderson/gomplate/) for template rendering configuration files using the GoLang template engine. Supports lots of local and remote datasources
 * [`goofys`](https://github.com/kahing/goofys/) a high-performance Amazon S3 file system for mounting encrypted S3 buckets that store cluster configurations and secrets
 * [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
+* [`tmate`](https://tmate.io) for remote terminal sharing with other engineers (pairing) and collaborative debugging
 
 [](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)
 

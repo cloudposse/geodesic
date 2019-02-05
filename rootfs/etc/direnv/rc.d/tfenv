@@ -1,0 +1,9 @@
+# Usage: use_tfenv [...]
+#
+# Load environment variables for a `terraform` project using `tfenv`.
+# Any arguments given will be passed to `tfenv`.
+#
+function use_tfenv() {
+	# Export terraform environent
+	eval "$(tfenv)"
+}

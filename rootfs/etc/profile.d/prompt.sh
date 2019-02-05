@@ -31,37 +31,37 @@ function geodesic_prompt() {
 	case $PROMPT_STYLE in
 	plain)
 		# 8859-1 codepoints:
-		AWS_VAULT_ACTIVE_MARK=$(tput bold)$(tput setab 2)$'»'$(tput sgr0)' ' # green
-		AWS_VAULT_INACTIVE_MARK=$'· '
+		ASSUME_ROLE_ACTIVE_MARK=$(tput bold)$(tput setab 2)$'»'$(tput sgr0)' ' # green
+		ASSUME_ROLE_INACTIVE_MARK=$'· '
 		BLACK_RIGHTWARDS_ARROWHEAD=$'=> '
 		BANNER_MARK=$'§ '
 		;;
 
 	unicode)
 		# unicode
-		AWS_VAULT_ACTIVE_MARK=$'\u2705 '      # '✅'
-		AWS_VAULT_INACTIVE_MARK=$'\u274C '    # '❌'
+		ASSUME_ROLE_ACTIVE_MARK=$'\u2705 '    # '✅'
+		ASSUME_ROLE_INACTIVE_MARK=$'\u274C '  # '❌'
 		BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 ' # '➤', suggest '▶' may be present in more fonts
 		BANNER_MARK=$'\u29C9 '                # '⧉'
 		;;
 
 	*)
 		# default
-		AWS_VAULT_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u2713 \x01'$(tput sgr0)$'\x02'   # green bold '✓'
-		AWS_VAULT_INACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 1)$'\x02\u2717 \x01'$(tput sgr0)$'\x02' # red bold '✗'
-		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 '                                                            # '⨠'
+		ASSUME_ROLE_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u2713 \x01'$(tput sgr0)$'\x02'   # green bold '✓'
+		ASSUME_ROLE_INACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 1)$'\x02\u2717 \x01'$(tput sgr0)$'\x02' # red bold '✗'
+		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 '                                                              # '⨠'
 		BANNER_MARK='⧉ '
 		;;
 	esac
 
-	if [ -n "$AWS_VAULT" ]; then
-		STATUS=${AWS_VAULT_ACTIVE_MARK}
+	if [ -n "$ASSUME_ROLE" ]; then
+		STATUS=${ASSUME_ROLE_ACTIVE_MARK}
 	else
-		STATUS=${AWS_VAULT_INACTIVE_MARK}
+		STATUS=${ASSUME_ROLE_INACTIVE_MARK}
 	fi
 
-	if [ -n "${AWS_VAULT}" ]; then
-		ROLE_PROMPT="(${AWS_VAULT})"
+	if [ -n "${ASSUME_ROLE}" ]; then
+		ROLE_PROMPT="(${ASSUME_ROLE})"
 	else
 		ROLE_PROMPT="(none)"
 	fi

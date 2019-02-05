@@ -62,7 +62,7 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 # Install alpine package manifest
 COPY packages.txt /etc/apk/
 
-RUN apk add $(grep -v '^#' /etc/apk/packages.txt) && \
+RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     ln -s /usr/share/bash-completion/completions/fzf /etc/bash_completion.d/fzf.sh && \
     touch /conf/.gitconfig
@@ -99,11 +99,17 @@ RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d
     gcloud config set metrics/environment github_docker_image --installation
 
 #
-# Install aws-vault to easily assume roles (not related to HashiCorp Vault)
+# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
 #
-ENV AWS_VAULT_BACKEND file
+ENV AWS_VAULT_ENABLED=true
+ENV AWS_VAULT_BACKEND=file
 ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 #ENV AWS_VAULT_FILE_PASSPHRASE=
+
+#
+# Configure aws-okta to easily assume roles
+#
+ENV AWS_OKTA_ENABLED=false
 
 #
 # Install kubectl
@@ -143,7 +149,7 @@ RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ 
 ENV HELM_APPR_VERSION 0.7.0
 ENV HELM_DIFF_VERSION 2.11.0+2
 ENV HELM_EDIT_VERSION 0.2.0
-ENV HELM_GITHUB_VERSION 0.2.0
+ENV HELM_GIT_VERSION 0.3.0
 ENV HELM_SECRETS_VERSION 1.2.9
 ENV HELM_S3_VERSION 0.7.0
 ENV HELM_PUSH_VERSION 0.7.1
@@ -152,7 +158,7 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
     && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
     && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
-    && helm plugin install https://github.com/sagansystems/helm-github --version ${HELM_GITHUB_VERSION} \
+    && helm plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
 
@@ -177,9 +183,16 @@ ENV SHELL=/bin/bash
 ENV LESS=-Xr
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
+# Reduce `make` verbosity
+ENV MAKEFLAGS="--no-print-directory"
+ENV MAKE_INCLUDES="Makefile Makefile.*"
+
 # This is not a "multi-user" system, so we'll use `/etc` as the global configuration dir
 # Read more: <https://wiki.archlinux.org/index.php/XDG_Base_Directory>
 ENV XDG_CONFIG_HOME=/etc
+
+# Clean up file modes for scripts
+RUN find ${XDG_CONFIG_HOME} -type f -name '*.sh' -exec chmod 755 {} \;
 
 COPY rootfs/ /
 

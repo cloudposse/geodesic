@@ -1,0 +1,31 @@
+# Usage: use_terraform [...]
+#
+# Load environment variables for a `terraform` project.
+# Any arguments given will be passed to the terraform project.
+# This should be called before `use tfenv`
+# 
+function use_terraform() {
+
+	# The environment mapping below is not strictly necessary. Setting the `TF_CLI_*` envs is recommended.
+	# The `TF_CLI_*` envs are handled by <https://github.com/cloudposse/tfenv>
+	# This is done to preserve backwards compatibility with older environments and should eventually be deprecated.
+	#
+	# Terraform backend for a given project using envs
+	export TF_STATE_FILE=${TF_FILE:-terraform.tfstate}
+	export TF_BUCKET_REGION=${TF_BUCKET_REGION:-${AWS_REGION}}
+	export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename $(pwd))}
+	
+	# Disable color if not running in a TTY (e.g. CI/CD context)
+	if [ ! -t 1 ]; then
+		export TF_CLI_DEFAULT_NO_COLOR=true
+	fi
+	
+	# Translate environment variables to terraform arguments
+	[ -z "${TF_FROM_MODULE}" ] || export TF_CLI_INIT_FROM_MODULE="${TF_FROM_MODULE}"
+	[ -z "${TF_STATE_FILE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_KEY="${TF_BUCKET_PREFIX}/${TF_STATE_FILE}"
+	[ -z "${TF_BUCKET}" ] || export TF_CLI_INIT_BACKEND_CONFIG_BUCKET="${TF_BUCKET}"
+	[ -z "${TF_BUCKET_REGION}" ] || export TF_CLI_INIT_BACKEND_CONFIG_REGION="${TF_BUCKET_REGION}"
+	[ -z "${TF_DYNAMODB_TABLE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_DYNAMODB_TABLE="${TF_DYNAMODB_TABLE}"
+	[ -z "${AWS_PROFILE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_PROFILE="${AWS_PROFILE}"
+	[ -z "${AWS_ROLE_ARN}" ] || export TF_CLI_INIT_BACKEND_CONFIG_ROLE_ARN="${AWS_ROLE_ARN}"
+}

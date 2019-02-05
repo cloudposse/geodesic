@@ -1,4 +1,4 @@
-if [ -z "${AWS_VAULT}" ]; then
+if [ -z "${ASSUME_ROLE}" ]; then
 	if [ -f "/etc/motd" ]; then
 		cat "/etc/motd"
 	fi

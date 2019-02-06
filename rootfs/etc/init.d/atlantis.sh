@@ -69,7 +69,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 
 	# Add SSH key to agent, if one is configured so we can pull from private git repos
 	if [ -n "${ATLANTIS_SSH_PRIVATE_KEY}" ]; then
-		source <(ssh-agent -s)
+		source <(gosu ${ATLANTIS_USER} ssh-agent -s)
 		ssh-add - <<<${ATLANTIS_SSH_PRIVATE_KEY}
 		# Sanitize environment
 		unset ATLANTIS_SSH_PRIVATE_KEY

@@ -32,7 +32,7 @@ tasks:
           kops cluster update
           kops cluster rolling-update
 
-      # Apply pendnig changes
+      # Apply pending changes
       apply:
         description: "Apply pending changes"
         script:

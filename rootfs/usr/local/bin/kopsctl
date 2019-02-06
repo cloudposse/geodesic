@@ -80,7 +80,7 @@ tasks:
 
           # Delete Public Key
           delete:
-            description: "Rotate the cluster SSH key pair"
+            description: "Delete the cluster SSH public key"
             script:
             - *exit_on_errors
             - *chamber

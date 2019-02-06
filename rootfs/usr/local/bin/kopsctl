@@ -26,9 +26,9 @@ tasks:
       plan:
         description: "Show a plan of pending changes"
         script:
+        - *exit_on_errors
         - *chamber
         - |
-          set -e
           kops cluster update
           kops cluster rolling-update
 
@@ -36,9 +36,9 @@ tasks:
       apply:
         description: "Apply pending changes"
         script:
+        - *exit_on_errors
         - *chamber
         - |
-          set -e
           kops update cluster --yes
           kops rolling-update cluster --force --yes 
 
@@ -51,7 +51,6 @@ tasks:
           default: admin
           description: "SSH Public Key secret name"
           required: true
-      
         tasks:
           # Connect to bastion instance
           bastion:

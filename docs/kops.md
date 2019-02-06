@@ -69,7 +69,7 @@ Most configuration settings are defined as environment variables. These can be s
 | KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `s3://${AWS_REGION}.${DNS_ZONE}`) |
 | KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that describes the cluster                                               |
 | KOPS_UTILITY_SUBNETS                               | Subnet CIDRs for the publically facing services (e.g. ingress ELBs)                            |
-| KUBERNETES_VERSION                                 | Version of Kubernetes to deploy. Must be compatible with the `kops` release.                   |
+| KUBERNETES_VERSION                                 | Version of Kubernetes to deploy. Must be compatible with the `kops` release.  See [kops compatibility matrix](https://github.com/kubernetes/kops#compatibility-matrix) for more details                 |
 | NODE_MACHINE_TYPE                                  | AWS EC2 instance type for the _default_ node pool                                              |
 | NODE_MAX_SIZE                                      | Maximum number of EC2 instances in the _default_ node pool                                     |
 | NODE_MIN_SIZE                                      | Minimum number of EC2 instances in the _default_ node pool                                     |

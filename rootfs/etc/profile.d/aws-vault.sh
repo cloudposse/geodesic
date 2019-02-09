@@ -50,13 +50,13 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 
 	# Start a shell or run a command with an assumed role
 	function aws_vault_assume_role() {
-		role=${1:-$(choose_role_interactive)}
-
 		# Do not allow nested roles
 		if [ -n "${AWS_VAULT}" ]; then
 			echo "Type '$(green exit)' before attempting to assume another role"
 			return 1
 		fi
+
+		role=${1:-$(choose_role_interactive)}
 
 		if [ -z "${role}" ]; then
 			echo "Usage: $0 [role]"

@@ -35,15 +35,28 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 		fi
 	}
 
+	function choose_role_interactive() {
+		_preview="${FZF_PREVIEW:-crudini --format=ini --get "$AWS_CONFIG_FILE" 'profile {}'}"
+		crudini --get "${AWS_CONFIG_FILE}" |
+			awk -F ' ' '{print $2}' |
+			fzf \
+				--height 30% \
+				--reverse \
+				--prompt='-> ' \
+				--header 'Select AWS profile' \
+				--query "${AWS_ORG:-${NAMESPACE}}-" \
+				--preview "$_preview"
+	}
+
 	# Start a shell or run a command with an assumed role
 	function aws_vault_assume_role() {
-		role=${1:-${AWS_DEFAULT_PROFILE}}
-
 		# Do not allow nested roles
 		if [ -n "${AWS_VAULT}" ]; then
 			echo "Type '$(green exit)' before attempting to assume another role"
 			return 1
 		fi
+
+		role=${1:-$(choose_role_interactive)}
 
 		if [ -z "${role}" ]; then
 			echo "Usage: $0 [role]"

@@ -17,6 +17,13 @@ mixins:
 
 tasks:
 
+  login:
+    # Write out kubecfg
+    description: "Login to Kops cluster uusing IAM role"
+    script:
+    - *exit_on_errors
+    - build-kubecfg
+
  # Cluster Operations
   cluster:
     description: "Operations to perform on the kops cluster"

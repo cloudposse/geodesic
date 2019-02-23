@@ -48,6 +48,10 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 				--preview "$_preview"
 	}
 
+	function choose_role() {
+		[ -n "${ASSUME_ROLE_INTERACTIVE}" ] && echo "$(choose_role_interactive)" || echo "${AWS_DEFAULT_PROFILE}"
+	}
+
 	# Start a shell or run a command with an assumed role
 	function aws_vault_assume_role() {
 		# Do not allow nested roles
@@ -56,7 +60,7 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 			return 1
 		fi
 
-		role=${1:-$(choose_role_interactive)}
+		role=${1:-$(choose_role)}
 
 		if [ -z "${role}" ]; then
 			echo "Usage: $0 [role]"

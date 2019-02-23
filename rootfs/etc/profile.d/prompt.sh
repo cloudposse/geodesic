@@ -31,7 +31,7 @@ function geodesic_prompt() {
 	case $PROMPT_STYLE in
 	plain)
 		# 8859-1 codepoints:
-		# '\[' and '\]' are bash prompt delimters around non-printing characters
+		# '\[' and '\]' are bash prompt delimiters around non-printing characters
 		ASSUME_ROLE_ACTIVE_MARK="\["$(tput bold)$(tput setab 2)"\]»\["$(tput sgr0)"\] " # green
 		ASSUME_ROLE_INACTIVE_MARK=$'· '
 		BLACK_RIGHTWARDS_ARROWHEAD=$'=> '

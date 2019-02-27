@@ -56,7 +56,7 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 	}
 
 	function choose_role() {
-		if [ -n "${ASSUME_ROLE_INTERACTIVE}" ]; then
+		if [ "${ASSUME_ROLE_INTERACTIVE:-true}" == "true" ]; then
 			echo "$(choose_role_interactive)"
 		else
 			echo "${AWS_DEFAULT_PROFILE}"

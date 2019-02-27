@@ -1,7 +1,7 @@
 #
 # Python Dependencies
 #
-FROM alpine:3.8 as python
+FROM alpine:3.9 as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
@@ -35,7 +35,7 @@ RUN make dist
 #
 # Geodesic base image
 #
-FROM alpine:3.8
+FROM alpine:3.9
 
 ENV BANNER "geodesic"
 

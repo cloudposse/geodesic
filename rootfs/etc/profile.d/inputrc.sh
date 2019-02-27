@@ -1,7 +1,7 @@
-# if we do not have one, copy from localhost, and use bindings for this shell
-[ -f ~/.inputrc ] || {
+# If we can, and do not have one, copy inputrc from localhost.
+[ -f ~/.inputrc ] && [ -f /localhost/.inputrc ] || {
     cp /localhost/.inputrc ~/.inputrc &&
+        # Use new bindings for current shell.
         bind -f ~/.inputrc ;
 }
-# subsequent shells will read ~/.inputrc at startup, unless INPUTRC is set.
-
+# Subsequent shells automatically read ${INPUTRC-"~/.inputrc"} at startup.

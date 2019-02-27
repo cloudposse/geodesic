@@ -10,17 +10,24 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 		export ASSUME_ROLE=${AWS_VAULT}
 		# Set the Terraform `aws_assume_role_arn` based on our current context
 		export TF_VAR_aws_assume_role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
-		echo "* Assumed role $(green ${TF_VAR_aws_assume_role_arn})"
+		if [ -n "${TF_VAR_aws_assume_role_arn}" ]; then
+			echo "* Assumed role $(green ${TF_VAR_aws_assume_role_arn})"
+		else
+			echo "* $(red Assume role failed)"
+			exit 1
+		fi
 	else
-		AWS_VAULT_ARGS=("--assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL}")
+		AWS_VAULT_ARGS=()
+		AWS_VAULT_ARGS+=("--assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL}")
+		AWS_VAULT_ARGS+=("--session-ttl=${AWS_VAULT_SESSION_TTL}")
+
 		[ -d /localhost/.awsvault ] || mkdir -p /localhost/.awsvault
 		ln -sf /localhost/.awsvault ${HOME}
-		if [ "${VAULT_SERVER_ENABLED:-true}" == "true" ]; then
+		if [ "${AWS_VAULT_SERVER_ENABLED:-true}" == "true" ]; then
 			curl -sSL --connect-timeout 0.1 -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
 			result=$?
 			if [ $result -ne 0 ]; then
 				echo "* Started EC2 metadata service at $(green http://169.254.169.254/latest)"
-				aws-vault server &
 				AWS_VAULT_ARGS+=("--server")
 			else
 				echo "* EC2 metadata server already running"
@@ -49,7 +56,11 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 	}
 
 	function choose_role() {
-		[ -n "${ASSUME_ROLE_INTERACTIVE}" ] && echo "$(choose_role_interactive)" || echo "${AWS_DEFAULT_PROFILE}"
+		if [ -n "${ASSUME_ROLE_INTERACTIVE}" ]; then
+			echo "$(choose_role_interactive)"
+		else
+			echo "${AWS_DEFAULT_PROFILE}"
+		fi
 	}
 
 	# Start a shell or run a command with an assumed role
@@ -63,7 +74,7 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 		role=${1:-$(choose_role)}
 
 		if [ -z "${role}" ]; then
-			echo "Usage: $0 [role]"
+			echo "Usage: assume-role [role]"
 			return 1
 		fi
 		# Sync the clock in the Docker Virtual Machine to the system's hardware clock to avoid time drift

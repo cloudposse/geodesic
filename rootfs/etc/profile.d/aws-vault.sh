@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
+if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"
 		exit 1
@@ -77,9 +77,16 @@ if [ "${AWS_VAULT_ENABLED}" == "true" ]; then
 			echo "Usage: assume-role [role]"
 			return 1
 		fi
-		# Sync the clock in the Docker Virtual Machine to the system's hardware clock to avoid time drift
-		# (Only works in privileged mode)
-		hwclock -s >/dev/null 2>&1
+		# Sync the clock in the Docker Virtual Machine to the system's hardware clock to avoid time drift.
+		# Assume whichever clock is behind by more than 10 seconds is wrong, since virtual clocks
+		# almost never gain time.
+		let diff=$(date '+%s')-$(date -d "$(hwclock -r)" '+%s')
+		if [ $diff -gt 10 ]; then
+			hwclock -w >/dev/null 2>&1
+		elif [ $diff -lt -10 ]; then
+			# (Only works in privileged mode)
+			hwclock -s >/dev/null 2>&1
+		fi
 		if [ $? -ne 0 ]; then
 			echo "* $(yellow Failed to sync system time from hardware clock)"
 		fi

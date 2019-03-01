@@ -65,7 +65,6 @@ COPY packages.txt /etc/apk/
 
 RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
-    ln -s /usr/share/bash-completion/completions/fzf /etc/bash_completion.d/fzf.sh && \
     touch /conf/.gitconfig
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf

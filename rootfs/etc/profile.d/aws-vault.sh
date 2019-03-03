@@ -51,7 +51,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 				--reverse \
 				--prompt='-> ' \
 				--header 'Select AWS profile' \
-				--query "${AWS_ORG:-${NAMESPACE}}-" \
+				--query "${ASSUME_ROLE_INTERACTIVE_PREFIX:-${NAMESPACE}-${STAGE}-}" \
 				--preview "$_preview"
 	}
 

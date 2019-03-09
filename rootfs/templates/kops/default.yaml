@@ -34,7 +34,8 @@ spec:
       idleTimeoutSeconds: {{ getenv "KOPS_API_LOAD_BALANCER_IDLE_TIMEOUT_SECONDS" "600" }}
   kubeAPIServer:
   {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}
-    authorizationMode: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE" "RBAC,AlwaysAllow" }}
+    anonymousAuth: false
+    authorizationMode: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE" "RBAC" }}
     authorizationRbacSuperUser: {{ getenv "KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER" "admin" }}
   {{- end }}
   {{- if bool (getenv "KOPS_ADMISSION_CONTROL_ENABLED" "true") }}
@@ -50,6 +51,8 @@ spec:
     - ResourceQuota
     - NodeRestriction
     - Priority
+    - Initializers
+    - DenyEscalatingExec
   {{- end }}
   {{- if bool (getenv "KOPS_AWS_IAM_AUTHENTICATOR_ENABLED" "false") }}
   authentication:
@@ -90,6 +93,13 @@ spec:
       name: {{ . | regexp.Replace "^.*[0-9]" "" }}
     {{- end }}
     name: events
+  hooks:
+  - before:
+    - docker.service
+    manifest: |
+      Type=oneshot
+      ExecStart=/usr/bin/chattr +i /usr/bin/docker-runc
+    name: cve-2019-5736.service
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: {{ getenv "KUBERNETES_VERSION" }}

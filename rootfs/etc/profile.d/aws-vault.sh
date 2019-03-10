@@ -26,7 +26,6 @@ function assume_active_role() {
 	fi
 }
 
-
 if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"

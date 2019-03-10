@@ -1,10 +1,39 @@
 #!/bin/bash
 
+function assume_active_role() {
+	if [ "${AWS_VAULT_SERVER_ENABLED:-true}" != "true" ]; then
+		return 0
+	fi
+
+	local aws_def_prof="$AWS_DEFAULT_PROFILE"
+	unset AWS_DEFAULT_PROFILE
+
+	curl -sSL --connect-timeout 0.1 --fail -o /dev/null --stderr /dev/null 'http://169.254.169.254/latest/meta-data/iam/security-credentials/local-credentials'
+	if [ $? ]; then
+		export TF_VAR_aws_assume_role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
+		if [ -n "${TF_VAR_aws_assume_role_arn}" ]; then
+			local aws_vault=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$TF_VAR_aws_assume_role_arn" | cut -d' ' -f 3)
+			if [ -z "$AWS_VAULT" ] || [ "$AWS_VAULT" == "$aws_vault" ]; then
+				echo "* Attaching to exising aws-vault session and assuming role ${AWS_VAULT}"
+				export AWS_VAULT="$aws_vault"
+			fi
+		else
+			unset TF_VAR_aws_assume_role_arn
+			AWS_DEFAULT_PROFILE=${aws_def_prof}
+		fi
+	else
+		AWS_DEFAULT_PROFILE=$aws_def_prof
+	fi
+}
+
+
 if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"
 		exit 1
 	fi
+
+	assume_active_role
 
 	if [ -n "${AWS_VAULT}" ]; then
 		export ASSUME_ROLE=${AWS_VAULT}
@@ -67,8 +96,16 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	function aws_vault_assume_role() {
 		# Do not allow nested roles
 		if [ -n "${AWS_VAULT}" ]; then
-			echo "Type '$(green exit)' before attempting to assume another role"
-			return 1
+			if [ "$SHLVL" -eq 1 ] && [ "${AWS_VAULT_SERVER_ENABLED:-true}" == "true" ]; then
+				local aws_vault="$AWS_VAULT"
+				local aws_vault_server_enabled="${AWS_VAULT_SERVER_ENABLED:-true}"
+				trap 'export AWS_VAULT="$aws_vault" && export AWS_VAULT_SERVER_ENABLED="$aws_vault_server_enabled" && trap - RETURN' RETURN
+				unset AWS_VAULT
+				AWS_VAULT_SERVER_ENABLED=false
+			else
+				echo "Type '$(green exit)' before attempting to assume another role"
+				return 1
+			fi
 		fi
 
 		role=${1:-$(choose_role)}

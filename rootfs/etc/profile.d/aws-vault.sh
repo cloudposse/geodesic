@@ -95,10 +95,19 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	function aws_vault_assume_role() {
 		# Do not allow nested roles
 		if [ -n "${AWS_VAULT}" ]; then
+			# There is an exception to the "Do not allow nested roles" rule.
+			# If we are in the current role because we are piggybacking off of an aws-vault credential server
+			# started by another process, then it is safe to allow "nesting" because we are not really in
+			# an aws-vault shell to start with. We have to allow this (a) in order to assume a role other
+			# than the one the credential server is serving and (b) to continue to be able to work if
+			# the process that started the server ends and takes the credential server with it.
 			if [ "$SHLVL" -eq 1 ] && [ "${AWS_VAULT_SERVER_ENABLED:-true}" == "true" ]; then
+				# Save the current values of AWS_VAULT and AWS_VAULT_SERVER_ENABLED
 				local aws_vault="$AWS_VAULT"
 				local aws_vault_server_enabled="${AWS_VAULT_SERVER_ENABLED:-true}"
-				trap 'export AWS_VAULT="$aws_vault" && export AWS_VAULT_SERVER_ENABLED="$aws_vault_server_enabled" && trap - RETURN' RETURN
+				# Be sure to restore the values of AWS_VAULT and AWS_VAULT_SERVER_ENABLED when
+				# this function returns, regardless of how it returns (e.g. in case of errors).
+				trap 'export AWS_VAULT="$aws_vault" && export AWS_VAULT_SERVER_ENABLED="$aws_vault_server_enabled"' RETURN
 				unset AWS_VAULT
 				AWS_VAULT_SERVER_ENABLED=false
 			else

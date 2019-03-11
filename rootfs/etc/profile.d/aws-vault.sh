@@ -5,7 +5,7 @@ function assume_active_role() {
 		return 0
 	fi
 
-	local aws_def_prof="$AWS_DEFAULT_PROFILE"
+	local aws_default_profile="$AWS_DEFAULT_PROFILE"
 	unset AWS_DEFAULT_PROFILE
 
 	curl -sSL --connect-timeout 0.1 --fail -o /dev/null --stderr /dev/null 'http://169.254.169.254/latest/meta-data/iam/security-credentials/local-credentials'
@@ -19,10 +19,10 @@ function assume_active_role() {
 			fi
 		else
 			unset TF_VAR_aws_assume_role_arn
-			AWS_DEFAULT_PROFILE=${aws_def_prof}
+			AWS_DEFAULT_PROFILE=${aws_default_profile}
 		fi
 	else
-		AWS_DEFAULT_PROFILE=$aws_def_prof
+		AWS_DEFAULT_PROFILE=$aws_default_profile
 	fi
 }
 

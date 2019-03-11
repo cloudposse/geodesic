@@ -10,4 +10,6 @@
 
 * #1
 
-## Testing steps
+## Testing instructions
+
+* Provide key instructions for testing

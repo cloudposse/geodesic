@@ -29,6 +29,7 @@ We leverage as many semantics of the linux shell as we can to make the experienc
 * `/etc/motd` is the current "Message of the Day"
 * `/mnt/local` is where we house the local state (like your temporary AWS credentials)
 * `/mnt/remote` is where we mount the S3 bucket for cluster state; these files are never written to disk and only kept in memory for security
+* `/conf` is where all module configuration is stored. Directory names are mapped directly to a bucket prefix, including subdirectories.
 
 ## Extending the Shell
 

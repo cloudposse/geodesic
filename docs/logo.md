@@ -1,6 +1,6 @@
 ## Our Logo
 
-![Geodesic Logo](docs/geodesic-small.png)
+![Geodesic Logo](geodesic-small.png)
 
 In mathematics, a geodesic line is the shortest distance between two points on a sphere. It's also a solid structure composed of geometric shapes such as hexagons.
 

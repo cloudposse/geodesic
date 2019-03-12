@@ -5,24 +5,24 @@ function assume_active_role() {
 		return 0
 	fi
 
-	local aws_def_prof="$AWS_DEFAULT_PROFILE"
+	local aws_default_profile="$AWS_DEFAULT_PROFILE"
 	unset AWS_DEFAULT_PROFILE
 
 	curl -sSL --connect-timeout 0.1 --fail -o /dev/null --stderr /dev/null 'http://169.254.169.254/latest/meta-data/iam/security-credentials/local-credentials'
-	if [ $? ]; then
+	if [ $? -eq 0 ]; then
 		export TF_VAR_aws_assume_role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
 		if [ -n "${TF_VAR_aws_assume_role_arn}" ]; then
 			local aws_vault=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$TF_VAR_aws_assume_role_arn" | cut -d' ' -f 3)
 			if [ -z "$AWS_VAULT" ] || [ "$AWS_VAULT" == "$aws_vault" ]; then
-				echo "* Attaching to exising aws-vault session and assuming role ${AWS_VAULT}"
+				echo "* Attaching to exising aws-vault session and assuming role ${aws_vault}"
 				export AWS_VAULT="$aws_vault"
 			fi
 		else
 			unset TF_VAR_aws_assume_role_arn
-			AWS_DEFAULT_PROFILE=${aws_def_prof}
+			AWS_DEFAULT_PROFILE=${aws_default_profile}
 		fi
 	else
-		AWS_DEFAULT_PROFILE=$aws_def_prof
+		AWS_DEFAULT_PROFILE=$aws_default_profile
 	fi
 }
 
@@ -32,7 +32,9 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		exit 1
 	fi
 
-	assume_active_role
+	if [ "$SHLVL" -eq 1 ]; then
+		assume_active_role
+	fi
 
 	if [ -n "${AWS_VAULT}" ]; then
 		export ASSUME_ROLE=${AWS_VAULT}

@@ -46,7 +46,7 @@ openssl
 pwgen
 python
 rakkess@cloudposse
-rback-lookup@cloudposse
+rbac-lookup@cloudposse
 retry@cloudposse
 scenery@cloudposse
 shellcheck@cloudposse

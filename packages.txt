@@ -45,6 +45,8 @@ openssh-client
 openssl
 pwgen
 python
+rakkess@cloudposse
+rbac-lookup@cloudposse
 retry@cloudposse
 scenery@cloudposse
 shellcheck@cloudposse

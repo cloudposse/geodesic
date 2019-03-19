@@ -102,14 +102,13 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/geodesic). 
 ## Our Logo
 
-![Geodesic Logo](geodesic-small.png)
+![Geodesic Logo](https://raw.githubusercontent.com/cloudposse/geodesic/master/docs/geodesic-small.png)
 
 In mathematics, a geodesic line is the shortest distance between two points on a sphere. It's also a solid structure composed of geometric shapes such as hexagons.
 
 We like to think of geodesic as the shortest path to a rock-solid cloud infrastructure. The geodesic logo is a hexagon with a cube suspended at its center. The cube represents this geodesic container, which is central to everything and at the same time is what ties everything together.
 
 But look a little closer and you’ll notice there’s much more to it. It's also an isometric shape of a cube with a missing piece. This represents its pluggable design, which lets anyone extend it to suit their vision.
-
 
 
 
@@ -248,8 +247,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
 ### Contributors
 
-|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Igor Rodionov][goruha_avatar]][goruha_homepage]<br/>[Igor Rodionov][goruha_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Sarkis Varozian][sarkis_avatar]][sarkis_homepage]<br/>[Sarkis Varozian][sarkis_homepage] |
-|---|---|---|---|
+|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Igor Rodionov][goruha_avatar]][goruha_homepage]<br/>[Igor Rodionov][goruha_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Sarkis Varozian][sarkis_avatar]][sarkis_homepage]<br/>[Sarkis Varozian][sarkis_homepage] | [![Oscar Sullivan][osulli_avatar]][osulli_homepage]<br/>[Oscar Sullivan][osulli_homepage] |
+|---|---|---|---|---|
 
 
   [osterman_homepage]: https://github.com/osterman
@@ -266,6 +265,10 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
   [sarkis_homepage]: https://github.com/sarkis
   [sarkis_avatar]: https://avatars3.githubusercontent.com/u/42673?s=144&v=4
+
+
+  [osulli_homepage]: https://github.com/osulli
+  [osulli_avatar]: https://github.com/osulli.png?size=150
 
 
 

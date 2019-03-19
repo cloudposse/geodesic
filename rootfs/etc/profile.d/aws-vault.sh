@@ -16,6 +16,7 @@ function assume_active_role() {
 			if [ -z "$AWS_VAULT" ] || [ "$AWS_VAULT" == "$aws_vault" ]; then
 				echo "* Attaching to exising aws-vault session and assuming role ${aws_vault}"
 				export AWS_VAULT="$aws_vault"
+				export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION-${AWS_REGION}}"
 			fi
 		else
 			unset TF_VAR_aws_assume_role_arn

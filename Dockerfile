@@ -191,6 +191,9 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
 
+# Enable Atlantis to manage helm
+RUN chmod -R 777 /var/lib/helm
+
 # 
 # Install fancy Kube PS1 Prompt
 #

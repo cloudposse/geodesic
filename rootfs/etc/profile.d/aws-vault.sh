@@ -14,7 +14,7 @@ function assume_active_role() {
 		if [ -n "${TF_VAR_aws_assume_role_arn}" ]; then
 			local aws_vault=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$TF_VAR_aws_assume_role_arn" | cut -d' ' -f 3)
 			if [ -z "$AWS_VAULT" ] || [ "$AWS_VAULT" == "$aws_vault" ]; then
-				echo "* Attaching to exising aws-vault session and assuming role ${aws_vault}"
+				echo "* $(green Attaching to exising aws-vault session and assuming role) $(cyan ${aws_vault})"
 				export AWS_VAULT="$aws_vault"
 				export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION-${AWS_REGION}}"
 			fi
@@ -58,10 +58,10 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 			curl -sSL --connect-timeout 0.1 -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
 			result=$?
 			if [ $result -ne 0 ]; then
-				echo "* Started EC2 metadata service at $(green http://169.254.169.254/latest)"
+				echo "* $(green assume-role) will start EC2 metadata service at $(green http://169.254.169.254/latest)"
 				AWS_VAULT_ARGS+=("--server")
 			else
-				echo "* EC2 metadata server already running"
+				echo "* $(red EC2 metadata server already running)"
 			fi
 		fi
 	fi

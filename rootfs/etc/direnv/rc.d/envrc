@@ -1,0 +1,13 @@
+# Usage: use_envrc [...]
+#
+# Load environment variables from all `*.envrc` files
+# Any arguments given will be treated as a glob.
+#
+function use_envrc() {
+	local wildcard="${1:-*.envrc}"
+	# Export terraform environent
+	
+	for file in $wildcard; do
+		source_env $file
+	done
+}

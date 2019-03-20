@@ -139,13 +139,10 @@ function use() {
 		--name "${DOCKER_NAME}"
 		--rm
 		--env KUBERNETES_API_PORT=${GEODESIC_PORT})
-	# With set -o pipefail, the pipe below fails ~50% of the time on Mac due to a bug in bash.
-	# With set +o pipefail, this bug is mitigated, and the only difference is the behavior when `docker ps` fails.
-	# If `docker ps` fails, then it is likely that any further docker action will fail too, so it does not matter.
-	set +o pipefail
-	docker ps | grep -q ${DOCKER_NAME} >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		echo "# Attaching to existing ${DOCKER_NAME} session"
+
+	local container_id=$(docker ps --quiet --filter name="${DOCKER_NAME}" --format "{{`{{ .ID }}`}}")
+	if [ -n "$container_id" ]; then
+		echo "# Attaching to existing ${DOCKER_NAME} session ($container_id)"
 		if [ $# -eq 0 ]; then
 			set -- "/bin/bash" "-l" "$@"
 		fi

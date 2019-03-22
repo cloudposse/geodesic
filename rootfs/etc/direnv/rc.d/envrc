@@ -9,6 +9,6 @@ function use_envrc() {
 	
 	for file in $wildcard; do
 		[ -e "$file" ] || break
-		source_env $file
+		source_env "$file"
 	done
 }

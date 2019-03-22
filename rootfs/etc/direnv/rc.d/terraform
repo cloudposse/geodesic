@@ -14,15 +14,30 @@ function use_terraform() {
 	export TF_STATE_FILE=${TF_FILE:-terraform.tfstate}
 	export TF_BUCKET_REGION=${TF_BUCKET_REGION:-${AWS_REGION}}
 
+	# Find the root directory of our terraform configurations. This may vary when running under atlantis,
+	# or when using `git` project folders
+	if [ -z "${TF_CONF}" ]; then
+		export GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+		if [ -n "${GIT_ROOT}" ]; then
+			# Atlantis performs a `git clone` to a folder like /conf/atlantis/.atlantis/repos/some-org/the-repo/61/default/
+			export TF_CONF="${GIT_ROOT}/conf"
+		else
+			# In a geodesic shell, `HOME=/conf` is the default configuration directory.
+			export TF_CONF="${HOME}"
+		fi
+	fi
+
 	case "${TF_BUCKET_PREFIX_FORMAT}" in
 		basename-pwd)
 			# Use old bucket prefix format (flat structure, uses leaf directory name only)
 			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename $(pwd))}
 			;;
 		pwd|*)
-			# Use full directory path after /conf
-			# (default)
-			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(pwd | cut -d/ -f3-)}
+			# Use full directory path relative to the top-level configuration directory.
+			# We want the bucket prefix relative to conf/ within the `TF_CONF` folder.
+			# For example, `conf/us-west-2/vpc` should map to a bucket prefix of `us-west-2/vpc`
+			# (default mode)
+			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-${PWD#$TF_CONF/}}
 			;;
 	esac
 	

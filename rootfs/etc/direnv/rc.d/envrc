@@ -8,7 +8,7 @@ function use_envrc() {
 	# Export all .envrc files in the current directory
 	
 	for file in $wildcard; do
-		[ -e "$wildcard" ] || break
+		[ -e "$file" ] || break
 		source_env $file
 	done
 }

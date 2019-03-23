@@ -139,10 +139,11 @@ function use() {
 		--name "${DOCKER_NAME}"
 		--rm
 		--env KUBERNETES_API_PORT=${GEODESIC_PORT})
-	set -o pipefail
-	docker ps | grep -q ${DOCKER_NAME} >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		echo "# Attaching to existing ${DOCKER_NAME} session"
+
+	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
+	container_id=$(docker ps --quiet -a --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
+	if [ -n "$container_id" ]; then
+		echo "# Attaching to existing ${DOCKER_NAME} session ($container_id)"
 		if [ $# -eq 0 ]; then
 			set -- "/bin/bash" "-l" "$@"
 		fi

@@ -131,7 +131,7 @@ spec:
       --pid-file=/var/run/teleport.pid \
       --auth-server="{{- print (getenv "TELEPORT_AUTH_DOMAIN_NAME" | default (print "auth." (getenv "TELEPORT_PROXY_DOMAIN_NAME"))) ":3025" -}}" \
       --advertise-ip="$(curl -sS http://169.254.169.254/latest/meta-data/local-ipv4)" \
-      --labels "id=$(curl -sS http://169.254.169.254/latest/meta-data/instance-id)"'
+      --labels "id=$(curl -sS http://169.254.169.254/latest/meta-data/instance-id),role=$(/bin/sh /usr/local/bin/k8s-role-label.sh)"'
       ExecReload=/bin/kill -HUP $MAINPID
       PIDFile=/var/run/teleport.pid
   - name: teleport-node-install.service
@@ -164,6 +164,18 @@ spec:
           enabled: false
         proxy_service:
           enabled: false
+    - name: k8s-role-label.sh
+      # path is actually the path plus the filename
+      path: /usr/local/bin/k8s-role-label.sh
+      roles: [Node, Master, Bastion]
+      content: |
+        #!/bin/sh
+        aws ec2 describe-tags \
+          --filters "Name=resource-id,Values=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)" \
+          --region $(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document \
+                     | grep region | cut -d\" -f4) \
+          --query 'Tags[*].{tag:Key,value:Value}' \
+          --output text | sed 's/\t/=/' | grep k8s.io/role | sed 's%k8s.io/role/%%' | cut -f1 -d=
 {{- end }}
   kubernetesApiAccess:
   - 0.0.0.0/0

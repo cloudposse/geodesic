@@ -108,12 +108,14 @@ function use() {
 		if [ -d "$mount_path/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then
 			local_home=${user_local_app_data}/lxss${HOME}
 		else
+			local restore_nullglob=$(shopt -p nullglob)
 			shopt -s nullglob
 			for dir in $mount_path/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu*; do
 				folder_name=$(basename ${dir})
 				local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
 				break
 			done
+			$restore_nullglob
 		fi
 
 		if [ -z "${local_home}" ]; then

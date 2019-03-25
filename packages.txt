@@ -12,10 +12,12 @@ curl
 direnv@testing
 drill
 dumb-init
+emacs-nox
 fetch@cloudposse
 emailcli@cloudposse
 figlet
 figurine@cloudposse
+file
 fuse
 fzf
 gettext

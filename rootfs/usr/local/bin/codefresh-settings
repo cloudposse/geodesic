@@ -15,7 +15,7 @@ export CURRENT_CLUSTER=$(kubectl config view -o jsonpath="{@.contexts[?(@.name==
 echo $(kubectl config view -o jsonpath="{@.clusters[?(@.name=='${CURRENT_CLUSTER}')].cluster.server}")
 echo
 
-export CODEFRESH_SECRET=$(kubectl -n ${NAMESPACE} get sa ${CODEFRESH_SA}  -o jsonpath='{@.secrets[].name}')
+export CODEFRESH_SECRET=$(kubectl -n ${NAMESPACE} get sa ${CODEFRESH_SA} -o jsonpath='{@.secrets[].name}')
 
 echo "CA Certificate"
 echo "=============="

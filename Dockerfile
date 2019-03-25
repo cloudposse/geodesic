@@ -1,7 +1,7 @@
 #
 # Python Dependencies
 #
-FROM alpine:3.8 as python
+FROM alpine:3.9.2 as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
@@ -13,12 +13,12 @@ RUN pip install -r /requirements.txt --install-option="--prefix=/dist" --no-buil
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:228.0.0-alpine as google-cloud-sdk
+FROM google/cloud-sdk:239.0.0-alpine as google-cloud-sdk
 
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:0.53.0 as packages
+FROM cloudposse/packages:0.81.0 as packages
 
 WORKDIR /packages
 
@@ -35,7 +35,7 @@ RUN make dist
 #
 # Geodesic base image
 #
-FROM alpine:3.8
+FROM alpine:3.9.2
 
 ENV BANNER "geodesic"
 
@@ -190,6 +190,9 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
+
+# Enable Atlantis to manage helm
+RUN chmod -R 777 /var/lib/helm
 
 # 
 # Install fancy Kube PS1 Prompt

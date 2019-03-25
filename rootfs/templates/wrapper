@@ -108,12 +108,14 @@ function use() {
 		if [ -d "$mount_path/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then
 			local_home=${user_local_app_data}/lxss${HOME}
 		else
+			local restore_nullglob=$(shopt -p nullglob)
 			shopt -s nullglob
 			for dir in $mount_path/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu*; do
 				folder_name=$(basename ${dir})
 				local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
 				break
 			done
+			$restore_nullglob
 		fi
 
 		if [ -z "${local_home}" ]; then
@@ -139,10 +141,11 @@ function use() {
 		--name "${DOCKER_NAME}"
 		--rm
 		--env KUBERNETES_API_PORT=${GEODESIC_PORT})
-	set -o pipefail
-	docker ps | grep -q ${DOCKER_NAME} >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		echo "# Attaching to existing ${DOCKER_NAME} session"
+
+	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
+	container_id=$(docker ps --quiet -a --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
+	if [ -n "$container_id" ]; then
+		echo "# Attaching to existing ${DOCKER_NAME} session ($container_id)"
 		if [ $# -eq 0 ]; then
 			set -- "/bin/bash" "-l" "$@"
 		fi

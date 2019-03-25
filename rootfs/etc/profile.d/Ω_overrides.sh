@@ -6,7 +6,6 @@
 # This must come after all setup has happened so that the final configuration is availble for inspection,
 # and there must not be any configuration after this to ensure that anything set here remains set as the user intended.
 
-
 ## Load user's custom overrides
 
 function _load_geodesic_overrides() {

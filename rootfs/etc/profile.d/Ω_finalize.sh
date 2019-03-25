@@ -3,7 +3,6 @@
 # other files that this function needs to be able to see.
 # This file should come next to last, followed only by Ω_overrides.sh.
 
-
 ## Perform any clean-up or post-setup actions
 
 # Set up command completion for command aliases.

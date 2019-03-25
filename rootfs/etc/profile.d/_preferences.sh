@@ -4,8 +4,6 @@
 # This file has depends on _geodesic-config.sh and should come third.
 # This file loads user preferences/customizations and must load before any user-visible configuration takes place.
 
-
-
 # Parse the GEODESIC_TRACE variable and set the internal _GEODESIC_TRACE_CUSTOMIZATION flag if needed
 if [[ $GEODESIC_TRACE =~ custom ]]; then
 	export _GEODESIC_TRACE_CUSTOMIZATION=true
@@ -14,7 +12,6 @@ else
 fi
 
 [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: GEODESIC_CONFIG_HOME is found to be "${GEODESIC_CONFIG_HOME:-<unset>}"
-
 
 #
 # Determine the base directory for all customizations.

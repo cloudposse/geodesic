@@ -5,7 +5,23 @@ shopt -s checkwinsize
 # Cache the current screen size
 export SCREEN_SIZE="${LINES}x${COLUMNS}"
 
-export PROMPT_COMMAND=prompter
+export PROMPT_COMMAND
+function _install_prompter() {
+	if ! [[ $PROMPT_COMMAND =~ prompter ]]; then
+		local final_colon=';$'
+
+		if [[ -z $PROMPT_COMMAND ]]; then
+			PROMPT_COMMAND="prompter;"
+		elif [[ $PROMPT_COMMAND =~ $final_colon ]]; then
+			PROMPT_COMMAND="${PROMPT_COMMAND}prompter;"
+		else
+			PROMPT_COMMAND="${PROMPT_COMMAND};prompter;"
+		fi
+	fi
+}
+_install_prompter
+unset -f _install_prompter
+
 function prompter() {
 	for hook in ${PROMPT_HOOKS[@]}; do
 		"${hook}"
@@ -26,6 +42,7 @@ function reload() {
 
 # Define our own prompt
 PROMPT_HOOKS+=("geodesic_prompt")
+KUBE_PS1_SYMBOL_ENABLE=${KUBE_PS1_SYMBOL_ENABLE:-false}
 function geodesic_prompt() {
 
 	case $PROMPT_STYLE in

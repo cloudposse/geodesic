@@ -26,10 +26,10 @@ function _search_geodesic_dirs() {
 	local resource=$2
 	local base="${GEODESIC_DOT_DIR}"
 
-	[[ -n $GEODESIC_CUSTOM_TRACE ]] && echo trace: looking for resources of type "$resource"
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource"
 
 	if [[ ! -d $base ]]; then
-		[[ -n $GEODESIC_CUSTOM_TRACE ]] && echo trace: "$base" is not a directory, giving up the search for "$resource"
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: "$base" is not a directory, giving up the search for "$resource"
 		return
 	fi
 
@@ -72,13 +72,13 @@ function _expand_dir_or_file() {
 	local default_exclusion_pattern="(~|.old|.orig|.disabled)$"
 	local exclude="${GEODESIC_AUTO_LOAD_EXCLUSIONS:-$default_exclusion_pattern}"
 
-	[[ -n $GEODESIC_CUSTOM_TRACE ]] && echo trace: looking for resources of type "$resource" in "$dir"
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource" in "$dir"
 
 	for item in "${dir}/$2" "${dir}/${2}.d"/*; do
 		if [[ -f $item ]]; then
 			[[ $item =~ $exclude ]] && continue
 			expand_list+=($item)
-			[[ -n $GEODESIC_CUSTOM_TRACE ]] && echo trace: found "$item"
+			[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: found "$item"
 		fi
 	done
 }

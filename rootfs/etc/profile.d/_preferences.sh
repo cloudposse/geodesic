@@ -54,5 +54,10 @@ function _load_geodesic_preferences() {
 	done
 }
 
-_load_geodesic_preferences
+if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} != false ]]; then
+	echo $(yellow Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is set and not 'false')
+else
+	_load_geodesic_preferences
+fi
+
 unset -f _load_geodesic_preferences

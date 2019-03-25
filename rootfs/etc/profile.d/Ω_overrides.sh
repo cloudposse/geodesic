@@ -10,7 +10,7 @@ function _load_geodesic_overrides() {
 	done
 }
 
-_load_geodesic_overrides
+[[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} != false ]] || _load_geodesic_overrides
 unset -f _load_overrides
 
 unset _GEODESIC_TRACE_CUSTOMIZATION

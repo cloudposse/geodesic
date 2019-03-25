@@ -13,4 +13,3 @@ function yellow() {
 function cyan() {
 	echo "$(tput setaf 6)$*$(tput sgr0)"
 }
-

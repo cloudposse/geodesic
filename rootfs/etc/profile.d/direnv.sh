@@ -1,4 +1,3 @@
-
 # Install `direnv` via PROMPT_COMMAND hook
 #
 

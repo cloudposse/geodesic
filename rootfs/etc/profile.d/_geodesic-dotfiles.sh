@@ -21,7 +21,6 @@
 # and all the files found will be added in the order described above. The second argument is the name of the resource
 # See example usages in _preferences.sh
 
-
 function _search_geodesic_dirs() {
 	local -n search_list=$1
 	local resource=$2
@@ -59,7 +58,6 @@ function _search_geodesic_dirs() {
 		_expand_dir_or_file search_list "${resource}" "${base}/${DOCKER_IMAGE}"
 	fi
 }
-
 
 # _expand_dir_or_file is a helper function
 #

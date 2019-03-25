@@ -1,4 +1,3 @@
-
 # By default Ctrl-S (a.k.a C-s or ^S) stops terminal output.
 #  However, in bash, it is  mapped to forward-search (through command history),
 # which is the standard emacs mapping. Unfortunately, it cannot do both, and by default, stop output wins.

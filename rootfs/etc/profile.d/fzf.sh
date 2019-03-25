@@ -36,7 +36,6 @@ function _set_fzf_default_opts() {
 	local olive="3"
 	local keep="-1" # Keep the exsiting terminal setting for this field
 
-
 	case "$1" in
 	solar_24)
 		export FZF_DEFAULT_OPTS='--color=bg+:#073642,bg:#002b36,spinner:#719e07,hl:#586e75
@@ -60,7 +59,7 @@ function _set_fzf_default_opts() {
 		# Built-in basic color schemes
 		export FZF_DEFAULT_OPTS="--color=$1"
 		;;
-	mild|*) # "mild" is redundant with "*", but I want this to have an explicit name in case the default changes later
+	mild | *) # "mild" is redundant with "*", but I want this to have an explicit name in case the default changes later
 		export FZF_DEFAULT_OPTS="--border
 			--color fg:$keep,bg:$keep,hl:$burntOrange,fg+:$olive,bg+:$gray2,hl+:$veryPaleYellow
 			--color info:$teal,prompt:$blue,spinner:$teal,pointer:$orange,marker:$salmon,header:$green"

@@ -1,4 +1,3 @@
-
 if [[ $GEODESIC_TRACE =~ custom ]]; then
 	export GEODESIC_CUSTOM_TRACE=true
 else
@@ -20,7 +19,7 @@ elif [[ ! -d $GEODESIC_DOT_DIR ]]; then
 	# Set, but not correctly. See if it is relative to /localhost (host ~)
 	if [[ -d /localhost/$GEODESIC_DOT_DIR ]]; then
 		GEODESIC_DOT_DIR="/localhost/$GEODESIC_DOT_DIR"
-	# See if it is a full host path ending under host ~
+		# See if it is a full host path ending under host ~
 	elif [[ -d /localhost/$(basename $GEODESIC_DOT_DIR) ]]; then
 		GEODESIC_DOT_DIR="/localhost/$(basename $GEODESIC_DOT_DIR)"
 	else
@@ -34,7 +33,6 @@ fi
 unset GEODESIC_DOT_DIR_DEFAULT
 
 [[ -n $GEODESIC_CUSTOM_TRACE ]] && echo trace: GEODESIC_DOT_DIR is ultimately set to "${GEODESIC_DOT_DIR}"
-
 
 ## Save shell history in the most specific place
 HISTFILE_LIST=(${HISTFILE:-${GEODESIC_DOT_DIR}/history})

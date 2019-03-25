@@ -6,7 +6,7 @@ _install_alias_completion
 
 # remove duplicates from PROMPT_COMMAND
 function _dedupe_prompt_command() {
-	local prompt_command=( ${PROMPT_COMMAND//;/ } )
+	local prompt_command=(${PROMPT_COMMAND//;/ })
 	PROMPT_COMMAND=
 
 	for cmd in "${prompt_command[@]}"; do

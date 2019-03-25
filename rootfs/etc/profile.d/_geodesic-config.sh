@@ -1,5 +1,10 @@
-# bash funnctions to import
+# Files in the profile.d directory are executed by the lexicographical order of their file names.
+# This file is named _geodesic-config.sh. The leading underscore is needed to ensure this file executes before
+# other files that depend on the functions defined here.
+# This file has depends on _colors.sh and should come second.
 
+# bash functions that support the user customization framework
+#
 # Given the name of a resource, _search_geodesic_dirs assembles an array of matching, Geodesic-specific resources,
 # in order from most general to most specific. They should be applied in order with the later ones overriding
 # the earlier ones.
@@ -9,7 +14,7 @@
 # * If it is a directory, all the non-hidden files in that directory are loaded in glob sort order
 #
 # Several directories are searched for resources, in this order:
-# * $base/defaults/ ($base itself defaults to /localhost/.geodesic, can be set via GEODESIC_DOT_DIR)
+# * $base/defaults/ ($base itself defaults to /localhost/.geodesic, can be set via GEODESIC_CONFIG_HOME)
 # * $base/ if and only if there is no $base/defaults/ directory
 # * $base/$(dirname $DOCKER_IMAGE)/defaults/
 # * $base/$(dirname $DOCKER_IMAGE)/ if and only if there is no $base/$(dirname $DOCKER_IMAGE)/defaults/ directory
@@ -24,7 +29,7 @@
 function _search_geodesic_dirs() {
 	local -n search_list=$1
 	local resource=$2
-	local base="${GEODESIC_DOT_DIR}"
+	local base="${GEODESIC_CONFIG_HOME}"
 
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource"
 

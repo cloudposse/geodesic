@@ -36,7 +36,7 @@ if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
 		fi
 
 		if [ -z "${role}" ]; then
-			echo "Usage: $0 [role]"
+			echo "Usage: assume-role [role]"
 			return 1
 		fi
 		# Sync the clock in the Docker Virtual Machine to the system's hardware clock to avoid time drift

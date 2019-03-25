@@ -65,7 +65,6 @@ COPY packages.txt /etc/apk/
 
 RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
-    ln -s /usr/share/bash-completion/completions/fzf /etc/bash_completion.d/fzf.sh && \
     touch /conf/.gitconfig
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
@@ -103,8 +102,10 @@ RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d
 # Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
 #
 ENV AWS_VAULT_ENABLED=true
+ENV AWS_VAULT_SERVER_ENABLED=false
 ENV AWS_VAULT_BACKEND=file
 ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
+ENV AWS_VAULT_SESSION_TTL=12h
 #ENV AWS_VAULT_FILE_PASSPHRASE=
 
 #
@@ -116,7 +117,6 @@ ENV AWS_OKTA_ENABLED=false
 # Install kubectl
 #
 ENV KUBERNETES_VERSION 1.10.11
-ENV KUBECONFIG=${SECRETS_PATH}/kubernetes/kubeconfig
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 ENV KUBECTX_COMPLETION_VERSION 0.6.2
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
@@ -139,7 +139,10 @@ ENV KOPS_BASTION_PUBLIC_NAME="bastion"
 ENV KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
 ENV KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
 ENV KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
+
 ENV KUBECONFIG=/dev/shm/kubecfg
+ENV KUBECONFIG_TEMPLATE=/templates/kops/kubecfg.yaml
+
 RUN /usr/bin/kops completion bash > /etc/bash_completion.d/kops.sh
 
 # Instance sizes
@@ -188,6 +191,9 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
 
+# Enable Atlantis to manage helm
+RUN chmod -R 777 /var/lib/helm
+
 # 
 # Install fancy Kube PS1 Prompt
 #
@@ -197,7 +203,7 @@ ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube
 #
 # AWS
 #
-ENV AWS_DATA_PATH=/localhost/.aws/
+ENV AWS_DATA_PATH=/localhost/.aws
 ENV AWS_CONFIG_FILE=${AWS_DATA_PATH}/config
 ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_DATA_PATH}/credentials
 

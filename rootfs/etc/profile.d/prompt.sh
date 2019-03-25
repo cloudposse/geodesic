@@ -31,7 +31,8 @@ function geodesic_prompt() {
 	case $PROMPT_STYLE in
 	plain)
 		# 8859-1 codepoints:
-		ASSUME_ROLE_ACTIVE_MARK=$(tput bold)$(tput setab 2)$'»'$(tput sgr0)' ' # green
+		# '\[' and '\]' are bash prompt delimiters around non-printing characters
+		ASSUME_ROLE_ACTIVE_MARK="\["$(tput bold)$(tput setab 2)"\]»\["$(tput sgr0)"\] " # green
 		ASSUME_ROLE_INACTIVE_MARK=$'· '
 		BLACK_RIGHTWARDS_ARROWHEAD=$'=> '
 		BANNER_MARK=$'§ '
@@ -66,9 +67,9 @@ function geodesic_prompt() {
 		ROLE_PROMPT="(none)"
 	fi
 
-	PS1=$'${STATUS}'
+	PS1="${STATUS}"
 	PS1+="  ${ROLE_PROMPT} \W "
-	PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD} '
+	PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD}'
 
 	if [ -n "${BANNER}" ]; then
 		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)\n"${PS1}

@@ -45,6 +45,8 @@ openssh-client
 openssl
 pwgen
 python
+rakkess@cloudposse
+rbac-lookup@cloudposse
 retry@cloudposse
 scenery@cloudposse
 shellcheck@cloudposse
@@ -52,6 +54,7 @@ shfmt@cloudposse
 sops@cloudposse
 sshpass
 stern@cloudposse
+sudo
 syslog-ng
 tar
 terraform@cloudposse

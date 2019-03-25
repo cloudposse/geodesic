@@ -13,7 +13,18 @@ function use_terraform() {
 	# Terraform backend for a given project using envs
 	export TF_STATE_FILE=${TF_FILE:-terraform.tfstate}
 	export TF_BUCKET_REGION=${TF_BUCKET_REGION:-${AWS_REGION}}
-	export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename $(pwd))}
+
+	case "${TF_BUCKET_PREFIX_FORMAT}" in
+		basename-pwd)
+			# Use old bucket prefix format (flat structure, uses leaf directory name only)
+			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(basename $(pwd))}
+			;;
+		pwd|*)
+			# Use full directory path after /conf
+			# (default)
+			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(pwd | cut -d/ -f3-)}
+			;;
+	esac
 	
 	# Disable color if not running in a TTY (e.g. CI/CD context)
 	if [ ! -t 1 ]; then

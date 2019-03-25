@@ -17,6 +17,7 @@ function assume_active_role() {
 				echo "* $(green Attaching to exising aws-vault session and assuming role) $(cyan ${aws_vault})"
 				export AWS_VAULT="$aws_vault"
 				export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION-${AWS_REGION}}"
+				export AWS_VAULT_SERVER_EXTERNAL=true
 			fi
 		else
 			unset TF_VAR_aws_assume_role_arn
@@ -80,6 +81,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 			fzf \
 				--height 30% \
 				--reverse \
+				--select-1 \
 				--prompt='-> ' \
 				--header 'Select AWS profile' \
 				--query "${ASSUME_ROLE_INTERACTIVE_QUERY:-${NAMESPACE}-${STAGE}-}" \

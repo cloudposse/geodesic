@@ -18,7 +18,7 @@ FROM google/cloud-sdk:228.0.0-alpine as google-cloud-sdk
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:0.53.0 as packages
+FROM cloudposse/packages:0.80.0 as packages
 
 WORKDIR /packages
 
@@ -65,7 +65,6 @@ COPY packages.txt /etc/apk/
 
 RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
-    ln -s /usr/share/bash-completion/completions/fzf /etc/bash_completion.d/fzf.sh && \
     touch /conf/.gitconfig
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
@@ -191,6 +190,9 @@ RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --versi
     && helm plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
     && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
     && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
+
+# Enable Atlantis to manage helm
+RUN chmod -R 777 /var/lib/helm
 
 # 
 # Install fancy Kube PS1 Prompt

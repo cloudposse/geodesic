@@ -146,7 +146,7 @@ spec:
       https://get.gravitational.com/teleport-ent-v{{- getenv "TELEPORT_VERSION" -}}-linux-amd64-bin.tar.gz && \
       tar  -xzf /tmp/teleport.tar.gz -C /tmp && \
       cp -f /tmp/teleport-ent/teleport /usr/local/bin/teleport && \
-      chmod 550 /usr/local/bin/teleport'
+      chmod 551 /usr/local/bin/teleport'
   fileAssets:
     - name: teleport.yaml
       # path is actually the path plus the filename

@@ -5,7 +5,34 @@ shopt -s checkwinsize
 # Cache the current screen size
 export SCREEN_SIZE="${LINES}x${COLUMNS}"
 
-export PROMPT_COMMAND=prompter
+# Here we install our `prompter` prompt command to run the array of PROMPT_HOOKS we set up.
+# We like managing our stuff via the PROMPT_HOOKS array because it is easier to add things,
+# but bash only runs the command string in PROMPT_COMMAND,
+# in part because you cannot export an array or pass it to a child process.
+# However, not all the utilities we use support being managed through our PROMPT_HOOKS.
+# Some utilities (such as `direnv`) operate directly on the PROMPT_COMMAND variable, adding
+# themselves to it. Also, the PROMPT_COMMAND is inheritied by subshells, but we will be
+# running this initialization script again in the subshell.
+# So we cannot just unthinkingly set PROMPT_COMMAND=prompter or PROMPT_COMMAND="${PROMPT_COMMAND};prompter"
+# Instead, we examine the PROMPT_COMMAND variable, initialize it to "prompter;" if it is empty,
+# or otherwise add "prompter;" to the end of the command string (inserting a ; before it if needed).
+export PROMPT_COMMAND
+function _install_prompter() {
+	if ! [[ $PROMPT_COMMAND =~ prompter ]]; then
+		local final_colon=';$'
+
+		if [[ -z $PROMPT_COMMAND ]]; then
+			PROMPT_COMMAND="prompter;"
+		elif [[ $PROMPT_COMMAND =~ $final_colon ]]; then
+			PROMPT_COMMAND="${PROMPT_COMMAND}prompter;"
+		else
+			PROMPT_COMMAND="${PROMPT_COMMAND};prompter;"
+		fi
+	fi
+}
+_install_prompter
+unset -f _install_prompter
+
 function prompter() {
 	for hook in ${PROMPT_HOOKS[@]}; do
 		"${hook}"
@@ -26,6 +53,7 @@ function reload() {
 
 # Define our own prompt
 PROMPT_HOOKS+=("geodesic_prompt")
+KUBE_PS1_SYMBOL_ENABLE=${KUBE_PS1_SYMBOL_ENABLE:-false}
 function geodesic_prompt() {
 
 	case $PROMPT_STYLE in

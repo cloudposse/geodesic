@@ -1,5 +1,4 @@
-PROMPT_HOOKS+=("direnv_prompt")
+# Install `direnv` via PROMPT_COMMAND hook
+#
 
-function direnv_prompt() {
-	eval "$(direnv hook bash)"
-}
+eval "$(direnv hook bash)"

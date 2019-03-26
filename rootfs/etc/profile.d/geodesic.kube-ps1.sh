@@ -1,3 +1,4 @@
+# A little extra help for https://github.com/jonmosco/kube-ps1
 PROMPT_HOOKS+=("kube_ps1_cache_buster")
 function kube_ps1_cache_buster() {
 	# If config cache is empty

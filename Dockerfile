@@ -39,9 +39,6 @@ FROM alpine:3.9.2
 
 ENV BANNER "geodesic"
 
-# Where to store state
-ENV CACHE_PATH=/localhost/.geodesic
-
 ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
@@ -210,9 +207,8 @@ ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_DATA_PATH}/credentials
 #
 # Shell
 #
-ENV HISTFILE=${CACHE_PATH}/history
 ENV SHELL=/bin/bash
-ENV LESS=-Xr
+ENV LESS=R
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
 # Reduce `make` verbosity

@@ -69,10 +69,6 @@ function use() {
 		DOCKER_ARGS=()
 	fi
 
-	if [ -n "${ENV_FILE}" ]; then
-		DOCKER_ARGS+=(--env-file ${ENV_FILE})
-	fi
-
 	if [ "${WITH_DOCKER}" == "true" ]; then
 		if [ $(uname -s) == 'Linux' ]; then
 			# Bind-mount docker client and docker socket into container (linux only)
@@ -85,10 +81,19 @@ function use() {
 		fi
 	fi
 
-	# allow users to override value of GEODESIC_DEFAULT_ENV_FILE
-	local geodesic_default_env_file=${GEODESIC_DEFAULT_ENV_FILE:-~/.geodesic/env}
-	if [ -f "${geodesic_default_env_file}" ]; then
-		DOCKER_ARGS+=(--env-file=${geodesic_default_env_file})
+	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} == false ]]; then
+		if [ -n "${ENV_FILE}" ]; then
+			DOCKER_ARGS+=(--env-file ${ENV_FILE})
+		fi
+
+		# allow users to override value of GEODESIC_DEFAULT_ENV_FILE
+		local geodesic_default_env_file=${GEODESIC_DEFAULT_ENV_FILE:-~/.geodesic/env}
+		if [ -f "${geodesic_default_env_file}" ]; then
+			DOCKER_ARGS+=(--env-file=${geodesic_default_env_file})
+		fi
+	else
+		echo "# Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is set and not 'false'"
+		DOCKER_ARGS+=(--env GEODESIC_CUSTOMIZATION_DISABLED)
 	fi
 
 	if [ -n "${DOCKER_DNS}" ]; then

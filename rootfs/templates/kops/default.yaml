@@ -113,12 +113,27 @@ spec:
     {{- end }}
     name: events
   hooks:
+  # Mitigate CVE-2019-5736
   - before:
     - docker.service
     manifest: |
       Type=oneshot
       ExecStart=/usr/bin/chattr +i /usr/bin/docker-runc
     name: cve-2019-5736.service
+{{- if bool (getenv "KIAM_INSTALLED" "true") }}
+  # Install iptable entry for kiam which, when kiam is not present, will prevent any access to EC2 metadata
+  # NOTE: the interface name (after -i) must be the same as the interface name passed to kiam
+  #       and if kiam is not listening on the default 8181 port, you must replace 8181 with the correct port number
+  - after:
+    - network.target
+    manifest: |
+      Type=oneshot
+      ExecStart=/bin/sh -c '/sbin/iptables -t nat -A PREROUTING -d 169.254.169.254/32 \
+          -i cali+ -p tcp -m tcp --dport 80 -j DNAT \
+          --to-destination $(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8181'
+    name: kiam-iptables.service
+    roles: [Node]
+{{- end }}
 {{- if getenv "TELEPORT_PROXY_DOMAIN_NAME" }}
   - name: teleport-node.service
     roles: [Node, Master, Bastion]

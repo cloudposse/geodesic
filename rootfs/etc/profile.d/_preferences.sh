@@ -46,9 +46,11 @@ unset _GEODESIC_CONFIG_HOME_DEFAULT
 # Search for and find the history file most specificly targeted to this DOCKER_IMAGE
 function _geodesic_set_histfile() {
 	## Save shell history in the most specific place
+	local histfile_at_start="${HISTFILE}"
 	local histfile_list=(${HISTFILE:-${GEODESIC_CONFIG_HOME}/history})
-	_search_geodesic_dirs HISTFILE_LIST history
+	_search_geodesic_dirs histfile_list history
 	HISTFILE="${histfile_list[-1]}"
+	[[ ${HISTFILE} == $histfile_at_start ]] || histfile -r
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE set to "${HISTFILE}"
 }
 _geodesic_set_histfile

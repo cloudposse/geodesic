@@ -49,8 +49,7 @@ function _geodesic_set_histfile() {
 	local histfile_at_start="${HISTFILE}"
 	local histfile_list=(${HISTFILE:-${GEODESIC_CONFIG_HOME}/history})
 	_search_geodesic_dirs histfile_list history
-	HISTFILE="${histfile_list[-1]}"
-	[[ ${HISTFILE} == $histfile_at_start ]] || history -r
+	export HISTFILE="${histfile_list[-1]}"
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE set to "${HISTFILE}"
 }
 _geodesic_set_histfile

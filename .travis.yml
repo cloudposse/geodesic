@@ -16,11 +16,11 @@ install:
 - make init
 - make travis/docker-login
 - make packages/reinstall/shfmt
-- make bash/fmt/check
 
 script:
 - make deps
 - make lint
+- make bash/fmt/check
 - make docker/build
 
 after_success:

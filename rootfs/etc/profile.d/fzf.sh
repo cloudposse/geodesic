@@ -38,19 +38,19 @@ function _set_fzf_default_opts() {
 
 	local fzf_default_opts
 	case "$1" in
-	solar_24|solarized_24|solarized_light_24)
+	solar_24 | solarized_24 | solarized_light_24)
 		# Solarized colors from https://ethanschoonover.com/solarized/ according to fzf site
 		fzf_default_opts='--color=bg+:#073642,bg:#002b36,spinner:#719e07,hl:#586e75
 			--color=fg:#839496,header:#586e75,info:#cb4b16,pointer:#719e07
 			--color=marker:#719e07,fg+:#839496,prompt:#719e07,hl+:#719e07'
 		;;
-	solar_light|solarized_light)
+	solar_light | solarized_light)
 		## Solarized Light color scheme for fzf, approximated with ANSI 256 colors, preserving foreground and background
 		fzf_default_opts="--border
 			--color fg:$keep,bg:$keep,hl:$blue,fg+:$gray4,bg+:$grayE,hl+:$blue
 			--color info:$burntOrange,prompt:$burntOrange,pointer:$gray3,marker:$gray3,spinner:$burntOrange"
 		;;
-	solar_dark|solarized_dark)
+	solar_dark | solarized_dark)
 		# Solarized Dark color scheme for fzf, approximated with ANSI 256 colors, preserving foreground and background
 		fzf_default_opts="--border
 			--color fg:$keep,bg:$keep,hl:$blue,fg+:$grayE,bg+:$gray4,hl+:$blue

@@ -86,7 +86,7 @@ function geodesic_prompt() {
 		# '➤' ($'\u27a4') BLACK RIGHTWARDS ARROWHEAD from the Dingbats Unicode block
 		# '▶︎' ($'\u25b6\ufe0e') BLACK RIGHT-POINTING TRIANGLE which is sometimes presented as an emoji (as GitHub likes to) '▶️'
 		# '⏩︎' ($'\u23e9\ufe0e') BLACK RIGHT-POINTING DOUBLE TRIANGLE
-		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 '                                                              # '⨠'
+		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 ' # '⨠' Z NOTATION SCHEMA PIPING
 		BANNER_MARK='⧉ '
 		;;
 	esac

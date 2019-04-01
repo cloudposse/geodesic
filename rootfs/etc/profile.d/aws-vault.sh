@@ -80,6 +80,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 			awk -F ' ' '{print $2}' |
 			fzf \
 				--height 30% \
+				--preview-window right:70% \
 				--reverse \
 				--select-1 \
 				--prompt='-> ' \

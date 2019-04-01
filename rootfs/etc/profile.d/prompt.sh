@@ -76,9 +76,17 @@ function geodesic_prompt() {
 
 	*)
 		# default
-		ASSUME_ROLE_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u2713 \x01'$(tput sgr0)$'\x02'   # green bold '✓'
+		#	ASSUME_ROLE_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u2713 \x01'$(tput sgr0)$'\x02'   # green bold '✓'
+		ASSUME_ROLE_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u221a \x01'$(tput sgr0)$'\x02'   # green bold '√'
 		ASSUME_ROLE_INACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 1)$'\x02\u2717 \x01'$(tput sgr0)$'\x02' # red bold '✗'
-		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 '                                                              # '⨠'
+		# Options for arrow per https://github.com/cloudposse/geodesic/issues/417#issuecomment-477836676
+		# '»' ($'\u00bb') RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK from the Latin-1 supplement Unicode block
+		# '≫' ($'\u226b') MUCH GREATER-THAN and
+		# '⋙' ($'\u22d9') VERY MUCH GREATER-THAN which are from the Mathematical Operators Unicode block
+		# '➤' ($'\u27a4') BLACK RIGHTWARDS ARROWHEAD from the Dingbats Unicode block
+		# '▶︎' ($'\u25b6\ufe0e') BLACK RIGHT-POINTING TRIANGLE which is sometimes presented as an emoji (as GitHub likes to) '▶️'
+		# '⏩︎' ($'\u23e9\ufe0e') BLACK RIGHT-POINTING DOUBLE TRIANGLE
+		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 ' # '⨠' Z NOTATION SCHEMA PIPING
 		BANNER_MARK='⧉ '
 		;;
 	esac
@@ -97,7 +105,7 @@ function geodesic_prompt() {
 
 	PS1="${STATUS}"
 	PS1+="  ${ROLE_PROMPT} \W "
-	PS1+=$'${BLACK_RIGHTWARDS_ARROWHEAD}'
+	PS1+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
 
 	if [ -n "${BANNER}" ]; then
 		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)\n"${PS1}

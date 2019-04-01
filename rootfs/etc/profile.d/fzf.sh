@@ -36,37 +36,43 @@ function _set_fzf_default_opts() {
 	local olive="3"
 	local keep="-1" # Keep the exsiting terminal setting for this field
 
+	local fzf_default_opts
 	case "$1" in
-	solar_24)
-		export FZF_DEFAULT_OPTS='--color=bg+:#073642,bg:#002b36,spinner:#719e07,hl:#586e75
+	solar_24 | solarized_24 | solarized_light_24)
+		# Solarized colors from https://ethanschoonover.com/solarized/ according to fzf site
+		fzf_default_opts='--color=bg+:#073642,bg:#002b36,spinner:#719e07,hl:#586e75
 			--color=fg:#839496,header:#586e75,info:#cb4b16,pointer:#719e07
 			--color=marker:#719e07,fg+:#839496,prompt:#719e07,hl+:#719e07'
 		;;
-	solar_light)
-		## Solarized Light color scheme for fzf
-		export FZF_DEFAULT_OPTS="--border
+	solar_light | solarized_light)
+		## Solarized Light color scheme for fzf, approximated with ANSI 256 colors, preserving foreground and background
+		fzf_default_opts="--border
 			--color fg:$keep,bg:$keep,hl:$blue,fg+:$gray4,bg+:$grayE,hl+:$blue
 			--color info:$burntOrange,prompt:$burntOrange,pointer:$gray3,marker:$gray3,spinner:$burntOrange"
 		;;
-	solar_dark)
-		# Solarized Dark color scheme for fzf
-		export FZF_DEFAULT_OPTS="--border
+	solar_dark | solarized_dark)
+		# Solarized Dark color scheme for fzf, approximated with ANSI 256 colors, preserving foreground and background
+		fzf_default_opts="--border
 			--color fg:$keep,bg:$keep,hl:$blue,fg+:$grayE,bg+:$gray4,hl+:$blue
 			--color info:$burntOrange,prompt:$burntOrange,pointer:$veryPaleYellow
 			--color marker:$veryPaleYellow,spinner:$burntOrange"
 		;;
 	dark | light | 16 | bw)
 		# Built-in basic color schemes
-		export FZF_DEFAULT_OPTS="--color=$1"
+		fzf_default_opts="--color=$1"
 		;;
 	mild | *) # "mild" is redundant with "*", but I want this to have an explicit name in case the default changes later
-		export FZF_DEFAULT_OPTS="--border
+		fzf_default_opts="--border
 			--color fg:$keep,bg:$keep,hl:$burntOrange,fg+:$olive,bg+:$gray2,hl+:$veryPaleYellow
 			--color info:$teal,prompt:$blue,spinner:$teal,pointer:$orange,marker:$salmon,header:$green"
 		;;
 	esac
+	export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:+${FZF_DEFAULT_OPTS} }${fzf_default_opts}"
 }
 
-if [[ -z $FZF_DEFAULT_OPTS ]]; then
-	_set_fzf_default_opts "$FZF_COLORS"
+_set_fzf_default_opts "$FZF_COLORS"
+
+# Requires fzf v0.18.0 or later
+if [[ $PROMPT_STYLE == plain && ! $FZF_DEFAULT_OPTS =~ --no-unicode ]]; then
+	FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:+${FZF_DEFAULT_OPTS} }--no-unicode"
 fi

@@ -12,7 +12,6 @@ lint:
 	@LINT=true \
 	 find rootfs/usr/local/include -type f '!' -name '*.sample' -exec \
 			 /bin/sh -c 'echo "==> {}">/dev/stderr; make --include-dir=rootfs/usr/local/include/ --just-print --dry-run --recon --no-print-directory --quiet --silent -f {}' \; > /dev/null
-	@make bash:lint
 
 deps:
 	@exit 0
@@ -27,7 +26,7 @@ run:
 	@geodesic
 
 bash/fmt:
-	shfmt -l -w $(PWD)
+	shfmt -l -w $(PWD)/rootfs
 
 bash/fmt/check:
 	shfmt -d $(PWD)/rootfs

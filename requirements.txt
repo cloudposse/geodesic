@@ -1,5 +1,5 @@
 ansible==2.7.9
-awscli==1.16.125
+awscli==1.16.135
 awsebcli==3.14.13
 boto==2.49.0
 crudini==0.9

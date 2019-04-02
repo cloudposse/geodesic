@@ -24,7 +24,7 @@ function assume_active_role() {
 			AWS_DEFAULT_PROFILE=${aws_default_profile}
 		fi
 	else
-		AWS_DEFAULT_PROFILE=$aws_default_profile
+		AWS_DEFAULT_PROFILE=${aws_default_profile}
 	fi
 }
 

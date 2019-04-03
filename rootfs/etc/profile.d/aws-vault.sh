@@ -3,13 +3,10 @@
 function _validate_aws_vault_server() {
 	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
 
-	# For some reason, the obvious way did not work, and curl_exit_code was always 0
-	# local instance=$(curl -m 2 --connect-timeout 0.3 -sS -f http://169.254.169.254/latest/meta-data/instance-id/)
-	# local curl_exit_code=$? # was always 0
-
-	curl -m 2 --connect-timeout 0.3 -sS -f http://169.254.169.254/latest/meta-data/instance-id/ >/tmp/instance
-	local curl_exit_code=$?
-	local instance=$(cat /tmp/instance)
+	local instance
+	local curl_exit_code
+	instance=$(curl -m 2 --connect-timeout 0.3 -s -f http://169.254.169.254/latest/meta-data/instance-id/)
+	curl_exit_code=$?
 
 	if [[ $instance == "aws-vault" ]]; then
 		_assume_active_aws_role

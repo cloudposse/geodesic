@@ -32,7 +32,7 @@ if [ -d "/localhost/.awsvault/keys/" ] && [ ! -w "/localhost/.awsvault/" ]; then
 fi
 
 if [ "${AWS_VAULT_BACKEND}" != "file" ]; then
-    echo "*"
+	echo "*"
 	echo "* WARNING: AWS_VAULT_BACKEND is \"${AWS_VAULT_BACKEND}\". Geodesic only supports AWS_VAULT_BACKEND=\"file\"."
 	echo "*"
 fi

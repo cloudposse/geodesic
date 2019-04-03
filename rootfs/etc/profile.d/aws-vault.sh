@@ -11,7 +11,7 @@ function _validate_aws_vault_server() {
 	if [[ $instance == "aws-vault" ]]; then
 		_assume_active_aws_role
 	elif (($curl_exit_code == 0)); then
-		echo $(green force-starting aws-vault server because real AWS meta-data server is reachable)
+		echo "* $(green force-starting aws-vault server because real AWS meta-data server is reachable)"
 		_force_start_aws_vault_server
 	elif (($curl_exit_code == 7)) || (($curl_exit_code == 28)); then
 		echo "* $(green assume-role) will start EC2 metadata service at $(green http://169.254.169.254/latest)"
@@ -141,7 +141,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 				# this function returns, regardless of how it returns (e.g. in case of errors).
 				trap 'export AWS_VAULT="$aws_vault" && export AWS_VAULT_SERVER_ENABLED="$aws_vault_server_enabled"' RETURN
 				unset AWS_VAULT
-				AWS_VAULT_SERVER_ENABLED=false
+				AWS_VAULT_SERVER_ENABLED="false: server serving other role"
 			else
 				echo "Type '$(green exit)' before attempting to assume another role"
 				return 1

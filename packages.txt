@@ -20,6 +20,7 @@ figurine@cloudposse
 file
 fuse
 fzf@cloudposse
+fzf-bash-completion
 gettext
 git
 github-commenter@cloudposse

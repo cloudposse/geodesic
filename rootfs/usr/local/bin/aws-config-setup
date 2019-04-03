@@ -59,7 +59,7 @@ crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" source_profi
 read -p "Setup AWS Credentials (aws-vault)? [y/n] " SETUP_VAULT
 
 if [ "${SETUP_VAULT}" == "y" ]; then
-	aws-vault add "${AWS_SOURCE_PROFILE}"
+	aws-vault --backend=file add "${AWS_SOURCE_PROFILE}"
 fi
 
 echo "Configured AWS ${AWS_DEFAULT_PROFILE} profile for ${AWS_REGION} region in the ${AWS_ACCOUNT_ID} account"

@@ -73,13 +73,14 @@ function _search_geodesic_dirs() {
 #   the exclusion pattern in GEODESIC_AUTO_LOAD_EXCLUSIONS, in the directory to the array-ref
 function _expand_dir_or_file() {
 	local -n expand_list=$1
+	local resource=$2
 	local dir=${3-${PWD}}
 	local default_exclusion_pattern="(~|.bak|.log|.old|.orig|.disabled)$"
 	local exclude="${GEODESIC_AUTO_LOAD_EXCLUSIONS:-$default_exclusion_pattern}"
 
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource" in "$dir"
 
-	for item in "${dir}/$2" "${dir}/${2}.d"/*; do
+	for item in "${dir}/$resource" "${dir}/${resource}.d"/*; do
 		if [[ -f $item ]]; then
 			[[ $item =~ $exclude ]] && continue
 			expand_list+=($item)

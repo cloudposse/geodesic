@@ -39,14 +39,21 @@ elif [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 	fi
 fi
 
+if [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
+	if mkdir -p $GEODESIC_CONFIG_HOME; then
+		echo $(yellow Created directory "$GEODESIC_CONFIG_HOME" '(GEODESIC_CONFIG_HOME)')
+	else
+		echo $(red Cannot create directory "$GEODESIC_CONFIG_HOME" '(GEODESIC_CONFIG_HOME)')
+	fi
+fi
+
 unset _GEODESIC_CONFIG_HOME_DEFAULT
 
 [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: GEODESIC_CONFIG_HOME is ultimately set to "${GEODESIC_CONFIG_HOME}"
 
-# Search for and find the history file most specificly targeted to this DOCKER_IMAGE
+# Search for and find the history file most specifically targeted to this DOCKER_IMAGE
 function _geodesic_set_histfile() {
 	## Save shell history in the most specific place
-	local histfile_at_start="${HISTFILE}"
 	local histfile_list=(${HISTFILE:-${GEODESIC_CONFIG_HOME}/history})
 	_search_geodesic_dirs histfile_list history
 	export HISTFILE="${histfile_list[-1]}"

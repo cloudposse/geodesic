@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 function _validate_aws_vault_server() {
 	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
 
@@ -8,7 +7,7 @@ function _validate_aws_vault_server() {
 	# local instance=$(curl -m 2 --connect-timeout 0.3 -sS -f http://169.254.169.254/latest/meta-data/instance-id/)
 	# local curl_exit_code=$? # was always 0
 
-	curl -m 2 --connect-timeout 0.3 -sS -f http://169.254.169.254/latest/meta-data/instance-id/ > /tmp/instance
+	curl -m 2 --connect-timeout 0.3 -sS -f http://169.254.169.254/latest/meta-data/instance-id/ >/tmp/instance
 	local curl_exit_code=$?
 	local instance=$(cat /tmp/instance)
 
@@ -22,15 +21,17 @@ function _validate_aws_vault_server() {
 		AWS_VAULT_ARGS+=("--server")
 	else
 		echo "* $(red Unexpected status code $curl_exit_code while probing for meta-data server. Disabling aws-vault server.)"
-	 	export AWS_VAULT_SERVER_ENABLED="probe returned $curl_exit_code"
+		export AWS_VAULT_SERVER_ENABLED="probe returned $curl_exit_code"
 	fi
 }
 
 function _force_start_aws_vault_server() {
-	{ aws-vault server >/dev/null & } 2>/dev/null
+	{
+		aws-vault server >/dev/null &
+	} 2>/dev/null
 	local aws_vault_server_pid=$!
 	sleep 1
-	if disown $aws_vault_server_pid 2> /dev/null; then
+	if disown $aws_vault_server_pid 2>/dev/null; then
 		echo $(green aws-vault server started at PID $aws_vault_server_pid)
 		AWS_VAULT_ARGS+=("--server")
 	else
@@ -51,7 +52,7 @@ function _assume_active_aws_role() {
 		export AWS_VAULT_SERVER_EXTERNAL=true
 		local aws_vault=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$TF_VAR_aws_assume_role_arn" | cut -d' ' -f 3)
 		if [[ -z $aws_vault ]]; then
-			echo "* $(red Could not find role name for $TF_VAR_aws_assume_role_arn; calling it \"instance-role\")"
+			echo "* $(red Could not find role name for ${TF_VAR_aws_assume_role_arn}\; calling it \"instance-role\")"
 			aws-vault="instance-role"
 		fi
 		if [[ -z $AWS_VAULT || $AWS_VAULT == $aws_vault ]]; then

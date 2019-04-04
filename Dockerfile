@@ -39,7 +39,6 @@ FROM alpine:3.9.2
 
 ENV BANNER "geodesic"
 
-ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
 ENV KOPS_CLUSTER_NAME=example.foo.bar
@@ -94,16 +93,6 @@ RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d
     gcloud config set core/disable_usage_reporting true --installation && \
     gcloud config set component_manager/disable_update_check true --installation && \
     gcloud config set metrics/environment github_docker_image --installation
-
-#
-# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
-#
-ENV AWS_VAULT_ENABLED=true
-ENV AWS_VAULT_SERVER_ENABLED=false
-ENV AWS_VAULT_BACKEND=file
-ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
-ENV AWS_VAULT_SESSION_TTL=12h
-#ENV AWS_VAULT_FILE_PASSPHRASE=
 
 #
 # Configure aws-okta to easily assume roles
@@ -203,6 +192,16 @@ ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube
 ENV AWS_DATA_PATH=/localhost/.aws
 ENV AWS_CONFIG_FILE=${AWS_DATA_PATH}/config
 ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_DATA_PATH}/credentials
+
+#
+# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
+#
+ENV AWS_VAULT_ENABLED=true
+ENV AWS_VAULT_SERVER_ENABLED=false
+ENV AWS_VAULT_BACKEND=file
+ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
+ENV AWS_VAULT_SESSION_TTL=12h
+#ENV AWS_VAULT_FILE_PASSPHRASE=
 
 #
 # Shell

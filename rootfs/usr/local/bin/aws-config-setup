@@ -21,6 +21,22 @@ if [ -z "${AWS_ROOT_ACCOUNT_ID}" ]; then
 	exit 1
 fi
 
+if [ ! -d "/localhost/.awsvault/" ] || [ ! -w "/localhost/.awsvault/" ]; then
+	echo "/localhost/.awsvault/ is not writable"
+	exit 1
+fi
+
+if [ -d "/localhost/.awsvault/keys/" ] && [ ! -w "/localhost/.awsvault/keys/" ]; then
+	echo "/localhost/.awsvault/keys/ is not writable"
+	exit 1
+fi
+
+if [ "${AWS_VAULT_BACKEND}" != "file" ]; then
+	echo "*"
+	echo "* WARNING: AWS_VAULT_BACKEND is \"${AWS_VAULT_BACKEND}\". Geodesic only supports AWS_VAULT_BACKEND=\"file\"."
+	echo "*"
+fi
+
 # Derive the source profile from the prefix of the default profile
 export AWS_SOURCE_PROFILE=$(echo ${AWS_DEFAULT_PROFILE} | cut -d- -f1)
 

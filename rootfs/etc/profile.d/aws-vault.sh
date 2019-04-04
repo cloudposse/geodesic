@@ -1,30 +1,67 @@
 #!/bin/bash
 
-function assume_active_role() {
-	if [ "${AWS_VAULT_SERVER_ENABLED:-true}" != "true" ]; then
-		return 0
+function _validate_aws_vault_server() {
+	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
+
+	local instance
+	local curl_exit_code
+	instance=$(curl -m 2 --connect-timeout 0.3 -s -f http://169.254.169.254/latest/meta-data/instance-id/)
+	curl_exit_code=$?
+
+	if [[ $instance == "aws-vault" ]]; then
+		_assume_active_aws_role
+	elif (($curl_exit_code == 0)); then
+		echo "* $(green force-starting aws-vault server because real AWS meta-data server is reachable)"
+		_force_start_aws_vault_server
+	elif (($curl_exit_code == 7)) || (($curl_exit_code == 28)); then
+		echo "* $(green assume-role) will start EC2 metadata service at $(green http://169.254.169.254/latest)"
+		AWS_VAULT_ARGS+=("--server")
+	else
+		echo "* $(red Unexpected status code $curl_exit_code while probing for meta-data server. Disabling aws-vault server.)"
+		export AWS_VAULT_SERVER_ENABLED="probe returned $curl_exit_code"
 	fi
+}
+
+function _force_start_aws_vault_server() {
+	{
+		aws-vault server >/dev/null &
+	} 2>/dev/null
+	local aws_vault_server_pid=$!
+	sleep 1
+	if disown $aws_vault_server_pid 2>/dev/null; then
+		echo $(green aws-vault server started at PID $aws_vault_server_pid)
+		AWS_VAULT_ARGS+=("--server")
+	else
+		echo $(red Failed to start aws-vault server, forcing non-sever mode)
+		export AWS_VAULT_SERVER_ENABLED=unavailable
+	fi
+}
+
+function _assume_active_aws_role() {
+	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
 
 	local aws_default_profile="$AWS_DEFAULT_PROFILE"
+	trap 'AWS_DEFAULT_PROFILE=${AWS_DEFAULT_PROFILE:-$aws_default_profile}' RETURN
 	unset AWS_DEFAULT_PROFILE
 
-	curl -sSL --connect-timeout 0.1 --fail -o /dev/null --stderr /dev/null 'http://169.254.169.254/latest/meta-data/iam/security-credentials/local-credentials'
-	if [ $? -eq 0 ]; then
-		export TF_VAR_aws_assume_role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
-		if [ -n "${TF_VAR_aws_assume_role_arn}" ]; then
-			local aws_vault=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$TF_VAR_aws_assume_role_arn" | cut -d' ' -f 3)
-			if [ -z "$AWS_VAULT" ] || [ "$AWS_VAULT" == "$aws_vault" ]; then
-				echo "* $(green Attaching to exising aws-vault session and assuming role) $(cyan ${aws_vault})"
-				export AWS_VAULT="$aws_vault"
-				export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION-${AWS_REGION}}"
-				export AWS_VAULT_SERVER_EXTERNAL=true
-			fi
-		else
-			unset TF_VAR_aws_assume_role_arn
-			AWS_DEFAULT_PROFILE=${aws_default_profile}
+	export TF_VAR_aws_assume_role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
+	if [ -n "${TF_VAR_aws_assume_role_arn}" ]; then
+		export AWS_VAULT_SERVER_EXTERNAL=true
+		local aws_vault=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$TF_VAR_aws_assume_role_arn" | cut -d' ' -f 3)
+		if [[ -z $aws_vault ]]; then
+			echo "* $(red Could not find role name for ${TF_VAR_aws_assume_role_arn}\; calling it \"instance-role\")"
+			aws-vault="instance-role"
+		fi
+		if [[ -z $AWS_VAULT || $AWS_VAULT == $aws_vault ]]; then
+			echo "* $(green Attaching to exising aws-vault session and assuming role) $(cyan ${aws_vault})"
+			export AWS_VAULT="$aws_vault"
+			export ASSUME_ROLE=${AWS_VAULT}
+			export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION-${AWS_REGION}}"
 		fi
 	else
-		AWS_DEFAULT_PROFILE=$aws_default_profile
+		unset TF_VAR_aws_assume_role_arn
+		AWS_DEFAULT_PROFILE=${aws_default_profile}
+		AWS_VAULT_SERVER_ENABLED="get-caller-identity failed"
 	fi
 }
 
@@ -32,10 +69,6 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"
 		exit 1
-	fi
-
-	if [ "$SHLVL" -eq 1 ]; then
-		assume_active_role
 	fi
 
 	if [ -n "${AWS_VAULT}" ]; then
@@ -56,14 +89,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		[ -d /localhost/.awsvault ] || mkdir -p /localhost/.awsvault
 		ln -sf /localhost/.awsvault ${HOME}
 		if [ "${AWS_VAULT_SERVER_ENABLED:-true}" == "true" ]; then
-			curl -sSL --connect-timeout 0.1 -o /dev/null --stderr /dev/null http://169.254.169.254/latest/meta-data/iam/security-credentials
-			result=$?
-			if [ $result -ne 0 ]; then
-				echo "* $(green assume-role) will start EC2 metadata service at $(green http://169.254.169.254/latest)"
-				AWS_VAULT_ARGS+=("--server")
-			else
-				echo "* $(red EC2 metadata server already running)"
-			fi
+			_validate_aws_vault_server
 		fi
 	fi
 
@@ -115,7 +141,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 				# this function returns, regardless of how it returns (e.g. in case of errors).
 				trap 'export AWS_VAULT="$aws_vault" && export AWS_VAULT_SERVER_ENABLED="$aws_vault_server_enabled"' RETURN
 				unset AWS_VAULT
-				AWS_VAULT_SERVER_ENABLED=false
+				AWS_VAULT_SERVER_ENABLED="false: server serving other role"
 			else
 				echo "Type '$(green exit)' before attempting to assume another role"
 				return 1

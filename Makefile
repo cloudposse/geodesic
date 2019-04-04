@@ -20,7 +20,7 @@ build:
 	@make --no-print-directory docker:build
 
 install:
-	@docker run --rm -e CLUSTER=galaxy $(DOCKER_IMAGE_NAME) | sudo -E bash -s $(DOCKER_TAG)
+	@docker run --rm -e CLUSTER=galaxy $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
 
 run:
 	@geodesic

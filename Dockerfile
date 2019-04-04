@@ -39,7 +39,6 @@ FROM alpine:3.9.2
 
 ENV BANNER "geodesic"
 
-ENV GEODESIC_PATH=/usr/local/include/toolbox
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
 ENV KOPS_CLUSTER_NAME=example.foo.bar

@@ -70,12 +70,17 @@ fi
 
 unset -f _load_geodesic_preferences
 
+## Append rather than overwrite history file
+shopt -s histappend
+
+## Default to saving 2500 lines of history rather than the bash default of 500
+HISTFILESIZE="${HISTFILESIZE:-2500}"
+
 # Search for and find the history file most specifically targeted to this DOCKER_IMAGE
 function _geodesic_set_histfile() {
 	## Save shell history in the most specific place
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE is "${HISTFILE}" after loading preferences
 	[[ $HISTFILE == ${HOME}/.bash_history ]] && unset HISTFILE
-	HISTFILESIZE="${HISTFILESIZE:-2500}"
 	local histfile_list=(${HISTFILE:-${GEODESIC_CONFIG_HOME}/history})
 	_search_geodesic_dirs histfile_list history
 	export HISTFILE="${histfile_list[-1]}"

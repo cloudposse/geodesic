@@ -5,20 +5,31 @@ function _validate_aws_vault_server() {
 
 	local instance
 	local curl_exit_code
-	instance=$(curl -m 2 --connect-timeout 0.3 -s -f http://169.254.169.254/latest/meta-data/instance-id/)
+
+	# Use the same test aws-vault uses to see if a server is already running
+	# https://github.com/99designs/aws-vault/blob/4cf00453d011c4bdacb3801e05b9a823acc69ee9/server/server.go#L80-L83
+	# but add longer timeout to guard against other kinds of networking issues
+	instance=$(timeout 2 curl --connect-timeout 0.01 -s -f http://169.254.169.254/latest/meta-data/instance-id/)
 	curl_exit_code=$?
 
 	if [[ $instance == "aws-vault" ]]; then
+		# We successfully connected to an active aws-vault credentials server, so use it
 		_assume_active_aws_role
 	elif (($curl_exit_code == 0)); then
 		echo "* $(green force-starting aws-vault server because real AWS meta-data server is reachable)"
 		_force_start_aws_vault_server
+		# 7 = Failed to connect to host, 28 = connection timed out
 	elif (($curl_exit_code == 7)) || (($curl_exit_code == 28)); then
 		echo "* $(green assume-role) will start EC2 metadata service at $(green http://169.254.169.254/latest)"
 		AWS_VAULT_ARGS+=("--server")
+		# 22 = HTTP page not retrieved (e.g. status 404), 52 = Empty reply,
+		# 124 = timeout exceeded (implies TCP connection succeeded)
+	elif (($curl_exit_code == 22)) || (($curl_exit_code == 52)) || (($curl_exit_code == 124)); then
+		echo "* $(yellow connected to something at 169.254.169.254 but got status code ${curl_exit_code}. Force-starting aws-vault server)"
+		_force_start_aws_vault_server
 	else
-		echo "* $(red Unexpected status code $curl_exit_code while probing for meta-data server. Disabling aws-vault server.)"
-		export AWS_VAULT_SERVER_ENABLED="probe returned $curl_exit_code"
+		echo "* $(red Unexpected status code ${curl_exit_code} while probing for meta-data server. Disabling aws-vault server.)"
+		export AWS_VAULT_SERVER_ENABLED="probe returned ${curl_exit_code}"
 	fi
 }
 
@@ -33,7 +44,7 @@ function _force_start_aws_vault_server() {
 		AWS_VAULT_ARGS+=("--server")
 	else
 		echo $(red Failed to start aws-vault server, forcing non-sever mode)
-		export AWS_VAULT_SERVER_ENABLED=unavailable
+		export AWS_VAULT_SERVER_ENABLED="failed to start"
 	fi
 }
 

@@ -25,7 +25,7 @@ function _validate_aws_vault_server() {
 		# 22 = HTTP page not retrieved (e.g. status 404), 52 = Empty reply,
 		# 124 = timeout exceeded (implies TCP connection succeeded)
 	elif (($curl_exit_code == 22)) || (($curl_exit_code == 52)) || (($curl_exit_code == 124)); then
-		echo "* $(yellow connected to something at 169.254.169.254 but got status code ${curl_exit_code}. Force-starting aws-vault server)"
+		echo "* $(yellow Connected to something at 169.254.169.254 but got status code ${curl_exit_code}. Force-starting aws-vault server.)"
 		_force_start_aws_vault_server
 	else
 		echo "* $(red Unexpected status code ${curl_exit_code} while probing for meta-data server. Disabling aws-vault server.)"

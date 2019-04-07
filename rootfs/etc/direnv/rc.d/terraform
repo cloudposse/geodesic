@@ -32,6 +32,15 @@ function use_terraform() {
 	fi
 	
 	# Translate environment variables to terraform arguments
+	# Note: Setting TF_CLI_INIT_BACKEND_CONFIG_ENCRYPT to "true" does not work due to quirks:
+	#   https://github.com/cloudposse/tfenv/issues/10
+	# Set to 1 to enable.
+	if [[ $TF_BUCKET_ENCRYPT == false ]]; then
+		export TF_CLI_INIT_BACKEND_CONFIG_ENCRYPT=false
+	else
+		export TF_CLI_INIT_BACKEND_CONFIG_ENCRYPT=1
+	fi
+
 	[ -z "${TF_FROM_MODULE}" ] || export TF_CLI_INIT_FROM_MODULE="${TF_FROM_MODULE}"
 	[ -z "${TF_STATE_FILE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_KEY="${TF_BUCKET_PREFIX}/${TF_STATE_FILE}"
 	[ -z "${TF_BUCKET}" ] || export TF_CLI_INIT_BACKEND_CONFIG_BUCKET="${TF_BUCKET}"

@@ -33,7 +33,7 @@ function write_kube_config() {
 	[[ $kubeconfig_template_url =~ ^https?:// ]] || kubeconfig_template_url="file://$(realpath "$kubeconfig_template_url")"
 
 	direnv exec ${KUBECONFIG_DIR} gomplate ${GOMPLATE_EXTRA_ARGS} \
- 		-d "data=${kubeconfig_template_url}?type=text/plain" -i '{{ (ds "data") | tpl}}' >${KUBECONFIG}
+		-d "data=${kubeconfig_template_url}?type=text/plain" -i '{{ (ds "data") | tpl}}' >${KUBECONFIG}
 }
 
 ensure_env_vars

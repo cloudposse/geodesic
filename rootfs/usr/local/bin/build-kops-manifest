@@ -9,6 +9,6 @@ mkdir -p ${KOPS_CONF_DIR}
 
 [[ $KOPS_TEMPLATE_URL =~ ^https?:// ]] || KOPS_TEMPLATE_URL="file://$(realpath "$KOPS_TEMPLATE_URL")"
 direnv exec ${KOPS_CONF_DIR} gomplate ${GOMPLATE_EXTRA_ARGS} \
-  -d "data=${KOPS_TEMPLATE_URL}?type=text/plain" -i '{{ (ds "data") | tpl}}' >${KOPS_MANIFEST}
+	-d "data=${KOPS_TEMPLATE_URL}?type=text/plain" -i '{{ (ds "data") | tpl}}' >${KOPS_MANIFEST}
 
 echo "Wrote manifest to ${KOPS_MANIFEST}..."

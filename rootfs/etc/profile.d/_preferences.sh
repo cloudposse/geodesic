@@ -50,17 +50,7 @@ fi
 unset _GEODESIC_CONFIG_HOME_DEFAULT
 
 [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: GEODESIC_CONFIG_HOME is ultimately set to "${GEODESIC_CONFIG_HOME}"
-
-# Search for and find the history file most specifically targeted to this DOCKER_IMAGE
-function _geodesic_set_histfile() {
-	## Save shell history in the most specific place
-	local histfile_list=(${HISTFILE:-${GEODESIC_CONFIG_HOME}/history})
-	_search_geodesic_dirs histfile_list history
-	export HISTFILE="${histfile_list[-1]}"
-	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE set to "${HISTFILE}"
-}
-_geodesic_set_histfile
-unset -f _geodesic_set_histfile
+[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE is "${HISTFILE}" before loading preferences
 
 function _load_geodesic_preferences() {
 	local preference_list=()
@@ -79,3 +69,28 @@ else
 fi
 
 unset -f _load_geodesic_preferences
+
+## Append rather than overwrite history file
+shopt -s histappend
+
+## Default to saving 2500 lines of history rather than the bash default of 500
+HISTFILESIZE="${HISTFILESIZE:-2500}"
+
+# Search for and find the history file most specifically targeted to this DOCKER_IMAGE
+function _geodesic_set_histfile() {
+	## Save shell history in the most specific place
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE is "${HISTFILE}" after loading preferences
+	[[ $HISTFILE == ${HOME}/.bash_history ]] && unset HISTFILE
+	local histfile_list=(${HISTFILE:-${GEODESIC_CONFIG_HOME}/history})
+	_search_geodesic_dirs histfile_list history
+	export HISTFILE="${histfile_list[-1]}"
+	if [[ ! $HISTFILE =~ ^/localhost/ ]]; then
+		echo "* $(yellow Not allowing \"HISTFILE=${HISTFILE}\".)"
+		mkdir -p "${GEODESIC_CONFIG_HOME}/${DOCKER_IMAGE}/" && HISTFILE="${GEODESIC_CONFIG_HOME}/${DOCKER_IMAGE}/history" &&
+			touch "$HISTFILE" || HISTFILE="${GEODESIC_CONFIG_HOME}/history"
+		echo "* $(yellow HISTFILE forced to \"${HISTFILE}\".)"
+	fi
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE set to "${HISTFILE}"
+}
+_geodesic_set_histfile
+unset -f _geodesic_set_histfile

@@ -192,6 +192,10 @@ spec:
           --query 'Tags[*].{tag:Key,value:Value}' \
           --output text | sed 's/\t/=/' | grep k8s.io/role | sed 's%k8s.io/role/%%' | cut -f1 -d=
 {{- end }}
+{{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}
+  kubelet:
+    anonymousAuth: false
+{{- end }}
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: {{ getenv "KUBERNETES_VERSION" }}

@@ -8,9 +8,9 @@ function terraform_prompt() {
 	fi
 }
 
-# Install autocompletion rules
-if [ -x '/usr/bin/terraform' ]; then
-	complete -C /usr/bin/terraform terraform
+# Install auto-completion rules
+if which terraform >/dev/null; then
+	complete -C "$(which terraform)" terraform
 fi
 
 # Set default plugin cache dir

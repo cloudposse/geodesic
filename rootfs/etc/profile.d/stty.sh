@@ -5,4 +5,4 @@
 # Mapping a different key to stop terminal output is one possibility, but most of the control keys are already
 # mapped to something somewhere, so instead we just turn off the flow control altogether.
 
-stty -ixon
+[ -t 1 ] && stty -ixon

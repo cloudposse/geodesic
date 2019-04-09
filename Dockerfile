@@ -210,6 +210,9 @@ ENV SHELL=/bin/bash
 ENV LESS=R
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
+# Set a default terminal to "dumb" (headless) to make `tput` happy
+ENV TERM=dumb
+
 # Reduce `make` verbosity
 ENV MAKEFLAGS="--no-print-directory"
 ENV MAKE_INCLUDES="Makefile Makefile.*"

@@ -30,3 +30,9 @@ bash/fmt:
 
 bash/fmt/check:
 	shfmt -d $(PWD)/rootfs
+
+apk-update:
+	@echo package_repos.md5 old $$(cat package_repos.md5 || echo '<not found>')
+	@docker run --rm -e CLUSTER=galaxy $(DOCKER_IMAGE_NAME) -c \
+	'apk update >/dev/null && md5sum /var/cache/apk/APKINDEX.* | md5sum | colrm 33' > package_repos.md5
+	@echo package_repos.md5 new $$(cat package_repos.md5 || echo '<not found>')

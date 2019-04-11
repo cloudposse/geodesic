@@ -1,6 +1,3 @@
-# ARGs used in FROM must be declared before the first FROM
-ARG CLOUDPOSSE_PACKAGES_VERSION="0.86.0"
-
 #
 # Python Dependencies
 #
@@ -21,7 +18,7 @@ FROM google/cloud-sdk:241.0.0-alpine as google-cloud-sdk
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:${CLOUDPOSSE_PACKAGES_VERSION} as packages
+FROM cloudposse/packages:0.84.0 as packages
 
 WORKDIR /packages
 
@@ -60,14 +57,14 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 
 # Install alpine package manifest
 COPY packages.txt /etc/apk/
+# Install repo checksum in an attempt to ensure updates bust the Docker build cache
+COPY package_repos.md5 /var/cache/apk/
 
-
-# Import package version for cache busting
-ARG CLOUDPOSSE_PACKAGES_VERSION
-RUN echo Using cloudposse/packages version ${CLOUDPOSSE_PACKAGES_VERSION} as packages cache key && \
-    apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
+RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
+
+RUN [[ $(md5sum /var/cache/apk/APKINDEX.* | md5sum | colrm 33) == $(cat /var/cache/apk/package_repos.md5) ]] || echo WARNING: apk package repos mismatch 1>&2
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 

@@ -1,3 +1,6 @@
+# ARGs used in FROM must be declared before the first FROM
+ARG CLOUDPOSSE_PACKAGES_VERSION="0.86.0"
+
 #
 # Python Dependencies
 #
@@ -18,7 +21,7 @@ FROM google/cloud-sdk:241.0.0-alpine as google-cloud-sdk
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:0.84.0 as packages
+FROM cloudposse/packages:${CLOUDPOSSE_PACKAGES_VERSION} as packages
 
 WORKDIR /packages
 
@@ -53,13 +56,16 @@ RUN echo "@cloudposse https://apk.cloudposse.com/3.9/vendor" >> /etc/apk/reposit
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
     echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories && \
-    echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories && \
-    apk update
+    echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories
 
 # Install alpine package manifest
 COPY packages.txt /etc/apk/
 
-RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
+
+# Import package version for cache busting
+ARG CLOUDPOSSE_PACKAGES_VERSION
+RUN echo Using cloudposse/packages version ${CLOUDPOSSE_PACKAGES_VERSION} as packages cache key && \
+    apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 

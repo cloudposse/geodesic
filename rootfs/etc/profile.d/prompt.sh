@@ -91,6 +91,15 @@ function geodesic_prompt() {
 		;;
 	esac
 
+	local level_prompt
+	case $SHLVL in
+	1) level_prompt='.' ;;
+	2) level_prompt=':' ;;
+	3) level_prompt='⋮' ;; # vertical elipsis \u22ee from Mathematical Symbols
+	*) level_prompt="$SHLVL" ;;
+	esac
+	level_prompt=$'\x01'$(tput bold)$'\x02'"${level_prompt}"$'\x01'$(tput sgr0)$'\x02'
+
 	if [ -n "$ASSUME_ROLE" ]; then
 		STATUS=${ASSUME_ROLE_ACTIVE_MARK}
 	else
@@ -103,8 +112,8 @@ function geodesic_prompt() {
 		ROLE_PROMPT="(none)"
 	fi
 
-	PS1="${STATUS}"
-	PS1+="  ${ROLE_PROMPT} \W "
+	PS1="${STATUS}${level_prompt} "
+	PS1+="${ROLE_PROMPT} \W "
 	PS1+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
 
 	if [ -n "${BANNER}" ]; then

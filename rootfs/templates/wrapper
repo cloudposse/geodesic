@@ -47,7 +47,7 @@ function debug() {
 }
 
 function run_exit_hooks() {
-	command -v on_geodesic_exit >/dev/null && on_geodesic_exit
+	command -v geodesic_on_exit >/dev/null && geodesic_on_exit
 }
 
 function use() {
@@ -89,7 +89,6 @@ function use() {
 		if [ -n "${ENV_FILE}" ]; then
 			DOCKER_ARGS+=(--env-file ${ENV_FILE})
 		fi
-		DOCKER_ARGS+=(--env HOST_HOME=$HOME)
 
 		# allow users to override value of GEODESIC_DEFAULT_ENV_FILE
 		local geodesic_default_env_file=${GEODESIC_DEFAULT_ENV_FILE:-~/.geodesic/env}
@@ -144,6 +143,7 @@ function use() {
 	else
 		echo "# Mounting ${local_home} into container"
 		DOCKER_ARGS+=(--volume=${local_home}:/localhost)
+		DOCKER_ARGS+=(--env LOCAL_HOME=${local_home})
 	fi
 
 	DOCKER_ARGS+=(--privileged

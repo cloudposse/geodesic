@@ -59,12 +59,14 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 COPY packages.txt /etc/apk/
 # Install repo checksum in an attempt to ensure updates bust the Docker build cache
 COPY geodesic_apkindex.md5 /var/cache/apk/
+COPY rootfs/usr/local/bin/geodesic-apkindex-md5 /tmp/
 
 RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
-RUN [[ $(md5sum /var/cache/apk/APKINDEX.* | md5sum | colrm 33) == $(cat /var/cache/apk/geodesic_apkindex.md5) ]] || echo WARNING: apk package repos mismatch 1>&2
+RUN [[ $(/tmp/geodesic-apkindex-md5) == $(cat /var/cache/apk/geodesic_apkindex.md5) ]] || echo WARNING: apk package repos mismatch 1>&2
+RUN rm -f /tmp/geodesic-apkindex-md5
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 

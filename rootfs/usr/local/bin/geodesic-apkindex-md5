@@ -1,0 +1,2 @@
+#!/bin/sh
+md5sum /var/cache/apk/APKINDEX.* | md5sum | colrm 33

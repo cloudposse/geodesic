@@ -35,5 +35,5 @@ bash/fmt/check:
 apk-update geodesic_apkindex.md5:
 	@echo geodesic_apkindex.md5 old $$(cat geodesic_apkindex.md5 || echo '<not found>')
 	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
-	'apk update >/dev/null && md5sum /var/cache/apk/APKINDEX.* | md5sum | colrm 33' > geodesic_apkindex.md5
+	'apk update >/dev/null && geodesic-apkindex-md5' > geodesic_apkindex.md5
 	@echo geodesic_apkindex.md5 new $$(cat geodesic_apkindex.md5 || echo '<not found>')

@@ -46,6 +46,12 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 
 
+## Screenshots
+
+
+![Demo](https://sweetops.com/wp-content/uploads/2019/03/termtosvg_fmnxoium.svg)
+*<br/>[Example of running a shell](https://github.com/cloudposse/testing.cloudposse.co) based on the `cloudposse/geodesic` base docker image.*
+
 
 ## Introduction
 

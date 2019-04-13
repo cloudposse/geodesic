@@ -135,7 +135,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	}
 
 	# Start a shell or run a command with an assumed role
-	function aws_vault_assume_role() {
+	function _aws_vault_assume_role() {
 		# Do not allow nested roles
 		if [ -n "${AWS_VAULT}" ]; then
 			# There is an exception to the "Do not allow nested roles" rule.
@@ -197,6 +197,17 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	}
 
 	function assume-role() {
-		aws_vault_assume_role $*
+		_aws_vault_assume_role $*
 	}
+
+	function role-server() {
+		if [[ ${AWS_VAULT_SERVER_ENABLED:-true} != "true" ]]; then
+			echo $(red Not starting role server becuase AWS_VAULT_SERVER_ENABLED is "${AWS_VAULT_SERVER_ENABLED}")
+			exit 99
+		fi
+
+		AWS_VAULT_ARGS+=("--debug")
+		_aws_vault_assume_role "${1:-$(choose_role)}" sleep 7d
+	}
+
 fi

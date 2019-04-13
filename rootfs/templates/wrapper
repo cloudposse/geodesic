@@ -46,6 +46,10 @@ function debug() {
 	fi
 }
 
+function run_exit_hooks() {
+	command -v geodesic_on_exit >/dev/null && geodesic_on_exit
+}
+
 function use() {
 	DOCKER_ARGS=()
 	if [ -t 1 ]; then
@@ -139,6 +143,7 @@ function use() {
 	else
 		echo "# Mounting ${local_home} into container"
 		DOCKER_ARGS+=(--volume=${local_home}:/localhost)
+		DOCKER_ARGS+=(--env LOCAL_HOME=${local_home})
 	fi
 
 	DOCKER_ARGS+=(--privileged
@@ -147,6 +152,7 @@ function use() {
 		--rm
 		--env KUBERNETES_API_PORT=${GEODESIC_PORT})
 
+	trap run_exit_hooks EXIT
 	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
 	container_id=$(docker ps --quiet -a --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
 	if [ -n "$container_id" ]; then

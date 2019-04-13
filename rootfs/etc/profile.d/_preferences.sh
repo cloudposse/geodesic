@@ -13,6 +13,13 @@ fi
 
 [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: GEODESIC_CONFIG_HOME is found to be "${GEODESIC_CONFIG_HOME:-<unset>}"
 
+# If LOCAL_HOME is set, create a symbolic link so host pathnames (at least the ones under $HOME) work inside the shell
+if [[ -n $LOCAL_HOME && ! -e $LOCAL_HOME ]]; then
+	mkdir -p $(dirname "${LOCAL_HOME}") && ln -s /localhost "${LOCAL_HOME}" ||
+		echo $(red Unable to create symbolic link $LOCAL_HOME '->' /localhost)
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: linked $LOCAL_HOME '->' /localhost
+fi
+
 #
 # Determine the base directory for all customizations.
 # We do some extra processing because GEODESIC_CONFIG_HOME needs to be set as a path in the Geodesic file system,

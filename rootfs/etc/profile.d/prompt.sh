@@ -111,7 +111,6 @@ function geodesic_prompt() {
 	local kops_root=""
 	[[ -n $KOPS_SSH_PRIVATE_KEY ]] && kops_root="+"
 
-
 	PS1="${STATUS}${level_prompt} "
 	PS1+="${ROLE_PROMPT} \W "
 	PS1+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'

@@ -102,22 +102,22 @@ function geodesic_prompt() {
 
 	if [ -n "$ASSUME_ROLE" ]; then
 		STATUS=${ASSUME_ROLE_ACTIVE_MARK}
-	else
-		STATUS=${ASSUME_ROLE_INACTIVE_MARK}
-	fi
-
-	if [ -n "${ASSUME_ROLE}" ]; then
 		ROLE_PROMPT="(${ASSUME_ROLE})"
 	else
+		STATUS=${ASSUME_ROLE_INACTIVE_MARK}
 		ROLE_PROMPT="(none)"
 	fi
+
+	local kops_root=""
+	[[ -n $KOPS_SSH_PRIVATE_KEY ]] && kops_root="+"
+
 
 	PS1="${STATUS}${level_prompt} "
 	PS1+="${ROLE_PROMPT} \W "
 	PS1+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
 
 	if [ -n "${BANNER}" ]; then
-		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)\n"${PS1}
+		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)${kops_root}\n"${PS1}
 	fi
 	export PS1
 }

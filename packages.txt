@@ -43,7 +43,7 @@ libltdl
 make
 musl-dev
 ncurses
-oath-toolkit-oathtool@testing
+oath-toolkit-oathtool@community
 openssh-client
 openssl
 pwgen

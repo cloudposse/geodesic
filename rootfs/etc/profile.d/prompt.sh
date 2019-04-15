@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Allow bash to check the window size to keep prompt with relative to window size
 shopt -s checkwinsize
 
@@ -102,22 +102,31 @@ function geodesic_prompt() {
 
 	if [ -n "$ASSUME_ROLE" ]; then
 		STATUS=${ASSUME_ROLE_ACTIVE_MARK}
-	else
-		STATUS=${ASSUME_ROLE_INACTIVE_MARK}
-	fi
-
-	if [ -n "${ASSUME_ROLE}" ]; then
 		ROLE_PROMPT="(${ASSUME_ROLE})"
 	else
+		STATUS=${ASSUME_ROLE_INACTIVE_MARK}
 		ROLE_PROMPT="(none)"
 	fi
+
+	local secrets_active=""
+	local secrets="${PROMPT_SECRET_ENVS:-GITHUB_TOKEN;KOPS_SSH_PRIVATE_KEY}"
+	for secret_name in $(echo "$secrets" | tr ';' ' '); do
+		if [[ -z $secret_name ]] || ! local -n ref=$secret_name; then
+			echo $(red Error parsing PROMPT_SECRET_ENVS \'"${PROMPT_SECRET_ENVS}"\')
+			break
+		fi
+		if [[ -n $ref ]]; then
+			secrets_active="+"
+			break
+		fi
+	done
 
 	PS1="${STATUS}${level_prompt} "
 	PS1+="${ROLE_PROMPT} \W "
 	PS1+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
 
 	if [ -n "${BANNER}" ]; then
-		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)\n"${PS1}
+		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)${secrets_active}\n"${PS1}
 	fi
 	export PS1
 }

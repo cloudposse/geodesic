@@ -206,8 +206,8 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 			exit 99
 		fi
 
-		AWS_VAULT_ARGS+=("--debug")
-		_aws_vault_assume_role "${1:-$(choose_role)}" sleep 7d
+		[[ ${AWS_VAULT_ARGS[*]} =~ --debug ]] || AWS_VAULT_ARGS+=("--debug")
+		_aws_vault_assume_role "${1:-$(choose_role)}" sleep inf
 	}
 
 fi

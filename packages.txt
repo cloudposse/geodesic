@@ -60,6 +60,7 @@ stern@cloudposse
 sudo
 syslog-ng
 tar
+teleport@cloudposse
 terraform@cloudposse
 terragrunt@cloudposse
 terrahelp@cloudposse

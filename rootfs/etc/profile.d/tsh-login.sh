@@ -1,5 +1,9 @@
 #!/bin/bash
 
 function tsh-login() {
-	tsh login --bind-addr=:${GEODESIC_PORT} --proxy=${TELEPORT_PROXY_DOMAIN_NAME:-tele.${DOCKER_IMAGE#*.}} $*
+	if (( $# == 0 )); then
+		tsh login --bind-addr=:${GEODESIC_PORT} --proxy=${TELEPORT_LOGIN_PROXY:-tele.${DOCKER_IMAGE#*.}} $STAGE
+	else
+		tsh login --bind-addr=:${GEODESIC_PORT} --proxy=${TELEPORT_LOGIN_PROXY:-tele.${DOCKER_IMAGE#*.}} $*
+	fi
 }

@@ -76,6 +76,28 @@ function _assume_active_aws_role() {
 	fi
 }
 
+function sync_clocks() {
+	# Use a timeout due to slow clock reads on EC2 (10 seconds).
+	# Fixes: hwclock: select() to /dev/rtc0 to wait for clock tick timed out
+	hwclock_time=$(timeout 1.5 hwclock -r)
+
+	# Sync the clock in the Docker Virtual Machine to the system's hardware clock to avoid time drift.
+	# Assume whichever clock is behind by more than 10 seconds is wrong, since virtual clocks
+	# almost never gain time.
+	if [ -n "${hwclock_time}" ]; then
+		let diff=$(date '+%s')-$(date -d "${hwclock_time}" '+%s')
+		echo "* Docker clock is ${diff} seconds behind Host clock"
+		if [ $diff -gt 10 ]; then
+			hwclock -w >/dev/null 2>&1 || echo "* $(yellow Failed to set Docker clock from Host clock)"
+		elif [ $diff -lt -10 ]; then
+			# (Only works in privileged mode)
+			hwclock -s >/dev/null 2>&1 || echo "* $(yellow Failed to set Host clock from Docker clock)"
+		fi
+	else
+		echo "* $(yellow Unable to read hardware clock)"
+	fi
+}
+
 if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"
@@ -167,25 +189,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		fi
 
 		if [ "${DOCKER_TIME_DRIFT_FIX:-true}" == "true" ]; then
-			# Use a timeout due to slow clock reads on EC2 (10 seconds).
-			# Fixes: hwclock: select() to /dev/rtc0 to wait for clock tick timed out
-			hwclock_time=$(timeout 1.5 hwclock -r)
-
-			# Sync the clock in the Docker Virtual Machine to the system's hardware clock to avoid time drift.
-			# Assume whichever clock is behind by more than 10 seconds is wrong, since virtual clocks
-			# almost never gain time.
-			if [ -n "${hwclock_time}" ]; then
-				let diff=$(date '+%s')-$(date -d "${hwclock_time}" '+%s')
-				if [ $diff -gt 10 ]; then
-					hwclock -w >/dev/null 2>&1
-				elif [ $diff -lt -10 ]; then
-					# (Only works in privileged mode)
-					hwclock -s >/dev/null 2>&1
-				fi
-				if [ $? -ne 0 ]; then
-					echo "* $(yellow Failed to sync system time from hardware clock)"
-				fi
-			fi
+			sync_clocks
 		fi
 
 		shift

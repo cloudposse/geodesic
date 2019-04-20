@@ -20,7 +20,7 @@ build:
 	@make --no-print-directory docker:build
 
 install:
-	@docker run --rm -e $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
+	@docker run --rm $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
 
 run:
 	@geodesic

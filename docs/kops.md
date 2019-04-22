@@ -12,17 +12,26 @@ but that is still a work in progress that will introduce some new patterns.
 - The described usage pattern corresponds to [Geodesic](https://github.com/cloudposse/geodesic) version 0.95.1,
 [Reference Architecture](https://github.com/cloudposse/reference-architectures) version 0.7.0, and
 [terraform-root-modules](https://github.com/cloudposse/terraform-root-modules) version 0.71.0
+- Check the versions! Geodesic, `kops`, Kubernetes, and other tools referenced in this documentation are 
+constantly evolving, and it is likely this documentation will be at least slightly out-of-date within days
+of its publication. Also, because it is only updated manually (rather than generated automatically), there will likely 
+be times when one part of this document intends to reference one version of a resource while another part references 
+a different version. Please keep these facts in mind when you are using this document to help you set up your own cluster.
 
-## Table of Contents (to be updated)
+## Table of Contents
 
 - [Kubernetes Operations (kops)](#kubernetes-operations-kops)
+  - [Usage](#usage)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
-  - [Configuration Settings](#configuration-settings)
-  - [Provision a Kops Cluster](#provision-a-kops-cluster)
-    - [Configure Environment Settings](#configure-environment-settings)
-    - [Provision Dependencies](#provision-dependencies)
-    - [Create the Cluster](#create-the-cluster)
+  - [Overview](#overview)
+  - [Configuration Settings Overview](#configuration-settings-overview)
+    - [Terraform and Chamber](#terraform-and-chamber)
+    - [Where Did That Value Come From?](#where-did-that-value-come-from)
+  - [Create the Cluster](#create-the-cluster)
+    - [Setting the Parameters](#setting-the-parameters)
+    - [Shared VPC]
+    - [Provisioning Resrouces](#provisioning-resources)
   - [Operating the Cluster](#operating-the-cluster)
     - [Tips & Tricks](#tips--tricks)
     - [Upgrade a Cluster](#upgrade-a-cluster)
@@ -41,6 +50,24 @@ but that is still a work in progress that will introduce some new patterns.
 - **Supports Multiple CNIs** providers [out of the box](https://github.com/kubernetes/kops/blob/master/docs/networking.md).
 - **Lifecycle Hooks** make it easy to add containers and files to nodes via a [cluster manifest](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md)
 
+## Overview
+
+The process of provisioning a new `kops` cluster takes (3) steps. Here's what it looks like:
+
+1. **Configure the parameter settings**
+   - Create a new project (e.g. `/conf/kops`). 
+   - Configure parameters in multiple places.
+   - Rebuild the `geodesic` image. Then restart the shell.
+2. **Provision the `kops` dependencies using the [`kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) terraform root module**
+   - State backend (S3 bucket) that will store the YAML state.
+   - Cluster DNS zone that will be used by kops for service discovery.
+   - SSH key-pair to access the Kubernetes masters and nodes.
+   - Write settings to SSM Parameter Store.
+3. **Execute the `kops create` on the manifest file to create the `kops` cluster**
+   - Build the manifest.
+   - Validate the cluster is healthy.
+
+
 ## Configuration Settings Overview
 
 We use 2 different mechanisms for storing configuration parameters.
@@ -49,7 +76,8 @@ We use 2 different mechanisms for storing configuration parameters.
 control, and do not need to be shared among "projects." Most parameters should be stored in files.
 1. Parameters can be saved in and read from AWS SSM Parameter Store using [Chamber](https://github.com/segmentio/chamber)
  or the [Terraform](https://www.terraform.io/) `aws_ssm_parameter` resource. This is best for secrets, as they are protected via AWS IAM, and do
- not risk being checked into source code control. We also use this for parameters that are used by more than
+ not risk being checked into source code control. We also use this for parameters that are automatically generated 
+ or are used by more than
  one project, such as `KOPS_NETOWRK_CIDR`. However access to SSM is severely rate limited, so parameters that 
  are accessed frequently should be stored somewhere else. For the sake of brevity, we sometimes refer to the AWS SSM Parameter Store 
  as just "SSM".
@@ -69,9 +97,22 @@ and configurations that form a self-contained unit (though possibly with depende
 
 #### `direnv`
 
-We use ([direnv](https://direnv.net/)) to automatically load configurations into enviornment variables
+We use [direnv](https://direnv.net/) to automatically load configurations into enviornment variables
 when you `cd` into a directory. Alternatively, they can be executed explicitly by running 
 `direnv exec $directory $command`. This is useful when running commands as part of a CI/CD GitOps-style pipeline.
+
+The way `direnv` works is that when you `cd` into a directory, it looks for a file named `.envrc` and if it
+finds it, reads and executes the contents of the file. It generally expects to find `bash` style environment
+variable assignments of the form
+```bash
+export NAME=vaule
+```
+Any environment variables set in the `.envrc` file are exported into the current environment, and, critically,
+removed from the environment when you `cd` out of the directory. 
+
+Normally `direnv` only reads the `.envrc` file, but CloudPosse adds a `use envrc` command to the file, which
+causes `direenv` to read all the files in the directory that have `.envrc` extensions. This allows parameters
+to be set automatically by `direnv` without requiring that the settings be put in a hidden file.
 
 ##### `/conf/.direnv`
 
@@ -120,7 +161,7 @@ it to generate several configuration parameters which Terraform then stores in S
 that we use cannot read parameters out of SSM, so we use Chamber to read _all_ the parameters out of SSM
 and place them in environment variables, which all our tools can use. 
 
-### Where did that value come from?
+### Where Did That Value Come From?
 
 Because of the interactions between Docker, Chamber, `direnv`, and Terraform, it can be difficult to determine 
 where the final value of a parameter originated. This document focuses on the recommended place to set 
@@ -155,16 +196,16 @@ SSM with the value from `kops.envrc`. This is why you should not set a parameter
 
 </details>
 
-## Creating a cluster
+## Create the cluster
 
 The following describes how to create a cluster, treating the setting of parameters in various places as 
 steps in the creation process.
 
-- Note: Our standard configuration of `kops` isolates the cluster in private (not directly accessible from the public internet)
-        subnets of a VPC (commonly called a "Private Cluster"), with the VPC created and managed by `kops`, and this is what is 
-        described here. We have recently added support for deploying a cluster inside a VPC that is not created or managed
-        by `kops` but created some other way, which we call a "shared VPC". The adjustments needed to operate in a shared
-        VPC are described below under [Shared VPC](#shared-vpc).
+- Note: Our standard configuration of `kops` isolates the cluster in private subnets (not directly accessible from the 
+public internet) of a VPC (a configuration commonly called a "Private Cluster"), with the VPC created and managed by 
+`kops`, and this is what is described here. We have recently added support for deploying a cluster inside a VPC that 
+is not created or managed by `kops` but created some other way, which we call a "shared VPC". The adjustments needed 
+to operate in a shared VPC are described below under [Shared VPC](#shared-vpc).
         
 ### Setting the Parameters
 
@@ -194,15 +235,30 @@ these will already be set for you.
 | Environment Variable                               | Description of the Parameter                 | Suggested Value | 
 | -------------------------------------------------- | -------------------------------------------|------------------|
 | KOPS_MANIFEST | Location of the (generated) `kops` manifest file | `<inherit>` |
-| KUBECONFIG | Where to store/find "kubeconfig" file used by `kubeclt` | `<inherit>`
+| KUBECONFIG | Where to store/find "kubeconfig" file used by `kubectl` | `<inherit>`
 | KUBECONFIG_TEMPLATE | Template file for `build-kubeconfig` to use to create a "kubeconfig" file | `<inherit>` |
 | KOPS_BASTION_PUBLIC_NAME | The hostname part of the Bastion server's domain name | bastion |
 </details>
 
 
-#### `/conf/kops/terraform.tfvars`
+#### `/conf/kops/terraform.envrc`, `/conf/kops/terraform.tfvars` 
 
-Geodesic uses Terraform to set up networking and DNS, computing values that will be used later. So these
+Geodesic uses Terraform to set up networking and DNS, computing values that will be used later. 
+
+The `/conf/kops/terraform.envrc` file normally only contains 2 parameters:
+
+| `terraform.envrc` Variable | Description of the Parameter                 | Suggested Value |
+|--------------------|----------------------------------------------|-----------------|
+| TF_CLI_INIT_FROM_MODULE | The URL for the `kops` "Terraform root module" | _see below_ |
+| TF_CLI_PLAN_PARALLELISM | The maximum number of concurrent operations as Terraform walks the graph. | 2 |
+
+- `TF_CLI_INIT_FROM_MODULE` should be a version-pinned reference to the `kops` module of the 
+CloudPosse [Terraform Root Modules repo](https://github.com/cloudposse/terraform-root-modules). For this
+version of the documentation, it should be `git::https://github.com/cloudposse/terraform-root-modules.git//aws/kops?ref=tags/0.71.0`,
+which shoudl match the "terraform-root-modules" version stated above under [Usage](#usage).
+
+
+The remaining
 parameters should be configured in `/conf/kops/terraform.tfvars`. If you generated your Dockerfile using our 
 [Reference Architecture tools](https://github.com/cloudposse/reference-architectures#get-started), then 
 all these values will already be set for you.
@@ -307,211 +363,51 @@ is run again, it will overwrite the values you set.
 | KOPS_AVAILABILITY_ZONES | The AWS Availability Zones in which the cluster will be provisioned |
 </details>
 
+### Shared VPC
 
----
-# END OF CURRENT WORK
-# Do not review below this line
+Normally, `kops` creates and manages its own VPC. However, you may want to create a shared VPC that `kops` will
+not modify, in order to more easily add other services to it. We provide a [VPC](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/vpc)
+Terraform module that creates a VPC and stores in SSM the information `kops` needs in order to use it. Details
+instructions on how to use that module are beyond the scope of this document, but briefly, you can just use
+it following the same pattern used for other "Terraform root modules". The key configuration items are:
+- Remove `network_cidr` from `/conf/kops/terraform.tfvars` and copy its value to `vpc_cidr_block` in 
+`/confg/vpc/terraform.tfvars`
+- Set `create_vpc = "false"` in `/conf/kops/terraform.tfvars`
 
-We start the process by defining some parameters in `/conf/kops/terraform.tfvars`
+Be sure to create the VPC first, before provisioning anything relating to `kops`
 
+### Provisioning Resources
 
-We create a [`kops`](https://github.com/kubernetes/kops) cluster from a manifest.
+Now that you have all the configuration set, build your custom Geodesic container, start it, and go through the following
+steps from within the container.
 
-The default manifest go-template is located in [`/templates/kops/default.yaml`](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml)
-and is compiled by running `build-kops-manifest`. 
+- `assume-role` to assume an IAM role with appropriate permissions
+- `cd /conf/kops` not only changes your working directory, but causes `direnv` to set up your environment variables
+- `make deps` loads Terraform modules, configures Terraform state storage, and downloads a Makefile for the next steps
+- `terraform apply` (type "yes" when prompted) creates S3 bucket, DNS zone, and SSH keypair for use by `kops`
 
-defined as environment variables. These can be set using the `.envrc` pattern or sourced from AWS SSM Parameter Store using `chamber`.
+At this point, there are new settings (generated by Terraform), and you need to take steps to load them into your
+shell environment. 
+- `make kops/shell` puts you into a subshell with the new settings loaded into your environment
 
-### `/conf/kops/kops.envrc`
- 
-# Min/Max number of nodes (aka workers)
-| KOPS_FEATURE_FLAGS | Enable experimental `kops` features | <unset> |
-ENV NODE_MAX_SIZE 2
-ENV NODE_MIN_SIZE 2
-| BASTION_MACHINE_TYPE | AWS Instance type for the Bastion server | t3.small |
-| MASTER_MACHINE_TYPE | AWS Instance type for the Kubernetes master nodes | t3.medium |
-| NODE_MACHINE_TYPE | AWS Instance type for the Kubernetes worker nodes | t3.medium |
+From here forward you need to make sure you are continuing to operate from within this subshell. When the Geodesic 
+command line prompt is 2 lines, a `+` at the end of the first line lets you know that the `kops` parameters are loaded.
 
+- `make kops/build-manifest` creates the `$KOPS_MANIFEST` file
+- `make kops/create` loads the manifest into `kops`
+- `make kops/create-secret-sshpublickey` loads the SSH key into `kops` (for communicating with the EC2 instances)
+- `make kops/apply` actually creates the cluster
 
+The cluster make take 5-10 minutes to fully come on line. 
+- `kops validate cluster` or `make kops/validate` to check on the status of the cluster. Once it has validated,
+your cluster is up and running and ready to use.
 
-<details>
-<summary>List of Supported Environment Variables</summary>
-
-| Environment Variable                               | Description of the setting                                                                     | Recommended Source | Default from   |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |--------|----------------
-| BASTION_MACHINE_TYPE                               | AWS EC2 instance type of bastion host                                                          | kops.envrc | Geodesic Dockerfile |
-| KOPS_ADMISSION_CONTROL_ENABLED                     | Toggle if adminission controller should be enabled                                             | kops.envrc | template |
-| KOPS_API_LOAD_BALANCER_IDLE_TIMEOUT_SECONDS        | AWS ELB idle connection timeout for the API load balancer                                      | kops.envrc | template |
-| KOPS_AUTHORIZATION_RBAC_ENABLED                    | Toggle Kubernetes RBAC support                                                                 | kops.envrc | template |
-| KOPS_AVAILABILITY_ZONES                            | AWS Availability Zones (AZs) to use. Must all reside in the same region. Use an _odd_ number.  | SSM via Terraform  | `terraform-root-modules/aws/kops/` 
-| KOPS_AWS_IAM_AUTHENTICATOR_ENABLED                 | Toggle IAM Authenticator support                                                               |
-| KOPS_BASE_IMAGE                                    | AWS AMI base image for all EC2 instances                                                       |
-| KOPS_BASTION_PUBLIC_NAME                           | Hostname that will be used for the bastion instance                                            |
-| KOPS_CLOUDWATCH_DETAILED_MONITORING                | Toggle detailed CloudWatch monitoring (increases operating costs)                              |
-| KOPS_CLUSTER_AUTOSCALER_ENABLED                    | Toggle the Kubernetes node autoscaler capability                                               |
-| KOPS_CLUSTER_NAME                                  | Cluster base hostname (E.g. `${AWS_REGION}.${DNS_ZONE}`)                                       |
-| KOPS_DNS_ZONE                                      | Authoritative DNS Zone that will be populated automatically with hostnames                         |
-| KOPS_FEATURE_FLAGS                                 | Enable experimental features that are not available by default                                     |
-| KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE            | Ordered list of plug-ins to do authorization on secure port                                    |
-| KOPS_KUBE_API_SERVER_AUTHORIZATION_RBAC_SUPER_USER | Username of the Kubernetes Super User                                                          |
-| KOPS_MANIFEST                                      | The path to the manifest. Used by `build-kops-manifest`.                                       |
-| KOPS_NETWORK_CIDR                                  | The network used by kubernetes for `Pods` and `Services` in the cluster                        |
-| KOPS_NON_MASQUERADE_CIDR                           | A list of strings in CIDR notation that specify the non-masquerade ranges.                     |
-| KOPS_PRIVATE_SUBNETS                               | Subnet CIDRs for all EC2 instances                                                             |
-| KOPS_STATE_STORE                                   | S3 Bucket that will be used to store the cluster state (E.g. `s3://${AWS_REGION}.${DNS_ZONE}`) |
-| KOPS_TEMPLATE                                      | Kops manifest go-template (gomplate) that describes the cluster                                               |
-| KOPS_UTILITY_SUBNETS                               | Subnet CIDRs for the publically facing services (e.g. ingress ELBs)                            |
-| KUBERNETES_VERSION                                 | Version of Kubernetes to deploy. Must be compatible with the `kops` release.  See [kops compatibility matrix](https://github.com/kubernetes/kops#compatibility-matrix) for more details                 |
-| NODE_MACHINE_TYPE                                  | AWS EC2 instance type for the _default_ node pool                                              |
-| NODE_MAX_SIZE                                      | Maximum number of EC2 instances in the _default_ node pool                                     |
-| NODE_MIN_SIZE                                      | Minimum number of EC2 instances in the _default_ node pool                                     |
-
-**IMPORTANT:**
-
-1. `KOPS_NETWORK_CIDR` and `KOPS_NON_MASQUERADE_CIDR` **MUST NOT** overlap
-2. `KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE` is a comma-separated list (e.g.`AlwaysAllow`,`AlwaysDeny`,`ABAC`,`Webhook`,`RBAC`,`Node`)
-3. `KOPS_BASE_IMAGE` refers to one of the official AWS AMI's provided by `kops`. For more details, refer to the [official documentation](https://github.com/kubernetes/kops/blob/master/docs/images.md). Additionally, the [latest stable images](https://github.com/kubernetes/kops/blob/master/channels/stable) are published on their GitHub
-4. `KOPS_FEATURE_FLAGS` are [published on their GitHub](https://github.com/kubernetes/kops/blob/master/docs/experimental.md)
-
-</details>
-
-Other settings can be generated automatically by using the [`kops` terraform "root" module](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops). This module will write the computed settings to AWS SSM Parameter Store for use with `chamber`.  
-
-**NOTE** In order to build the manifest as a step in the [`Dockerfile`](Dockerfile) (e.g. `RUN build-kops-manifest`), the settings should be stored in the `.envrc` rather than in `chamber`.
-
-
-## Provision a Kops Cluster
-
-After setting the parameters above, you can (re-)build your custom Geodesic shell and then, from within the shell,
-use Terraform to generate additional configuration and create AWS resources.
-
-```
-cd /conf/kops
-make deps
-make apply
-```
-Be sure to type "yes" in response to the `terraform` prompt confirming that you want to create the resources.
-
-The process of provisioning a new `kops` cluster takes (3) steps. Here's what it looks like:
-
-1. **Configure the environment settings**
-   - Create a new project (e.g. `/conf/kops`). Optionally define an `.envrc`.
-   - Rebuild the `geodesic` image. Then restart the shell.
-2. **Provision the `kops` dependencies using the [`kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) terraform root module**
-   - State backend (S3 bucket) that will store the YAML state.
-   - Cluster DNS zone that will be used by kops for service discovery.
-   - SSH key-pair to access the Kubernetes masters and nodes.
-   - Write settings to SSM Parameter Store.
-3. **Execute the `kops create` on the manifest file to create the `kops` cluster**
-   - Build the manifest.
-   - Validate the cluster is healthy.
-
-
-We provide a reference example here in our [`terraform-root-modules/aws/kops`](https://github.com/cloudposse/terraform-root-modules/tree/master/aws/kops) service catalog for provisioning everything needed by `kops` on AWS.
-
-
-**IMPORTANT** For the purpose of this documentation, we will assume all the settings are in the `.envrc`. If you want to use `chamber` (recommended), then prefix all commands below with `chamber exec kops --`. (E.g. `chamber exec kops -- build-kops-manifest` or `chamber exec kops -- kops export kubecfg`). This will export the environment variables found in the `kops` service namespace using chamber.
-
-### Configure Environment Settings
-
-Here is an example `.envrc`. Stick this in a project folder like `/conf/kops/` to enable kops support.
-
-**NOTE:** For a full list of options, see the [Configuration Settings](#configuration-settings).
-
-```bash
-export KOPS_MANIFEST=/conf/kops/manifest.yaml
-export KOPS_TEMPLATE=/templates/kops/default.yaml
-
-export KOPS_CLUSTER_NAME=$(terraform output zone_name)
-export KOPS_STATE_STORE=s3://$(terraform output bucket_name)
-export KOPS_STATE_STORE_REGION=us-east-1
-export KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
-export KOPS_BASE_IMAGE=kope.io/k8s-1.10-debian-jessie-amd64-hvm-ebs-2018-08-17
-
-export KOPS_BASTION_PUBLIC_NAME="bastion"
-export KOPS_PRIVATE_SUBNETS="172.20.32.0/19,172.20.64.0/19,172.20.96.0/19,172.20.128.0/19"
-export KOPS_UTILITY_SUBNETS="172.20.0.0/22,172.20.4.0/22,172.20.8.0/22,172.20.12.0/22"
-export KOPS_AVAILABILITY_ZONES="us-west-2a,us-west-2b,us-west-2c"
-
-# Instance sizes
-export BASTION_MACHINE_TYPE="t2.medium"
-export MASTER_MACHINE_TYPE="t2.medium"
-export NODE_MACHINE_TYPE="t2.medium"
-
-# Min/Max number of nodes (aka workers)
-export NODE_MAX_SIZE=2
-export NODE_MIN_SIZE=2
-```
-
-**IMPORTANT** The `KOPS_CLUSTER_NAME=$(terraform output zone_name)` and `KOPS_STATE_STORE=s3://$(terraform output bucket_name)` settings must correspond to those provisioned by the `terraform-aws-kops-state-backend` module. 
-
-
-After making any changes, rebuild the Docker image:
-
-```bash
-make docker/build
-```
-
-### Provision Dependencies
-
-Run Terraform to provision the `kops` backend (S3 bucket, DNS zone, and SSH keypair):
-
-```bash
-make -C /conf/kops init apply
-```
-
-### Create the Cluster
-
-Run the `geodesic` shell again and assume role to login to AWS:
-
-```bash
-assume-role
-```
-
-Change directory to `kops` folder:
-
-```bash
-cd /conf/kops
-```
-
-Compile the `manifest.yaml` by running `build-kops-manifest` which renders [the template](https://github.com/cloudposse/geodesic/blob/master/rootfs/templates/kops/default.yaml) using your current environment settings. 
-
-```bash
-build-kops-manifest
-```
-
-**NOTE**: you can override the `KOPS_TEMPLATE` to specify an alternative path to the manifest template file.
-
-Run the following command to create the cluster. This will just initialize the cluster state, which involves writing a state file to the S3 bucket. It does not actually provision any AWS resources for the cluster.
-
-```bash
-kops create -f manifest.yaml
-```
-
-In AWS, it's required that all AWS EC2 instances have a master SSH key. Run the following command to add the SSH public key to the cluster:
-
-```bash
-kops create secret sshpublickey admin -i ${KOPS_SSH_PUBLIC_KEY_PATH} --name ${KOPS_CLUSTER_NAME}
-```
-**IMPORTANT** this assumes `/secrets/tf` has been mounted using `goofys`
-
-Run the following command to provision the AWS resources for the cluster:
-
-```bash
-kops update cluster --yes
-```
-
-All done. The `kops` cluster is now up and running.
-
-Run the following command to validate the cluster is healthy:
-
-```bash
-kops validate cluster
-```
 
 ## Operating the Cluster
 
-Use the `kubectl` command to interact with the Kubernetes cluster. To use the `kubectl` command (_e.g._ `kubectl get nodes`, `kubectl get pods`), you need to first export the `kubecfg` configuration settings from the cluster.
+Use the `kubectl` command to interact with the Kubernetes cluster. To use the `kubectl` command 
+(_e.g._ `kubectl get nodes`, `kubectl get pods`), you need to first export the `kubecfg` configuration settings 
+from the cluster.
 
 Run the following command to export `kubecfg` settings needed to connect to the cluster:
 
@@ -519,9 +415,14 @@ Run the following command to export `kubecfg` settings needed to connect to the 
 kops export kubecfg
 ```
 
-**IMPORTANT:** You need to run this command every time you start a new shell and before you interact with the cluster (e.g. before running `kubectl`). By default, we set the `KUBECONFIG=/dev/shm/kubecfg` (shared memory based filesystem) so that it never touches disk and is wiped out when the shell exits.
+**IMPORTANT:** You need to run this command every time you start a new shell and before you interact with the cluster 
+(e.g. before running `kubectl`). By default, we set the `KUBECONFIG=/dev/shm/kubecfg` (shared memory based filesystem) 
+so that it never touches disk and is wiped out when the shell exits. Also, before you run `kops export kubecfg` you
+need to have run `assume-role` and `make kops/shell`, in order to have the necessary credentials available for
+`kops` to be able to generate the `kubecfg`.
 
-See the documentation for [`kubecfg` settings for `kubectl`](https://github.com/kubernetes/kops/blob/master/docs/kubectl.md) for more details.
+See the documentation for [`kubecfg` settings for `kubectl`](https://github.com/kubernetes/kops/blob/master/docs/kubectl.md) 
+for more details.
 
 <details><summary>Show Example Output</summary>
 
@@ -567,11 +468,11 @@ Below is an example of what it should _roughly_ look like (IPs and Availability 
 ```
 ⨠ kubectl get nodes
 NAME                                                STATUS   ROLES    AGE   VERSION
-ip-172-20-108-58.us-west-2.compute.internal    Ready    node     15m   v1.10.8
-ip-172-20-125-166.us-west-2.compute.internal   Ready    master   17m   v1.10.8
-ip-172-20-62-206.us-west-2.compute.internal    Ready    master   18m   v1.10.8
-ip-172-20-74-158.us-west-2.compute.internal    Ready    master   17m   v1.10.8
-ip-172-20-88-143.us-west-2.compute.internal    Ready    node     16m   v1.10.8
+ip-172-20-108-58.us-west-2.compute.internal    Ready    node     15m   v1.11.9
+ip-172-20-125-166.us-west-2.compute.internal   Ready    master   17m   v1.11.9
+ip-172-20-62-206.us-west-2.compute.internal    Ready    master   18m   v1.11.9
+ip-172-20-74-158.us-west-2.compute.internal    Ready    master   17m   v1.11.9
+ip-172-20-88-143.us-west-2.compute.internal    Ready    node     16m   v1.11.9
 ```
 
 </details>
@@ -636,12 +537,14 @@ kube-system   kube-scheduler-ip-172-20-74-158.us-west-2.compute.internal        
 
 To upgrade the cluster or change settings (_e.g_. number of nodes, instance types, Kubernetes version, etc.):
 
-1. Update the settings in the `.envrc` for the corresponding kops project
+1. Update the settings in the `.envrc` files for the corresponding kops project
 2. Rebuild Docker image (`make docker/build`)
 3. Run `geodesic` shell (e.g. by running the wrapper script `example.company.co`)
    - assume role (`assume-role`) 
    - change directory to the `/conf/kops` folder (or whichever project folder contains your kops configurations)
+   - `make kops/shell`
 4. Run `kops export kubecfg` to get the cluster context
+1. Run `make kops/build-manifest` to create a new `manifest.yaml`
 5. Run `kops replace -f manifest.yaml` to replace the cluster resources (update state)
 6. Run `kops update cluster` to view a plan of changes
 7. Run `kops update cluster --yes` to apply pending changes

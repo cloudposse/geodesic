@@ -30,7 +30,7 @@ a different version. Please keep these facts in mind when you are using this doc
     - [Where Did That Value Come From?](#where-did-that-value-come-from)
   - [Create the Cluster](#create-the-cluster)
     - [Setting the Parameters](#setting-the-parameters)
-    - [Shared VPC]
+    - [Shared VPC](#shared-vpc)
     - [Provisioning Resrouces](#provisioning-resources)
   - [Operating the Cluster](#operating-the-cluster)
     - [Tips & Tricks](#tips--tricks)
@@ -255,7 +255,7 @@ The `/conf/kops/terraform.envrc` file normally only contains 2 parameters:
 - `TF_CLI_INIT_FROM_MODULE` should be a version-pinned reference to the `kops` module of the 
 CloudPosse [Terraform Root Modules repo](https://github.com/cloudposse/terraform-root-modules). For this
 version of the documentation, it should be `git::https://github.com/cloudposse/terraform-root-modules.git//aws/kops?ref=tags/0.71.0`,
-which shoudl match the "terraform-root-modules" version stated above under [Usage](#usage).
+which should match the "terraform-root-modules" version stated above under [Usage](#usage).
 
 
 The remaining
@@ -334,7 +334,7 @@ There are some other environment variables you can set in `/conf/kops/kops.envrc
 
 **IMPORTANT:**
 
-1. `KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE` is a comma-separated list (e.g.`AlwaysAllow`,`AlwaysDeny`,`ABAC`,`Webhook`,`RBAC`,`Node`)
+1. `KOPS_KUBE_API_SERVER_AUTHORIZATION_MODE` is a comma-separated list (e.g.`AlwaysAllow,AlwaysDeny,ABAC,Webhook,RBAC,Node`)
 4. `KOPS_FEATURE_FLAGS` are [published on their GitHub](https://github.com/kubernetes/kops/blob/master/docs/experimental.md)
 
 </details>
@@ -371,7 +371,7 @@ Terraform module that creates a VPC and stores in SSM the information `kops` nee
 instructions on how to use that module are beyond the scope of this document, but briefly, you can just use
 it following the same pattern used for other "Terraform root modules". The key configuration items are:
 - Remove `network_cidr` from `/conf/kops/terraform.tfvars` and copy its value to `vpc_cidr_block` in 
-`/confg/vpc/terraform.tfvars`
+`/conf/vpc/terraform.tfvars`
 - Set `create_vpc = "false"` in `/conf/kops/terraform.tfvars`
 
 Be sure to create the VPC first, before provisioning anything relating to `kops`

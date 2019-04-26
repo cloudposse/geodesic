@@ -87,11 +87,23 @@ function sync_clocks() {
 	if [ -n "${hwclock_time}" ]; then
 		let diff=$(date '+%s')-$(date -d "${hwclock_time}" '+%s')
 		echo "* Docker clock is ${diff} seconds behind Host clock"
-		if [ $diff -gt 10 ]; then
-			hwclock -w >/dev/null 2>&1 || echo "* $(yellow Failed to set Docker clock from Host clock)"
-		elif [ $diff -lt -10 ]; then
+		if [ $diff -gt 2 ]; then
+			if hwclock -w >/dev/null 2>&1; then
+				echo "* $(green Successfully synced clocks)"
+				let diff=$(date '+%s')-$(date -d "$(timeout 5 hwclock -r)" '+%s')
+				echo "* $(green Docker clock is now ${diff} seconds behind Host clock)"
+			else
+				echo "* $(yellow Failed to set Docker clock from Host clock)"
+			fi
+		elif [ $diff -lt -2 ]; then
 			# (Only works in privileged mode)
-			hwclock -s >/dev/null 2>&1 || echo "* $(yellow Failed to set Host clock from Docker clock)"
+			if hwclock -2 >/dev/null 2>&1; then
+				echo "* $(green Successfully synced clocks)"
+				let diff=$(date '+%s')-$(date -d "$(timeout 5 hwclock -r)" '+%s')
+				echo "* $(green Docker clock is now ${diff} seconds behind Host clock)"
+			else
+				echo "* $(yellow Failed to set Host clock from Docker clock)"
+			fi
 		fi
 	else
 		echo "* $(yellow Unable to read hardware clock)"

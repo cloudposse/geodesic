@@ -49,7 +49,8 @@ spec:
       ]
   api:
     loadBalancer:
-      type: Public
+      ## Public or Internal https://github.com/kubernetes/kops/blob/master/docs/topology.md#aws
+      type: {{ getenv "KOPS_API_LOAD_BALANCER_TYPE" "Public" }}
       idleTimeoutSeconds: {{ getenv "KOPS_API_LOAD_BALANCER_IDLE_TIMEOUT_SECONDS" "600" }}
   kubeAPIServer:
   {{- if bool (getenv "KOPS_AUTHORIZATION_RBAC_ENABLED" "false") }}

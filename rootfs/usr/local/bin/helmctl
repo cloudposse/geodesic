@@ -1,0 +1,48 @@
+#!/usr/bin/variant
+# vim:set ft=yaml
+
+mixins:
+  # Exit on all errors
+  exit_on_errors: &exit_on_errors
+    set -e
+
+  # Default runner
+  runner: &runner
+    command: "bash"
+    args: ["-ex", "-c"]
+
+tasks:
+  tiller:
+    # Write out kubecfg
+    description: "Commands that operate on the helm tiller"
+    tasks:
+      install:
+        description: "Install tiller"
+        parameters:
+        - name: rbac-enabled
+          description: "Enable RBAC"
+          default: true
+          type: boolean
+          required: false
+        script:
+        - *exit_on_errors
+        - |
+          if [[ {{ get "rbac_enabled" }} == "true" ]]; then
+            echo "Enabled Tiller with RBAC"
+            kubectl get -n kube-system serviceaccount tiller > /dev/null 2>&1 || \
+              kubectl -n kube-system create serviceaccount tiller;
+            kubectl get -n kube-system clusterrolebinding tiller > /dev/null 2>&1 || \
+              kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller;
+            helm init --history-max 200 --service-account tiller --upgrade;
+          else
+            echo "Enabled Tiller without RBAC"
+            helm init --history-max 200 --upgrade;
+          fi 
+      uninstall:
+        description: "Uninstall the helm tiller"
+        script:
+        - *exit_on_errors
+        - |
+          kubectl -n kube-system delete deployment tiller-deploy
+          kubectl delete clusterrolebinding tiller --ignore-not-found
+          kubectl -n kube-system delete serviceaccount tiller --ignore-not-found

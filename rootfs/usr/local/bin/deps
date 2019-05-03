@@ -29,16 +29,16 @@ tasks:
       fi
       {{ range $index, $dep := .config.deps }}
         version="{{ index $dep "version" | default "" }}"
-        name={{ $dep.name }}
-        source={{ $dep.source }}
-        filename=$(basename {{ $dep.source }})
+        name="{{ $dep.name }}"
+        source="{{ $dep.source }}"
+        filename="$(basename {{ $dep.source }})"
         path="{{ index $dep "path" | default "." }}"
-        output="$path/$filename"
+        output="${path}/${filename}"
         if [ -f "${output}" ]; then
-          echo "Cleaning $name -> [$path] $filename"
+          echo "uninstalled ${name} from ${output}"
           rm -f "${output}"
         else
-          echo "$name not installed"
+          echo "${name} not installed"
         fi
       {{ end }}
 
@@ -60,15 +60,16 @@ tasks:
       fi
       {{ range $index, $dep := .config.deps }}
         version="{{ index $dep "version" | default "" }}"
-        name={{ $dep.name }}
-        source={{ $dep.source }}
-        filename=$(basename {{ $dep.source }})
+        name="{{ $dep.name }}"
+        source="{{ $dep.source }}"
+        filename="$(basename {{ $dep.source }})"
         path="{{ index $dep "path" | default "." }}"
         mode="{{ index $dep "mode" | default "" }}"
-        output="$path/$filename"
-        echo "Fetching $name -> [$path] $filename"
+        output="${path}/${filename}"
+        mkdir -p "${path}"
         curl -sSL -o "${output}" "${source}"
         if [ -n "${mode}" ]; then
           chmod "${mode}" "${output}"
         fi
+        echo "installed ${name} to ${output}"
       {{ end }}

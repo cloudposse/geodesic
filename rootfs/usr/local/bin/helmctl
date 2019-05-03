@@ -17,8 +17,13 @@ tasks:
     description: "Commands that operate on the helm tiller"
     tasks:
       install:
-        description: "Install tiller"
+        description: "Install the helm tiller"
         parameters:
+        - name: namespace
+          description: "Namespace to install tiller"
+          default: "kube-system"
+          type: string
+          required: false
         - name: rbac-enabled
           description: "Enable RBAC"
           default: true
@@ -29,20 +34,25 @@ tasks:
         - |
           if [[ {{ get "rbac_enabled" }} == "true" ]]; then
             echo "Enabled Tiller with RBAC"
-            kubectl get -n kube-system serviceaccount tiller > /dev/null 2>&1 || \
-              kubectl -n kube-system create serviceaccount tiller;
-            kubectl get -n kube-system clusterrolebinding tiller > /dev/null 2>&1 || \
-              kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller;
-            helm init --history-max 200 --service-account tiller --upgrade;
+            kubectl get -n {{ get "namespace" }} serviceaccount tiller > /dev/null 2>&1 || \
+              kubectl -n {{ get "namespace" }} create serviceaccount tiller;
+            kubectl get -n {{ get "namespace" }} clusterrolebinding tiller > /dev/null 2>&1 || \
+              kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount={{ get "namespace" }}:tiller;
+            helm init --tiller-namespace={{ get "namespace" }} --history-max 200 --service-account tiller --upgrade --wait;
           else
             echo "Enabled Tiller without RBAC"
-            helm init --history-max 200 --upgrade;
+            helm init --tiller-namespace={{ get "namespace" }} --history-max 200 --upgrade --wait;
           fi 
       uninstall:
         description: "Uninstall the helm tiller"
+        - name: namespace
+          description: "Namespace to install tiller"
+          default: "kube-system"
+          type: string
+          required: false
         script:
         - *exit_on_errors
         - |
-          kubectl -n kube-system delete deployment tiller-deploy
+          kubectl -n {{ get "namespace" }} delete deployment tiller-deploy
           kubectl delete clusterrolebinding tiller --ignore-not-found
-          kubectl -n kube-system delete serviceaccount tiller --ignore-not-found
+          kubectl -n {{ get "namespace" }} delete serviceaccount tiller --ignore-not-found

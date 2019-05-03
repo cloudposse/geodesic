@@ -1,0 +1,74 @@
+#!/usr/bin/variant
+tasks:
+  config:
+    description: "Display the configuration"
+    parameters:
+    - name: file
+      type: string
+      default: "deps.yaml"
+      required: true
+      description: "Configuration file (YAML)"
+    script:
+      cat {{ get "file" }}
+
+  uninstall:
+    description: "Cleanup all dependencies (delete)"
+    parameters:
+    - name: config
+      type: object
+      description: "Configuration (YAML)"
+    - name: verbose
+      type: boolean
+      description: "Flag to toggle verbose output"
+      default: false
+      required: false
+    script: |
+      set -e
+      if [ "{{ get "verbose" }}" == "true" ]; then
+        set -x
+      fi
+      {{ range $index, $dep := .config.deps }}
+        version="{{ index $dep "version" | default "" }}"
+        name={{ $dep.name }}
+        source={{ $dep.source }}
+        filename=$(basename {{ $dep.source }})
+        path="{{ index $dep "path" | default "." }}"
+        output="$path/$filename"
+        if [ -f "${output}" ]; then
+          echo "Cleaning $name -> [$path] $filename"
+          rm -f "${output}"
+        else
+          echo "$name not installed"
+        fi
+      {{ end }}
+
+  install:
+    description: "Install all dependencies"
+    parameters:
+    - name: config
+      type: object
+      description: "Configuration (YAML)"
+    - name: verbose
+      type: boolean
+      description: "Flag to toggle verbose output"
+      default: false
+      required: false
+    script: |
+      set -e
+      if [ "{{ get "verbose" }}" == "true" ]; then
+        set -x
+      fi
+      {{ range $index, $dep := .config.deps }}
+        version="{{ index $dep "version" | default "" }}"
+        name={{ $dep.name }}
+        source={{ $dep.source }}
+        filename=$(basename {{ $dep.source }})
+        path="{{ index $dep "path" | default "." }}"
+        mode="{{ index $dep "mode" | default "" }}"
+        output="$path/$filename"
+        echo "Fetching $name -> [$path] $filename"
+        curl -sSL -o "${output}" "${source}"
+        if [ -n "${mode}" ]; then
+          chmod "${mode}" "${output}"
+        fi
+      {{ end }}

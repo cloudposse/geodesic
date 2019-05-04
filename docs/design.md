@@ -1,4 +1,10 @@
-# Design
+% DESIGN(1) | Geodesic
+% Erik Osterman
+% May 2019
+
+# NAME
+
+design - Geodesic Design
 
 ## An Opinionated Framework
 

@@ -1,4 +1,12 @@
-# FAQ
+% FAQ(1) | Geodesic
+% Erik Osterman
+% May 2019
+
+# NAME
+
+FAQ - Frequently Asked Questions
+
+# QUESTIONS
 
 ## Does it work with Windows?
 

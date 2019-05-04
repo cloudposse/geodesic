@@ -1,4 +1,8 @@
-# Kubernetes Operations (kops)
+# NAME
+
+kops - Kubernetes Operations (kops)
+
+# SYNOPSIS 
 
 Kops is one of the easiest ways to get a production grade Kubernetes cluster up and running. The `kops` command line tool (cli) is like `kubectl` for clusters. It handles all the standard CRUD operations necessary to manage the complete life cycle of a cluster.
 
@@ -7,7 +11,8 @@ current practice is to define one cluster per Geodesic contianer, with all clust
 in the `/conf` folder. We are planning to publish guidelines for how to manage multiple clusters per container, 
 but that is still a work in progress that will introduce some new patterns.
 
-### USAGE
+# DESCRIPTION
+
 - This document describes how to set up a single `kops` cluster in a single Geodesic container.
 - The described usage pattern corresponds to [Geodesic](https://github.com/cloudposse/geodesic) version 0.95.1,
 [Reference Architecture](https://github.com/cloudposse/reference-architectures) version 0.7.0, and
@@ -18,27 +23,7 @@ of its publication. Also, because it is only updated manually (rather than gener
 be times when one part of this document intends to reference one version of a resource while another part references 
 a different version. Please keep these facts in mind when you are using this document to help you set up your own cluster.
 
-## Table of Contents
-
-- [Kubernetes Operations (kops)](#kubernetes-operations-kops)
-  - [Usage](#usage)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Overview](#overview)
-  - [Configuration Settings Overview](#configuration-settings-overview)
-    - [Terraform and Chamber](#terraform-and-chamber)
-    - [Where Did That Value Come From?](#where-did-that-value-come-from)
-  - [Create the Cluster](#create-the-cluster)
-    - [Setting the Parameters](#setting-the-parameters)
-    - [Shared VPC](#shared-vpc)
-    - [Provisioning Resrouces](#provisioning-resources)
-  - [Operating the Cluster](#operating-the-cluster)
-    - [Tips & Tricks](#tips--tricks)
-    - [Upgrade a Cluster](#upgrade-a-cluster)
-  - [References](#references)
-  - [Getting Help](#getting-help)
-
-## Features
+# FEATURES
 
 - **Automated Provisioning** of Kubernetes clusters in [AWS](https://github.com/kubernetes/kops/blob/master/docs/aws.md) and [GCE](https://github.com/kubernetes/kops/blob/master/docs/tutorial/gce.md)
 - **Highly Available (HA)** Kubernetes masters and nodes by using auto-scaling groups
@@ -50,7 +35,7 @@ a different version. Please keep these facts in mind when you are using this doc
 - **Supports Multiple CNIs** providers [out of the box](https://github.com/kubernetes/kops/blob/master/docs/networking.md).
 - **Lifecycle Hooks** make it easy to add containers and files to nodes via a [cluster manifest](https://github.com/kubernetes/kops/blob/master/docs/cluster_spec.md)
 
-## Overview
+# OVERVIEW
 
 The process of provisioning a new `kops` cluster takes (3) steps. Here's what it looks like:
 

@@ -1,0 +1,49 @@
+#!/usr/bin/variant
+# vim:set ft=yaml
+
+mixins:
+  # Exit on all errors
+  exit_on_errors: &exit_on_errors
+    set -e
+
+  # Default runner
+  runner: &runner
+    command: "bash"
+    args: ["-ex", "-c"]
+
+tasks:
+  update:
+    description: "Rebuild man pages and reindex"
+    steps:
+    - task: "build"
+    - task: "index"
+
+  build:
+    # Write out kubecfg
+    description: "Build man pages"
+    script:
+    - *exit_on_errors
+    - |
+      section=1
+      man_pages=/usr/share/man/man${section}
+      mkdir -p ${man_pages}
+      for md in $(find /usr/share/docs -type f -name '*.md'); do
+        man=${man_pages}/$(basename $md .md).$section
+        # Verbatim text (i.e. between backticks, `…`) doesn’t show in any particular way
+        sed 's/`/**/g' < $md | pandoc -s -f markdown -t man | sed 's/\\\[en\]/-/' > $man
+        echo "Wrote $man"
+      done
+
+  index:
+    description: "Index man pages"
+    script:
+    - *exit_on_errors
+    - mandb -c
+
+  list:
+    description: "List all available man pages"
+    script:
+    - *exit_on_errors
+    - apropos .
+
+

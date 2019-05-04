@@ -1,11 +1,9 @@
+# Use `man` page system for help
 function help() {
-	cat <<__EOF__
-Available commands:
-  leave-role      Leave the current role; run this to release your session
-  assume-role     Assume a new role; run this to renew your session
-  setup-role      Setup a new role; run this to configure your AWS profile
-  s3              Manage s3 buckets with fstab
-  init-terraform  Configure terraform project backend to use S3
-
-__EOF__
+	if [ $# -ne 0 ]; then
+		apropos "$*"
+	else
+		echo -e "Available documentation:\n\n"
+		apropos . | sed 's/^/  /'
+	fi
 }

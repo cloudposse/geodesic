@@ -1,6 +1,9 @@
-% README(1) | Geodesic
-% Erik Osterman
-% May 2019
+---
+title: README(1) | Geodesic
+author:
+- Erik Osterman
+date: May 2019
+---
 
 # NAME
 

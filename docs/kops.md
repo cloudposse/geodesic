@@ -1,3 +1,10 @@
+---
+title: KOPS(1) | Geodesic
+author:
+- Erik Osterman
+date: May 2019
+---
+
 # NAME
 
 kops - Kubernetes Operations (kops)

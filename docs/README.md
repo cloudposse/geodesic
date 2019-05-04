@@ -15,15 +15,15 @@ This directory contains a number of markdown-formatted "man" pages. These will b
 
 # USAGE
 
-## Build Man Pages
+## Build
 
 To rebuild the man pages, run `docs update`
 
-## List Man Pages
+## List
 
 To list all available man pages, run `help`. Then for more information on any topic, run `help` and pass the command as an argument. 
 
-## Search Man Pages 
+## Search 
 
 To search for help, run `help "topic"` where `"topic"` is what you want more information on.
 

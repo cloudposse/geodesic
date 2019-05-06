@@ -1,6 +1,6 @@
 # Essential alpine packages
 ansible
-awscli
+awscli@testing
 awless@cloudposse
 aws-iam-authenticator@cloudposse
 aws-vault@cloudposse

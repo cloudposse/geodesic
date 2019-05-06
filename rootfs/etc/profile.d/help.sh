@@ -1,10 +1,8 @@
 # Use `man` page system for help
 function help() {
 	if [ $# -ne 0 ]; then
-		apropos "$*"
+		docs search --query="$*"
 	else
-		echo -e "Available documentation:\n"
-		apropos . | sed 's/^/  /'
-		echo
+		docs search
 	fi
 }

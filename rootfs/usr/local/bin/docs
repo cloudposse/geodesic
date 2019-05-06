@@ -44,6 +44,30 @@ tasks:
     description: "List all available man pages"
     script:
     - *exit_on_errors
-    - apropos .
+    - echo -e "Available topics:\n"
+    - apropos . | sed 's/^/  /'
+    - echo
 
+  search:
+    description: "Search documentation"
+    interactive: true
+    parameters:
+    - name: query
+      type: string
+      default: ""
+      description: "Search query"
+      required: false
+    script: |-
+      topic=$(apropos . | awk '{print $1}' | fzf \
+        --height 50% \
+        --preview-window right:70% \
+        --reverse \
+        --select-1 \
+        --prompt='-> ' \
+        --header 'Select Help Topic' \
+        --query "${1}" \
+        --preview "man {} | head -20")
 
+      if [ -n "${topic}" ]; then
+        man $topic
+      fi

@@ -5,6 +5,7 @@ stages:
   - Prepare
   - Build
   - Push
+
 steps:
   main_clone:
     title: "Clone repository"
@@ -46,4 +47,3 @@ steps:
       condition:
         all:
           executeForBranch: "'${{CF_BRANCH}}' != ''"
-

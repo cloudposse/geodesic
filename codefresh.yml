@@ -20,7 +20,7 @@ steps:
     type: build
     stage: Build
     description: Build geodesic
-    image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    image_name: ${{CF_REPO_NAME}}
     dockerfile: Dockerfile
 
   push_image_commit:
@@ -28,6 +28,7 @@ steps:
     type: push
     stage: Push
     candidate: ${{build_image}}
+    image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     registry: dockerhub
     tags:
       - "${{CF_REVISION}}"
@@ -37,6 +38,7 @@ steps:
     type: push
     stage: Push
     candidate: ${{build_image}}
+    image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     registry: dockerhub
     tags:
       - "${{CF_BRANCH}}"
@@ -50,6 +52,7 @@ steps:
     type: push
     stage: Push
     candidate: ${{build_image}}
+    image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     registry: dockerhub
     tag: "${{CF_RELEASE_TAG}}"
     when:
@@ -62,6 +65,7 @@ steps:
     type: push
     stage: Push
     candidate: ${{build_image}}
+    image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     registry: dockerhub
     tag: latest
     when:

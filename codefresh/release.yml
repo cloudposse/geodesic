@@ -4,6 +4,7 @@ version: '1.0'
 stages:
   - Prepare
   - Promote
+
 steps:
   main_clone:
     title: Pull image with commit sha

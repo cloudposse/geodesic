@@ -1,7 +1,7 @@
 #
 # Python Dependencies
 #
-FROM alpine:3.9.2 as python
+FROM alpine:3.9.3 as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
@@ -13,7 +13,7 @@ RUN pip install -r /requirements.txt --install-option="--prefix=/dist" --no-buil
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:241.0.0-alpine as google-cloud-sdk
+FROM google/cloud-sdk:244.0.0-alpine as google-cloud-sdk
 
 #
 # Cloud Posse Package Distribution
@@ -35,7 +35,7 @@ RUN make dist
 #
 # Geodesic base image
 #
-FROM alpine:3.9.2
+FROM alpine:3.9.3
 
 ENV BANNER "geodesic"
 

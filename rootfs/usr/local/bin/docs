@@ -19,7 +19,7 @@ tasks:
     - task: "index"
 
   build:
-    # Write out kubecfg
+    # Build man pages
     description: "Build man pages"
     script:
     - *exit_on_errors

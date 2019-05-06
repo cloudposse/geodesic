@@ -9,6 +9,10 @@ steps:
     title: Pull image with commit sha
     stage: "Prepare"
     image: "${{CF_DOCKER_REPO_URL}}/${{CF_REPO_NAME}}:${{CF_REVISION}}"
+    retry:
+      maxAttempts: 10
+      delay: 60
+      exponentialFactor: 1
     commands:
     - "true"
 
@@ -20,10 +24,6 @@ steps:
     image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     registry: dockerhub
     tag: "${{CF_RELEASE_TAG}}"
-    retry:
-      maxAttempts: 10
-      delay: 60
-      exponentialFactor: 1
     when:
       condition:
         all:

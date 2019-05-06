@@ -11,8 +11,8 @@ steps:
     image: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}:${{CF_REVISION}}"
     registry: dockerhub
     retry:
-      maxAttempts: 10
-      delay: 60
+      maxAttempts: 40
+      delay: 15
       exponentialFactor: 1
     commands:
     - "true"
@@ -21,7 +21,7 @@ steps:
     title: Push image with release tag
     type: push
     stage: Promote
-    candidate: ${{build_image}}
+    candidate: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}:${{CF_REVISION}}"
     image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     registry: dockerhub
     tag: "${{CF_RELEASE_TAG}}"

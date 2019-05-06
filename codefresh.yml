@@ -2,9 +2,19 @@
 version: '1.0'
 
 stages:
+  - Prepare
   - Build
   - Push
 steps:
+  main_clone:
+    title: "Clone repository"
+    type: git-clone
+    stage: Prepare
+    description: "Initialize"
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    git: CF-default
+    revision: ${{CF_REVISION}}
+
   build_image:
     title: Build image
     type: build

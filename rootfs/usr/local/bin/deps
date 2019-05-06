@@ -1,4 +1,16 @@
 #!/usr/bin/variant
+# vim:set ft=yaml
+
+mixins:
+  # Exit on all errors
+  exit_on_errors: &exit_on_errors
+    set -e
+
+  # Default runner
+  runner: &runner
+    command: "bash"
+    args: ["-ex", "-c"]
+
 tasks:
   config:
     description: "Display the configuration"
@@ -9,7 +21,8 @@ tasks:
       required: true
       description: "Configuration file (YAML)"
     script:
-      cat {{ get "file" }}
+    - *exit_on_errors
+    - cat {{ get "file" }}
 
   uninstall:
     description: "Cleanup all dependencies (delete)"
@@ -17,13 +30,15 @@ tasks:
     - name: config
       type: object
       description: "Configuration (YAML)"
+      required: true
     - name: verbose
       type: boolean
       description: "Flag to toggle verbose output"
       default: false
       required: false
-    script: |
-      set -e
+    script:
+    - *exit_on_errors
+    - |
       if [ "{{ get "verbose" }}" == "true" ]; then
         set -x
       fi
@@ -48,13 +63,15 @@ tasks:
     - name: config
       type: object
       description: "Configuration (YAML)"
+      required: true
     - name: verbose
       type: boolean
       description: "Flag to toggle verbose output"
       default: false
       required: false
-    script: |
-      set -e
+    script:
+    - *exit_on_errors
+    - |
       if [ "{{ get "verbose" }}" == "true" ]; then
         set -x
       fi
@@ -67,7 +84,7 @@ tasks:
         mode="{{ index $dep "mode" | default "" }}"
         output="${path}/${filename}"
         mkdir -p "${path}"
-        curl -sSL -o "${output}" "${source}"
+        curl -fsSL -o "${output}" "${source}"
         if [ -n "${mode}" ]; then
           chmod "${mode}" "${output}"
         fi

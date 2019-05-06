@@ -1,4 +1,4 @@
-ansible==2.7.9
+ansible==2.7.10
 awscli==1.16.152
 awsebcli==3.15.0
 boto==2.49.0

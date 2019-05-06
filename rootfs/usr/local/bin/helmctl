@@ -46,7 +46,7 @@ tasks:
       uninstall:
         description: "Uninstall the helm tiller"
         - name: namespace
-          description: "Namespace to install tiller"
+          description: "tiller's namespace"
           default: "kube-system"
           type: string
           required: false

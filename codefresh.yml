@@ -18,7 +18,7 @@ steps:
     type: push
     stage: Push
     candidate: ${{build_image}}
-    registry: dockerhub
+    registry: dockerhub/${{CF_REPO_OWNER}}
     tags:
       - "${{CF_REVISION}}"
 

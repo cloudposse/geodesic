@@ -106,7 +106,7 @@ Normally `direnv` only reads the `.envrc` file, but CloudPosse adds a `use envrc
 causes `direenv` to read all the files in the directory that have `.envrc` extensions. This allows parameters
 to be set automatically by `direnv` without requiring that the settings be put in a hidden file.
 
-##### `/conf/.direnv`
+##### `/conf/.envrc`
 
 In the `/conf` directory itself, we put a file named `.envrc` which contains just this one line:
 ```

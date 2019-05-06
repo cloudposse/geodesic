@@ -1,0 +1,30 @@
+# Build a service with environment variables
+version: '1.0'
+
+stages:
+  - Prepare
+  - Promote
+steps:
+  main_clone:
+    title: Pull image with commit sha
+    stage: "Prepare"
+    image: "${{CF_DOCKER_REPO_URL}}/${{CF_REPO_NAME}}:${{CF_REVISION}}"
+    commands:
+    - "true"
+
+  push_image_tag:
+    title: Push image with release tag
+    type: push
+    stage: Promote
+    candidate: ${{build_image}}
+    image_name: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    registry: dockerhub
+    tag: "${{CF_RELEASE_TAG}}"
+    retry:
+      maxAttempts: 10
+      delay: 60
+      exponentialFactor: 1
+    when:
+      condition:
+        all:
+          executeForTag: "'${{CF_RELEASE_TAG}}' != ''"

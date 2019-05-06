@@ -20,7 +20,7 @@ steps:
     candidate: ${{build_image}}
     registry: dockerhub
     tags:
-      - "${{SEMVERSION_COMMIT}}"
+      - "${{CF_REVISION}}"
 
   push_image_branch:
     title: Push image with branch tag

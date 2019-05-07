@@ -1,0 +1,74 @@
+#!/usr/bin/variant
+# vim:set ft=yaml
+
+mixins:
+  # Exit on all errors
+  exit_on_errors: &exit_on_errors
+    set -e
+
+  # Default runner
+  runner: &runner
+    command: "bash"
+    args: ["-ex", "-c"]
+
+tasks:
+  update:
+    description: "Rebuild man pages and reindex"
+    steps:
+    - task: "build"
+    - task: "index"
+
+  build:
+    # Build man pages
+    description: "Build man pages"
+    script:
+    - *exit_on_errors
+    - |
+      section=1
+      man_pages=/usr/share/man/man${section}
+      mkdir -p ${man_pages}
+      for md in $(find /usr/share/docs -type f -name '*.md'); do
+        man=${man_pages}/$(basename $md .md).$section
+        # Verbatim text (i.e. between backticks, `…`) doesn’t show in any particular way
+        sed 's/`/**/g' < $md | sed -E 's/^#(#+ )/\1/g' | \
+          pandoc -s -f markdown -t man | sed 's/\\\[en\]/-/' > $man
+        echo "Wrote $man"
+      done
+
+  index:
+    description: "Index man pages"
+    script:
+    - *exit_on_errors
+    - mandb -c
+
+  list:
+    description: "List all available man pages"
+    script:
+    - *exit_on_errors
+    - echo -e "Available topics:\n"
+    - apropos . | sed 's/^/  /'
+    - echo
+
+  search:
+    description: "Search documentation"
+    interactive: true
+    parameters:
+    - name: query
+      type: string
+      default: ""
+      description: "Search query"
+      required: false
+    script: |-
+      topic=$(apropos . | awk '{print $1}' | fzf \
+        --height 50% \
+        --preview-window right:70% \
+        --reverse \
+        --select-1 \
+        --prompt='-> ' \
+        --header 'Select Help Topic' \
+        --query "${1}" \
+        --preview "man {} | head -20")
+
+      if [ -n "${topic}" ]; then
+        man $topic
+      fi

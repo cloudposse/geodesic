@@ -41,11 +41,13 @@ less
 libc6-compat
 libltdl
 make
+man-db@testing
 musl-dev
 ncurses
 oath-toolkit-oathtool@community
 openssh-client
 openssl
+pandoc@cloudposse
 pwgen
 python
 rakkess@cloudposse

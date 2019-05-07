@@ -231,7 +231,14 @@ ENV XDG_CONFIG_HOME=/etc
 # Clean up file modes for scripts
 RUN find ${XDG_CONFIG_HOME} -type f -name '*.sh' -exec chmod 755 {} \;
 
+# Install "root" filesystem
 COPY rootfs/ /
+
+# Install documentation
+COPY docs/ /usr/share/docs/
+
+# Build man pages
+RUN /usr/local/bin/docs update
 
 WORKDIR /conf
 

@@ -45,6 +45,7 @@ tasks:
           fi 
       uninstall:
         description: "Uninstall the helm tiller"
+        parameters:
         - name: namespace
           description: "tiller's namespace"
           default: "kube-system"

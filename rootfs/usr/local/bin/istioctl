@@ -1,0 +1,21 @@
+#!/usr/bin/env variant
+# vim:set ft=yaml
+
+parameters:
+- name: namespace
+  default: "default"
+  description: "Kubernetes namespace"
+
+tasks:
+
+  # https://istio.io/docs/tasks/traffic-management/ingress/#determining-the-ingress-ip-and-ports-when-using-an-external-load-balancer
+  istio-ingress:
+    description: Output the FQHN of the Istio Ingress Gateway
+    script: |
+      kubectl --namespace istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+
+  # https://istio.io/docs/setup/kubernetes/quick-start/
+  istio-injection:
+    description: Enable Istio Sidecar Injection for a namespace
+    script: |
+      kubectl label namespace {{ get "namespace" }} istio-injection=enabled --overwrite=true

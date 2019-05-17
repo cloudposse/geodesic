@@ -82,6 +82,12 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	# Do not export these as Terraform environment variables
 	export TFENV_BLACKLIST="^(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|AWS_SECURITY_TOKEN|AWS_SESSION_TOKEN|ATLANTIS_.*|GITHUB_.*)$"
 
+    # Configure Git credentials for atlantis to allow access to GitHub private repos (see rootfs/usr/local/bin/git-credential-github)
+    # https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
+    export GITHUB_USER=${ATLANTIS_GH_USER}
+    export GITHUB_TOKEN=${ATLANTIS_GH_TOKEN}
+    git config --global credential.helper 'github'
+
 	# Use a primitive init handler to catch signals and handle them properly
 	# Use gosu to drop privileges
 	# Use env to setup the shell environment for atlantis

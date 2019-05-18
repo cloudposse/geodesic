@@ -86,6 +86,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
     # https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
     export GITHUB_USER=${ATLANTIS_GH_USER}
     export GITHUB_TOKEN=${ATLANTIS_GH_TOKEN}
+    chmod +x /usr/local/bin/git-credential-github
     git config --global credential.helper 'github'
 
 	# Use a primitive init handler to catch signals and handle them properly

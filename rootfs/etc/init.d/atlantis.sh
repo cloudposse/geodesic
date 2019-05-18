@@ -87,7 +87,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
     export GITHUB_TOKEN=${ATLANTIS_GH_TOKEN}
     chmod +x /usr/local/bin/git-credential-github
 
-    # Force git to use HTTPS instead of SSH. With HTTPS, git will use the `GITHUB_TOKEN` to authenticate with GitHub (with SSH it won't)
+    # Force `git` to use HTTPS instead of SSH. With HTTPS, `git` will use the `GITHUB_TOKEN` to authenticate with GitHub (with SSH it won't)
     # https://ricostacruz.com/til/github-always-ssh
     # https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf
     # https://gist.github.com/Kovrinic/ea5e7123ab5c97d451804ea222ecd78a

@@ -91,7 +91,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
     # https://ricostacruz.com/til/github-always-ssh
     # https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf
     # https://gist.github.com/Kovrinic/ea5e7123ab5c97d451804ea222ecd78a
-    git config --global url."https://github.com/".insteadOf git@github.com:
+    git config --global url."https://github.com/".insteadOf "git@github.com:"
 
     # https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
     # see rootfs/usr/local/bin/git-credential-github

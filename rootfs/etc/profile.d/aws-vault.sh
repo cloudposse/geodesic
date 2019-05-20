@@ -14,7 +14,7 @@ function _validate_aws_vault_server() {
 
 	if [[ $instance == "aws-vault" ]]; then
 		# We successfully connected to an active aws-vault credentials server, so use it
-		_assume_active_aws_role
+		assume_active_aws_role
 	elif (($curl_exit_code == 0)); then
 		echo "* $(green force-starting aws-vault server because real AWS meta-data server is reachable)"
 		_force_start_aws_vault_server
@@ -48,7 +48,7 @@ function _force_start_aws_vault_server() {
 	fi
 }
 
-function _assume_active_aws_role() {
+function assume_active_aws_role() {
 	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
 
 	local aws_default_profile="$AWS_DEFAULT_PROFILE"
@@ -71,8 +71,8 @@ function _assume_active_aws_role() {
 		fi
 	else
 		unset TF_VAR_aws_assume_role_arn
-		AWS_DEFAULT_PROFILE=${aws_default_profile}
-		AWS_VAULT_SERVER_ENABLED="get-caller-identity failed"
+		export AWS_DEFAULT_PROFILE=${aws_default_profile}
+		export AWS_VAULT_SERVER_ENABLED="get-caller-identity failed"
 	fi
 }
 
@@ -221,6 +221,10 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 			echo $(red Not starting role server becuase AWS_VAULT_SERVER_ENABLED is "${AWS_VAULT_SERVER_ENABLED}")
 			exit 99
 		fi
+
+		# We add --debug for the role server, but want to remove it when done
+		local aws_vault_args=("${AWS_VAULT_ARGS[@]}")
+		trap 'AWS_VAULT_ARGS=("${aws_vault_args[@]}")' RETURN
 
 		[[ ${AWS_VAULT_ARGS[*]} =~ --debug ]] || AWS_VAULT_ARGS+=("--debug")
 		_aws_vault_assume_role "${1:-$(choose_role)}" sleep inf

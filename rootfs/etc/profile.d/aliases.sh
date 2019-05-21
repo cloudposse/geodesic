@@ -9,15 +9,14 @@ alias taboff='bind '\''set disable-completion on'\'''
 # tabon turn on tab auto-completion
 alias tabon='bind '\''set disable-completion off'\'''
 
-
 # Run chamber to put secrets for given service(s) in the environment
 function chdo() {
-    source <(chamber export -f dotenv "$@" | sed "s/^/export /" | perl -pe s/\\\\n/\\n/g)
+	source <(chamber export -f dotenv "$@" | sed "s/^/export /" | perl -pe s/\\\\n/\\n/g)
 }
 
 # Remove secrets chamber put in the environment for given service(s)
 function chundo() {
-    source <(chamber export -f dotenv "$@" | cut -f 1 -d= | sed "s/^/unset /")
+	source <(chamber export -f dotenv "$@" | cut -f 1 -d= | sed "s/^/unset /")
 }
 
 # Import kops secrets into the environment
@@ -26,8 +25,6 @@ alias kudo='chdo kops'
 alias kundo='chundo kops'
 # Use kops to create kubecfg (requires kops secrets in environment, e.g. kudo)
 alias kexp='kops export kubecfg'
-
-
 
 ##################################################################################################################
 #
@@ -92,13 +89,13 @@ function _install_alias_completion() {
 			if [[ "${compl_func#_$namespace::}" == $compl_func ]]; then
 				local compl_wrapper="_${namespace}::${alias_name}"
 				echo "function $compl_wrapper {
-                            (( COMP_CWORD += ${#alias_arg_words[@]} ))
-                            COMP_WORDS=($alias_cmd $alias_args \${COMP_WORDS[@]:1})
-                            (( COMP_POINT -= \${#COMP_LINE} ))
-                            COMP_LINE=\${COMP_LINE/$alias_name/$alias_cmd $alias_args}
-                            (( COMP_POINT += \${#COMP_LINE} ))
-                            $compl_func
-                        }" >>"$tmp_file"
+							(( COMP_CWORD += ${#alias_arg_words[@]} ))
+							COMP_WORDS=($alias_cmd $alias_args \${COMP_WORDS[@]:1})
+							(( COMP_POINT -= \${#COMP_LINE} ))
+							COMP_LINE=\${COMP_LINE/$alias_name/$alias_cmd $alias_args}
+							(( COMP_POINT += \${#COMP_LINE} ))
+							$compl_func
+						}" >>"$tmp_file"
 				new_completion="${new_completion/ -F $compl_func / -F $compl_wrapper }"
 			fi
 		fi

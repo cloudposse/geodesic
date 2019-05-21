@@ -12,8 +12,8 @@ steps:
     image: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}:${{CF_REVISION}}"
     registry: dockerhub
     retry:
-      maxAttempts: 40
-      delay: 15
+      maxAttempts: 10
+      delay: 60
       exponentialFactor: 1
     commands:
     - "true"

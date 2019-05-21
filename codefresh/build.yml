@@ -4,6 +4,7 @@ version: '1.0'
 stages:
   - Prepare
   - Build
+  - Test
   - Push
 
 steps:
@@ -26,9 +27,11 @@ steps:
 
   run_tests:
     title: "Run Tests"
+    stage: "Test"
     image: ${{build_image}}
     description: "Run basic tests"
     commands:
+    - set -x
     - make init
     - make travis/docker-login
     - make packages/reinstall/shfmt

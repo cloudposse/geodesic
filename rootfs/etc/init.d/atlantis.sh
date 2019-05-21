@@ -90,7 +90,12 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
     # https://ricostacruz.com/til/github-always-ssh
     # https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf
     # https://gist.github.com/Kovrinic/ea5e7123ab5c97d451804ea222ecd78a
+
+    # The URL "git@github.com:" is used by `git` (e.g. `git clone`)
     gosu ${ATLANTIS_USER} git config --global url."https://github.com/".insteadOf "git@github.com:"
+    # The URL "ssh://git@github.com/" is used by Terraform (e.g. `terraform init --from-module=...`)
+    # NOTE: we use `--add` to append the second URL to the config file
+    gosu ${ATLANTIS_USER} git config --global url."https://github.com/".insteadOf "ssh://git@github.com/" --add
 
     # https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
     # see rootfs/usr/local/bin/git-credential-github

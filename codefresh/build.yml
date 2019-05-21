@@ -4,6 +4,7 @@ version: '1.0'
 stages:
   - Prepare
   - Build
+  - Test
   - Push
 
 steps:
@@ -23,6 +24,19 @@ steps:
     description: Build geodesic
     image_name: ${{CF_REPO_NAME}}
     dockerfile: Dockerfile
+
+  run_tests:
+    title: "Run Tests"
+    stage: "Test"
+    image: ${{build_image}}
+    description: "Run basic tests"
+    commands:
+    - set -x
+    - make init
+    - make packages/reinstall/shfmt
+    - make bash/fmt/check
+    - make deps
+    - make lint
 
   push_image_commit:
     title: Push image with commit sha tag

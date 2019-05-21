@@ -33,7 +33,6 @@ steps:
     commands:
     - set -x
     - make init
-    - make travis/docker-login
     - make packages/reinstall/shfmt
     - make bash/fmt/check
     - make deps

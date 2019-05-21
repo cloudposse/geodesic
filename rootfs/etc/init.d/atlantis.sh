@@ -85,17 +85,16 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
     # Configure git credentials for atlantis to allow access to GitHub private repos
     export GITHUB_USER=${ATLANTIS_GH_USER}
     export GITHUB_TOKEN=${ATLANTIS_GH_TOKEN}
-    chmod +x /usr/local/bin/git-credential-github
 
     # Force `git` to use HTTPS instead of SSH. With HTTPS, `git` will use the `GITHUB_TOKEN` to authenticate with GitHub (with SSH it won't)
     # https://ricostacruz.com/til/github-always-ssh
     # https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf
     # https://gist.github.com/Kovrinic/ea5e7123ab5c97d451804ea222ecd78a
-    git config --global url."https://github.com/".insteadOf "git@github.com:"
+    gosu ${ATLANTIS_USER} git config --global url."https://github.com/".insteadOf "git@github.com:"
 
     # https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
     # see rootfs/usr/local/bin/git-credential-github
-    git config --global credential.helper 'github'
+    gosu ${ATLANTIS_USER} git config --global credential.helper 'github'
 
 	# Use a primitive init handler to catch signals and handle them properly
 	# Use gosu to drop privileges

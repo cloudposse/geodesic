@@ -11,10 +11,10 @@ Have a question? Please checkout our [Slack Community](https://slack.cloudposse.
 
 [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
-## Describe the bug
+## Describe the Bug
 A clear and concise description of what the bug is.
 
-## Expected behavior
+## Expected Behavior
 A clear and concise description of what you expected to happen.
 
 ## Steps to Reproduce
@@ -27,9 +27,9 @@ Steps to reproduce the behavior:
 ## Screenshots
 If applicable, add screenshots or logs to help explain your problem.
 
-## Desktop (please complete the following information):
- - OS: [e.g. iOS]
- - Version [e.g. 22]
+## Environment (please complete the following information):
+ - OS: [e.g. Linux, OSX, WSL, etc]
+ - Version [e.g. 10.15]
 
-**Additional context**
+## Additional Context
 Add any other context about the problem here.

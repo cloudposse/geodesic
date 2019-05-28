@@ -3,7 +3,7 @@
 
 [![Cloud Posse][logo]](https://cpco.io/homepage)
 
-# Geodesic [![Codefresh Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fgeodesic%2Fbuild?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/geodesic/build) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic?ref=badge_shield) [![Latest Release](https://img.shields.io/github/release/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+# Geodesic [![Codefresh Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fgeodesic%2Fbuild?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/geodesic/build) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic?ref=badge_shield) [![Latest Release](https://img.shields.io/github/release/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com) [![Slack Archive](https://img.shields.io/badge/slack-archive-blue.svg)](https://archive.sweetops.com/geodesic)
 
 
 ![Geodesic](docs/geodesic-small.png)
@@ -78,7 +78,18 @@ Let's roll...
 
 
 
-## Features
+---
+title: ABOUT(1) | Geodesic
+author:
+- Erik Osterman
+date: May 2019
+---
+
+## NAME
+
+about - About the Geodesic Cloud Automation Shell
+
+## FEATURES
 
 * **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/99designs/aws-vault/), automatic key rotation, encryption at rest, and VPCs
 * **Repeatable** - 100% Infrastructure-as-Code with change automation and support for scriptable admin tasks in any language, including Terraform
@@ -86,7 +97,7 @@ Let's roll...
 * **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications and CI/CD systems like TravisCI, CircleCI or Jenkins
 * **OpenSource** - Permissive [APACHE 2.0](LICENSE) license means no lock-in and no on-going license fees
 
-## Technologies
+## TECHNOLOGIES
 
 At its core, Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of the components of a modern cloud.
 
@@ -107,14 +118,27 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 
 [](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)
 
-## Documentation
+## SEE MORE
 
 Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/geodesic). 
-## Our Logo
+---
+title: LOGO(1) | Geodesic
+author:
+- Erik Osterman
+date: May 2019
+---
+
+## NAME
+
+logo - Explanation of the Geodesic Logo
+
+## SYNOPSIS
 
 ![Geodesic Logo](https://raw.githubusercontent.com/cloudposse/geodesic/master/docs/geodesic-small.png)
 
 In mathematics, a geodesic line is the shortest distance between two points on a sphere. It's also a solid structure composed of geometric shapes such as hexagons.
+
+## DESCRIPTION
 
 We like to think of geodesic as the shortest path to a rock-solid cloud infrastructure. The geodesic logo is a hexagon with a cube suspended at its center. The cube represents this geodesic container, which is central to everything and at the same time is what ties everything together.
 

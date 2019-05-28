@@ -14,15 +14,15 @@ Have a question? Please checkout our [Slack Community](https://slack.cloudposse.
 ## Describe the bug
 A clear and concise description of what the bug is.
 
-## To Reproduce
+## Expected behavior
+A clear and concise description of what you expected to happen.
+
+## Steps to Reproduce
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Run '....'
 3. Enter '....'
 4. See error
-
-## Expected behavior
-A clear and concise description of what you expected to happen.
 
 ## Screenshots
 If applicable, add screenshots or logs to help explain your problem.

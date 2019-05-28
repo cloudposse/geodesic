@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-Have a question? Please use [Slack Community](https://slack.cloudposse.com). 
+Have a question? Please checkout our [Slack Community](https://slack.cloudposse.com) in the `#geodesic` channel or visit our [Slack Archive](https://archive.sweetops.com/geodesic/). 
 
 [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 

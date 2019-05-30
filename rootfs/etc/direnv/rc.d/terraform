@@ -5,6 +5,16 @@
 # This should be called before `use tfenv`
 # 
 function use_terraform() {
+	local version="$1"
+
+	if [ -n "${version}" ]; then
+		local terraform_dir="/usr/local/terraform/${version}/bin/"
+		if [ -x "${terraform_dir}/terraform" ]; then
+			export PATH="${terraform_dir}:${PATH}"
+		else
+			echo -e "\nERROR: Terraform ${version} not installed. Try running \`apk add --update terraform_${version}@cloudposse\`\n"
+		fi
+	fi
 
 	# The environment mapping below is not strictly necessary. Setting the `TF_CLI_*` envs is recommended.
 	# The `TF_CLI_*` envs are handled by <https://github.com/cloudposse/tfenv>

@@ -1,6 +1,6 @@
 ansible==2.7.10
 awscli==1.16.152
-awsebcli==3.15.0
+awsebcli==3.15.2
 boto==2.49.0
 crudini==0.9
 Jinja2==2.10.1

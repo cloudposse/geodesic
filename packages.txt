@@ -28,7 +28,7 @@ gomplate@cloudposse
 goofys@cloudposse
 gosu@cloudposse
 groff
-helm@cloudposse==2.14.1-r0
+helm@cloudposse
 helmfile@cloudposse
 iputils
 jq

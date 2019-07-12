@@ -88,3 +88,21 @@ function _expand_dir_or_file() {
 		fi
 	done
 }
+
+# _cmd_exists checks if a given string would currently be interpreted by the shell as a command.
+# We use this to avoid redefining existing commands when we expect to be creating new ones.
+# usage:
+#     _cmd_exists ll || alias ll='ls -l'
+function _cmd_exists() {
+	command -v $1 >/dev/null
+}
+
+# Because there is no easy way to invert the exit status of a command for use in an if statement
+# _cmd_missing returns true if a given string would currently NOT be interpreted by the shell as a command.
+function _cmd_missing() {
+	if command -v $1 >/dev/null; then
+		return 1
+	else
+		return 0
+	fi
+}

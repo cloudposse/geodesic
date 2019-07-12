@@ -1,6 +1,5 @@
-
 function _alias_if_new() {
- _cmd_exists "$1" || alias "$1"="$2"
+	_cmd_exists "$1" || alias "$1"="$2"
 }
 
 # Setup some handy aliases
@@ -36,10 +35,8 @@ if _cmd_missing chundo; then
 	_alias_if_new kundo 'chundo kops'
 fi
 
-
 ###### END OF ALIASES #########
 unset _alias_if_new
-
 
 ##################################################################################################################
 #

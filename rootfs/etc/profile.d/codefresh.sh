@@ -11,11 +11,11 @@ function require_cfvar() {
 	# Look for ${{VARNAME}}
 	local left=$(expr index "$1" '${{')
 	local right=$(expr index "$1" '}}')
-	(( $left > 0 && $right > 0 )) || return 0
+	(($left > 0 && $right > 0)) || return 0
 
 	# Extract VARNAME
 	let left+=3
-	local var=$(expr substr "$1" $left $(( $right - $left )))
+	local var=$(expr substr "$1" $left $(($right - $left)))
 	echo Build variable \"$var\" has not been set >&2
 
 	# Look for docmentation of VARNAME on the rest of the args
@@ -28,11 +28,10 @@ function require_cfvar() {
 	# remove leading spaces
 	doc="${doc:$(expr match "$doc" '\s*')}"
 
-	(( ${#doc} > 0 )) && echo "${var}: $doc"
+	((${#doc} > 0)) && echo "${var}: $doc"
 
 	return 3
 }
-
 
 # Usage:
 #    require_cfvars <<'EOF'

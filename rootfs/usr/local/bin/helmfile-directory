@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Determine the helmfile directory to use based on the directory configuration and environment variables.
+
+if [[ -n $HELMFILE_DIR ]]; then
+  echo "$HELMFILE_DIR" && exit 0
+fi
+
+if  [[ -d /conf/${DEPLOY_REGION:-$AWS_REGION}/helmfiles ]]; then
+  echo "/conf/${DEPLOY_REGION:-$AWS_REGION}/helmfiles"
+else
+  echo '/conf/helmfiles'
+fi

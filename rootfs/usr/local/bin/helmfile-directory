@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Determine the helmfile directory to use based on the directory configuration and environment variables.
+# * If HELMFILE_DIR is set, use that.
+# * Otherwise, determine the AWS region. If DEPLOY_REGION is set, use that. Otherwise, use $AWS_REGION.
+# * If there is a region-specific helmfile directory for the region we just determined, use that.
+# * Otherwise, default to /conf/helmfiles
 
 if [[ -n $HELMFILE_DIR ]]; then
 	echo "$HELMFILE_DIR" && exit 0

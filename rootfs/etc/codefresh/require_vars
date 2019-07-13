@@ -3,7 +3,7 @@
 
 ## TO USE THIS FILE IN CODEFRESH
 #    image: cloudposse/geodesic:latest
-#    entrypoint: /etc/codefresh/require_vars
+#    entry_point: /etc/codefresh/require_vars
 #    cmd:
 #    - ${{AWS_DOCKER_REPO_HOST}} The host hame portion of the ECR Docker repo to use
 #    - ${{CF_PULL_REQUEST_NUMBER}} The PR number from GitHub, but only if this was triggered in relation to a PR

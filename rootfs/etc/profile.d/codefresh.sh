@@ -44,8 +44,9 @@ function require_cfvar() {
 # The final EOF must be at the begining of the line.
 function require_cfvars() {
 	local v
+	local status=0
 	while read v; do
-		echo "${v@Q}"
-		require_cfvar "$v"
+		require_cfvar "$v" || status=33
 	done
+	return $status
 }

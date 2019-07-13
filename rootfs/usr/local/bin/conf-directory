@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Determine the directory under /conf to use based on the directory configuration and environment variables.
+# * If HELMFILE_DIR is set, use that.
+# * Otherwise, determine the AWS region. If DEPLOY_REGION is set, use that. Otherwise, use $AWS_REGION.
+# * If there is a region-specific helmfile directory for the region we just determined, use that.
+# * Otherwise, default to /conf/helmfiles
+
+project="${1:-helmfiles}"
+project_var="${project^^}_DIR"
+
+if [[ -n ${!project_var} ]]; then
+	echo "${!project_var}" && exit 0
+fi
+
+if [[ -d /conf/${DEPLOY_REGION:-$AWS_REGION}/${project} ]]; then
+	echo "/conf/${DEPLOY_REGION:-$AWS_REGION}/${project}"
+else
+	echo "/conf/${project}"
+fi

@@ -10,7 +10,6 @@
 #    - ${{AWS_ENV_NAME}} The full name of the AWS environment to deploy to, e.g. prod.spoton.sh
 #    - ${{BASE_HOST}} The subdomain below which to start attaching new host names
 
-
 # Usage:
 #    require_cfvar '${{VARNAME}}' [documentation of the variable]
 #    require_cfvar "'${{VARNAME}}' documentation of the variable"
@@ -20,11 +19,11 @@
 # Note that the single quotes around ${{VARNAME}} are critical.
 function require_cfvar() {
 	# Look for ${{VARNAME}} and extract VARNAME
-  local var=$(expr match "$1" '[[:blank:]]*\${{\([^}]*\)}}')
-  ((${#var} > 0)) || return 0
+	local var=$(expr match "$1" '[[:blank:]]*\${{\([^}]*\)}}')
+	((${#var} > 0)) || return 0
 
-  local separator="---------------------------------------"
-  echo "$separator"
+	local separator="---------------------------------------"
+	echo "$separator"
 	red Build variable \"$var\" has not been set >&2
 
 	# Look for docmentation of VARNAME on the rest of the args
@@ -38,8 +37,8 @@ function require_cfvar() {
 
 	((${#doc} > 0)) && yellow "${var}: $doc"
 
-  echo "$separator"
-  echo
+	echo "$separator"
+	echo
 	return 31
 }
 
@@ -78,11 +77,11 @@ if ((${#@} == 0)); then
 	require_cfvars || exit 34
 elif [[ $1 =~ ^(/bin/)?(ba)?sh$ ]]; then
 	red REQUIRE VARS: First argument is a shell "($1)". CMD must be specified as JSON array to avoid this.
-  i=1
-  for arg in "$@"; do
-    echo "arg $i: ${arg@Q}"
-    let i++
-  done
+	i=1
+	for arg in "$@"; do
+		echo "arg $i: ${arg@Q}"
+		let i++
+	done
 
 	red REQUIRE VARS: Invalid CMD, exiting.
 	exit 99

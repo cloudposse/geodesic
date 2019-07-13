@@ -47,6 +47,7 @@ steps:
     registry: dockerhub
     tags:
       - "${{CF_REVISION}}"
+      - "${{CF_SHORT_REVISION}}"
 
   push_image_branch:
     title: Push image with branch tag

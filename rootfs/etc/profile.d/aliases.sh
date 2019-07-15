@@ -1,30 +1,42 @@
+function _alias_if_new() {
+	_cmd_exists "$1" || alias "$1"="$2"
+}
+
 # Setup some handy aliases
-alias kube-system='kubectl --namespace=kube-system'
-alias default='kubectl --namespace=default'
-alias telnet='busybox-extras telnet'
-alias ll='ls -l'
+_alias_if_new kube-system 'kubectl --namespace=kube-system'
+_alias_if_new default 'kubectl --namespace=default'
+_alias_if_new telnet 'busybox-extras telnet'
+_alias_if_new ll 'ls -l'
 
 # taboff turns off tab auto-completion, which is practically required when pasting code with tabs into the terminal
-alias taboff='bind '\''set disable-completion on'\'''
+_alias_if_new taboff 'bind '\''set disable-completion on'\'''
 # tabon turn on tab auto-completion
-alias tabon='bind '\''set disable-completion off'\'''
+_alias_if_new tabon 'bind '\''set disable-completion off'\'''
 
-# Run chamber to put secrets for given service(s) in the environment
-function chdo() {
-	source <(chamber export -f dotenv "$@" | sed "s/^/export /" | perl -pe s/\\\\n/\\n/g)
-}
-
-# Remove secrets chamber put in the environment for given service(s)
-function chundo() {
-	source <(chamber export -f dotenv "$@" | cut -f 1 -d= | sed "s/^/unset /")
-}
-
-# Import kops secrets into the environment
-alias kudo='chdo kops'
-# Remove kops secrets from the environment
-alias kundo='chundo kops'
 # Use kops to create kubecfg (requires kops secrets in environment, e.g. kudo)
-alias kexp='kops export kubecfg'
+_alias_if_new kexp 'kops export kubecfg'
+
+if _cmd_missing chdo; then
+	# Run chamber to put secrets for given service(s) in the environment
+	function chdo() {
+		source <(chamber export -f dotenv "$@" | sed "s/^/export /" | perl -pe s/\\\\n/\\n/g)
+	}
+	# Import kops secrets into the environment
+	_alias_if_new kudo 'chdo kops'
+fi
+
+if _cmd_missing chundo; then
+	# Remove secrets chamber put in the environment for given service(s)
+	function chundo() {
+		source <(chamber export -f dotenv "$@" | cut -f 1 -d= | sed "s/^/unset /")
+	}
+
+	# Remove kops secrets from the environment
+	_alias_if_new kundo 'chundo kops'
+fi
+
+###### END OF ALIASES #########
+unset _alias_if_new
 
 ##################################################################################################################
 #

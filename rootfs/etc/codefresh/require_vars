@@ -1,0 +1,102 @@
+#!/bin/bash
+# Tools for use specifically within the Codefresh CI/CD pipeline
+
+## TO USE THIS FILE IN CODEFRESH
+#    image: cloudposse/geodesic:latest
+#    entry_point: /etc/codefresh/require_vars
+#    cmd:
+#    - ${{AWS_DOCKER_REPO_HOST}} The host hame portion of the ECR Docker repo to use
+#    - ${{CF_PULL_REQUEST_NUMBER}} The PR number from GitHub, but only if this was triggered in relation to a PR
+#    - ${{AWS_ENV_NAME}} The full name of the AWS environment to deploy to, e.g. prod.spoton.sh
+#    - ${{BASE_HOST}} The subdomain below which to start attaching new host names
+
+# Usage:
+#    require_cfvar '${{VARNAME}}' [documentation of the variable]
+#    require_cfvar "'${{VARNAME}}' documentation of the variable"
+#
+# Returns true (exit 0) if ${{VARNAME}} has been replaced with something else, indicating it has been set.
+# Returns false and echos "VARNAME: documentation of the variable" if ${{VARNAME}} has not been set.
+# Note that the single quotes around ${{VARNAME}} are critical.
+function require_cfvar() {
+	# Look for ${{VARNAME}} and extract VARNAME
+	local var=$(expr match "$1" '[[:blank:]]*\${{\([^}]*\)}}')
+	((${#var} > 0)) || return 0
+
+	local separator="---------------------------------------"
+	echo "$separator"
+	red Build variable \"$var\" has not been set >&2
+
+	# Look for docmentation of VARNAME on the rest of the args
+	# First, look for trailing characters on $1 and collect them
+	local rem1=$(expr match "$1" '[^}]*}}[[:blank:]]*\(.*\)')
+
+	shift
+	local doc="$rem1 $*"
+	# remove leading spaces
+	doc=$(expr match "$doc" '[[:blank:]]*\([^[:blank:]].*\)')
+
+	((${#doc} > 0)) && yellow "${var}: $doc"
+
+	echo "$separator"
+	echo
+	return 31
+}
+
+# Usage:
+#    require_cfvars <<'EOF'
+#    ${{VAR_ONE}} documentation of VAR_ONE
+#    ${{VAR_TWO}} documentation of VAR_TWO
+#    ...
+#    EOF
+# Checks each variable with require_cfvar.
+# Variables must be at the start of the line, one per line, but do not need to be quoted.
+# The final EOF must be at the begining of the line.
+function require_cfvars() {
+	local var
+	local status=0
+	while read var; do
+		require_cfvar "$var" || status=32
+	done
+	return $status
+}
+
+function red() {
+	echo "$(tput setaf 1)$*$(tput sgr0)"
+}
+
+function yellow() {
+	echo "$(tput setaf 3)$*$(tput sgr0)"
+}
+
+echo "REQUIRE VARS: checking for presence of required variables"
+
+[[ $TERM == "dumb" ]] && export TERM=ansi
+
+if ((${#@} == 0)); then
+	## No arguments, read from stdin
+	require_cfvars || exit 34
+elif [[ $1 =~ ^(/bin/)?(ba)?sh$ ]]; then
+	red REQUIRE VARS: First argument is a shell "($1)". CMD must be specified as JSON array to avoid this.
+	i=1
+	for arg in "$@"; do
+		echo "arg $i: ${arg@Q}"
+		let i++
+	done
+
+	red REQUIRE VARS: Invalid CMD, exiting.
+	exit 99
+else
+	status=0
+	bad=0
+	for var in "$@"; do
+		require_cfvar "$var" || {
+			status=33
+			let bad++
+		}
+	done
+	echo "REQUIRE VARS: checked ${#@} variables"
+	echo "REQUIRE VARS: missing ${bad} variables"
+	exit $status
+fi
+
+exit 0

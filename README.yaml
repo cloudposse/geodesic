@@ -18,6 +18,9 @@ badges:
   - name: "Slack Community"
     image: "https://slack.cloudposse.com/badge.svg"
     url: "https://slack.cloudposse.com"
+  - name: "Slack Archive"
+    image: "https://img.shields.io/badge/slack-archive-blue.svg"
+    url: "https://archive.sweetops.com/geodesic"
 
 # Screenshots
 screenshots:

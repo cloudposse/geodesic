@@ -47,8 +47,8 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 USER root
 
 # install the cloudposse alpine repository
-add https://apk.cloudposse.com/ops@cloudposse.com.rsa.pub /etc/apk/keys/
-run echo "@cloudposse https://apk.cloudposse.com/3.9/vendor" >> /etc/apk/repositories
+ADD https://apk.cloudposse.com/ops@cloudposse.com.rsa.pub /etc/apk/keys/
+RUN echo "@cloudposse https://apk.cloudposse.com/3.10/vendor" >> /etc/apk/repositories
 
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \

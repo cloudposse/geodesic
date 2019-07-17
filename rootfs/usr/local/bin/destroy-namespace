@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if ((${#@} != 1)); then
+    echo Deletes a Kubernetes namespace and everything in it or managed by it,
+	echo first using helm to delete the things it can delete.
+	echo
+	echo Usage:
+	echo '   destroy-namespace namespace'
+	echo
+	exit 1
+fi
+
+helm list --namespace "${1}" --short --all | xargs -r helm delete --purge
+kubectl delete namespace "${1}" --ignore-not-found --cascade=true

@@ -82,7 +82,7 @@ function _expand_dir_or_file() {
 
 	for item in "${dir}/$resource" "${dir}/${resource}.d"/*; do
 		if [[ -f $item ]]; then
-			[[ $item =~ $exclude ]] && continue
+			[[ $item =~ $exclude ]] && ([[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: excluding "$item" || true) && continue
 			expand_list+=($item)
 			[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: found "$item"
 		fi

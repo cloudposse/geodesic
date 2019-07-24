@@ -57,3 +57,25 @@ tasks:
           kubectl -n {{ get "namespace" }} delete deployment tiller-deploy
           kubectl delete clusterrolebinding tiller --ignore-not-found
           kubectl -n {{ get "namespace" }} delete serviceaccount tiller --ignore-not-found
+  namespace:
+    # namespace is a work in progress. For now, use /usr/local/bin/annotate-namespace and destroy-namespace instead
+    description: "Commands that operate on a Kubernetes namespace"
+    tasks:
+      annotate:
+        description: "Annotate a Kubernetes namespace, creating it if needed"
+        parameters:
+          - name: namespace
+            description: "Namespace to annotate"
+            type: string
+            required: true
+          - name: annotation
+            description: "Annotation to add"
+            type: string
+            required: true
+        script:
+        - *exit_on_errors
+        - |
+          kubectl get namespace {{ get "namespace" }} >/dev/null 2>&1 || kubectl create namespace {{ get "namespace" }}
+          kubectl annotate --overwrite namespace {{ get "namespace" }} {{ get "annotation" }}
+          echo Annotated namespace {{ get "namespace" }} with annotation \"{{ get "annotation" }}\"
+

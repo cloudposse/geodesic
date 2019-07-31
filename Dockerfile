@@ -35,7 +35,7 @@ RUN make dist
 #
 # Geodesic base image
 #
-FROM alpine:3.9.3
+FROM alpine:3.10.0
 
 ENV BANNER "geodesic"
 
@@ -46,9 +46,9 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 # Install all packages as root
 USER root
 
-# Install the cloudposse alpine repository
+# install the cloudposse alpine repository
 ADD https://apk.cloudposse.com/ops@cloudposse.com.rsa.pub /etc/apk/keys/
-RUN echo "@cloudposse https://apk.cloudposse.com/3.9/vendor" >> /etc/apk/repositories
+RUN echo "@cloudposse https://apk.cloudposse.com/3.10/vendor" >> /etc/apk/repositories
 
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \

@@ -18,7 +18,7 @@ FROM google/cloud-sdk:244.0.0-alpine as google-cloud-sdk
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:0.90.0 as packages
+FROM cloudposse/packages:0.114.1 as packages
 
 WORKDIR /packages
 

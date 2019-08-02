@@ -22,7 +22,8 @@ fuse
 fzf@cloudposse
 fzf-bash-completion
 gettext
-git
+# Get git 2.20.1 from the Alpine 3.9 package repo
+git@main-3.9=2.20.1-r0
 github-commenter@cloudposse
 gomplate@cloudposse
 goofys@cloudposse
@@ -43,11 +44,13 @@ libltdl
 make
 man-db@testing
 musl-dev
+mysql-client
 ncurses
 oath-toolkit-oathtool@community
 openssh-client
 openssl
 pandoc@cloudposse
+postgresql-client
 pwgen
 python
 rakkess@cloudposse

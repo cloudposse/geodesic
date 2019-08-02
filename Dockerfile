@@ -1,7 +1,7 @@
 #
 # Python Dependencies
 #
-FROM alpine:3.9.3 as python
+FROM alpine:3.10.0 as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
@@ -54,6 +54,9 @@ RUN echo "@cloudposse https://apk.cloudposse.com/3.10/vendor" >> /etc/apk/reposi
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
     echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories && \
     echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories
+
+# Temporarily(?) downgrade `git` because version 2.22 breaks the `helm-git` plugin
+RUN echo @main-3.9 https://alpine.global.ssl.fastly.net/alpine/v3.9/main >> /etc/apk/repositories
 
 # Install alpine package manifest
 COPY packages.txt /etc/apk/

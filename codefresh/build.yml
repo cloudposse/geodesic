@@ -14,7 +14,7 @@ steps:
     stage: Prepare
     description: "Initialize"
     repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
-    git: CF-default
+    git: github
     revision: ${{CF_REVISION}}
 
   build_image:

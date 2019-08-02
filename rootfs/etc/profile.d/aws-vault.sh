@@ -9,7 +9,8 @@ function _validate_aws_vault_server() {
 	# Use the same test aws-vault uses to see if a server is already running
 	# https://github.com/99designs/aws-vault/blob/4cf00453d011c4bdacb3801e05b9a823acc69ee9/server/server.go#L80-L83
 	# but add longer timeout to guard against other kinds of networking issues
-	instance=$(timeout 2 curl --connect-timeout 0.01 -s -f http://169.254.169.254/latest/meta-data/instance-id/)
+	# Local aws-vault server can be slow if another client is accessing it.
+	instance=$(timeout 3 curl --connect-timeout 0.1 -s -f http://169.254.169.254/latest/meta-data/instance-id/)
 	curl_exit_code=$?
 
 	if [[ $instance == "aws-vault" ]]; then

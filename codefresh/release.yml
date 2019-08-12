@@ -30,6 +30,8 @@ steps:
       condition:
         all:
           executeForTag: "'${{CF_RELEASE_TAG}}' != ''"
+          tag_set: 'includes("${{CF_RELEASE_TAG}}", "CF_RELEASE_TAG") == false'
+
 
   push_image_tag_latest:
     title: Push image with latest TAG
@@ -43,3 +45,4 @@ steps:
       condition:
         all:
           executeForTag: "'${{CF_RELEASE_TAG}}' != ''"
+          tag_set: 'includes("${{CF_RELEASE_TAG}}", "CF_RELEASE_TAG") == false'

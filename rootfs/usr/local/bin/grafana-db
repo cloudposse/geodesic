@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 #  ## import dashboards for Grafana
 
 # Requires
@@ -10,20 +10,28 @@
 #
 #    URL is URL to (raw) ConfigMap or ConfigMapList containing Grafana dashboards as for Prometheus Operator
 #    gnetId is ID (typically a 4 digit number) for the dashaboard on Grafana.com
+#
+# Example:
+#    # Load the CoreOS standard Kubernetes Grafana dashboards
+#    grafana-db https://raw.githubusercontent.com/coreos/kube-prometheus/release-0.1/manifests/grafana-dashboardDefinitions.yaml
+#
+#    # Load the Kubernetes Capacity dashboard with gnetId 5228 from Grafana.com
+#    grafana-db 5228
 
 ## TODO
-## Allow uploading a local file. Main this is determining, detecting, and parsing format of file
-## Remove absolute times in .time
-##   Bonus points: calculate the time interval in .time and replace with relative time interval of same length
-##                 round to standard relative time choice
-## Better error handling
-## Optional overwrite flag
-## Allow host and api_key on command line
-## Optional deletion of UID
-## Optional additional input specifications
-##   Ensure new definitions override defaults
-##   Optional suppression of default input specifications
-## Allow the ability to upload dashboards to a designated folder
+## - Allow uploading a local file. Main thing is determining, detecting, and parsing format of file
+## - Remove absolute times in .time
+##   - Bonus points:
+##     - calculate the time interval in .time and replace with relative time interval of same length
+##       - round to standard relative time choice
+## - Better error handling
+## - Optional overwrite flag
+## - Allow host and api_key on command line
+## - Optional deletion of UID
+## - Optional additional input specifications
+##   - Ensure new definitions override defaults
+##   - Optional suppression of default input specifications
+## - Allow the ability to upload dashboards to a designated folder
 
 function download() {
 	local grafana_com="https://grafana.com/api/dashboards"
@@ -155,6 +163,14 @@ Usage:
   URL is URL to (raw) ConfigMap or ConfigMapList containing Grafana dashboards
   as for Prometheus Operator gnetId is ID (typically a 4 digit number) for the
   dashaboard on Grafana.com
+
+Example:
+  # Load the CoreOS standard Kubernetes Grafana dashboards
+  grafana-db https://raw.githubusercontent.com/coreos/kube-prometheus/release-0.1/manifests/grafana-dashboardDefinitions.yaml
+
+  # Load the Kubernetes Capacity dashboard with gnetId 5228 from Grafana.com
+  grafana-db 5228
+
 EOF
 fi
 

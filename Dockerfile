@@ -3,17 +3,26 @@
 #
 FROM alpine:3.10.1 as python
 
-# Package pruning
-#   python and python-dev: replace with python3 and python3-dev
-#   py-pip: only needed for python 2
-#   py-virtualenv: replaced with built-in venv in Python 3
+## Sadly, not ready for Python 3 yet. Crudini and gcloud SDK not updated.
+## When we are ready, changes below ready to go
+## Package pruning
+##   python and python-dev: replace with python3 and python3-dev
+##   py-pip: only needed for python 2
+##   py-virtualenv: replaced with built-in venv in Python 3
+#RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
+#RUN apk add python3 python3-dev libffi-dev gcc linux-headers musl-dev openssl-dev make
+#
+#COPY requirements.txt /requirements.txt
+#
+#RUN python3 -m pip install --upgrade pip setuptools wheel && \
+#    pip install -r /requirements.txt --install-option="--prefix=/dist" --no-build-isolation
+
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
-RUN apk add python3 python3-dev libffi-dev gcc linux-headers musl-dev openssl-dev make
+RUN apk add python python-dev py-pip py-virtualenv libffi-dev gcc linux-headers musl-dev openssl-dev make
 
 COPY requirements.txt /requirements.txt
 
-RUN python3 -m pip install --upgrade pip setuptools wheel && \
-    pip install -r /requirements.txt --install-option="--prefix=/dist" --no-build-isolation
+RUN pip install -r /requirements.txt --install-option="--prefix=/dist" --no-build-isolation
 
 #
 # Google Cloud SDK
@@ -99,8 +108,6 @@ ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
 
 COPY --from=google-cloud-sdk /google-cloud-sdk/ /usr/local/google-cloud-sdk/
 
-# Until Google supports Python3, we need to install Python 2 for them
-RUN apk add python
 RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d/gcloud.sh && \
     ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \

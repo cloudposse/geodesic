@@ -1,3 +1,4 @@
+#!/bin/bash 
 #  ## import dashboards for Grafana
 
 # Requires

@@ -25,41 +25,40 @@
 ## Allow the ability to upload dashboards to a designated folder
 
 function download() {
-  local grafana_com="https://grafana.com/api/dashboards"
-  local tmpdir=$(mktemp -d)
-  trap "rm -rf $tmpdir" RETURN EXIT
+	local grafana_com="https://grafana.com/api/dashboards"
+	local tmpdir=$(mktemp -d)
+	trap "rm -rf $tmpdir" RETURN EXIT
 
-  local count=0
-  local files=()
-  local url="$1"
-  # Allow Grafana.com dashbobord to be specified simply by its gnetId, typically 4 digits
-  [[ "$url" =~ ^[0-9]*$ ]] && url="${grafana_com}/${url}"
+	local count=0
+	local files=()
+	local url="$1"
+	# Allow Grafana.com dashbobord to be specified simply by its gnetId, typically 4 digits
+	[[ "$url" =~ ^[0-9]*$ ]] && url="${grafana_com}/${url}"
 
-  while IFS= read -r line
-  do
-    files+=("${tmpdir}/${count}.json")
-    printf "%s" "$line" > "${files[-1]}"
-    ((count+=1))
-  done < <(curl -sSLf "$url" | parse_dashboard_definition $1)
+	while IFS= read -r line; do
+		files+=("${tmpdir}/${count}.json")
+		printf "%s" "$line" >"${files[-1]}"
+		((count += 1))
+	done < <(curl -sSLf "$url" | parse_dashboard_definition $1)
 
-  if (( $count == 0)); then
-    red "Failed to find a dashboard at $url"
-    exit 1
-  elif (($count > 49)); then
-    red "Download created $count dashboards, which is too many. Probably parsed the file incorrectly. Aborting."
-    exit 99
-  else
-    green Downloaded $count dashboards from "${url}"
-  fi
-  for file in "${files[@]}"; do
-    upload "$file"
-    echo
-  done
+	if (($count == 0)); then
+		red "Failed to find a dashboard at $url"
+		exit 1
+	elif (($count > 49)); then
+		red "Download created $count dashboards, which is too many. Probably parsed the file incorrectly. Aborting."
+		exit 99
+	else
+		green Downloaded $count dashboards from "${url}"
+	fi
+	for file in "${files[@]}"; do
+		upload "$file"
+		echo
+	done
 }
 
 function upload() {
-  local host="${GRAFANA_ROOT_URL:-$PROMETHEUS_GRAFANA_ROOT_URL}"
-  local ds_inputs='[
+	local host="${GRAFANA_ROOT_URL:-$PROMETHEUS_GRAFANA_ROOT_URL}"
+	local ds_inputs='[
     {
       "name": "DS_PROMETHEUS",
       "type": "datasource",
@@ -80,51 +79,82 @@ function upload() {
     }
   ]'
 
-  local title=$(jq <$1 .title)
-  if (( $(jq < $1 '.__inputs|length') == 0 )); then
-    # Upload a real dashboard, what could be in a configmap
-    jq <$1 '.editable=true | {dashboard: ., overwrite: false}' | \
-      curl -qs -w "%{stderr}Upload of dashboard $title fished with status code %{http_code}\n" \
-      -X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
-      "$host/api/dashboards/db" | (parse_grafana_response 2> /dev/null || :)
-  else
-    # Import a portable dashboard, as from Grafana.com
-    jq <$1 --argjson inputs "$ds_inputs" '.editable = true | {dashboard: ., inputs: $inputs, overwrite: false}' | \
-      curl -qs -w "%{stderr}Upload of dashboard $title fished with status code %{http_code}\n" \
-      -X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
-      "$host/api/dashboards/import" |  (parse_grafana_response 2> /dev/null || :)
-  fi
+	local title=$(jq <$1 .title)
+	if (($(jq <$1 '.__inputs|length') == 0)); then
+		# Upload a real dashboard, what could be in a configmap
+		jq <$1 '.editable=true | {dashboard: ., overwrite: false}' |
+			curl -qs -w "%{stderr}Upload of dashboard $title fished with status code %{http_code}\n" \
+				-X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
+				"$host/api/dashboards/db" | (parse_grafana_response 2>/dev/null || :)
+	else
+		# Import a portable dashboard, as from Grafana.com
+		jq <$1 --argjson inputs "$ds_inputs" '.editable = true | {dashboard: ., inputs: $inputs, overwrite: false}' |
+			curl -qs -w "%{stderr}Upload of dashboard $title fished with status code %{http_code}\n" \
+				-X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
+				"$host/api/dashboards/import" | (parse_grafana_response 2>/dev/null || :)
+	fi
 
-  #  Status codes from https://grafana.com/docs/http_api/dashboard/#create-update-dashboard
-  #  Status Codes:
-  #
-  #  200 – Created
-  #  400 – Errors (invalid json, missing or invalid fields, etc)
-  #  401 – Unauthorized
-  #  403 – Access denied
-  #  412 – Precondition failed
-  #  The 412 status code is used for explaining that you cannot create the dashboard and why. There can be different reasons for this:
-  #
-  #  The dashboard has been changed by someone else, status=version-mismatch
-  #  A dashboard with the same name in the folder already exists, status=name-exists
-  #  A dashboard with the same uid already exists, status=name-exists
-  #  The dashboard belongs to plugin <plugin title>, status=plugin-dashboard
-  #
-  # Status 500 usually comes from there being something wrong with the dashboard. Check the Grafana logs.
-  # If importing from Grafana.com, it could be that there are variables that need to be set that
-  # this script does not set.
+	#  Status codes from https://grafana.com/docs/http_api/dashboard/#create-update-dashboard
+	#  Status Codes:
+	#
+	#  200 – Created
+	#  400 – Errors (invalid json, missing or invalid fields, etc)
+	#  401 – Unauthorized
+	#  403 – Access denied
+	#  412 – Precondition failed
+	#  The 412 status code is used for explaining that you cannot create the dashboard and why. There can be different reasons for this:
+	#
+	#  The dashboard has been changed by someone else, status=version-mismatch
+	#  A dashboard with the same name in the folder already exists, status=name-exists
+	#  A dashboard with the same uid already exists, status=name-exists
+	#  The dashboard belongs to plugin <plugin title>, status=plugin-dashboard
+	#
+	# Status 500 usually comes from there being something wrong with the dashboard. Check the Grafana logs.
+	# If importing from Grafana.com, it could be that there are variables that need to be set that
+	# this script does not set.
 
 }
 
 function parse_dashboard_definition() {
-  if [[ $1 =~ .json$ ]]; then
-    # Compact the JSON to a single line
-    jq -rc
-  else
-    yq r -j '-d*' - | jq -rc '.. | if .data? then (.data | to_entries | .[].value | fromjson) elif .json? then .json else empty end'
-  fi
+	if [[ $1 =~ .json$ ]]; then
+		# Compact the JSON to a single line
+		jq -rc
+	else
+		yq r -j '-d*' - | jq -rc '.. | if .data? then (.data | to_entries | .[].value | fromjson) elif .json? then .json else empty end'
+	fi
 }
 
 function parse_grafana_response() {
-   jq -r 'if .status? then "Grafana reports \(.status)\(if .message? then ": \(.message)" else empty end)" else empty end'
+	jq -r 'if .status? then "Grafana reports \(.status)\(if .message? then ": \(.message)" else empty end)" else empty end'
 }
+
+function red() {
+	echo "$(tput setaf 1)$*$(tput sgr0)"
+}
+
+function green() {
+	echo "$(tput setaf 2)$*$(tput sgr0)"
+}
+
+if [[ -z "$GRAFANA_API_KEY" ]]; then
+	red GRAFANA_API_KEY must be set to a valid API key for accessing Grafana
+	exit 3
+fi
+
+if [[ -z "${GRAFANA_ROOT_URL:-$PROMETHEUS_GRAFANA_ROOT_URL}" ]]; then
+	red either GRAFANA_ROOT_URL or PROMETHEUS_GRAFANA_ROOT_URL must be set to Grafana hostname
+	exit 3
+fi
+
+if (($# != 1)); then
+	cat <<EOF
+Usage:
+  grafana-db <URL or gnetId>
+
+  URL is URL to (raw) ConfigMap or ConfigMapList containing Grafana dashboards
+  as for Prometheus Operator gnetId is ID (typically a 4 digit number) for the
+  dashaboard on Grafana.com
+EOF
+fi
+
+download "$1"

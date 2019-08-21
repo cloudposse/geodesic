@@ -53,6 +53,7 @@ pandoc@cloudposse
 postgresql-client
 pwgen
 python
+python3
 rakkess@cloudposse
 rbac-lookup@cloudposse
 retry@cloudposse

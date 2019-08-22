@@ -32,7 +32,7 @@ function use_terraform() {
 		pwd|*)
 			# Use full directory path after /conf
 			# (default)
-			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-${PWD#*/conf/}}
+			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-${PWD##*/conf/}}
 			;;
 	esac
 	

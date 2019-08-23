@@ -2,19 +2,22 @@ docker:
 - Dockerfile
 
 direnv:
-- rootfs/etc/direnv/*
+- rootfs/etc/direnv/**
 
 terraform:
 - rootfs/etc/direnv/rc.d/terraform
 
 scripts:
-- rootfs/usr/local/bin/*
-- rootfs/usr/bin/*
+- rootfs/usr/local/bin/**
+- rootfs/usr/bin/**
 
 packages:
 - packages.txt
 - requirements.txt
 
 codefresh:
-- codefresh/*
-- rootfs/etc/codefresh/*
+- codefresh/**
+- rootfs/etc/codefresh/**
+
+github:
+- .github/**

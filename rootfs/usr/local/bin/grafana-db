@@ -5,11 +5,40 @@
 #  GRAFANA_API_KEY: api key authorizing "edit" on dashboards
 #  PROMETHEUS_GRAFANA_ROOT_URL or GRAFANA_ROOT_URL: URL to which '/api/dashboards...' will be appended
 #
+
+function usage() {
+	cat <<EOF
+Usage:
+  grafana-db <URL, gnetId, or file>
+
+  URL is URL to (raw) ConfigMap or ConfigMapList containing Grafana dashboards
+  as for Prometheus Operator gnetId is ID (typically a 4 digit number) for the
+  dashaboard on Grafana.com
+  file is a local file. It must have the .json extension if contains only a JSON dashboard
+
+Example:
+  # Load the CoreOS standard Kubernetes Grafana dashboards
+  grafana-db https://raw.githubusercontent.com/coreos/kube-prometheus/release-0.1/manifests/grafana-dashboardDefinitions.yaml
+
+  # Load the Kubernetes Capacity dashboard with gnetId 5228 from Grafana.com
+  grafana-db 5228
+
+  # Load a dashboard from a local file containing a dashboard in a Grafana ConfigMap
+  grafana-db dashboard.yaml
+
+  # Load a dashboard from a local file downloaded from your local Grafana.
+  # Note: If you want to create a different instance of the dashboard in the Grafana instance you downloaded
+  # the dashboard from, you first need to change the "uid" and "title" fields in the file.
+  grafana-db dashboard.json
+
+EOF
+}
 # Usage:
-#    grafana-db <URL or gnetId>
+#    grafana-db <URL, gnetId, or file>
 #
 #    URL is URL to (raw) ConfigMap or ConfigMapList containing Grafana dashboards as for Prometheus Operator
 #    gnetId is ID (typically a 4 digit number) for the dashaboard on Grafana.com
+#    file is a local file. It must have the .json extension if contains only a JSON dashboard
 #
 # Example:
 #    # Load the CoreOS standard Kubernetes Grafana dashboards
@@ -17,9 +46,17 @@
 #
 #    # Load the Kubernetes Capacity dashboard with gnetId 5228 from Grafana.com
 #    grafana-db 5228
+#
+#    # Load a dashboard from a local file containing a dashboard in a Grafana ConfigMap
+#    grafana-db dashboard.yaml
+#
+#    # Load a dashboard from a local file downloaded from your local Grafana.
+#    # Note: you may first need to change the "uid" field in the file.
+#    grafana-db dashboard.json
 
-## TODO
+## DONE
 ## - Allow uploading a local file. Main thing is determining, detecting, and parsing format of file
+## TODO
 ## - Remove absolute times in .time
 ##   - Bonus points:
 ##     - calculate the time interval in .time and replace with relative time interval of same length
@@ -42,22 +79,30 @@ function download() {
 	local files=()
 	local url="$1"
 	# Allow Grafana.com dashbobord to be specified simply by its gnetId, typically 4 digits
-	[[ "$url" =~ ^[0-9]*$ ]] && url="${grafana_com}/${url}"
+	if [[ "$url" =~ ^[0-9]*$ ]]; then
+		url="${grafana_com}/${url}"
+	elif [[ ! "$url" =~ ~https? ]]; then
+		if [[ "$url" =~ ^/ ]]; then
+			url="file://$url"
+		else
+			url="file://${PWD}/${url}"
+		fi
+	fi
 
 	while IFS= read -r line; do
 		files+=("${tmpdir}/${count}.json")
 		printf "%s" "$line" >"${files[-1]}"
 		((count += 1))
-	done < <(curl -sSLf "$url" | parse_dashboard_definition $1)
+	done < <(curl -sSLf "$url" | parse_dashboard_definition "$1")
 
 	if (($count == 0)); then
-		red "Failed to find a dashboard at $url"
+		red "! Failed to find a dashboard at $url" 1>&2
 		exit 1
 	elif (($count > 49)); then
-		red "Download created $count dashboards, which is too many. Probably parsed the file incorrectly. Aborting."
+		red "! Download created $count dashboards, which is too many. Probably parsed the file incorrectly. Aborting." 1>&2
 		exit 99
 	else
-		green Downloaded $count dashboards from "${url}"
+		green "* Downloaded $count dashboards from ${url}" 1>&2
 	fi
 	for file in "${files[@]}"; do
 		upload "$file"
@@ -88,17 +133,18 @@ function upload() {
     }
   ]'
 
-	local title=$(jq <$1 .title)
-	if (($(jq <$1 '.__inputs|length') == 0)); then
+	local title=$(jq <"$1" .title)
+	green "* Starting upload of dashboard titled ${title}" 1>&2
+	if (($(jq <"$1" 'if .__inputs? then (.__inputs|length) else 0 end') == 0)); then
 		# Upload a real dashboard, what could be in a configmap
-		jq <$1 '.editable=true | {dashboard: ., overwrite: false}' |
-			curl -qs -w "%{stderr}Upload of dashboard $title fished with status code %{http_code}\n" \
+		jq <"$1" '.editable=true | {dashboard: ., overwrite: false}' |
+			curl -qs -w "%{stderr}* Upload of dashboard $title finished with status code %{http_code}\n" \
 				-X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
 				"$host/api/dashboards/db" | (parse_grafana_response 2>/dev/null || :)
 	else
 		# Import a portable dashboard, as from Grafana.com
-		jq <$1 --argjson inputs "$ds_inputs" '.editable = true | {dashboard: ., inputs: $inputs, overwrite: false}' |
-			curl -qs -w "%{stderr}Upload of dashboard $title fished with status code %{http_code}\n" \
+		jq <"$1" --argjson inputs "$ds_inputs" '.editable = true | {dashboard: ., inputs: $inputs, overwrite: false}' |
+			curl -qs -w "%{stderr}* Upload of dashboard $title finished with status code %{http_code}\n" \
 				-X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
 				"$host/api/dashboards/import" | (parse_grafana_response 2>/dev/null || :)
 	fi
@@ -125,7 +171,7 @@ function upload() {
 }
 
 function parse_dashboard_definition() {
-	if [[ $1 =~ .json$ ]]; then
+	if [[ "$1" =~ .json$ ]]; then
 		# Compact the JSON to a single line
 		jq -rc
 	else
@@ -134,7 +180,8 @@ function parse_dashboard_definition() {
 }
 
 function parse_grafana_response() {
-	jq -r 'if .status? then "Grafana reports \(.status)\(if .message? then ": \(.message)" else empty end)" else empty end'
+	jq -r '"* " + if .status? then "Grafana reports \(.status)\(if .message? then ": \(.message)" else empty end)"
+	 else if .message? then "Grafana says: \(.message)" else empty end end'
 }
 
 function red() {
@@ -156,22 +203,7 @@ if [[ -z "${GRAFANA_ROOT_URL:-$PROMETHEUS_GRAFANA_ROOT_URL}" ]]; then
 fi
 
 if (($# != 1)); then
-	cat <<EOF
-Usage:
-  grafana-db <URL or gnetId>
-
-  URL is URL to (raw) ConfigMap or ConfigMapList containing Grafana dashboards
-  as for Prometheus Operator gnetId is ID (typically a 4 digit number) for the
-  dashaboard on Grafana.com
-
-Example:
-  # Load the CoreOS standard Kubernetes Grafana dashboards
-  grafana-db https://raw.githubusercontent.com/coreos/kube-prometheus/release-0.1/manifests/grafana-dashboardDefinitions.yaml
-
-  # Load the Kubernetes Capacity dashboard with gnetId 5228 from Grafana.com
-  grafana-db 5228
-
-EOF
+	usage
+else
+	download "$1"
 fi
-
-download "$1"

@@ -81,7 +81,7 @@ function download() {
 	# Allow Grafana.com dashbobord to be specified simply by its gnetId, typically 4 digits
 	if [[ "$url" =~ ^[0-9]*$ ]]; then
 		url="${grafana_com}/${url}"
-	elif [[ ! "$url" =~ ~https? ]]; then
+	elif [[ ! "$url" =~ ^https? ]]; then
 		if [[ "$url" =~ ^/ ]]; then
 			url="file://$url"
 		else

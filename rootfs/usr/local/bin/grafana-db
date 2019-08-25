@@ -7,7 +7,7 @@
 #
 
 function usage() {
-  cat <<EOF
+	cat <<EOF
 Usage:
   grafana-db <URL, gnetId, or file>
 
@@ -73,7 +73,7 @@ EOF
 function download() {
 	local grafana_com="https://grafana.com/api/dashboards"
 	local tmpdir=$(mktemp -d)
-  trap "rm -rf $tmpdir" RETURN EXIT
+	trap "rm -rf $tmpdir" RETURN EXIT
 
 	local count=0
 	local files=()
@@ -203,7 +203,7 @@ if [[ -z "${GRAFANA_ROOT_URL:-$PROMETHEUS_GRAFANA_ROOT_URL}" ]]; then
 fi
 
 if (($# != 1)); then
-  usage
+	usage
 else
 	download "$1"
 fi

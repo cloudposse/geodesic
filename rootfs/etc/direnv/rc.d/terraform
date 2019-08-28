@@ -32,7 +32,7 @@ function use_terraform() {
 		pwd|*)
 			# Use full directory path after /conf
 			# (default)
-			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-$(pwd | cut -d/ -f3-)}
+			export TF_BUCKET_PREFIX=${TF_BUCKET_PREFIX:-${PWD##*/conf/}}
 			;;
 	esac
 	
@@ -42,13 +42,11 @@ function use_terraform() {
 	fi
 	
 	# Translate environment variables to terraform arguments
-	# Note: Setting TF_CLI_INIT_BACKEND_CONFIG_ENCRYPT to "true" does not work due to quirks:
-	#   https://github.com/cloudposse/tfenv/issues/10
-	# Set to 1 to enable.
+	# Set to `true` to enable.
 	if [[ $TF_BUCKET_ENCRYPT == false ]]; then
 		export TF_CLI_INIT_BACKEND_CONFIG_ENCRYPT=false
 	else
-		export TF_CLI_INIT_BACKEND_CONFIG_ENCRYPT=1
+		export TF_CLI_INIT_BACKEND_CONFIG_ENCRYPT=true
 	fi
 
 	[ -z "${TF_FROM_MODULE}" ] || export TF_CLI_INIT_FROM_MODULE="${TF_FROM_MODULE}"
@@ -58,4 +56,14 @@ function use_terraform() {
 	[ -z "${TF_DYNAMODB_TABLE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_DYNAMODB_TABLE="${TF_DYNAMODB_TABLE}"
 	[ -z "${AWS_PROFILE}" ] || export TF_CLI_INIT_BACKEND_CONFIG_PROFILE="${AWS_PROFILE}"
 	[ -z "${AWS_ROLE_ARN}" ] || export TF_CLI_INIT_BACKEND_CONFIG_ROLE_ARN="${AWS_ROLE_ARN}"
+
+	# Starting with Terraform 0.12, you can no longer initialize a directory that contains any files (not even dot files)
+	# To mitigate this, define the `TF_MODULE_CACHE` variable with an empty directory.
+	# This directory will be used for `terraform init -from-module=...`, `terraform plan`, `terraform apply`, and `terraform destroy`
+	if [ -n "${TF_MODULE_CACHE}" ]; then
+		export TF_CLI_PLAN="${TF_MODULE_CACHE}"
+		export TF_CLI_APPLY="${TF_MODULE_CACHE}"
+		export TF_CLI_INIT="${TF_MODULE_CACHE}"
+		export TF_CLI_DESTROY="${TF_MODULE_CACHE}"
+	fi
 }

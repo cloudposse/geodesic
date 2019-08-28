@@ -1,10 +1,10 @@
 #
 # Python Dependencies
 #
-FROM alpine:3.9.3 as python
+FROM alpine:3.10.1 as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
-RUN apk add python python-dev libffi-dev gcc py-pip py-virtualenv linux-headers musl-dev openssl-dev make
+RUN apk add python python-dev py-pip py-virtualenv libffi-dev gcc linux-headers musl-dev openssl-dev make
 
 COPY requirements.txt /requirements.txt
 
@@ -13,12 +13,12 @@ RUN pip install -r /requirements.txt --install-option="--prefix=/dist" --no-buil
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:244.0.0-alpine as google-cloud-sdk
+FROM google/cloud-sdk:258.0.0-alpine as google-cloud-sdk
 
 #
 # Cloud Posse Package Distribution
 #
-FROM cloudposse/packages:0.90.0 as packages
+FROM cloudposse/packages:0.117.2 as packages
 
 WORKDIR /packages
 
@@ -35,7 +35,7 @@ RUN make dist
 #
 # Geodesic base image
 #
-FROM alpine:3.9.3
+FROM alpine:3.10.1
 
 ENV BANNER "geodesic"
 
@@ -46,14 +46,17 @@ ENV KOPS_CLUSTER_NAME=example.foo.bar
 # Install all packages as root
 USER root
 
-# Install the cloudposse alpine repository
+# install the cloudposse alpine repository
 ADD https://apk.cloudposse.com/ops@cloudposse.com.rsa.pub /etc/apk/keys/
-RUN echo "@cloudposse https://apk.cloudposse.com/3.9/vendor" >> /etc/apk/repositories
+RUN echo "@cloudposse https://apk.cloudposse.com/3.10/vendor" >> /etc/apk/repositories
 
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
     echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories && \
     echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories
+
+# Temporarily(?) downgrade `git` because version 2.22 breaks the `helm-git` plugin
+RUN echo @main-3.9 https://alpine.global.ssl.fastly.net/alpine/v3.9/main >> /etc/apk/repositories
 
 # Install alpine package manifest
 COPY packages.txt /etc/apk/

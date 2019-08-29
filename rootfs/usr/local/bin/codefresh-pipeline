@@ -56,10 +56,10 @@ function download_pipelines() {
 	local arg1="$1"
 	local subdirs="true"
 
-  if [[ -n "$arg1" ]] && [[ ! "$arg" =~ / ]]; then
-    arg1=(--project "$1")
-    subdirs="false"
-  fi
+	if [[ -n "$arg1" ]] && [[ ! "$arg" =~ / ]]; then
+		arg1=(--project "$1")
+		subdirs="false"
+	fi
 
 	while IFS= read -r line; do
 		files+=("${tmpdir}/${count}.json")
@@ -89,7 +89,7 @@ function convert_to_yaml() {
 			yq r "$1" >"$2"
 		fi
 	else
-    local subdirs="$3"
+		local subdirs="$3"
 		local pipeline=$(jq -rc '.metadata.name' <"$1")
 		# You could get project from jq .metadata.project, but we care more about the name embeded in the pipeline name
 		local project=$(dirname $pipeline)
@@ -100,9 +100,9 @@ function convert_to_yaml() {
 
 		local target="${pipeline##*/}.pip"
 		if [[ "$subdirs" == "true" ]]; then
-		  [[ -d "$project" ]] || mkdir -p "$project"
-		  target="${project}/${target}"
-    fi
+			[[ -d "$project" ]] || mkdir -p "$project"
+			target="${project}/${target}"
+		fi
 		yq r "$1" >"$target"
 		green "* Wrote  ${target}"
 	fi
@@ -116,18 +116,18 @@ function filter_pipeline() {
 }
 
 function compare_pipeline() {
-  # Check that the pipeline file exists and is parseable
-  local status
-  yq r "$1" >/dev/null 2>&1
-  status=$?
+	# Check that the pipeline file exists and is parseable
+	local status
+	yq r "$1" >/dev/null 2>&1
+	status=$?
 
-  if (( $status == 1 )); then
-    red "! File "$1" not found"
-    return 1
-  elif (( $status == 2 )); then
-    red "! File "$1" appears to not be a YAML file"
-    return 2
-  fi
+	if (($status == 1)); then
+		red "! File "$1" not found"
+		return 1
+	elif (($status == 2)); then
+		red "! File "$1" appears to not be a YAML file"
+		return 2
+	fi
 
 	local name
 	name=$(yq r -j "$1" | jq -r .metadata.name) || {

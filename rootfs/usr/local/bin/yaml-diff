@@ -16,8 +16,8 @@ EOF
 }
 
 function yaml-diff() {
-  local old=$(mktemp)
-  local new=$(mktemp)
+	local old=$(mktemp)
+	local new=$(mktemp)
 	trap "rm -rf $old $new" RETURN EXIT
 
 	local sort_array_filter='walk( if type == "array" then sort else . end )'
@@ -26,16 +26,16 @@ function yaml-diff() {
 	# TODO add a switch for this
 	false && filter="$sort_array_filter"
 
-  yq  r -j "$1" | jq -S "$filter" | yq r - > "$old"
-  yq  r -j "$2" | jq -S "$filter" | yq r - > "$new"
+	yq r -j "$1" | jq -S "$filter" | yq r - >"$old"
+	yq r -j "$2" | jq -S "$filter" | yq r - >"$new"
 
-  local color=never
-  [[ -t 1 ]] && color=always
-  if diff -q "$old" "$new" >/dev/null; then
-    green "* No changes"
-  else
-    diff -y --color=$color -W 120 "$old" "$new"
-  fi
+	local color=never
+	[[ -t 1 ]] && color=always
+	if diff -q "$old" "$new" >/dev/null; then
+		green "* No changes"
+	else
+		diff -y --color=$color -W 120 "$old" "$new"
+	fi
 }
 
 function red() {

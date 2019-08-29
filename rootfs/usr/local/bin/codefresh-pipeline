@@ -56,7 +56,7 @@ function download_pipelines() {
 	local arg1="$1"
 	local subdirs="true"
 
-	if [[ -n "$arg1" ]] && [[ ! "$arg" =~ / ]]; then
+	if [[ -n "$arg1" ]] && [[ ! "$arg1" =~ / ]]; then
 		arg1=(--project "$1")
 		subdirs="false"
 	fi
@@ -68,13 +68,13 @@ function download_pipelines() {
 	done < <(codefresh get pipeline --limit $limit -o json "${arg1[@]}" | filter_pipeline)
 
 	if (($count == 0)); then
-		red "! Failed to find a pipeline" 1>&2
+		red "! Failed to find a pipeline"
 		exit 1
 	elif (($count > $limit)); then
-		red "! Download created $count pipelines, which is too many. Probably parsed the output incorrectly. Aborting." 1>&2
+		red "! Download created $count pipelines, which is too many. Probably parsed the output incorrectly. Aborting."
 		exit 99
 	else
-		green "* Downloaded $count pipelines from Codefresh" 1>&2
+		green "* Downloaded $count pipelines from Codefresh"
 	fi
 	for file in "${files[@]}"; do
 		convert_to_yaml "$file" "$2" $subdirs

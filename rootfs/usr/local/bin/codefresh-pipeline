@@ -12,7 +12,7 @@ Usage:
 
   $(basename $0) compare <pipeline-spec-file>
 
-Downlaod:
+Download:
   With no parameters, all pipelines will be downloaded and written to files
   named based on the pipeline name. For example, a pipeline named "foo/bar"
   will be written to a YAML file named "bar.pip" in directory "./foo".

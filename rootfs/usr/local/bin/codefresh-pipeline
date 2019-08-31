@@ -155,6 +155,14 @@ function green() {
 	echo "$(tput setaf 2)$*$(tput sgr0)" 1>&2
 }
 
+function _check_requirements() {
+	if ! which codefresh >/dev/null; then
+		red "! Missing required executable: codefresh"
+		red "! Codefresh can be installed with: apk add codefresh@cloudposse"
+		return 98
+	fi
+}
+
 # Keep us from exiting the shell if this file is sourced by using return instead of exit
 function _main() {
 	case "$1" in
@@ -163,7 +171,7 @@ function _main() {
 			_usage
 		else
 			shift
-			download_pipelines "$@"
+			_check_requirements && download_pipelines "$@"
 		fi
 		;;
 	c | comp | compare)
@@ -171,7 +179,7 @@ function _main() {
 			_usage
 		else
 			shift
-			compare_pipeline "$@"
+			_check_requirements && compare_pipeline "$@"
 		fi
 		;;
 	*)

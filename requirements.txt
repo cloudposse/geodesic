@@ -14,7 +14,7 @@
 # Until awsebcli supports PyYAML 5.x, we are pinning it to 3.13
 PyYAML==3.13
 ansible==2.8.4
-awscli==1.16.226
+awscli==1.16.230
 awsebcli==3.15.3
 boto==2.49.0
 crudini==0.9

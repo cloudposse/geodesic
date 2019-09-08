@@ -38,10 +38,14 @@ tasks:
               kubectl -n {{ get "namespace" }} create serviceaccount tiller;
             kubectl get -n {{ get "namespace" }} clusterrolebinding tiller > /dev/null 2>&1 || \
               kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount={{ get "namespace" }}:tiller;
-            helm init --tiller-namespace={{ get "namespace" }} --history-max 200 --service-account tiller --upgrade --wait;
+            helm init --tiller-namespace={{ get "namespace" }} --history-max 200 --service-account tiller --upgrade --wait \
+              --override 'spec.template.metadata.annotations.cluster-autoscaler\.kubernetes\.io/safe-to-evict=true' ;
           else
             echo "Enabled Tiller without RBAC"
-            helm init --tiller-namespace={{ get "namespace" }} --history-max 200 --upgrade --wait;
+            # The --override option adds an annotation that tells the cluster autoscaler that it is safe
+            # to evict `tiller` if needed in order to shut down the node.
+            helm init --tiller-namespace={{ get "namespace" }} --history-max 200 --upgrade --wait \
+              --override 'spec.template.metadata.annotations.cluster-autoscaler\.kubernetes\.io/safe-to-evict=true' ;
           fi 
       uninstall:
         description: "Uninstall the helm tiller"
@@ -57,7 +61,10 @@ tasks:
           kubectl -n {{ get "namespace" }} delete deployment tiller-deploy
           kubectl delete clusterrolebinding tiller --ignore-not-found
           kubectl -n {{ get "namespace" }} delete serviceaccount tiller --ignore-not-found
-  namespace:
+  # Current (v0.34.0) variant does not allow a task with the same name as a defaulted parameter of another task
+  # so we cannot call this task "namespace" because it conflict with the tiller task
+  # namespace:
+  ns:
     # namespace is a work in progress. For now, use /usr/local/bin/annotate-namespace and destroy-namespace instead
     description: "Commands that operate on a Kubernetes namespace"
     tasks:

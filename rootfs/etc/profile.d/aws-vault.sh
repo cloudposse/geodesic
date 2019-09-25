@@ -141,7 +141,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 
 	PROMPT_HOOKS+=("aws_vault_prompt")
 	function aws_vault_prompt() {
-		if [ -z "${AWS_VAULT}" ]; then
+		if [[ -z "${AWS_VAULT}" ]] && [[ "${AWS_VAULT_PROMPT}" != "false" ]]; then
 			echo -e "-> Run '$(green assume-role)' to login to AWS with aws-vault"
 		fi
 	}

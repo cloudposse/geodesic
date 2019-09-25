@@ -46,6 +46,10 @@ function debug() {
 	fi
 }
 
+function run_exit_hooks() {
+	command -v geodesic_on_exit >/dev/null && geodesic_on_exit
+}
+
 function use() {
 	DOCKER_ARGS=()
 	if [ -t 1 ]; then
@@ -69,10 +73,6 @@ function use() {
 		DOCKER_ARGS=()
 	fi
 
-	if [ -n "${ENV_FILE}" ]; then
-		DOCKER_ARGS+=(--env-file ${ENV_FILE})
-	fi
-
 	if [ "${WITH_DOCKER}" == "true" ]; then
 		if [ $(uname -s) == 'Linux' ]; then
 			# Bind-mount docker client and docker socket into container (linux only)
@@ -85,10 +85,19 @@ function use() {
 		fi
 	fi
 
-	# allow users to override value of GEODESIC_DEFAULT_ENV_FILE
-	local geodesic_default_env_file=${GEODESIC_DEFAULT_ENV_FILE:-~/.geodesic/env}
-	if [ -f "${geodesic_default_env_file}" ]; then
-		DOCKER_ARGS+=(--env-file=${geodesic_default_env_file})
+	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} == false ]]; then
+		if [ -n "${ENV_FILE}" ]; then
+			DOCKER_ARGS+=(--env-file ${ENV_FILE})
+		fi
+
+		# allow users to override value of GEODESIC_DEFAULT_ENV_FILE
+		local geodesic_default_env_file=${GEODESIC_DEFAULT_ENV_FILE:-~/.geodesic/env}
+		if [ -f "${geodesic_default_env_file}" ]; then
+			DOCKER_ARGS+=(--env-file=${geodesic_default_env_file})
+		fi
+	else
+		echo "# Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is set and not 'false'"
+		DOCKER_ARGS+=(--env GEODESIC_CUSTOMIZATION_DISABLED)
 	fi
 
 	if [ -n "${DOCKER_DNS}" ]; then
@@ -108,12 +117,14 @@ function use() {
 		if [ -d "$mount_path/c/Users/${windows_user_name}/AppData/Local/lxss/" ]; then
 			local_home=${user_local_app_data}/lxss${HOME}
 		else
+			local restore_nullglob=$(shopt -p nullglob)
 			shopt -s nullglob
 			for dir in $mount_path/c/Users/${windows_user_name}/AppData/Local/Packages/CanonicalGroupLimited.Ubuntu*; do
 				folder_name=$(basename ${dir})
 				local_home=${user_local_app_data}/Packages/${folder_name}/LocalState/rootfs${HOME}
 				break
 			done
+			$restore_nullglob
 		fi
 
 		if [ -z "${local_home}" ]; then
@@ -132,17 +143,23 @@ function use() {
 	else
 		echo "# Mounting ${local_home} into container"
 		DOCKER_ARGS+=(--volume=${local_home}:/localhost)
+		DOCKER_ARGS+=(--env LOCAL_HOME=${local_home})
 	fi
 
 	DOCKER_ARGS+=(--privileged
 		--publish ${GEODESIC_PORT}:${GEODESIC_PORT}
 		--name "${DOCKER_NAME}"
 		--rm
-		--env KUBERNETES_API_PORT=${GEODESIC_PORT})
-	set -o pipefail
-	docker ps | grep -q ${DOCKER_NAME} >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		echo "# Attaching to existing ${DOCKER_NAME} session"
+		--env GEODESIC_PORT=${GEODESIC_PORT}
+		--env DOCKER_IMAGE="${DOCKER_IMAGE%:*}"
+		--env DOCKER_NAME="${DOCKER_NAME}"
+		--env DOCKER_TAG="${DOCKER_TAG}")
+
+	trap run_exit_hooks EXIT
+	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
+	container_id=$(docker ps --quiet -a --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
+	if [ -n "$container_id" ]; then
+		echo "# Attaching to existing ${DOCKER_NAME} session ($container_id)"
 		if [ $# -eq 0 ]; then
 			set -- "/bin/bash" "-l" "$@"
 		fi

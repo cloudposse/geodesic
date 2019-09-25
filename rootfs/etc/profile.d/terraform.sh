@@ -1,17 +1,16 @@
 PROMPT_HOOKS+=("terraform_prompt")
 function terraform_prompt() {
-	shopt -s nullglob
-	TF_FILES=(*.tf)
-	if [ ! -z "${TF_FILES}" ]; then
+	# Test if there are any files with names ending in ".tf"
+	if compgen -G '*.tf' >/dev/null; then
 		if [ ! -d ".terraform" ]; then
 			echo -e "-> Run '$(green init-terraform)' to use this project"
 		fi
 	fi
 }
 
-# Install autocompletion rules
-if [ -x '/usr/bin/terraform' ]; then
-	complete -C /usr/bin/terraform terraform
+# Install auto-completion rules
+if which terraform >/dev/null; then
+	complete -C "$(which terraform)" terraform
 fi
 
 # Set default plugin cache dir

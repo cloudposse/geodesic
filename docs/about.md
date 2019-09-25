@@ -1,4 +1,15 @@
-## Features
+---
+title: ABOUT(1) | Geodesic
+author:
+- Erik Osterman
+date: May 2019
+---
+
+## NAME
+
+about - About the Geodesic Cloud Automation Shell
+
+## FEATURES
 
 * **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/99designs/aws-vault/), automatic key rotation, encryption at rest, and VPCs
 * **Repeatable** - 100% Infrastructure-as-Code with change automation and support for scriptable admin tasks in any language, including Terraform
@@ -6,7 +17,7 @@
 * **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications and CI/CD systems like TravisCI, CircleCI or Jenkins
 * **OpenSource** - Permissive [APACHE 2.0](LICENSE) license means no lock-in and no on-going license fees
 
-## Technologies
+## TECHNOLOGIES
 
 At its core, Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of the components of a modern cloud.
 
@@ -27,6 +38,6 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 
 [](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)
 
-## Documentation
+## SEE MORE
 
 Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/geodesic). 

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+# Annotates a namespace, creating the namespace if it does not exist.
+
+if ((${#@} != 2)); then
+	echo Usage:
+	echo '   annotate-namespace namespace annotation'
+	exit 1
+fi
+
+kubectl get namespace "$1" >/dev/null 2>&1 || kubectl create namespace "$1"
+kubectl annotate --overwrite namespace "$1" "$2"
+
+echo Annotated namespace "$1" with annotation \""$2"\"

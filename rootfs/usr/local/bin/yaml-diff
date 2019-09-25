@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function _usage() {
+	cat <<EOF
+$(basename $0): Compare 2 YAML file for semantic equivalency
+
+Both files are converted to a canonical format before comparing, so the
+output may not resemble the input even if the files are identical.
+
+Assumes the order of items in an array is semantically important.
+
+Usage:
+  $(basename $0) old.yaml new.yaml
+
+EOF
+}
+
+function yaml-diff() {
+	local old=$(mktemp)
+	local new=$(mktemp)
+	trap "rm -rf $old $new" RETURN EXIT
+
+	local sort_array_filter='walk( if type == "array" then sort else . end )'
+	local filter="."
+
+	# TODO add a switch for this
+	false && filter="$sort_array_filter"
+
+	yq r -j "$1" | jq -S "$filter" | yq r - >"$old"
+	yq r -j "$2" | jq -S "$filter" | yq r - >"$new"
+
+	local color=never
+	[[ -t 1 ]] && color=always
+	if diff -q "$old" "$new" >/dev/null; then
+		green "* No changes"
+	else
+		diff -y --color=$color -W 120 "$old" "$new"
+	fi
+}
+
+function red() {
+	echo "$(tput setaf 1)$*$(tput sgr0)" 1>&2
+}
+
+function green() {
+	echo "$(tput setaf 2)$*$(tput sgr0)" 1>&2
+}
+
+function _main() {
+	if (($# != 2)); then
+		_usage && return 1
+	else
+		yaml-diff "$@"
+	fi
+}
+
+if (($# == 0)); then
+	## Allow script to be sourced without complaint
+	if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+		_usage
+	fi
+else
+	_main "$@"
+fi

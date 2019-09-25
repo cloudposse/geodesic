@@ -1,0 +1,29 @@
+codefresh:
+- codefresh/**
+- rootfs/etc/codefresh/**
+
+direnv:
+- rootfs/etc/direnv/**
+
+docker:
+- Dockerfile
+
+docs:
+- docs/**
+
+github:
+- .github/**
+
+packages:
+- packages.txt
+- requirements.txt
+
+scripts:
+- rootfs/usr/local/bin/**
+- rootfs/usr/bin/**
+
+shell:
+- rootfs/etc/profile.d/**
+
+terraform:
+- rootfs/etc/direnv/rc.d/terraform

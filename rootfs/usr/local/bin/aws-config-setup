@@ -21,6 +21,22 @@ if [ -z "${AWS_ROOT_ACCOUNT_ID}" ]; then
 	exit 1
 fi
 
+if [ ! -d "/localhost/.awsvault/" ] || [ ! -w "/localhost/.awsvault/" ]; then
+	echo "/localhost/.awsvault/ is not writable"
+	exit 1
+fi
+
+if [ -d "/localhost/.awsvault/keys/" ] && [ ! -w "/localhost/.awsvault/keys/" ]; then
+	echo "/localhost/.awsvault/keys/ is not writable"
+	exit 1
+fi
+
+if [ "${AWS_VAULT_BACKEND}" != "file" ]; then
+	echo "*"
+	echo "* WARNING: AWS_VAULT_BACKEND is \"${AWS_VAULT_BACKEND}\". Geodesic only supports AWS_VAULT_BACKEND=\"file\"."
+	echo "*"
+fi
+
 # Derive the source profile from the prefix of the default profile
 export AWS_SOURCE_PROFILE=$(echo ${AWS_DEFAULT_PROFILE} | cut -d- -f1)
 
@@ -30,15 +46,15 @@ if [ "${AWS_SOURCE_PROFILE}" == "${AWS_DEFAULT_PROFILE}" ]; then
 fi
 
 # Define empty source profile
-crudini --set ${AWS_CONFIG_FILE} "profile ${AWS_SOURCE_PROFILE}"
+crudini --set --inplace ${AWS_CONFIG_FILE} "profile ${AWS_SOURCE_PROFILE}"
 
 # Define default profile
-crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" region "${AWS_REGION}"
+crudini --set --inplace "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" region "${AWS_REGION}"
 
 if [ "${AWS_ACCOUNT_ID}" == "${AWS_ROOT_ACCOUNT_ID}" ]; then
-	crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_DEFAULT_PROFILE}"
+	crudini --set --inplace "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_DEFAULT_PROFILE}"
 else
-	crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/OrganizationAccountAccessRole"
+	crudini --set --inplace "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" role_arn "arn:aws:iam::${AWS_ACCOUNT_ID}:role/OrganizationAccountAccessRole"
 fi
 
 # Prompt the user to setup MFA
@@ -47,13 +63,13 @@ read -p "Use MFA? [y/n] " SETUP_MFA
 if [ "${SETUP_MFA}" == "y" ]; then
 	read -p "AWS IAM Username: " AWS_USERNAME
 	export AWS_MFA_SERIAL="arn:aws:iam::${AWS_ROOT_ACCOUNT_ID}:mfa/${AWS_USERNAME}"
-	crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" mfa_serial "${AWS_MFA_SERIAL}"
+	crudini --set --inplace "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" mfa_serial "${AWS_MFA_SERIAL}"
 else
 	crudini --del "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" mfa_serial
 fi
 
 # Reference the source profile settings
-crudini --set "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" source_profile "${AWS_SOURCE_PROFILE}"
+crudini --set --inplace "${AWS_CONFIG_FILE}" "profile ${AWS_DEFAULT_PROFILE}" source_profile "${AWS_SOURCE_PROFILE}"
 
 # Prompt the user to setup their AWS credentials in aws-vault
 read -p "Setup AWS Credentials (aws-vault)? [y/n] " SETUP_VAULT

@@ -1,6 +1,15 @@
-# Design
+---
+title: DESIGN(1) | Geodesic
+author:
+- Erik Osterman
+date: May 2019
+---
 
-## An Opinionated Framework
+## NAME
+
+design - Geodesic Design
+
+### An Opinionated Framework
 
 We designed this shell as the last layer of abstraction. It stitches all the tools together like `make`, `aws-cli`, `kops`, `helm`, `kubectl`, and `terraform`. As time progresses,
 there will undoubtably be even more that come into play. For this reason, we chose to use a combination of `bash` and `make` which together are ideally suited to combine the 
@@ -18,7 +27,7 @@ Since we use `make` under-the-hood, you can add all your ENVs at the end of the 
 For the default environment variables, checkout `/etc/profile.d/defaults.sh`. We believe using ENVs this way is both consistent
 with the "cloud" (12-factor) way of doing things, as well as a clear way of communicating what values are being passed without using a complicated convention. Additionally, you can set & forget these ENVs in your shell.
 
-## Layout Inside the Shell
+## LAYOUT
 
 We leverage as many semantics of the linux shell as we can to make the experience as frictionless as possible.
 
@@ -27,22 +36,24 @@ We leverage as many semantics of the linux shell as we can to make the experienc
 * `/etc/bash_completion.d` is where all bash completion scripts are kept and sourced when the shell starts.
 * `/usr/local/bin` has some helper scripts
 * `/etc/motd` is the current "Message of the Day"
-* `/mnt/local` is where we house the local state (like your temporary AWS credentials)
-* `/mnt/remote` is where we mount the S3 bucket for cluster state; these files are never written to disk and only kept in memory for security
+* `/localhost` is where we house the local state (like your temporary AWS credentials). This is mounted to your `HOME` directory.
+* `/conf` is where all configurations belong. For example, stick your terraform module invocations in this directory. When using `terraform`, the directory names are mapped directly to a bucket prefix for terraform state which include subdirectories (e.g. `/conf/us-west-2/vpc` will map to a state folder prefix of `us-west-2/vpc`).
 
-## Extending the Shell
+## EXTENDING
 
 Geodesic was written to be easily extended. There are a couple ways to do it. 
 
 You can easily extend the Geodesic shell by creating your own repo with a `Dockerfile`. We suggest you have it inherit `FROM geodeisc:latest` (or pin it to a [build number](https://travis-ci.org/cloudposse/geodesic) for stability). If you want to add or modify core functionality, this is the recommended way to do it.
 
-In side your container, you can replace any of our code with your own to make it behave exactly as you wish. You could even create one dedicated shell per cluster with 
-logic tailored specifically for that cluster.
+In side your container, you can replace any of our code with your own to make it behave exactly as you wish. You could even create one dedicated shell per cluster with logic tailored specifically for that cluster.
 
-Here are some other tips. Most of our modules do an `-include Makefile.*`, which means, we'll include other `Makefiles` in that directory. To add additional functionality,
-simply drop-in your `Makefile.something` in that module directory.
+### Here are some other tips.
 
-Want to add additional aliases or affect the shell? Drop your script in `/etc/profile.d` and it will be loaded automatically when the shell starts. 
+1. Many of our `Makefiles` do an `-include Makefile.*`, which means, we'll include other `Makefiles` in that directory. To add additional functionality, simply drop-in your `Makefile.something` in that directory.
+
+2. Want to add additional aliases or affect the shell? Drop your script in `/etc/profile.d` and it will be loaded automatically when the shell starts. 
+
+3. Need to set some environment variables? Use an `.envrc` in the corresponding directory
 
 As you can see, you can easily change almost any aspect of how the shell works simply by extending it.
 

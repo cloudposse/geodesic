@@ -15,6 +15,6 @@ if [ ! -f "${AWS_CONFIG_FILE}" ]; then
 fi
 
 # Install autocompletion rules
-if [ -x "/usr/bin/aws_completer" ]; then
-	complete -C '/usr/bin/aws_completer' aws
+if which aws_completer >/dev/null; then
+	complete -C "$(which aws_completer)" aws
 fi

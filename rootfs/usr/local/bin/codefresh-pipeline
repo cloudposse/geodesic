@@ -1,0 +1,198 @@
+#!/bin/bash
+#  ## Download Codefresh pipelines from Codefresh and save to YAML files.
+
+function _usage() {
+	cat <<EOF
+$(basename $0): Download pipelines specs from Codefresh, removing read-only fields
+
+Usage:
+  $(basename $0) download
+  $(basename $0) download <project-name>
+  $(basename $0) download <pipeline-name> [<output-file>]
+
+  $(basename $0) compare <pipeline-spec-file>
+
+Download:
+  With no parameters, all pipelines will be downloaded and written to files
+  named based on the pipeline name. For example, a pipeline named "foo/bar"
+  will be written to a YAML file named "bar.pip" in directory "./foo".
+
+  With 1 parameter:
+  * If the parameter does not contain a / (slash), it is taken as a
+    project name and all the pipelines for that project will be downloaded
+    into the current directory.
+  * If the parameter contains a / (slash), it is taken as a
+    pipeline name and only the named pipeline will be downloaded.
+  In both cases, files will be named after the name of the pipeline, using
+  the part of the name after the slash, and will be given a ".pip" extension
+
+  With 2 parameters, the named pipeline will be downloaded and saved in the
+  file with the given name. If <output-file> is - (dash) then the
+  pipeline YAML will be sent to stdout.
+
+Compare:
+  Given a pipeline spec file, show the changes the file would make to the
+  existing pipeline if used to replace it.
+
+  Exits with status 0 if the pipelines are the same, status 1 if different.
+
+Note on Authentication:
+  $(basename $0) requires that Codefresh authentication be already set up.
+  Run "codefresh auth help" for more information.
+
+EOF
+	return 1
+}
+
+function download_pipelines() {
+	local tmpdir=$(mktemp -d)
+	# echo rm -rf $tmpdir
+	trap "rm -rf $tmpdir" RETURN EXIT
+
+	local count=0
+	local limit=1000
+	local files=()
+
+	local arg1="$1"
+	local subdirs="true"
+
+	if [[ -n "$arg1" ]] && [[ ! "$arg1" =~ / ]]; then
+		arg1=(--project "$1")
+		subdirs="false"
+	fi
+
+	while IFS= read -r line; do
+		files+=("${tmpdir}/${count}.json")
+		printf "%s" "$line" >"${files[-1]}"
+		((count += 1))
+	done < <(codefresh get pipeline --limit $limit -o json "${arg1[@]}" | filter_pipeline)
+
+	if (($count == 0)); then
+		red "! Failed to find a pipeline"
+		exit 1
+	elif (($count > $limit)); then
+		red "! Download created $count pipelines, which is too many. Probably parsed the output incorrectly. Aborting."
+		exit 99
+	else
+		green "* Downloaded $count pipelines from Codefresh"
+	fi
+	for file in "${files[@]}"; do
+		convert_to_yaml "$file" "$2" $subdirs
+	done
+}
+
+function convert_to_yaml() {
+	if [[ -n "$2" ]]; then
+		if [[ $2 == "-" ]]; then
+			yq r "$1"
+		else
+			yq r "$1" >"$2"
+		fi
+	else
+		local subdirs="$3"
+		local pipeline=$(jq -rc '.metadata.name' <"$1")
+		# You could get project from jq .metadata.project, but we care more about the name embeded in the pipeline name
+		local project=$(dirname $pipeline)
+		if [[ -z "$pipeline" ]] || [[ -z "$project" ]]; then
+			red "* Unable to find project and pipeline name from file $1"
+			reutrn 5
+		fi
+
+		local target="${pipeline##*/}.pip"
+		if [[ "$subdirs" == "true" ]]; then
+			[[ -d "$project" ]] || mkdir -p "$project"
+			target="${project}/${target}"
+		fi
+		yq r "$1" >"$target"
+		green "* Wrote  ${target}"
+	fi
+}
+
+function filter_pipeline() {
+	jq -rc 'if (try .metadata catch false) then . else .[]  end |
+    del(.metadata| .projectId, .revision, .accountId, .created_at, .updated_at, .deprecate, .id, .originalYamlString)
+    | del(.spec | .stages, .packId,
+      (.triggers[] | .verified, .lastExecutionDate, .packId, .id, .endpoint, .secret)) | (.spec.steps |= {})'
+}
+
+function compare_pipeline() {
+	# Check that the pipeline file exists and is parseable
+	local status
+	yq r "$1" >/dev/null 2>&1
+	status=$?
+
+	if (($status == 1)); then
+		red "! File "$1" not found"
+		return 1
+	elif (($status == 2)); then
+		red "! File "$1" appears to not be a YAML file"
+		return 2
+	fi
+
+	local name
+	name=$(yq r -j "$1" | jq -r .metadata.name) || {
+		red "! Cannot find pipeline name in $1"
+		return 1
+	}
+	local old=$(mktemp)
+	trap "rm -f $old" RETURN EXIT
+
+	if (
+		set -o pipefail
+		codefresh get pipeline --limit 1 -o json "$name" | filter_pipeline | yq r - >"$old"
+	); then
+		yaml-diff "$old" "$1"
+	else
+		red "! Error downloading pipeline $name"
+	fi
+}
+
+function red() {
+	echo "$(tput setaf 1)$*$(tput sgr0)" 1>&2
+}
+
+function green() {
+	echo "$(tput setaf 2)$*$(tput sgr0)" 1>&2
+}
+
+function _check_requirements() {
+	if ! which codefresh >/dev/null; then
+		red "! Missing required executable: codefresh"
+		red "! Codefresh can be installed with: apk add codefresh@cloudposse"
+		return 98
+	fi
+}
+
+# Keep us from exiting the shell if this file is sourced by using return instead of exit
+function _main() {
+	case "$1" in
+	d | down | download)
+		if (($# < 2 || $# > 3)); then
+			_usage
+		else
+			shift
+			_check_requirements && download_pipelines "$@"
+		fi
+		;;
+	c | comp | compare)
+		if (($# != 2)); then
+			_usage
+		else
+			shift
+			_check_requirements && compare_pipeline "$@"
+		fi
+		;;
+	*)
+		_usage
+		;;
+	esac
+}
+
+if (($# == 0)); then
+	## Allow script to be sourced without complaint
+	if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+		_usage
+	fi
+else
+	_main "$@"
+fi

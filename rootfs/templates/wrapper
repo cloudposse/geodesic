@@ -6,7 +6,7 @@ set -o pipefail
 # Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$ % 30000))}
 
-OS=$(uname -s)
+readonly OS=$(uname -s)
 
 export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
@@ -57,7 +57,7 @@ function use() {
 		DOCKER_ARGS+=(-it --rm --name="${DOCKER_NAME}" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
 
 		if [ -n "$SSH_AUTH_SOCK" ]; then
-			if [ $(uname -s) == 'Linux' ]; then
+			if [ "${OS}" == 'Linux' ]; then
 				# Bind-mount SSH agent socket into container (linux only)
 				DOCKER_ARGS+=(--volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK"
 					--env SSH_AUTH_SOCK
@@ -68,19 +68,23 @@ function use() {
 					--env USER_ID
 					--env GROUP_ID)
 			fi
+			if [ "${OS}" == 'Darwin' ]; then
+				# Bind-mount SSH-agent socket (available in docker-for mac Edge release)
+				DOCKER_ARGS+=(--volume /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
+					-e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock)
 		fi
 	else
 		DOCKER_ARGS=()
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
-		if [ $(uname -s) == 'Linux' ]; then
+		if [ "${OS}" == 'Linux' ]; then
 			# Bind-mount docker client and docker socket into container (linux only)
 			echo "# Enabling docker support"
 			DOCKER_ARGS+=(--volume "$(which docker):/usr/bin/docker"
 			--volume "/var/run/docker.sock:/var/run/docker.sock")
 		else
-			echo "Not supported on $(uname -s)"
+			echo "Not supported on ${OS}"
 			exit 1
 		fi
 	fi

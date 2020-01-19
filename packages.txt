@@ -53,7 +53,7 @@ openssl
 pandoc@cloudposse
 postgresql-client
 pwgen
-python
+#python
 python3
 rakkess@cloudposse
 rbac-lookup@cloudposse

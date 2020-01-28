@@ -6,6 +6,7 @@ bash
 bash-completion
 bats@community
 busybox-extras
+cfssl@cloudposse
 coreutils
 chamber@cloudposse
 curl
@@ -22,14 +23,14 @@ fuse
 fzf@cloudposse
 fzf-bash-completion
 gettext
-# Get git 2.20.1 from the Alpine 3.9 package repo
-git@main-3.9=2.20.1-r0
+git
 github-commenter@cloudposse
 gomplate@cloudposse
 goofys@cloudposse
 gosu@cloudposse
 groff
-helm@cloudposse
+helm2@cloudposse
+helm3@cloudposse
 helmfile@cloudposse
 iputils
 jq
@@ -42,7 +43,7 @@ less
 libc6-compat
 libltdl
 make
-man-db@testing
+man-db@community
 musl-dev
 mysql-client
 ncurses

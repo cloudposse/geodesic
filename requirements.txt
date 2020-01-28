@@ -5,7 +5,7 @@
 # awscli 1.16.226 allows PyYAML <= 5.2
 #
 # Unfortunately as of 2019-08-26
-# * Current awsebcli==3.15.3 requires PyYAML >=3.10 <=3.13 and
+# * Current awsebcli==3.17.0 requires PyYAML >=3.10 <=3.13 and
 #   docker-compose >= 1.23.2, < 1.24.0 which also requires PyYAML >=3.10 <=3.13
 # * Current docker-compose=1.24.1 requires PyYAML >= 3.10, < 4.3
 #   and the team does not want to upgrade to PyYAML 5.x until 5.2 is out
@@ -15,7 +15,7 @@
 PyYAML==3.13
 ansible==2.8.5
 awscli==1.16.250
-awsebcli==3.15.3
+awsebcli==3.17.0
 boto==2.49.0
 crudini==0.9
 Jinja2==2.10.1

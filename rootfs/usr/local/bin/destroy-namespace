@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[[ -n $HELM_BINARY ]] || HELM_BINARY=helm
+
 if ((${#@} != 1)); then
 	echo Deletes a Kubernetes namespace and everything in it or managed by it,
 	echo first using helm to delete the things it can delete.
@@ -10,5 +12,5 @@ if ((${#@} != 1)); then
 	exit 1
 fi
 
-helm list --namespace "${1}" --short --all | xargs -r helm delete --purge
+${HELM_BINARY} list --namespace "${1}" --short --all | xargs -r ${HELM_BINARY} delete --purge
 kubectl delete namespace "${1}" --ignore-not-found --cascade=true

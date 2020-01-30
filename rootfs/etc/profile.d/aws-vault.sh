@@ -129,8 +129,12 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		fi
 	else
 		AWS_VAULT_ARGS=()
-		AWS_VAULT_ARGS+=("--assume-role-ttl=${AWS_VAULT_ASSUME_ROLE_TTL}")
-		AWS_VAULT_ARGS+=("--session-ttl=${AWS_VAULT_SESSION_TTL}")
+		AWS_VAULT_ARGS+=("--duration=${AWS_VAULT_DURATION:-1h}")
+
+		if [[ -n $AWS_SESSION_TTL ]]; then
+			[[ -n $AWS_SESSION_TOKEN_TTL ]] || export $AWS_CHAINED_SESSION_TOKEN_TTL="${AWS_SESSION_TTL}"
+			[[ -n $AWS_CHAINED_SESSION_TOKEN_TTL ]] || export $AWS_CHAINED_SESSION_TOKEN_TTL="${AWS_SESSION_TTL}"
+		fi
 
 		[ -d /localhost/.awsvault ] || mkdir -p /localhost/.awsvault
 		ln -sf /localhost/.awsvault ${HOME}

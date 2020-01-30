@@ -10,5 +10,9 @@ if ((${#@} != 1)); then
 	exit 1
 fi
 
-helm list --namespace "${1}" --short --all | xargs -r helm delete --purge
+[[ -n $HELM_BINARY ]] || HELM_BINARY=helm
+
+${HELM_BINARY} delete --help | grep -q -- --purge && _HELM_USE_PURGE=--purge || unset _HELM_USE_PURGE
+
+${HELM_BINARY} list --namespace "${1}" --short --all | xargs -r ${HELM_BINARY} delete ${_HELM_USE_PURGE}
 kubectl delete namespace "${1}" --ignore-not-found --cascade=true

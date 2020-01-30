@@ -13,23 +13,7 @@ RUN pip install -r /requirements.txt --install-option="--prefix=/dist" --no-buil
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:265.0.0-alpine as google-cloud-sdk
-
-#
-# Cloud Posse Package Distribution
-#
-FROM cloudposse/packages:0.117.2 as packages
-
-WORKDIR /packages
-
-#
-# Install the select packages from the cloudposse package manager image
-#
-# Repo: <https://github.com/cloudposse/packages>
-#
-ARG PACKAGES="cfssl cfssljson"
-ENV PACKAGES=${PACKAGES}
-RUN make dist
+FROM google/cloud-sdk:276.0.0-alpine as google-cloud-sdk
 
 
 #
@@ -55,9 +39,6 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
     echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories && \
     echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories
 
-# Temporarily(?) downgrade `git` because version 2.22 breaks the `helm-git` plugin
-RUN echo @main-3.9 https://alpine.global.ssl.fastly.net/alpine/v3.9/main >> /etc/apk/repositories
-
 # Install alpine package manifest
 COPY packages.txt /etc/apk/
 # Install repo checksum in an attempt to ensure updates bust the Docker build cache
@@ -81,11 +62,6 @@ WORKDIR /tmp
 # Copy python dependencies
 COPY --from=python /dist/ /usr/
 
-# Copy installer over to make package upgrades easy
-COPY --from=packages /packages/install/ /packages/install/
-
-# Copy select binary packages
-COPY --from=packages /dist/ /usr/local/bin/
 
 #
 # Install Google Cloud SDK
@@ -153,42 +129,40 @@ ENV NODE_MIN_SIZE 2
 #
 # Install helm
 #
+# helm version 2 config
 ENV HELM_HOME /var/lib/helm
 ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
-RUN helm completion bash > /etc/bash_completion.d/helm.sh \
+
+RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
     && mkdir -p ${HELM_HOME} \
-    && helm init --client-only \
+    && helm2 init --client-only \
     && mkdir -p ${HELM_HOME}/plugins
+# Enable Atlantis to manage helm 2
+RUN chmod -R 777 ${HELM_HOME}
+
+# helm version 3 config
+ENV HELM_PATH_CACHE /var/cache
+ENV HELM_PATH_CONFIG /etc
+ENV HELM_PATH_DATA /usr/share
+RUN mkdir -p ${HELM_PATH_CACHE}/helm ${HELM_PATH_CONFIG}/helm ${HELM_PATH_DATA}/helm
+
+# Enable Atlantis to manage helm 3
+RUN chmod -R 777 ${HELM_PATH_CACHE}/helm ${HELM_PATH_CONFIG}/helm ${HELM_PATH_DATA}/helm
 
 #
-# Install helm repos
+# Install minimal helm plugins
 #
-RUN helm repo add cloudposse-incubator https://charts.cloudposse.com/incubator/ \
-    && helm repo add incubator  https://kubernetes-charts-incubator.storage.googleapis.com/ \
-    && helm repo add coreos-stable https://s3-eu-west-1.amazonaws.com/coreos-charts/stable/ \
-    && helm repo update
+ENV HELM_DIFF_VERSION 3.0.0-rc.7
+ENV HELM_GIT_VERSION 0.5.0
+ENV HELM_HELM_2TO3_VERSION 0.2.1
 
-#
-# Install helm plugins
-#
-ENV HELM_APPR_VERSION 0.7.0
-ENV HELM_DIFF_VERSION 2.11.0+2
-ENV HELM_EDIT_VERSION 0.2.0
-ENV HELM_GIT_VERSION 0.3.0
-ENV HELM_SECRETS_VERSION 1.2.9
-ENV HELM_S3_VERSION 0.7.0
-ENV HELM_PUSH_VERSION 0.7.1
+RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
+    && helm2 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION}
 
-RUN helm plugin install https://github.com/app-registry/appr-helm-plugin --version v${HELM_APPR_VERSION} \
-    && helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
-    && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
-    && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
-    && helm plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
-    && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
-    && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
+RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
+    && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
+    && helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION}
 
-# Enable Atlantis to manage helm
-RUN chmod -R 777 /var/lib/helm
 
 # 
 # Install fancy Kube PS1 Prompt

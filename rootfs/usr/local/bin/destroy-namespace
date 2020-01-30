@@ -10,7 +10,6 @@ if ((${#@} != 1)); then
 	exit 1
 fi
 
-
 [[ -n $HELM_BINARY ]] || HELM_BINARY=helm
 
 ${HELM_BINARY} delete --help | grep -q -- --purge && _HELM_USE_PURGE=--purge || unset _HELM_USE_PURGE

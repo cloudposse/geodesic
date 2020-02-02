@@ -6,7 +6,7 @@ set -o pipefail
 # Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$ % 30000))}
 
-OS=$(uname -s)
+readonly OS=$(uname -s)
 
 export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
@@ -57,7 +57,7 @@ function use() {
 		DOCKER_ARGS+=(-it --rm --name="${DOCKER_NAME}" --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
 
 		if [ -n "$SSH_AUTH_SOCK" ]; then
-			if [ $(uname -s) == 'Linux' ]; then
+			if [ "${OS}" == 'Linux' ]; then
 				# Bind-mount SSH agent socket into container (linux only)
 				DOCKER_ARGS+=(--volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK"
 					--env SSH_AUTH_SOCK
@@ -67,6 +67,13 @@ function use() {
 					--env USER
 					--env USER_ID
 					--env GROUP_ID)
+			elif [ "${OS}" == 'Darwin' ] && [ "${GEODESIC_MAC_FORWARD_SOCKET}" == 'true' ]; then
+				# Bind-mount SSH-agent socket (available in docker-for mac Edge 2.2 release)
+				# Note that the file/socket /run/host-services/ssh-auth.sock does not actually exist
+				# on the host OS, it is a special value recognized by Docker for Mac.
+				# See https://github.com/docker/for-mac/issues/410#issuecomment-557613306
+				DOCKER_ARGS+=(--volume /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
+					-e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock)
 			fi
 		fi
 	else
@@ -74,13 +81,17 @@ function use() {
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
-		if [ $(uname -s) == 'Linux' ]; then
+		if [ "${OS}" == 'Linux' ]; then
 			# Bind-mount docker client and docker socket into container (linux only)
 			echo "# Enabling docker support"
 			DOCKER_ARGS+=(--volume "$(which docker):/usr/bin/docker"
 			--volume "/var/run/docker.sock:/var/run/docker.sock")
+		elif [ "${OS}" == 'Darwin' ] && [ "${GEODESIC_MAC_FORWARD_SOCKET}" == 'true' ]; then
+			# Bind-mount docker socket into container starting with Docker Desktop Mac 2.2
+			DOCKER_ARGS+=(--volume /run/guest-services/docker.sock:/run/guest-services/docker.sock
+				-e DOCKER_HOST="unix:///run/guest-services/docker.sock")
 		else
-			echo "Not supported on $(uname -s)"
+			echo "Docker in Docker not supported on ${OS}"
 			exit 1
 		fi
 	fi
@@ -157,7 +168,7 @@ function use() {
 
 	trap run_exit_hooks EXIT
 	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
-	container_id=$(docker ps --quiet -a --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
+	container_id=$(docker ps --quiet --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
 	if [ -n "$container_id" ]; then
 		echo "# Attaching to existing ${DOCKER_NAME} session ($container_id)"
 		if [ $# -eq 0 ]; then

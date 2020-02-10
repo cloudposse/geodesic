@@ -1,7 +1,7 @@
 #
 # Python Dependencies
 #
-FROM alpine:3.10.2 as python
+FROM alpine:3.11.3 as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python python-dev py-pip py-virtualenv libffi-dev gcc linux-headers musl-dev openssl-dev make
@@ -19,7 +19,7 @@ FROM google/cloud-sdk:276.0.0-alpine as google-cloud-sdk
 #
 # Geodesic base image
 #
-FROM alpine:3.10.2
+FROM alpine:3.11.3
 
 ENV BANNER "geodesic"
 

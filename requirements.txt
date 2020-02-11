@@ -1,21 +1,11 @@
-# Version tracking update
-# awscli 1.16.209, awsebcli 3.15.3 require PyYAML >=3.10 <=3.13
-# and awsebcli also depends on python docker-compose >= 1.23.2, < 1.24.0
-# which has a similar requirement.
-# awscli 1.16.226 allows PyYAML <= 5.2
-#
-# Unfortunately as of 2019-08-26
-# * Current awsebcli==3.15.3 requires PyYAML >=3.10 <=3.13 and
-#   docker-compose >= 1.23.2, < 1.24.0 which also requires PyYAML >=3.10 <=3.13
-# * Current docker-compose=1.24.1 requires PyYAML >= 3.10, < 4.3
-#   and the team does not want to upgrade to PyYAML 5.x until 5.2 is out
-#   See https://github.com/docker/compose/issues/6619
-#
-# Until awsebcli supports PyYAML 5.x, we are pinning it to 3.13
-PyYAML==3.13
-ansible==2.8.5
-awscli==1.16.250
-awsebcli==3.15.3
+PyYAML==5.2
+ansible==2.9.4
+awscli==1.17.14
 boto==2.49.0
-crudini==0.9
-Jinja2==2.10.1
+boto3==1.11.14
+# crudini 0.9.3 is required for Python3, but not yet released to pypi
+# install the hard way crudini==0.9.3
+# crudini requires python-iniparse version not yet released to pypi
+https://github.com/candlepin/python-iniparse/archive/727a5d212d79bddcd6fb1116e406700be63ded24.zip
+https://github.com/pixelb/crudini/archive/0.9.3.zip
+Jinja2==2.11.1

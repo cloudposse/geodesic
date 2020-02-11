@@ -3,47 +3,29 @@
 #
 FROM alpine:3.11.3 as python
 
-## When we are ready for Python3, here is how:
-## Package pruning
-##   python and python-dev: replace with python3 and python3-dev
-##   py-pip: only needed for python 2
-##   py-virtualenv: replaced with built-in venv in Python 3
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python3 python3-dev libffi-dev gcc linux-headers musl-dev openssl-dev make
 
 COPY requirements.txt /requirements.txt
 
-RUN python3 -m pip install --upgrade pip setuptools wheel cffi && \
-    pip install cffi -I --install-option="--prefix=/dist" --no-build-isolation && \
-    pip install -r /requirements.txt --install-option="--prefix=/dist" --no-build-isolation
+RUN python3 -m pip install --upgrade pip setuptools wheel && \
+    pip install -r /requirements.txt --ignore-installed --prefix=/dist --no-build-isolation --no-warn-script-location
 
-#    pip install cryptography --install-option="--prefix=/dist" --no-build-isolation && \
-#    pip install python-dateutil --install-option="--prefix=/dist" --no-build-isolation && \
+# Crudini needs special handling because it depends on the only marginally maintained iniparse
+RUN cd /tmp && wget https://github.com/candlepin/python-iniparse/archive/727a5d212d79bddcd6fb1116e406700be63ded24.zip && \
+    unzip 727a5d212d79bddcd6fb1116e406700be63ded24.zip && \
+    cd python-iniparse-727a5d212d79bddcd6fb1116e406700be63ded24 && \
+    pip install . --ignore-installed --prefix=/dist --no-build-isolation
+
+RUN cd /tmp && wget https://github.com/pixelb/crudini/archive/0.9.3.zip && \
+    unzip 0.9.3.zip && \
+    cd crudini-0.9.3 && \
+    pip install . --ignore-installed --prefix=/dist --no-build-isolation
 
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:276.0.0-alpine as google-cloud-sdk
-
-##
-## Cloud Posse Package Distribution
-##
-#FROM cloudposse/packages:0.117.2 as packages
-#
-#WORKDIR /packages
-#
-##
-## Install the select packages from the cloudposse package manager image
-##
-## Repo: <https://github.com/cloudposse/packages>
-##
-#ARG PACKAGES="cfssl cfssljson"
-#ENV PACKAGES=${PACKAGES}
-#RUN make dist
-#
-
-
-#
+FROM google/cloud-sdk:278.0.0-alpine as google-cloud-sdk
 
 #
 # Geodesic base image
@@ -89,18 +71,7 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 WORKDIR /tmp
 
 # Copy python dependencies
-#COPY --from=python /usr/lib/python3.8/site-packages/cffi/ /usr/lib/python3.8/site-packages/cffi/
-COPY --from=python /usr/lib/python3.8/site-packages/cryptography-2.8.dist-info/ /usr/lib/python3.8/site-packages/cryptography-2.8.dist-info/
-COPY --from=python /usr/lib/python3.8/site-packages/cryptography/ /usr/lib/python3.8/site-packages/cryptography/
-COPY --from=python /usr/lib/python3.8/site-packages/dateutil/ /usr/lib/python3.8/site-packages/dateutil/
-COPY --from=python /usr/lib/python3.8/site-packages/python_dateutil-2.8.1.dist-info/ /usr/lib/python3.8/site-packages/python_dateutil-2.8.1.dist-info/
 COPY --from=python /dist/ /usr/
-
-## Copy installer over to make package upgrades easy
-#COPY --from=packages /packages/install/ /packages/install/
-#
-## Copy select binary packages
-#COPY --from=packages /dist/ /usr/local/bin/
 
 #
 # Install Google Cloud SDK
@@ -200,13 +171,7 @@ RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v$
 
 RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
     && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
-    && helm plugin install https://github.com/mstrzele/helm-edit --version v${HELM_EDIT_VERSION} \
-    && helm plugin install https://github.com/futuresimple/helm-secrets --version ${HELM_SECRETS_VERSION} \
-    && helm plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
-    && helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
-    && helm plugin install https://github.com/chartmuseum/helm-push --version v${HELM_PUSH_VERSION}
     && helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION}
-    && helm plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION}
 
 
 # 

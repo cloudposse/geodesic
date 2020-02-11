@@ -11,17 +11,6 @@ COPY requirements.txt /requirements.txt
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
     pip install -r /requirements.txt --ignore-installed --prefix=/dist --no-build-isolation --no-warn-script-location
 
-# Crudini needs special handling because it depends on the only marginally maintained iniparse
-RUN cd /tmp && wget https://github.com/candlepin/python-iniparse/archive/727a5d212d79bddcd6fb1116e406700be63ded24.zip && \
-    unzip 727a5d212d79bddcd6fb1116e406700be63ded24.zip && \
-    cd python-iniparse-727a5d212d79bddcd6fb1116e406700be63ded24 && \
-    pip install . --ignore-installed --prefix=/dist --no-build-isolation
-
-RUN cd /tmp && wget https://github.com/pixelb/crudini/archive/0.9.3.zip && \
-    unzip 0.9.3.zip && \
-    cd crudini-0.9.3 && \
-    pip install . --ignore-installed --prefix=/dist --no-build-isolation
-
 #
 # Google Cloud SDK
 #

@@ -206,6 +206,8 @@ ENV XDG_CONFIG_HOME=/etc
 
 # This is a temporary fix related it https://github.com/direnv/direnv/issues/595
 # This can be removed on the next release of direnv > 2.21.2
+# Note that XDG_CONFIG_DIR is not a variable mentioned in the XDG standard, 
+# and should not be confused with XDG_CONFIG_DIRS.
 ENV XDG_CONFIG_DIR=/etc
 
 # Clean up file modes for scripts

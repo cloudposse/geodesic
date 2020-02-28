@@ -1,4 +1,4 @@
-PyYAML==5.2
+PyYAML==5.3
 ansible==2.9.4
 awscli==1.17.14
 boto==2.49.0

@@ -11,12 +11,11 @@ function kube_ps1_helper() {
 	# https://github.com/jonmosco/kube-ps1/issues/115
 	[[ $KUBE_PS1_CONTEXT == "N/A" ]] && KUBE_PS1_CONTEXT=""
 
-    # Update the prompt if the kubecfg file is deleted.
+	# Update the prompt if the kubecfg file is deleted.
 	# https://github.com/jonmosco/kube-ps1/issues/118
-	[[ -n $KUBE_PS1_CONTEXT ]] && [[ ! -r  "${KUBECONFIG}" ]] && KUBE_PS1_CONTEXT=""
+	[[ -n $KUBE_PS1_CONTEXT ]] && [[ ! -r "${KUBECONFIG}" ]] && KUBE_PS1_CONTEXT=""
 
 }
-
 
 # This shortens the cluster name based on our EKS cluster naming pattern,
 # taking just the characters between the first and second dashes after "cluster/".

@@ -121,7 +121,7 @@ function geodesic_prompt() {
 		fi
 	done
 
-	local dir_prompt;
+	local dir_prompt
 	dir_prompt="${STATUS}${level_prompt} "
 	dir_prompt+="${ROLE_PROMPT} \W "
 	dir_prompt+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
@@ -129,7 +129,7 @@ function geodesic_prompt() {
 	update_terraform_prompt
 	local old_kube_ps1_prefix="$KUBE_PS1_PREFIX"
 	KUBE_PS1_PREFIX="("
-	local tf_prompt;
+	local tf_prompt
 	if [[ $GEODESIC_TF_PROMPT_ACTIVE == "true" ]]; then
 		local tf_mark
 		if [[ $GEODESIC_TF_PROMPT_TF_NEEDS_INIT == "true" ]]; then

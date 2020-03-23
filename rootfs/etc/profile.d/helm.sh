@@ -1,7 +1,6 @@
-
 if command -v helm >/dev/null; then
 	# Initialize auto-completion for whichever helm version is the installed default
-    # Suppress error message about KUBECONFIG not found
+	# Suppress error message about KUBECONFIG not found
 	if [[ -r $KUBECONFIG ]]; then
 		source <(helm completion bash)
 	else

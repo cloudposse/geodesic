@@ -13,8 +13,8 @@ function set_cluster() {
 	KUBECONFIG_DIR=$(dirname ${KUBECONFIG:-/dev/shm/kubecfg})
 	export EKS_KUBECONFIG_PATTERN="${EKS_KUBECONFIG_PATTERN:-${KUBECONFIG_DIR}/kubecfg.%s}"
 	if [[ $1 == "off" ]]; then
-		/Users/jgro/CP_dev/geodesic/rootfs/usr/local/bin/eks-update-kubeconfig "$@" && unset KUBECONFIG
+		eks-update-kubeconfig "$@" && unset KUBECONFIG
 	else
-		/Users/jgro/CP_dev/geodesic/rootfs/usr/local/bin/eks-update-kubeconfig "$@" && export KUBECONFIG=$(printf "$EKS_KUBECONFIG_PATTERN" $1)
+		eks-update-kubeconfig "$@" && export KUBECONFIG=$(printf "$EKS_KUBECONFIG_PATTERN" $1)
 	fi
 }

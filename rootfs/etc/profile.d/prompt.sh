@@ -102,10 +102,10 @@ function geodesic_prompt() {
 
 	if [ -n "$ASSUME_ROLE" ]; then
 		STATUS=${ASSUME_ROLE_ACTIVE_MARK}
-		ROLE_PROMPT="(${ASSUME_ROLE})"
+		ROLE_PROMPT="[${ASSUME_ROLE}]"
 	else
 		STATUS=${ASSUME_ROLE_INACTIVE_MARK}
-		ROLE_PROMPT="(none)"
+		ROLE_PROMPT="[none]"
 	fi
 
 	local secrets_active=""
@@ -121,12 +121,36 @@ function geodesic_prompt() {
 		fi
 	done
 
-	PS1="${STATUS}${level_prompt} "
-	PS1+="${ROLE_PROMPT} \W "
-	PS1+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
+	local dir_prompt;
+	dir_prompt="${STATUS}${level_prompt} "
+	dir_prompt+="${ROLE_PROMPT} \W "
+	dir_prompt+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
+
+	update_terraform_prompt
+	local old_kube_ps1_prefix="$KUBE_PS1_PREFIX"
+	KUBE_PS1_PREFIX="("
+	local tf_prompt;
+	if [[ $GEODESIC_TF_PROMPT_ACTIVE == "true" ]]; then
+		local tf_mark
+		if [[ $GEODESIC_TF_PROMPT_TF_NEEDS_INIT == "true" ]]; then
+			tf_mark="${ASSUME_ROLE_INACTIVE_MARK}"
+		else
+			tf_mark="${ASSUME_ROLE_ACTIVE_MARK}"
+		fi
+		if [[ -n ${GEODESIC_TF_PROMPT_LINE} ]]; then
+			tf_prompt="${tf_mark}${GEODESIC_TF_PROMPT_LINE}\n"
+		fi
+		if [[ $GEODESIC_TERRAFORM_WORKSPACE_PROMPT_ENABLED == "true" ]]; then
+			KUBE_PS1_PREFIX="$(yellow "cluster:")("
+		fi
+	fi
+	if [[ $old_kube_ps1_prefix != $KUBE_PS1_PREFIX ]]; then
+		KUBE_PS1_KUBECONFIG_CACHE=""
+	fi
 
 	if [ -n "${BANNER}" ]; then
-		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)${secrets_active}\n"${PS1}
+		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)${secrets_active}\n${tf_prompt}${dir_prompt}"
+	else
+		PS1="${tf_prompt}${dir_prompt}"
 	fi
-	export PS1
 }

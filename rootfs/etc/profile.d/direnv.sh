@@ -1,4 +1,6 @@
 # Install `direnv` via PROMPT_COMMAND hook
 #
 
-eval "$(direnv hook bash)"
+if [[ ${DIRENV_ENABLED:-true} == "true" ]]; then
+	eval "$(direnv hook bash)"
+fi

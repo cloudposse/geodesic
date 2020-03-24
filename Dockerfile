@@ -6,6 +6,16 @@ FROM alpine:3.11.3 as python
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python3 python3-dev libffi-dev gcc linux-headers musl-dev openssl-dev make
 
+## Note:
+# To install aws-gogle-auth:
+# - add `aws-google-auth==0.0.34` to requirements.txt
+# - add these libraries here (python build time)
+#   - libjpeg-turbo-dev libxml2-dev libxslt-dev
+# - add these libraries to packages.txt
+#   - libjpeg-turbo
+#   - libxml2
+#   - libxslt
+
 COPY requirements.txt /requirements.txt
 
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
@@ -166,7 +176,7 @@ RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v$
 # 
 # Install fancy Kube PS1 Prompt
 #
-ENV KUBE_PS1_VERSION 0.6.0
+ENV KUBE_PS1_VERSION v0.7.0
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #

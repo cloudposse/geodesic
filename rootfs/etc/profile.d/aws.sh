@@ -26,7 +26,7 @@ function export_current_aws_role() {
 	if [[ -n $role_arn ]]; then
 		export DETECTED_ROLE_ARN="$role_arn"
 		local role_name=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$role_arn" | cut -d' ' -f 3)
-		if [[ -z role_name ]]; then
+		if [[ -z $role_name ]]; then
 			echo "* $(red Could not find role name for ${role_arn}\; calling it \"unknown-role\")"
 			role_name="unknown-role"
 		fi

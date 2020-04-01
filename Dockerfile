@@ -24,7 +24,7 @@ RUN python3 -m pip install --upgrade pip setuptools wheel && \
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:279.0.0-alpine as google-cloud-sdk
+FROM google/cloud-sdk:286.0.0-alpine as google-cloud-sdk
 
 #
 # Geodesic base image

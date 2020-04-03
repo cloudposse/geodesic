@@ -57,6 +57,7 @@ KUBE_PS1_SYMBOL_ENABLE=${KUBE_PS1_SYMBOL_ENABLE:-false}
 function geodesic_prompt() {
 
 	case $PROMPT_STYLE in
+	# Color escapes: 1=red, 2=green, 3=yellow, 6=cyan
 	plain)
 		# 8859-1 codepoints:
 		# '\[' and '\]' are bash prompt delimiters around non-printing characters
@@ -123,7 +124,11 @@ function geodesic_prompt() {
 
 	local dir_prompt
 	dir_prompt="${STATUS}${level_prompt} "
-	dir_prompt+="${ROLE_PROMPT} \W "
+	if [[ $PWD =~ ^/localhost/ ]]; then
+		dir_prompt+="${ROLE_PROMPT} ("$'\x01'$(tput bold)$(tput setaf 1)$'\x02LOCAL\x01'$(tput sgr0)$'\x02'") \W "
+	else
+		dir_prompt+="${ROLE_PROMPT} \W "
+	fi
 	dir_prompt+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
 
 	update_terraform_prompt

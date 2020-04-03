@@ -20,7 +20,7 @@ function _update_cluster_config() {
 		eks-update-kubeconfig "$@"
 	fi
 	export KUBECONFIG="$new_config"
-	(( $set_namespace == 0 )) && kubens "$current_namespace"
+	(($set_namespace == 0)) && kubens "$current_namespace"
 }
 
 function set-cluster() {

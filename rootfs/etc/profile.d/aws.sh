@@ -23,12 +23,19 @@ fi
 # sets environment variables accordingly
 function export_current_aws_role() {
 	local role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
-	if [[ -n $role_arn ]]; then
+	if [[ -z $role_arn ]]; then
+		unset ASSUME_ROLE
+	else
 		export DETECTED_ROLE_ARN="$role_arn"
 		local role_name=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$role_arn" | cut -d' ' -f 3)
 		if [[ -z $role_name ]]; then
-			echo "* $(red Could not find role name for ${role_arn}\; calling it \"unknown-role\")"
-			role_name="unknown-role"
+			if [[ "$role_arn" =~ "role/OrganizationAccountAccessRole" ]]; then
+				role_name="$(printf "%s" "$role_arn" | cut -d: -f 5):OrgAccess"
+				echo "* $(red Could not find profile name for ${role_arn}\; calling it \"${role_name}\")"
+			else
+				role_name="$(printf "%s" "$role_arn" | cut -d/ -f 2)"
+				echo "* $(green Could not find profile name for ${role_arn}\; calling it \"${role_name}\")"
+			fi
 		fi
 		export ASSUME_ROLE="$role_name"
 	fi

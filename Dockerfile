@@ -97,7 +97,7 @@ ENV AWS_OKTA_ENABLED=false
 #
 # Set KUBERNETES_VERSION and KOPS_BASE_IMAGE in /conf/kops/kops.envrc
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
-ENV KUBECTX_COMPLETION_VERSION 0.6.2
+ENV KUBECTX_COMPLETION_VERSION 0.8.0
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
 
@@ -161,9 +161,9 @@ RUN chmod -R 777 ${HELM_PATH_CACHE}/helm ${HELM_PATH_CONFIG}/helm ${HELM_PATH_DA
 #
 # Install minimal helm plugins
 #
-ENV HELM_DIFF_VERSION 3.0.0-rc.7
-ENV HELM_GIT_VERSION 0.5.0
-ENV HELM_HELM_2TO3_VERSION 0.2.1
+ENV HELM_DIFF_VERSION 3.1.1
+ENV HELM_GIT_VERSION 0.7.0
+ENV HELM_HELM_2TO3_VERSION 0.5.1
 
 RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
     && helm2 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION}
@@ -176,8 +176,8 @@ RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v$
 # 
 # Install fancy Kube PS1 Prompt
 #
-ENV KUBE_PS1_VERSION v0.7.0
-ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
+ENV KUBE_PS1_VERSION 0.7.0
+ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #
 # AWS

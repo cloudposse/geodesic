@@ -129,11 +129,55 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		fi
 	else
 		AWS_VAULT_ARGS=()
-		AWS_VAULT_ARGS+=("--duration=${AWS_VAULT_DURATION:-1h}")
+		# For clarity, Geodesic prefers to use env vars beginning with AWS_VAULT to configure AWS_VAULT:
+		#   AWS_VAULT_ASSUME_ROLE_TTL=1h
+		#   AWS_VAULT_SESSION_TTL=12h
+		#   and new with aws-vault version 5: AWS_VAULT_CHAINED_SESSION_TOKEN_TTL=8h
+		#
+		# However, we should honor the official aws-vault environment variables if they are set and AWS_VAULT_* are not.
+		# Unfortunately, the official variables changed between aws-vault version 4 and version 5.
+		# For aws-vault v4: https://github.com/99designs/aws-vault/blob/v4.7.1/USAGE.md#environment-variables
+		#	AWS_ASSUME_ROLE_TTL: Expiration time for aws assumed role (see the flag --assume-role-ttl)
+		#	AWS_SESSION_TTL: Expiration time for aws session (see the flag --session-ttl)
+		# For aws-vault v5: https://github.com/99designs/aws-vault/blob/v5.4.0/USAGE.md#environment-variables
+		#	AWS_ASSUME_ROLE_TTL: Expiration time for the AssumeRole credentials. Defaults to 1h
+		#	AWS_SESSION_TOKEN_TTL: Expiration time for the GetSessionToken credentials. Defaults to 1h
+		#	AWS_CHAINED_SESSION_TOKEN_TTL: Expiration time for the GetSessionToken credentials when chaining profiles. Defaults to 8h
+		#
+		# Also the flag called --assume-role-ttl in v4 was renamed to --duration in v5
+		# So now we skip setting flags, and use environment variables instead, particularly the v5 variables
+		# do not all have command line equivalents.
+		if [[ -n $AWS_VAULT_ASSUME_ROLE_TTL ]]; then
+			if [[ -n $AWS_ASSUME_ROLE_TTL ]]; then
+				echo "* $(red "aws-vault: overriding AWS_ASSUME_ROLE_TTL (${AWS_ASSUME_ROLE_TTL}) with AWS_VAULT_ASSUME_ROLE_TTL (${AWS_VAULT_ASSUME_ROLE_TTL})")"
+			fi
+			export AWS_ASSUME_ROLE_TTL=${AWS_VAULT_ASSUME_ROLE_TTL}
+		fi
 
-		if [[ -n $AWS_SESSION_TTL ]]; then
-			[[ -n $AWS_SESSION_TOKEN_TTL ]] || export $AWS_CHAINED_SESSION_TOKEN_TTL="${AWS_SESSION_TTL}"
-			[[ -n $AWS_CHAINED_SESSION_TOKEN_TTL ]] || export $AWS_CHAINED_SESSION_TOKEN_TTL="${AWS_SESSION_TTL}"
+		if aws-vault exec --help | grep -q -e --duration; then # aws-vault version 5
+			if [[ -n $AWS_VAULT_SESSION_TTL ]]; then
+				# AWS_VAULT_SESSION_TTL takes priority
+				if [[ -n $AWS_SESSION_TOKEN_TTL ]]; then
+					echo "* $(red "aws-vault: overriding AWS_SESSION_TOKEN_TTL (${AWS_SESSION_TOKEN_TTL}) with AWS_VAULT_SESSION_TTL (${AWS_VAULT_SESSION_TTL})")"
+				fi
+				export AWS_SESSION_TOKEN_TTL=${AWS_VAULT_SESSION_TTL}
+			elif [[ -z $AWS_SESSION_TOKEN_TTL ]] && [[ -n $AWS_SESSION_TTL ]]; then
+				echo "* $(green "aws-vault: copying version 4 AWS_SESSION_TTL (${AWS_SESSION_TTL}) to version 5 variable AWS_SESSION_TOKEN_TTL")"
+				export AWS_SESSION_TOKEN_TTL=${AWS_SESSION_TTL}
+			fi
+			if [[ -n $AWS_VAULT_CHAINED_SESSION_TOKEN_TTL ]]; then
+				if [[ -n $AWS_CHAINED_SESSION_TOKEN_TTL ]]; then
+					echo "* $(red "aws-vault: overriding AWS_CHAINED_SESSION_TOKEN_TTL (${AWS_CHAINED_SESSION_TOKEN_TTL}) with AWS_VAULT_CHAINED_SESSION_TOKEN_TTL (${AWS_VAULT_CHAINED_SESSION_TOKEN_TTL})")"
+					export AWS_CHAINED_SESSION_TOKEN_TTL=${AWS_VAULT_CHAINED_SESSION_TOKEN_TTL}
+				fi
+			fi
+			[[ -n $AWS_SESSION_TOKEN_TTL ]] && [[ -z $AWS_CHAINED_SESSION_TOKEN_TTL ]] && export AWS_CHAINED_SESSION_TOKEN_TTL="${AWS_SESSION_TOKEN_TTL}"
+		elif [[ -n $AWS_VAULT_SESSION_TTL ]]; then # aws-vault version 4
+			# AWS_VAULT_SESSION_TTL takes priority
+			if [[ -n AWS_SESSION_TTL ]]; then
+				echo "* $(red "aws-vault: overriding AWS_SESSION_TTL (${AWS_SESSION_TTL}) with AWS_VAULT_SESSION_TTL (${AWS_VAULT_SESSION_TTL})")"
+			fi
+			export AWS_SESSION_TTL=${AWS_VAULT_SESSION_TTL}
 		fi
 
 		[ -d /localhost/.awsvault ] || mkdir -p /localhost/.awsvault

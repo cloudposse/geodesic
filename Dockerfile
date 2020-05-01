@@ -1,7 +1,7 @@
 #
 # Python Dependencies
 #
-FROM alpine:3.11.5 as python
+FROM alpine:3.11.6 as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
 RUN apk add python3 python3-dev libffi-dev gcc linux-headers musl-dev openssl-dev make
@@ -29,7 +29,7 @@ FROM google/cloud-sdk:286.0.0-alpine as google-cloud-sdk
 #
 # Geodesic base image
 #
-FROM alpine:3.11.5
+FROM alpine:3.11.6
 
 ENV BANNER "geodesic"
 
@@ -42,7 +42,7 @@ USER root
 
 # install the cloudposse alpine repository
 ADD https://apk.cloudposse.com/ops@cloudposse.com.rsa.pub /etc/apk/keys/
-RUN echo "@cloudposse https://apk.cloudposse.com/3.10/vendor" >> /etc/apk/repositories
+RUN echo "@cloudposse https://apk.cloudposse.com/3.11/vendor" >> /etc/apk/repositories
 
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \

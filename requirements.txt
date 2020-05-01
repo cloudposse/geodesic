@@ -8,4 +8,4 @@ boto3==1.12.33
 # crudini requires python-iniparse version not yet released to pypi
 https://github.com/candlepin/python-iniparse/archive/727a5d212d79bddcd6fb1116e406700be63ded24.zip
 https://github.com/pixelb/crudini/archive/0.9.3.zip
-Jinja2==2.11.1
+Jinja2==2.11.2

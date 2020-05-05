@@ -19,7 +19,9 @@ _alias_if_new kexp 'kops export kubecfg'
 if _cmd_missing chdo; then
 	# Run chamber to put secrets for given service(s) in the environment
 	function chdo() {
-		source <(chamber export -f dotenv "$@" | sed "s/^/export /" | perl -pe s/\\\\n/\\n/g)
+		for service in "$@"; do
+			source <(chamber env "$service")
+		done
 	}
 	# Import kops secrets into the environment
 	_alias_if_new kudo 'chdo kops'

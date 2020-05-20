@@ -1,0 +1,16 @@
+#!/bin/bash
+function red() {
+	echo "$(tput setaf 1)$*$(tput sgr0)"
+}
+
+function green() {
+	echo "$(tput setaf 2)$*$(tput sgr0)"
+}
+
+red docker command not found.
+green To install:
+echo "    apk add docker-cli"
+echo
+green To inform your shell a new command has been installed
+echo "    hash -r"
+echo

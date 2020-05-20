@@ -69,9 +69,10 @@ function use() {
 					--env GROUP_ID)
 			elif [ "${OS}" == 'Darwin' ] && [ "${GEODESIC_MAC_FORWARD_SOCKET}" == 'true' ]; then
 				# Bind-mount SSH-agent socket (available in docker-for mac Edge 2.2 release)
-				# Note that the file/socket /run/host-services/ssh-auth.sock does not actually exist
-				# on the host OS, it is a special value recognized by Docker for Mac.
+				# Note that the file/socket /run/host-services/ssh-auth.sock does not exist
+				# on the host OS, it is in the Moby Linux VM in which the Docker daemon `dockerd` runs.
 				# See https://github.com/docker/for-mac/issues/410#issuecomment-557613306
+				# and https://docs.docker.com/docker-for-mac/osxfs/#namespaces
 				DOCKER_ARGS+=(--volume /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
 					-e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock)
 			fi
@@ -81,19 +82,19 @@ function use() {
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
-		if [ "${OS}" == 'Linux' ]; then
-			# Bind-mount docker client and docker socket into container (linux only)
-			echo "# Enabling docker support"
-			DOCKER_ARGS+=(--volume "$(which docker):/usr/bin/docker"
-			--volume "/var/run/docker.sock:/var/run/docker.sock")
-		elif [ "${OS}" == 'Darwin' ] && [ "${GEODESIC_MAC_FORWARD_SOCKET}" == 'true' ]; then
-			# Bind-mount docker socket into container starting with Docker Desktop Mac 2.2
-			DOCKER_ARGS+=(--volume /run/guest-services/docker.sock:/run/guest-services/docker.sock
-				-e DOCKER_HOST="unix:///run/guest-services/docker.sock")
-		else
-			echo "Docker in Docker not supported on ${OS}"
-			exit 1
+		# Bind-mount docker socket into container
+		# Should work on Linux and Mac.
+		# Note that the mounted /var/run/docker.sock is not a file or
+		# socket in the Mac host OS, it is in the dockerd VM.
+		# https://docs.docker.com/docker-for-mac/osxfs/#namespaces
+		echo "# Enabling docker support. Be sure you install a docker CLI binary (apk add docker-cli)."
+		DOCKER_ARGS+=(--volume "/var/run/docker.sock:/var/run/docker.sock")
+		# Some reports say this is needed for Windows WSL
+		if [[ $(uname -r) =~ Microsoft$ ]]; then
+			DOCKER_ARGS+=(--user root)
 		fi
+		# NOTE: bind mounting the docker CLI binary is no longer recommended and usually does not work.
+		# Use a docker image with a docker CLI binary installed that is appropriate to the image's OS.
 	fi
 
 	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} == false ]]; then

@@ -75,5 +75,6 @@ tfmask@cloudposse
 unzip
 util-linux
 variant@cloudposse
+variant2@cloudposse
 vim
 yq@cloudposse

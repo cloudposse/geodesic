@@ -1,4 +1,4 @@
-#!/usr/bin/variant
+#!/usr/bin/variant1
 # vim:set ft=yaml
 
 mixins:
@@ -61,7 +61,7 @@ tasks:
           kubectl -n {{ get "namespace" }} delete deployment tiller-deploy
           kubectl delete clusterrolebinding tiller --ignore-not-found
           kubectl -n {{ get "namespace" }} delete serviceaccount tiller --ignore-not-found
-  # Current (v0.34.0) variant does not allow a task with the same name as a defaulted parameter of another task
+  # Current (v0.34.0) variant1 does not allow a task with the same name as a defaulted parameter of another task
   # so we cannot call this task "namespace" because it conflict with the tiller task
   # namespace:
   ns:

@@ -4,6 +4,8 @@
 # Requires
 #  GRAFANA_API_KEY: api key authorizing "edit" on dashboards
 #  PROMETHEUS_GRAFANA_ROOT_URL or GRAFANA_ROOT_URL: URL to which '/api/dashboards...' will be appended
+# Optional
+#  GRAFANA_API_USER: username of user authorized to "edit" dashboards (GRAFANA_API_KEY is user's password)
 #
 
 function _usage() {
@@ -119,13 +121,13 @@ function upload_dashboard() {
 		# Upload a real dashboard, what could be in a configmap
 		jq <"$1" '.editable=true | {dashboard: ., overwrite: false}' |
 			curl -qs -w "%{stderr}* Upload of dashboard $title finished with status code %{http_code}\n" \
-				-X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
+				-X POST -H "Content-Type: application/json" -u "${GRAFANA_API_USER:-api_key}:${GRAFANA_API_KEY}" --data-binary @- \
 				"$host/api/dashboards/db" | (parse_grafana_response 2>/dev/null || :)
 	else
 		# Import a portable dashboard, as from Grafana.com
 		jq <"$1" --argjson inputs "$ds_inputs" '.editable = true | {dashboard: ., inputs: $inputs, overwrite: false}' |
 			curl -qs -w "%{stderr}* Upload of dashboard $title finished with status code %{http_code}\n" \
-				-X POST -H "Content-Type: application/json" -u "api_key:${GRAFANA_API_KEY}" --data-binary @- \
+				-X POST -H "Content-Type: application/json" -u "${GRAFANA_API_USER:-api_key}:${GRAFANA_API_KEY}" --data-binary @- \
 				"$host/api/dashboards/import" | (parse_grafana_response 2>/dev/null || :)
 	fi
 

@@ -9,12 +9,15 @@ function kube_ps1_helper() {
 	# This will probably be a supported option in v0.8.0 but this is the cheapest
 	# solution for now.
 	# https://github.com/jonmosco/kube-ps1/issues/115
-	[[ $KUBE_PS1_CONTEXT == "N/A" ]] && KUBE_PS1_CONTEXT=""
+	if [[ $KUBE_PS1_CONTEXT == "N/A" ]]; then
+		KUBE_PS1_CONTEXT=""
+	fi
 
 	# Update the prompt if the kubecfg file is deleted.
 	# https://github.com/jonmosco/kube-ps1/issues/118
-	[[ -n $KUBE_PS1_CONTEXT ]] && [[ ! -r "${KUBECONFIG}" ]] && KUBE_PS1_CONTEXT=""
-
+	if [[ -n $KUBE_PS1_CONTEXT ]] && [[ ! -r "${KUBECONFIG}" ]]; then
+		KUBE_PS1_CONTEXT=""
+	fi
 }
 
 # This shortens the cluster name based on our EKS cluster naming pattern,

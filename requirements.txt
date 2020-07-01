@@ -1,6 +1,6 @@
 PyYAML==5.3.1
 ansible==2.9.9
-awscli==1.18.69
+awscli==1.18.91
 boto==2.49.0
 boto3==1.13.19
 # crudini 0.9.3 is required for Python3, but not yet released to pypi

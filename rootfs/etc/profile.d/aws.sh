@@ -26,7 +26,6 @@ function export_current_aws_role() {
 	if [[ -z $role_arn ]]; then
 		unset ASSUME_ROLE
 	else
-		export DETECTED_ROLE_ARN="$role_arn"
 		local role_name=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$role_arn" | cut -d' ' -f 3)
 		if [[ -z $role_name ]]; then
 			if [[ "$role_arn" =~ "role/OrganizationAccountAccessRole" ]]; then
@@ -41,14 +40,17 @@ function export_current_aws_role() {
 	fi
 }
 
-# Keep track of AWS credentials and updates AWS role environment variables
-# when it notices changes
+# Keep track of AWS credentials and updates to AWS role environment variables.
+# When changes are noticed, update prompt with current role.
 function refresh_current_aws_role_if_needed() {
+	local is_exported="^declare -[^ x]*x[^ x]* "
+	local aws_profile=$(declare -p AWS_PROFILE 2>/dev/null)
+	[[ $aws_profile =~ $is_exported ]] || aws_profile=""
 	local credentials_mtime=$(stat -c "%Y" ${AWS_SHARED_CREDENTIALS_FILE:-"~/.aws/credentials"} 2>/dev/null)
-	local role_fingerprint="${AWS_PROFILE}/${credentials_mtime}/${AWS_ACCESS_KEY_ID}"
-	if [[ $role_fingerprint != $CURRRENT_AWS_ROLE_CACHE ]]; then
+	local role_fingerprint="${aws_profile}/${credentials_mtime}/${AWS_ACCESS_KEY_ID}"
+	if [[ $role_fingerprint != $GEODESIC_AWS_ROLE_CACHE ]]; then
 		export_current_aws_role
-		export CURRRENT_AWS_ROLE_CACHE="${role_fingerprint}"
+		export GEODESIC_AWS_ROLE_CACHE="${role_fingerprint}"
 	fi
 }
 

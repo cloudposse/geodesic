@@ -22,22 +22,39 @@ fi
 # Asks AWS what the currently active identity is and
 # sets environment variables accordingly
 function export_current_aws_role() {
-	local role_arn=$(aws sts get-caller-identity --output text --query 'Arn' | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,' | cut -d/ -f1-2)
-	if [[ -z $role_arn ]]; then
+	local role_name
+	# Could be a primary or assumed role. If we have assumed a role, cut off the session name.
+	local current_role=$(aws sts get-caller-identity --output text --query 'Arn' | cut -d/ -f1-2 2>/dev/null)
+	if [[ -z $current_role ]]; then
 		unset ASSUME_ROLE
-	else
-		local role_name=$(crudini --get --format=lines "$AWS_CONFIG_FILE" | grep "$role_arn" | cut -d' ' -f 3)
-		if [[ -z $role_name ]]; then
-			if [[ "$role_arn" =~ "role/OrganizationAccountAccessRole" ]]; then
-				role_name="$(printf "%s" "$role_arn" | cut -d: -f 5):OrgAccess"
-				echo "* $(red Could not find profile name for ${role_arn}\; calling it \"${role_name}\")"
-			else
-				role_name="$(printf "%s" "$role_arn" | cut -d/ -f 2)"
-				echo "* $(green Could not find profile name for ${role_arn}\; calling it \"${role_name}\")"
-			fi
-		fi
-		export ASSUME_ROLE="$role_name"
+		return 0
 	fi
+
+	# saml2aws will store the assumed role from sign-in as x_principal_arn in credentials file
+	# Default values from https://awscli.amazonaws.com/v2/documentation/api/latest/topic/config-vars.html
+	local creds_file="${AWS_SHARED_CREDENTIALS_FILE:-\~/.aws/credentials}"
+	if [[ -r $creds_file ]]; then
+		role_name=$(crudini --get --format=lines "${creds_file}" | grep "$current_role" | cut -d' ' -f 2)
+	fi
+
+	# Assumed roles are normally found in AWS config file, but using the role ARN,
+	# not the assumed role ARN. google2aws also puts login role in this file.
+	local config_file="${AWS_CONFIG_FILE:-\~/.aws/config}"
+	if [[ -z $role_name ]] && [[ -r $config_file ]]; then
+		local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
+		role_name=$(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3)
+	fi
+
+	if [[ -z $role_name ]]; then
+		if [[ "$role_arn" =~ "role/OrganizationAccountAccessRole" ]]; then
+			role_name="$(printf "%s" "$role_arn" | cut -d: -f 5):OrgAccess"
+			echo "* $(red Could not find profile name for ${role_arn}\; calling it \"${role_name}\")" >&2
+		else
+			role_name="$(printf "%s" "$role_arn" | cut -d/ -f 2)"
+			echo "* $(green Could not find profile name for ${role_arn}\; calling it \"${role_name}\")" >&2
+		fi
+	fi
+	export ASSUME_ROLE="$role_name"
 }
 
 # Keep track of AWS credentials and updates to AWS role environment variables.

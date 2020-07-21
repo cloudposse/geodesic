@@ -34,7 +34,7 @@ function export_current_aws_role() {
 	# Default values from https://awscli.amazonaws.com/v2/documentation/api/latest/topic/config-vars.html
 	local creds_file="${AWS_SHARED_CREDENTIALS_FILE:-\~/.aws/credentials}"
 	if [[ -r $creds_file ]]; then
-		role_name=$(crudini --get --format=lines "${creds_file}" | grep "$current_role" | cut -d' ' -f 2)
+		role_name=$(crudini --get --format=lines "${creds_file}" | grep "$current_role" | head -1 | cut -d' ' -f 2)
 	fi
 
 	# Assumed roles are normally found in AWS config file, but using the role ARN,
@@ -42,7 +42,7 @@ function export_current_aws_role() {
 	local config_file="${AWS_CONFIG_FILE:-\~/.aws/config}"
 	if [[ -z $role_name ]] && [[ -r $config_file ]]; then
 		local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
-		role_name=$(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3)
+		role_name=$(crudini --get --format=lines "$config_file" | grep "$role_arn" | head -1 | cut -d' ' -f 3)
 	fi
 
 	if [[ -z $role_name ]]; then

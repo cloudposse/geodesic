@@ -178,18 +178,15 @@ ENV HELM_DIFF_VERSION 3.1.2
 ENV HELM_GIT_VERSION 0.8.1
 ENV HELM_HELM_2TO3_VERSION 0.6.0
 
+# Install plugins and then remove cache
 RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
-    && helm2 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION}
+    && helm2 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
+    && rm -rf $HELM_HOME/cache/plugins
 
 RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
     && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
-    && helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION}
-
-# Delete unneeded Helm plugin cache
-# Helm 2
-RUN rm -rf $HELM_HOME/cache/plugins
-# Helm 3
-RUN rm -rf $XDG_CACHE_HOME/helm
+    && helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION} \
+    && rm -rf $XDG_CACHE_HOME/helm
 
 # 
 # Install fancy Kube PS1 Prompt

@@ -14,5 +14,10 @@ fi
 
 ${HELM_BINARY} delete --help | grep -q -- --purge && _HELM_USE_PURGE=--purge || unset _HELM_USE_PURGE
 
-${HELM_BINARY} list --namespace "${1}" --short --all | xargs -r ${HELM_BINARY} delete ${_HELM_USE_PURGE}
+if ${HELM_BINARY} delete --help | grep -q -- --namespace; then
+	${HELM_BINARY} list --namespace "${1}" --short --all | xargs -r ${HELM_BINARY} --namespace "${1}" delete ${_HELM_USE_PURGE}
+else
+	${HELM_BINARY} list --namespace "${1}" --short --all | xargs -r ${HELM_BINARY} delete ${_HELM_USE_PURGE}
+fi
+
 kubectl delete namespace "${1}" --ignore-not-found --cascade=true

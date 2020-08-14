@@ -1,0 +1,71 @@
+#!/bin/bash
+
+set -eo pipefail
+
+function usage() {
+	printf "\nUsage:\n  %s [-i] [namespace] release\n\n" "$0"
+	printf 'Patches a release converted with "helm 2to3" so that helm v3 will own it\n\n'
+	printf '  -i  Interactive. Displays diff and prompts for confirmation before applying\n\n'
+	printf '  See: https://github.com/helm/helm/pull/7649\n'
+	printf '       https://github.com/helm/helm-2to3/issues/162\n\n'
+}
+
+function main() {
+	if [[ $1 == '-i' ]]; then
+		interactive="true"
+		kc_cmd=diff
+		shift
+	else
+		kc_cmd=apply
+	fi
+
+	if (($# == 2)); then
+		namespace=$1
+		release=$2
+	else
+		namespace=$(kubens -c)
+		release=$1
+	fi
+
+	echo "Updating release $release in namespace $namespace"
+
+	jqfilter='.metadata.labels."app.kubernetes.io/managed-by" = "Helm" | del(.metadata.labels.heritage) '
+	jqfilter+=' | .metadata.annotations."meta.helm.sh/release-namespace" = "'"$namespace"'"'
+	jqfilter+=' | .metadata.annotations."meta.helm.sh/release-name" = "'"$release"'"'
+
+	# printf "jqfilter:\n%s\n\n" "$jqfilter"
+
+	temp=$(mktemp)
+	# printf "Temp file is $temp\n\n"
+
+	trap "rm -f $temp" EXIT
+
+	helm -n $namespace get manifest $release | yq r -j '-d*' - |
+		jq -c "$jqfilter" >"$temp"
+
+	if kubectl -n $namespace diff -f "$temp"; then
+		printf "\nNo Difference Found\n\n"
+		return 0
+	fi
+
+	if [[ -n $interactive ]]; then
+		printf "\n\n"
+		read -p "Apply? (y/N)"
+
+		if [[ $REPLY =~ ^[Yy] ]]; then
+			printf "\nApplying...\n"
+			kubectl -n $namespace apply -f "$temp"
+		else
+			printf "\nCanceling...\n"
+		fi
+	else
+		printf "\nApplying...\n"
+		kubectl -n $namespace apply -f "$temp"
+	fi
+}
+
+if (($# == 0)); then
+	usage
+else
+	main "$@"
+fi

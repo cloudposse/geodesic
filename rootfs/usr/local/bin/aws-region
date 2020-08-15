@@ -1,0 +1,115 @@
+#!/bin/bash
+# Converts AWS region names from full names to 3 character names and back.
+# Generally, AWS region names have 3 parts and the short name
+# is the first character of each part. Exceptions (due to collisions):
+# - Africa and China use second letter of first part.
+# - ap-south-1 is shortened to as0 to avoid conflict with ap-southeast-1
+# - cn-north-1 is shortened to nn0 to avoid conflict with cn-northwest-1
+
+# You should be able to list all regions with this command:
+# aws ec2 describe-regions --all-regions --query "Regions[].{Name:RegionName}" --output text
+# but actually it leaves out GovCloud and China
+
+usage() {
+	printf "\nConvert between long and short region codes\n\n"
+	printf "  %s [-l | --long | -s | --short] region-code\n\n" "$0"
+	echo '  If neither --long nor --short is provided, short inputs'
+	echo '  are converted to long, long inputs are converted to short'
+}
+
+declare -A short_map
+short_map=(
+	[ae1]=ap-east-1
+	[an1]=ap-northeast-1
+	[an2]=ap-northeast-2
+	[as0]=ap-south-1
+	[as1]=ap-southeast-1
+	[as2]=ap-southeast-2
+	[cc1]=ca-central-1
+	[ec1]=eu-central-1
+	[en1]=eu-north-1
+	[es1]=eu-south-1
+	[ew1]=eu-west-1
+	[ew2]=eu-west-2
+	[ew3]=eu-west-3
+	[fs1]=af-south-1
+	[ge1]=us-gov-east-1
+	[gw1]=us-gov-west-1
+	[ms1]=me-south-1
+	[nn0]=cn-north-1
+	[nn1]=cn-northwest-1
+	[se1]=sa-east-1
+	[ue1]=us-east-1
+	[ue2]=us-east-2
+	[uw1]=us-west-1
+	[uw2]=us-west-2
+)
+
+# It is faster just to loop through the array
+# than to create another array and index it
+short() {
+	# If we are given a short region code, then just
+	# validate it and return it if valid.
+	if ((${#1} == 3)); then
+		if [[ -n "${short_map[${1,,}]}" ]]; then
+			echo ${1,,}
+			return 0
+		fi
+		echo Not found >&2
+		return 1
+	fi
+
+	# Loop through the keys in short_map and return the one
+	# whose value matches what we were given (folded to lower case)
+	local long="${1,,}"
+	for short in "${!short_map[@]}"; do
+		if [[ $long == ${short_map[$short]} ]]; then
+			echo $short
+			return 0
+		fi
+	done
+	echo Not found >&2
+	return 1
+}
+
+long() {
+	# Fold our argument to lower case and look it up in short_map
+	local short="${short_map[${1,,}]}"
+	if [[ -n $short ]]; then
+		echo $short
+	else
+		# If we are given something that is not a short region code
+		# see if it matches an existing long region code, and return
+		# it if it does.
+		short="$(short $1)"
+		if [[ -n $short ]]; then
+			echo "${1,,}"
+		else
+			echo Not found >&2
+			return 1
+		fi
+	fi
+}
+
+# Test that all the short code entries map back to themselves
+test() {
+	for short in "${!short_map[@]}"; do
+		if [[ $(short $(long $short)) != $short ]]; then
+			echo Failed: $short - - >$(long $short) >$(short $(long $short)) >&2
+			return 1
+		fi
+	done
+	echo Passed
+}
+
+if [[ $1 == "test" ]]; then
+	test
+elif [[ $1 =~ l ]] && ! [[ $1 =~ central ]]; then
+	long $2
+elif (($# == 2)); then
+	short $2
+elif ((${#1} == 3)); then
+	long $1
+else
+	short $1
+fi

@@ -11,7 +11,7 @@
 # but actually it leaves out GovCloud and China
 
 usage() {
-	printf  "\nConvert between long and short region codes\n\n"
+	printf "\nConvert between long and short region codes\n\n"
 	printf "  %s [-l | --long | -s | --short] region-code\n\n" "$0"
 	echo '  If neither --long nor --short is provided, short inputs'
 	echo '  are converted to long, long inputs are converted to short'
@@ -48,8 +48,8 @@ short_map=(
 # It is faster just to loop through the array
 # than to create another array and index it
 short() {
-  # If we are given a short region code, then just
-  # validate it and return it if valid.
+	# If we are given a short region code, then just
+	# validate it and return it if valid.
 	if ((${#1} == 3)); then
 		if [[ -n "${short_map[${1,,}]}" ]]; then
 			echo ${1,,}
@@ -78,9 +78,9 @@ long() {
 	if [[ -n $short ]]; then
 		echo $short
 	else
-	  # If we are given something that is not a short region code
-	  # see if it matches an existing long region code, and return
-	  # it if it does.
+		# If we are given something that is not a short region code
+		# see if it matches an existing long region code, and return
+		# it if it does.
 		short="$(short $1)"
 		if [[ -n $short ]]; then
 			echo "${1,,}"

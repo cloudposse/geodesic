@@ -165,12 +165,6 @@ RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
     && helm2 init --client-only \
     && mkdir -p ${HELM_HOME}/plugins
 
-# Enable Atlantis to use helm 2
-RUN chmod -R a+rX ${HELM_HOME}
-
-# helm version 3 uses XDG variables set above.
-# See https://helm.sh/docs/faq/#xdg-base-directory-support
-
 #
 # Install minimal helm plugins
 #
@@ -186,6 +180,13 @@ RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v$
     && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
     && helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION} \
     && rm -rf $XDG_CACHE_HOME/helm
+
+# Enable Atlantis to use helm 2
+RUN chmod -R a+rwX ${HELM_HOME}
+
+# helm version 3 uses XDG variables set above.
+# XDG directory permissions updated at end of installs.
+# See https://helm.sh/docs/faq/#xdg-base-directory-support
 
 # 
 # Install fancy Kube PS1 Prompt

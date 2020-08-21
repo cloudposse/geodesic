@@ -68,6 +68,9 @@ syslog-ng
 tar
 teleport@cloudposse
 terraform@cloudposse
+# Do not install terraform-* or terraform_* by default
+# because they are incompatible with each other and
+# will cause problems for people who install one or the other
 terragrunt@cloudposse
 terrahelp@cloudposse
 tfenv@cloudposse

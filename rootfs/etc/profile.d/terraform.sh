@@ -1,4 +1,5 @@
 function update_terraform_prompt() {
+	[[ ${GEODESIC_TF_PROMPT_ENABLED:-false} == "true" ]] || return 0
 	# Test if there are any files with names ending in ".tf"
 	if compgen -G '*.tf' >/dev/null; then
 		export GEODESIC_TF_PROMPT_ACTIVE=true
@@ -29,6 +30,10 @@ function update_terraform_prompt() {
 if which terraform >/dev/null; then
 	complete -C "$(which terraform)" terraform
 fi
+
+for tf in /usr/bin/terraform-*; do
+	[[ -x $tf ]] && complete -C $tf $(basename $tf)
+done
 
 # Set default plugin cache dir
 export TF_PLUGIN_CACHE_DIR="${TF_PLUGIN_CACHE_DIR:-/localhost/.terraform.d/plugins}"

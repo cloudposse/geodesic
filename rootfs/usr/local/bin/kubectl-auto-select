@@ -1,0 +1,84 @@
+#!/bin/bash
+
+function red() {
+	echo "$(tput setaf 1)$*$(tput sgr0)" >&2
+}
+
+function green() {
+	echo "$(tput setaf 2)$*$(tput sgr0)"
+}
+
+# Output the normalized major and minor version number
+# 1. Remove any leading "v"
+# 2. If no dots, assume it is minor version with major version "1"
+function normalize_version() {
+	[[ -n $1 ]] || return
+	if [[ $1 == "null" ]]; then
+		red "Unable to determine Kubernetes (kubectl) version"
+		exit 1
+	fi
+
+	local version=${1#v} # remove leading "v" if present
+	# Customized Kubernetes versions, such as from AWS EKS, may have more than just the
+	# digits in the minor version, e.g. "16+", so strip out everything after leading digits,
+	# including patch version.
+	version=$(sed -E 's/((\d\.)?(\d+))([^d].*)?/\1/' <<<$version)
+	[[ $version =~ ^1\. ]] || version="1.${version}"
+	echo "$version"
+}
+
+# Output the major.minor version of the kubectl client
+function kubectl_mm_version() {
+	normalize_version $(kubectl version --client -o json 2>/dev/null | jq -r .clientVersion.minor)
+}
+
+# Output the git version of the kubectl client
+function kubectl_git_version() {
+	kubectl version --client -o json 2>/dev/null | jq -r .clientVersion.gitVersion
+}
+
+# Use `update-alternatives` to set kubectl to given major.minor version
+function set_alternatives() {
+	local version="$1"
+
+	if update-alternatives --set kubectl /usr/share/kubectl/"${version}"/bin/kubectl-"${version}"; then
+		if [[ $version == $(kubectl_mm_version) ]]; then
+			green "kubectl version set to $(kubectl_git_version)"
+		else
+			red "Unable to set kubectl to version ${version}"
+			red "kubectl version left at $(kubectl_mm_version)"
+		fi
+	fi
+}
+
+# Set Kubectl version based on environment variable, if set and
+# not already at that version
+function set_from_envar() {
+	local targetVersion=$(normalize_version "${GEODESIC_TARGET_KUBECTL_VERSION:-${GEODESIC_TARGET_KUBERNETES_VERSION}}")
+
+	if [[ -n ${targetVersion} ]]; then
+		local currentVersion="$1"
+		[[ -n $currentVersion ]] || currentVersion=$(kubectl_mm_version)
+		if [[ $currentVersion != $targetVersion ]]; then
+			set_alternatives "$targetVersion"
+		fi
+	fi
+}
+
+# Set Kubectl version based on version running on server, if available,
+# otherwised based on environment variable, if set
+function set_from_server() {
+	local versions clientVersion serverVersion hasServerVersion
+
+	versions=$(kubectl version -o json 2>/dev/null)
+	hasServerVersion=$?
+	clientVersion=$(normalize_version $(jq -r .clientVersion.minor <<<$versions))
+	if (($hasServerVersion != 0)); then
+		set_from_envar $clientVersion
+	else
+		serverVersion=$(normalize_version $(jq -r '.serverVersion.minor' <<<$versions))
+		set_alternatives "$serverVersion"
+	fi
+}
+
+set_from_server

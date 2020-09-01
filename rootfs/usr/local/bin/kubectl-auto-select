@@ -1,0 +1,125 @@
+#!/bin/bash
+
+set -eo pipefail
+
+INSTALL=false
+
+function red() {
+	echo "$(tput setaf 1)$*$(tput sgr0)" >&2
+}
+
+function green() {
+	echo "$(tput setaf 2)$*$(tput sgr0)"
+}
+
+function usage() {
+	echo 'Configure the correct version of kubectl for the cluster.'
+	echo
+	echo "  $(basename $0) [--install] [[<major>.]<minor>]"
+	echo '    where <major> and <minor> are major and minor Kubernetes version numbers.'
+	echo '    <major> is assumed to be 1 if not provided.'
+	echo '    If minor is not provided, the correct version will be determined by running `kubectl version`'
+	echo '    which of course requires that some version of kubectl be installed and configured to access the cluster.'
+	echo
+	echo '  --install  Install the needed version if it is not already installed'
+	echo
+	exit 2
+}
+
+# Output the normalized major and minor version number
+# 1. Remove any leading "v"
+# 2. If no dots, assume it is minor version with major version "1"
+function normalize_version() {
+	[[ -n $1 ]] || return
+	if [[ $1 == "null" ]]; then
+		red "Unable to determine Kubernetes (kubectl) version"
+		exit 1
+	fi
+
+	local version=${1#v} # remove leading "v" if present
+	# Customized Kubernetes versions, such as from AWS EKS, may have more than just the
+	# digits in the minor version, e.g. "16+", so strip out everything after leading digits,
+	# including patch version.
+	version=$(sed -E 's/((\d\.)?(\d+))([^d].*)?/\1/' <<<$version)
+	[[ $version =~ ^1\. ]] || version="1.${version}"
+	echo "$version"
+}
+
+function install() {
+	apk add -u kubectl-$(normalize_version "$1")@cloudposse
+}
+
+# Output the major.minor version of the kubectl client
+function kubectl_mm_version() {
+	normalize_version $(kubectl version --client -o json 2>/dev/null | jq -r .clientVersion.minor)
+}
+
+# Output the git version of the kubectl client
+function kubectl_git_version() {
+	kubectl version --client -o json 2>/dev/null | jq -r .clientVersion.gitVersion
+}
+
+# Use `update-alternatives` to set kubectl to given major.minor version
+function set_alternatives() {
+	local version="$1"
+
+	if [[ ! -x /usr/share/kubectl/"${version}"/bin/kubectl-"${version}" ]]; then
+		if [[ $INSTALL == "true" ]]; then
+			apk add -u kubectl-${version}@cloudposse
+		else
+			red "kubectl version ${version} not installed."
+			red "Install it with $0 --install $@"
+			exit 99
+		fi
+	fi
+
+	if update-alternatives --set kubectl /usr/share/kubectl/"${version}"/bin/kubectl-"${version}"; then
+		if [[ $version == $(kubectl_mm_version) ]]; then
+			green "kubectl version set to $(kubectl_git_version)"
+		else
+			red '`update-alternatives` succeeded but kubectl not at version ' "${version}."
+			red "kubectl version is now $(kubectl_mm_version)"
+		fi
+	else
+		red "Unable to set kubectl to version ${version}. Perhaps try installing it with \`apk add -u kubectl-${version}@cloudposse\`?"
+		red "kubectl version left at $(kubectl_mm_version)"
+	fi
+}
+
+# Set Kubectl version based on version running on server, if available,
+# otherwised based on environment variable, if set
+function set_from_server() {
+	local versions serverVersion
+
+	if [[ ! -x /usr/bin/kubectl ]]; then
+		red "No kubectl found, cannot determine version from server."
+		usage
+	fi
+
+	if versions=$(kubectl version -o json 2>/dev/null) &&
+		serverVersion=$(normalize_version $(jq -r '.serverVersion.minor' <<<$versions)) &&
+		[[ $serverVersion != "null" ]]; then
+
+		green "Detected server version $serverVersion"
+		set_alternatives "$serverVersion"
+	else
+		red "Unable to detect server version. Try specifying version on the command line."
+		usage
+	fi
+}
+
+if [[ $1 == "--install" ]]; then
+	INSTALL=true
+	shift
+fi
+
+if [[ $1 =~ ^- ]]; then
+	red "Unknown option: $1"
+	usage
+fi
+
+if [[ -n $1 ]]; then
+	set_alternatives $(normalize_version "$1")
+else
+	set_from_server
+fi

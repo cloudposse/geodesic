@@ -1,9 +1,44 @@
-nohup.out
-.terraform
-terraform.tfstate*
+
+# Things that could be checked into Git but need not be in the Docker image
 .git
-.idea
-*.iml
 .editorconfig
-build-harness
+
+# Below here should be pretty much a copy of .gitignore
 .build-harness
+build-harness/
+aws-assumed-role/
+.idea/
+*.iml
+
+# Compiled and auto-generated files
+**/nohup.out
+**/.terraform/*
+**/*.tfstate
+**/*.tfstate.*
+**/planfile
+**/*.planfile
+**/*.kubeconfig
+**/terraform.tfvars.json
+**/terraform.auto.tfvars.json
+**/*.terraform.tfvars.json
+**/*.terraform.auto.tfvars.json
+**/*.helmfile.vars.yaml
+
+# Module directory
+**/.terraform/
+**/.module/
+**/.helmfile/
+
+
+# Draft or auto-saved version
+# Note that the leading "**/" appears necessary for Docker even if not for Git
+**/*.draft.*
+**/*.orig
+**/*.bak
+**/*~
+
+# macOS special files and folders
+**/.DS_Store
+**/.CFUserTextEncoding
+**/.Trash/
+**/$RECYCLE.BIN/

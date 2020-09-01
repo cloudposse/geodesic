@@ -114,8 +114,9 @@ ENV AWS_OKTA_ENABLED=false
 # Install kubectl
 #
 # Set KUBERNETES_VERSION and KOPS_BASE_IMAGE in /conf/kops/kops.envrc
+#
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
-ENV KUBECTX_COMPLETION_VERSION 0.9.0
+ENV KUBECTX_COMPLETION_VERSION 0.9.1
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
 
@@ -168,7 +169,7 @@ RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
 #
 # Install minimal helm plugins
 #
-ENV HELM_DIFF_VERSION 3.1.2
+ENV HELM_DIFF_VERSION 3.1.3
 ENV HELM_GIT_VERSION 0.8.1
 ENV HELM_HELM_2TO3_VERSION 0.6.0
 

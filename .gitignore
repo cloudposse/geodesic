@@ -3,3 +3,36 @@ build-harness/
 aws-assumed-role/
 .idea/
 *.iml
+
+# Compiled or generated files
+# Compiled and auto-generated files
+**/nohup.out
+**/.terraform/*
+**/*.tfstate
+**/*.tfstate.*
+**/planfile
+**/*.planfile
+**/*.kubeconfig
+**/terraform.tfvars.json
+**/terraform.auto.tfvars.json
+**/*.terraform.tfvars.json
+**/*.terraform.auto.tfvars.json
+**/*.helmfile.vars.yaml
+
+# Module directory
+**/.terraform/
+**/.module/
+**/.helmfile/
+
+
+# Draft or auto-saved version
+**/*.draft.*
+**/*.orig
+**/*.bak
+**/*~
+
+# macOS special files and folders
+**/.DS_Store
+**/.CFUserTextEncoding
+**/.Trash/
+**/$RECYCLE.BIN/YCLE.BIN/

@@ -37,11 +37,9 @@ iputils
 jq
 keybase-client@testing
 kops@cloudposse
-kubectl@cloudposse
+# The latest version of kubectl is wrong for all of our customers, so do not install it.
+# Instead, install a compatible version. For now, track the latest AWS EKS version.
 kubectl-1.16@cloudposse
-kubectl-1.17@cloudposse
-kubectl-1.18@cloudposse
-kubectl-1.19@cloudposse
 kubectx@cloudposse
 kubens@cloudposse
 less

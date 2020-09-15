@@ -42,3 +42,14 @@ jobs:
         with:
           push: ${{ steps.prepare.outputs.trusted }}
           tags: ${{ steps.prepare.outputs.tags }}
+      - name: "Prepare test image"
+        run: |
+          docker tag ${{ github.repository }}:sha-${GITHUB_SHA:0:7} test-image:latest
+          make init
+      - name: "Run tests"
+        uses: "docker://test-image:latest"
+        with:
+          args: "-C test all"
+        env:
+          HELM_CHART_REPO_URL: ${{ steps.helm_chart.outputs.repo_url }}
+

@@ -27,7 +27,7 @@ jobs:
             TAGS="$TAGS,${{ github.repository }}:latest"
           fi
           echo ::set-output name=tags::${TAGS}
-          echo ::set-output trusted=${{ (github.event_name == 'release' && github.event.action == 'created') || github.event.pull_request.head.repo.full_name == github.repository }}
+          echo ::set-output name=trusted::${{ (github.event_name == 'release' && github.event.action == 'created') || github.event.pull_request.head.repo.full_name == github.repository }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub

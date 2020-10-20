@@ -189,15 +189,15 @@ function _main() {
 		return 4
 	fi
 	case $1 in
-	--overwrite )
-	  OVERWRITE=true
-	  shift
-	  ;;
+	--overwrite)
+		OVERWRITE=true
+		shift
+		;;
 
 	--*)
-	  red Unknown option "$1"
-	  exit 99
-	  ;;
+		red Unknown option "$1"
+		exit 99
+		;;
 	esac
 
 	if (($# != 1)); then

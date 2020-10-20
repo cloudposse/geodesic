@@ -233,7 +233,9 @@ COPY rootfs/ /
 COPY docs/ /usr/share/docs/
 
 # Build man pages
-RUN /usr/local/bin/docs update
+# man-db is not working as of 2020-10-20 with Alpine 3.11, so we are using man
+# TODO revert to RUN /usr/local/bin/docs update
+RUN /usr/local/bin/docs build
 
 # Make sure that "user specific" directories we are sharing
 # are in fact available to all users

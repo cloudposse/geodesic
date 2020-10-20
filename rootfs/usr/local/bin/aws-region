@@ -9,6 +9,7 @@
 # You should be able to list all regions with this command:
 # aws ec2 describe-regions --all-regions --query "Regions[].{Name:RegionName}" --output text
 # but actually it leaves out GovCloud and China
+# See https://github.com/jsonmaur/aws-regions for more complete list
 
 usage() {
 	printf "\nConvert between long and short region codes\n\n"
@@ -22,6 +23,7 @@ short_map=(
 	[ae1]=ap-east-1
 	[an1]=ap-northeast-1
 	[an2]=ap-northeast-2
+	[an3]=ap-northeast-3
 	[as0]=ap-south-1
 	[as1]=ap-southeast-1
 	[as2]=ap-southeast-2

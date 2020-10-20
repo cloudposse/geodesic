@@ -1,6 +1,7 @@
 #!/bin/bash
 #  ## import dashboards for Grafana
 
+OVERWRITE=false
 # Requires
 #  GRAFANA_API_KEY: api key authorizing "edit" on dashboards
 #  PROMETHEUS_GRAFANA_ROOT_URL or GRAFANA_ROOT_URL: URL to which '/api/dashboards...' will be appended
@@ -11,16 +12,18 @@
 function _usage() {
 	cat <<EOF
 Usage:
-  grafana-db <URL, gnetId, or file>
+  grafana-db [--overwrite] <URL, gnetId, or file>
 
   URL is URL to (raw) ConfigMap or ConfigMapList containing Grafana dashboards
   as for Prometheus Operator gnetId is ID (typically a 4 digit number) for the
   dashaboard on Grafana.com
   file is a local file. It must have the .json extension if contains only a JSON dashboard
 
+  --overwrite Replace dashboards having the same uid, even if the existing dashboard has been modified
+
 Example:
-  # Load the CoreOS standard Kubernetes Grafana dashboards
-  grafana-db https://raw.githubusercontent.com/coreos/kube-prometheus/release-0.1/manifests/grafana-dashboardDefinitions.yaml
+  # Load the latest version of kube-prometheus standard Kubernetes Grafana dashboards, replacing any already uploaded
+  grafana-db --overwrite https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
 
   # Load the Kubernetes Capacity dashboard with gnetId 5228 from Grafana.com
   grafana-db 5228
@@ -38,13 +41,13 @@ EOF
 
 ## DONE
 ## - Allow uploading a local file. Main thing is determining, detecting, and parsing format of file
+## - Optional overwrite flag
 ## TODO
 ## - Remove absolute times in .time
 ##   - Bonus points:
 ##     - calculate the time interval in .time and replace with relative time interval of same length
 ##       - round to standard relative time choice
 ## - Better error handling
-## - Optional overwrite flag
 ## - Allow host and api_key on command line
 ## - Optional deletion of UID
 ## - Optional additional input specifications
@@ -119,13 +122,13 @@ function upload_dashboard() {
 	green "* Starting upload of dashboard titled ${title}" 1>&2
 	if (($(jq <"$1" 'if .__inputs? then (.__inputs|length) else 0 end') == 0)); then
 		# Upload a real dashboard, what could be in a configmap
-		jq <"$1" '.editable=true | {dashboard: ., overwrite: false}' |
+		jq <"$1" '.editable=true | {dashboard: ., overwrite: '$OVERWRITE'}' |
 			curl -qs -w "%{stderr}* Upload of dashboard $title finished with status code %{http_code}\n" \
 				-X POST -H "Content-Type: application/json" -u "${GRAFANA_API_USER:-api_key}:${GRAFANA_API_KEY}" --data-binary @- \
 				"$host/api/dashboards/db" | (parse_grafana_response 2>/dev/null || :)
 	else
 		# Import a portable dashboard, as from Grafana.com
-		jq <"$1" --argjson inputs "$ds_inputs" '.editable = true | {dashboard: ., inputs: $inputs, overwrite: false}' |
+		jq <"$1" --argjson inputs "$ds_inputs" '.editable = true | {dashboard: ., inputs: $inputs, overwrite: '$OVERWRITE'}' |
 			curl -qs -w "%{stderr}* Upload of dashboard $title finished with status code %{http_code}\n" \
 				-X POST -H "Content-Type: application/json" -u "${GRAFANA_API_USER:-api_key}:${GRAFANA_API_KEY}" --data-binary @- \
 				"$host/api/dashboards/import" | (parse_grafana_response 2>/dev/null || :)
@@ -185,6 +188,17 @@ function _main() {
 		red either GRAFANA_ROOT_URL or PROMETHEUS_GRAFANA_ROOT_URL must be set to Grafana hostname
 		return 4
 	fi
+	case $1 in
+	--overwrite)
+		OVERWRITE=true
+		shift
+		;;
+
+	--*)
+		red Unknown option "$1"
+		exit 99
+		;;
+	esac
 
 	if (($# != 1)); then
 		_usage && return 1

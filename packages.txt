@@ -46,7 +46,10 @@ less
 libc6-compat
 libltdl
 make
-man-db@community
+# man-db 2.9.3-r2 require libgdbm.so.6 which is not available for Alpine 3.11
+# so we replace it with `man` for now
+# man-db@community
+man
 musl-dev
 mysql-client
 ncurses

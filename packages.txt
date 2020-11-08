@@ -85,5 +85,6 @@ unzip
 util-linux
 variant@cloudposse
 variant2@cloudposse
+vert@cloudposse
 vim
 yq@cloudposse

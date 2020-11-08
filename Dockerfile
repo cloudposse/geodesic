@@ -171,7 +171,7 @@ RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
 #
 ENV HELM_DIFF_VERSION 3.1.3
 ENV HELM_GIT_VERSION 0.8.1
-ENV HELM_HELM_2TO3_VERSION 0.6.0
+ENV HELM_HELM_2TO3_VERSION 0.7.0
 
 # Install plugins and then remove cache
 RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \

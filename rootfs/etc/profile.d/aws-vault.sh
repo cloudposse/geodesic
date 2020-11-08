@@ -154,7 +154,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 			export AWS_ASSUME_ROLE_TTL=${AWS_VAULT_ASSUME_ROLE_TTL}
 		fi
 
-		if aws-vault exec --help | grep -q -e --duration; then # aws-vault version 5
+		if aws-vault exec --help 2>&1 | grep -q -e --duration; then # aws-vault version 5
 			if [[ -n $AWS_VAULT_SESSION_TTL ]]; then
 				# AWS_VAULT_SESSION_TTL takes priority
 				if [[ -n $AWS_SESSION_TOKEN_TTL ]]; then

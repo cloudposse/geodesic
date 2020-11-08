@@ -267,22 +267,18 @@ export DOCKER_IMAGE="{{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}"
 export DOCKER_TAG="{{getenv "DOCKER_TAG" "${DOCKER_TAG:-dev}"}}"
 export DOCKER_NAME="{{getenv "APP_NAME" "${DOCKER_NAME:-$(basename $DOCKER_IMAGE)}"}}"
 
-if [ -n "${NAME}" ]; then
-	export DOCKER_NAME=$(basename "${NAME:-}")
+if [ -n "${GEODESIC_NAME}" ]; then
+	export DOCKER_NAME=$(basename "${GEODESIC_NAME:-}")
 fi
 
-if [ -n "${TAG}" ]; then
-	export DOCKER_TAG=${TAG}
+if [ -n "${GEODESIC_TAG}" ]; then
+	export DOCKER_TAG=${GEODESIC_TAG}
 fi
 
-if [ -n "${IMAGE}" ]; then
-	export DOCKER_IMAGE=${IMAGE:-${DOCKER_IMAGE}:${DOCKER_TAG}}
+if [ -n "${GEODESIC_IMAGE}" ]; then
+	export DOCKER_IMAGE=${GEODESIC_IMAGE:-${DOCKER_IMAGE}:${DOCKER_TAG}}
 else
 	export DOCKER_IMAGE=${DOCKER_IMAGE}:${DOCKER_TAG}
-fi
-
-if [ -n "${PORT}" ]; then
-	export GEODESIC_PORT=${PORT}
 fi
 
 export DOCKER_DNS=${DNS:-${DOCKER_DNS}}

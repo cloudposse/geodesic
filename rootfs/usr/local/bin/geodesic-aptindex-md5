@@ -1,0 +1,3 @@
+#!/bin/sh
+
+md5sum /var/lib/apt/lists/*InRelease | colrm 33 | sort | md5sum | colrm 33

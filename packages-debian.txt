@@ -1,0 +1,15 @@
+# Essential debian-only packages
+default-mysql-client
+dnsutils
+inetutils-ftp
+inetutils-ping
+inetutils-telnet
+inetutils-tools
+inetutils-traceroute
+ldnsutils
+locales
+oathtool
+
+# Not installing keybase
+# curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb
+# sudo apt install ./keybase_amd64.deb

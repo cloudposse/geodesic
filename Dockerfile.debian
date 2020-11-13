@@ -1,0 +1,205 @@
+ARG DEBIAN_VERSION=10.6-slim
+
+FROM debian:$DEBIAN_VERSION as python
+# Find the current version of Python at https://www.python.org/downloads/source/
+ARG PYTHON_VERSION=3.8.6
+
+# Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
+# Recommended: LC_ALL=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Once again, Debian is weird. Package-installed Python is system-only, and does not
+# play well with pip. See  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=765022#30
+#
+# So we cannot install the packages: RUN apt-get update && apt-get install -y python3 python3-pip python3-dev
+# and instead we have to build Python ourselves and install it in /usr/local/bin (by Debian design).
+
+RUN apt-get update && apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
+    libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev
+
+RUN curl -1sLfO https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz && \
+    tar -xf Python-${PYTHON_VERSION}.tar.xz
+
+WORKDIR Python-${PYTHON_VERSION}
+RUN ./configure --enable-optimizations && make -j $(nproc) && make install
+
+
+COPY requirements.txt /requirements.txt
+
+RUN python3 -m pip install --upgrade --progress-bar off pip setuptools wheel && \
+    pip install --progress-bar off -r /requirements.txt --ignore-installed --prefix=/dist --no-build-isolation --no-warn-script-location
+
+RUN ./configure --enable-optimizations --prefix=/dist && make install
+
+#
+# Geodesic base image
+#
+FROM debian:$DEBIAN_VERSION
+
+# Set terminal to be dumb for scripts, will override at run time
+ENV TERM=dumb
+# Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
+# Recommended: LC_ALL=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Set XDG environment variables per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+# This is not a "multi-user" system, so we'll use special directories under
+# - /etc as the global configuration dir instead of default $HOME/.config
+# - /usr/share as the global data dir instead of default $HOME/.local/share
+# - /tmp as the global cache dir instead of default  $HOME/.cache
+# This allows daemon/server users like Atlantis to use the same
+# configuration as the root user, which is usually what we want.
+# If the daemon wants isolation, it can unset the variables
+# or set them to something else.
+# We leave the runtime dir unset/default since that is specifically
+# required to be owned by the current user.
+# Read more: <https://wiki.archlinux.org/index.php/XDG_Base_Directory>
+ENV XDG_DATA_HOME=/usr/share/xdg_data_home
+ENV XDG_CONFIG_HOME=/etc/xdg_config_home
+ENV XDG_CACHE_HOME=/var/cache/xdg_cache_home
+RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
+	mkdir -p $dir; chmod 777 $dir; done
+
+ENV BANNER "geodesic"
+
+ENV MOTD_URL=http://geodesic.sh/motd
+ENV HOME=/conf
+# Leaving KOPS_CLUSTER_NAME unset can cause problems when kops gets the cluster
+# name from somewhere else and it is wrong, so we set it to make it obvious.
+ENV KOPS_CLUSTER_NAME=example.foo.bar
+
+# Install all packages as root
+USER root
+
+# Keep dpkg quiet about running non-interactively
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
+COPY packages.txt packages-debian.txt /etc/apt/
+# Install repo checksum in an attempt to ensure updates bust the Docker build cache
+COPY geodesic_aptindex.md5 /var/cache/apt/
+COPY rootfs/usr/local/bin/geodesic-aptindex-md5 /usr/local/bin/
+
+# Add CloudPosse package repo
+RUN apt-get update && apt-get install -y apt-utils && apt-get install -y curl
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/bash.deb.sh' | bash
+
+RUN apt-get update && apt-get install -y \
+    $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
+    mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
+    touch /conf/.gitconfig
+
+RUN ["/bin/bash", "-c", "[[ $(/usr/local/bin/geodesic-aptindex-md5) == $(cat /var/cache/apt/geodesic_aptindex.md5) ]] || echo \"WARNING: apt package repos mismatch: '$(/usr/local/bin/geodesic-aptindex-md5)' != '$(cat /var/cache/apt/geodesic_aptindex.md5)'\" 1>&2"]
+
+# Generate the en_US.UTF-8 locale
+RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
+
+# Disable vim from reading a swapfile (incompatible with goofys)
+RUN echo 'set noswapfile' >> /etc/vim/vimrc
+
+WORKDIR /tmp
+
+# Copy python dependencies
+COPY --from=python /dist/ /usr/local/
+
+#
+# Install Google Cloud SDK
+#
+ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
+
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN curl -1sLf https://packages.cloud.google.com/apt/doc/apt-key.gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+RUN apt-get update && apt-get install -y google-cloud-sdk
+
+RUN gcloud config set core/disable_usage_reporting true --installation && \
+    gcloud config set component_manager/disable_update_check true --installation && \
+    gcloud config set metrics/environment github_docker_image --installation
+
+
+#
+# Install helm
+#
+# helm version 2 config
+ENV HELM_HOME /var/lib/helm
+ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
+
+RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
+    && mkdir -p ${HELM_HOME} \
+    && helm2 init --client-only \
+    && mkdir -p ${HELM_HOME}/plugins
+
+#
+# Install minimal helm plugins
+#
+ENV HELM_DIFF_VERSION 3.1.3
+ENV HELM_GIT_VERSION 0.8.1
+ENV HELM_HELM_2TO3_VERSION 0.7.0
+
+# Install plugins and then remove cache
+RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
+    && helm2 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION}
+
+RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
+    && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
+    && helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION} \
+    && rm -rf $XDG_CACHE_HOME/helm
+
+# Enable Atlantis to use helm 2
+RUN chmod -R a+rwX ${HELM_HOME}
+
+# helm version 3 uses XDG variables set above.
+# XDG directory permissions updated at end of installs.
+# See https://helm.sh/docs/faq/#xdg-base-directory-support
+
+#
+# Install fancy Kube PS1 Prompt
+#
+ENV KUBE_PS1_VERSION 0.7.0
+ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
+
+#
+# Configure host AWS configuration to be available from inside Docker image
+#
+ENV AWS_DATA_PATH=/localhost/.aws
+ENV AWS_CONFIG_FILE=${AWS_DATA_PATH}/config
+ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_DATA_PATH}/credentials
+
+#
+# Disable aws-vault and okta support by default, enable in child Dockerfile or personal configuration if needed
+#
+ENV AWS_VAULT_ENABLED=false
+ENV AWS_VAULT_SERVER_ENABLED=false
+ENV AWS_OKTA_ENABLED=false
+
+# Shell customization
+# options for `less`. `R` allows ANSI color codes to be displayed while stripping out
+# other control codes that can cause `less` to mess up the screen formatting
+ENV LESS=R
+# Support for using an SSH key file on the host. No longer favored now that
+# Docker supports forwarding SSH_AUTH_SOCK, but retained for backward compatibility.
+# See rootfs/etc/profile.d/ssh-agent.sh
+ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
+
+# Reduce `make` verbosity
+ENV MAKEFLAGS="--no-print-directory"
+ENV MAKE_INCLUDES="Makefile Makefile.*"
+
+# Install "root" filesystem
+COPY rootfs/ /
+
+# Install documentation
+COPY docs/ /usr/share/docs/
+
+# Build man pages
+RUN /usr/local/bin/docs update
+
+# Make sure that "user specific" directories we are sharing
+# are in fact available to all users
+RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
+	chmod -R a+rwX $dir; done
+
+WORKDIR /conf
+
+ENTRYPOINT ["/bin/bash"]
+CMD ["-c", "init"]

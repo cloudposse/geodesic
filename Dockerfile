@@ -68,12 +68,12 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
     echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories
 
 # Install alpine package manifest
-COPY packages.txt /etc/apk/
+COPY packages.txt packages-alpine.txt /etc/apk/
 # Install repo checksum in an attempt to ensure updates bust the Docker build cache
 COPY geodesic_apkindex.md5 /var/cache/apk/
 COPY rootfs/usr/local/bin/geodesic-apkindex-md5 /tmp/
 
-RUN apk add --update $(grep -v '^#' /etc/apk/packages.txt) && \
+RUN apk add --update $(grep -h -v '^#' /etc/apk/packages.txt /etc/apk/packages-alpine.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
@@ -196,7 +196,7 @@ ENV KUBE_PS1_VERSION 0.7.0
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #
-# AWS
+# Configure host AWS configuration to be available from inside Docker image
 #
 ENV AWS_DATA_PATH=/localhost/.aws
 ENV AWS_CONFIG_FILE=${AWS_DATA_PATH}/config

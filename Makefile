@@ -20,7 +20,7 @@ build:
 	@make --no-print-directory docker:build
 
 install:
-	@docker run --rm $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
+	@docker run --rm --env DOCKER_IMAGE --env DOCKER_TAG $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
 
 run:
 	@geodesic
@@ -37,3 +37,9 @@ apk-update geodesic_apkindex.md5:
 	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
 	'apk update >/dev/null && geodesic-apkindex-md5' > geodesic_apkindex.md5
 	@echo geodesic_apkindex.md5 new $$(cat geodesic_apkindex.md5 || echo '<not found>')
+
+apt-update geodesic_aptindex.md5:
+	@echo geodesic_aptindex.md5 old $$(cat geodesic_aptindex.md5 || echo '<not found>')
+	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
+	'apt-get update >/dev/null && geodesic-aptindex-md5' > geodesic_aptindex.md5
+	@echo geodesic_aptindex.md5 new $$(cat geodesic_aptindex.md5 || echo '<not found>')

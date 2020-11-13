@@ -1,0 +1,58 @@
+# Banner is what is displayed at startup and on every command line
+# in order to distinguish this image from other similar images
+ENV BANNER "geodesic"
+
+ENV MOTD_URL=http://geodesic.sh/motd
+
+# Shell customization
+# options for `less`. `R` allows ANSI color codes to be displayed while stripping out
+# other control codes that can cause `less` to mess up the screen formatting
+ENV LESS=R
+
+#
+# Configure aws-okta to easily assume roles
+#
+ENV AWS_OKTA_ENABLED=true
+
+#
+# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
+#
+ENV AWS_VAULT_ENABLED=true
+ENV AWS_VAULT_SERVER_ENABLED=true
+ENV AWS_VAULT_BACKEND=file
+ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
+ENV AWS_VAULT_SESSION_TTL=12h
+#ENV AWS_VAULT_FILE_PASSPHRASE=
+
+
+####################################################################################
+# kops support
+# If you are using Cloud Posse's kops reference architecture, you con configure it
+# in your Dockerfile like this (edit as desired)
+
+ENV KOPS_CLUSTER_NAME=example.foo.bar
+
+ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
+ENV KOPS_TEMPLATE=/templates/kops/default.yaml
+ENV KOPS_STATE_STORE s3://undefined
+ENV KOPS_STATE_STORE_REGION us-east-1
+ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
+
+ENV KOPS_BASTION_PUBLIC_NAME="bastion"
+
+ENV KUBECONFIG=/dev/shm/kubecfg
+ENV KUBECONFIG_TEMPLATE=/templates/kops/kubecfg.yaml
+
+RUN /usr/bin/kops completion bash > /etc/bash_completion.d/kops.sh
+
+# Instance sizes for kops bastion, master nodes, and worker nodes
+ENV BASTION_MACHINE_TYPE "t3.small"
+ENV MASTER_MACHINE_TYPE "t3.medium"
+ENV NODE_MACHINE_TYPE "t3.medium"
+
+# Min/Max number of nodes (aka workers) per region
+ENV NODE_MAX_SIZE 2
+ENV NODE_MIN_SIZE 2
+
+# end of kops support section
+####################################################################################

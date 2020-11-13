@@ -5,13 +5,11 @@ aws-vault@cloudposse
 bash
 bash-completion
 bats@community
-busybox-extras
 cfssl@cloudposse
 coreutils
 chamber@cloudposse
 curl
 direnv@testing
-drill
 dumb-init
 emacs-nox
 fetch@cloudposse
@@ -21,7 +19,6 @@ figurine@cloudposse
 file
 fuse
 fzf@cloudposse
-fzf-bash-completion
 gettext
 git
 github-commenter@cloudposse
@@ -33,9 +30,7 @@ helm@cloudposse
 helm2@cloudposse
 helm3@cloudposse
 helmfile@cloudposse
-iputils
 jq
-keybase-client@testing
 kops@cloudposse
 # The latest version of kubectl is wrong for all of our customers, so do not install it.
 # Instead, install a compatible version. For now, track the latest AWS EKS version.
@@ -43,17 +38,12 @@ kubectl-1.16@cloudposse
 kubectx@cloudposse
 kubens@cloudposse
 less
-libc6-compat
-libltdl
 make
 # man-db 2.9.3-r2 require libgdbm.so.6 which is not available for Alpine 3.11
 # so we replace it with `man` for now
 # man-db@community
 man
 musl-dev
-mysql-client
-ncurses
-oath-toolkit-oathtool@community
 openssh-client
 openssl
 pandoc@cloudposse

@@ -62,7 +62,6 @@ stern@cloudposse
 sudo
 syslog-ng
 tar
-teleport@cloudposse
 terraform@cloudposse
 # Do not install terraform-* or terraform_* by default
 # because they are incompatible with each other and

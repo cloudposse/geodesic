@@ -225,9 +225,11 @@ ENV TERM=dumb
 # Reduce `make` verbosity
 ENV MAKEFLAGS="--no-print-directory"
 ENV MAKE_INCLUDES="Makefile Makefile.*"
-
 # Install "root" filesystem
 COPY rootfs/ /
+
+# Configure syslog-ng (different versions on different OSes)
+RUN mv -f /etc/syslog-ng/syslog-ng.conf /etc/syslog-ng/Geodesic/alpine/syslog-ng.conf.dist && ln -s /etc/syslog-ng/Geodesic/alpine/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 
 # Install documentation
 COPY docs/ /usr/share/docs/

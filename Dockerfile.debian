@@ -83,15 +83,35 @@ COPY rootfs/usr/local/bin/geodesic-aptindex-md5 /usr/local/bin/
 RUN apt-get update && apt-get install -y apt-utils && apt-get install -y curl
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/bash.deb.sh' | bash
 
+# Insall Google package repo
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN curl -1sLf https://packages.cloud.google.com/apt/doc/apt-key.gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
 RUN apt-get update && apt-get install -y \
     $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
+#
+# Install Google Cloud SDK
+#
+ARG GOOGLE_CLOUD_SDK_VERSION=316.0.0-0
+ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
+
+RUN apt-get update && apt-get install -y google-cloud-sdk=$GOOGLE_CLOUD_SDK_VERSION
+
+RUN { gcloud config set core/disable_usage_reporting true --installation && \
+    gcloud config set component_manager/disable_update_check true --installation && \
+    gcloud config set metrics/environment github_docker_image --installation; } 2>&1
+
 RUN ["/bin/bash", "-c", "[[ $(/usr/local/bin/geodesic-aptindex-md5) == $(cat /var/cache/apt/geodesic_aptindex.md5) ]] || echo \"WARNING: apt package repos mismatch: '$(/usr/local/bin/geodesic-aptindex-md5)' != '$(cat /var/cache/apt/geodesic_aptindex.md5)'\" 1>&2"]
 
-# Generate the en_US.UTF-8 locale
-RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+# Using the en_US.UTF-8 local breaks our login setup because it changes the sort order,
+# and therefore the order of execution, of our profile files. We use locale C.UTF-8 instead,
+# which is widely supported (more widely than en_US.UTF-8). However, if
+# we had a compelling reason to need en_US.UTF-8, we could install the
+# "locales" package and run the following command:
+# RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -103,18 +123,6 @@ WORKDIR /tmp
 # Copy python dependencies
 COPY --from=python /dist/ /usr/local/
 
-#
-# Install Google Cloud SDK
-#
-ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
-
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-RUN curl -1sLf https://packages.cloud.google.com/apt/doc/apt-key.gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-RUN apt-get update && apt-get install -y google-cloud-sdk
-
-RUN gcloud config set core/disable_usage_reporting true --installation && \
-    gcloud config set component_manager/disable_update_check true --installation && \
-    gcloud config set metrics/environment github_docker_image --installation
 
 
 #
@@ -187,6 +195,11 @@ ENV MAKE_INCLUDES="Makefile Makefile.*"
 
 # Install "root" filesystem
 COPY rootfs/ /
+
+# Configure syslog-ng (different versions on different OSes)
+RUN mv -f /etc/syslog-ng/syslog-ng.conf /etc/syslog-ng/Geodesic/debian/syslog-ng.conf.dist && \
+ ln -s /etc/syslog-ng/Geodesic/debian/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf && \
+ rm -f /etc/default/syslog-ng && cp /etc/syslog-ng/Geodesic/debian/syslog-ng.defaults /etc/default/syslog-ng
 
 # Install documentation
 COPY docs/ /usr/share/docs/

@@ -1,0 +1,16 @@
+########## GEODESIC NOTE ###############
+# While this is the standard file to set
+# defaults for syslog-ng under Debian,
+# GEODESIC does not use init.d or systemctl
+# to run syslog-ng, so this file is not
+# actually used. Options are configured
+# in the script that starts syslog-ng,
+# which is /etc/profile.d/syslog-ng.sh
+
+# log level of messages which should go to console
+# see syslog(3) for details
+#
+#CONSOLE_LOG_LEVEL=1
+
+# Command line options to syslog-ng
+SYSLOGNG_OPTS="--no-caps"

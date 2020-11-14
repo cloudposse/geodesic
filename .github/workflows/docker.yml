@@ -25,7 +25,7 @@ jobs:
         if [[ $GITHUB_REF == refs/tags/* ]]; then
           VERSION=${GITHUB_REF#refs/tags/}
         elif [[ $GITHUB_REF == refs/pull/* ]]; then
-          VERSION=pr-${{ github.event.pull_request.number }}-merge
+          VERSION=pr-${{ github.event.pull_request.number }}
           COMMIT_SHA=${{ github.event.pull_request.head.sha }}
         fi
         TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-{0}"

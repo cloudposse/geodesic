@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for this project
+about: Suggest an new feature for Geodesic
 title: ''
 labels: 'feature request'
 assignees: ''

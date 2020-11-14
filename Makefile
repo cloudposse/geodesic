@@ -26,12 +26,16 @@ lint: deps
 deps: init
 	@exit 0
 
-build %.build:
+%.build:
 	@make --no-print-directory docker:build
 	docker tag $(DOCKER_IMAGE_NAME) $(DOCKER_IMAGE_NAME_BASE)
 
-install %.install:
+%.install:
 	@docker run --rm --env DOCKER_IMAGE --env DOCKER_TAG $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
+
+build: $(DOCKER_BASE_OS).build
+
+install: $(DOCKER_BASE_OS).install
 
 run:
 	@geodesic

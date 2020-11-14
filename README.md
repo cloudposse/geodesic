@@ -78,11 +78,22 @@ These days, the typical software application is distributed as a docker image an
 
 Geodesic is composed of two parts:
 
-  1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools. Those tools are then integrated to work in concert with each other using a consistent framework. Installation of the shell is as easy as running a docker container.  
+  1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools.
+  Those tools are then integrated to work in concert with each other using a consistent framework.
+  Installation of the shell is as easy as running a docker container.
   2. It is a distribution of essential services and [reference architectures](https://github.com/cloudposse?q=cloudposse.co). The distribution includes a collection of [100+ Free Terraform Modules](https://github.com/cloudposse?q=terraform-) and their [invocations](https://github.com/cloudposse/terraform-root-modules), dozens of preconfigured [Helmfiles](https://github.com/cloudposse/helmfiles), [Helm charts](https://github.com/cloudposse/charts) for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS, Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up to work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
 
 An organization may chose to leverage all of these components, or just the parts that make their life easier.
-We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM cloudposse/geodesic:...` pinned to a release) in your projects.
+We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM cloudposse/geodesic:...` pinned to a release and base OS) in your projects.
+
+**Note**: Starting with Geodesic version 0.138.0, we distribute 2 versions of Geodesic Docker images, one based on [Alpine](https://alpinelinux.org/)
+and one based on [Debian](https://debian.org), tagged `VERSION-BASE_OS`, e.g. `0.138.0-alpine`.
+Prior to this, all Docker images were based on Alpine only and simply tagged `VERSION`. At present, the Alpine version is the most thoroughly tested
+and best supported version, and the special Docker tag `latest` will continue to point to the latest Alpine version while this
+remains the case. However, we encourage people to use the Debian version and report any issues by opening a GitHub issue,
+so that we may eventually make it the preferred version, after which point the `latest` tag will point to latest Debian image. We
+will maintain the `latest-alpine` and `latest-debian` Docker tags for those who want to commit to using one base OS or
+the other but still want automatic updates.
 
 Let's roll...
 

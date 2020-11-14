@@ -21,12 +21,14 @@ jobs:
       # and use that to designate whichever base OS version we recommend as the best supported.
       # Initially that will be Alpine, but at some later point will probably be Debian or Ubuntu.
       run: |
-        TAGS="${{ github.repository }}:sha-${GITHUB_SHA:0:7}-{0}"
+        COMMIT_SHA="${GITHUB_SHA}"
         if [[ $GITHUB_REF == refs/tags/* ]]; then
           VERSION=${GITHUB_REF#refs/tags/}
         elif [[ $GITHUB_REF == refs/pull/* ]]; then
           VERSION=pr-${{ github.event.pull_request.number }}-merge
+          COMMIT_SHA=${{ github.event.pull_request.head.sha }}
         fi
+        TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-{0}"
         if [[ -n $VERSION ]]; then
           TAGS="$TAGS,${{ github.repository }}:${VERSION}-{0}"
         fi
@@ -51,12 +53,12 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: ${{ (github.event_name == 'release' && github.event.action == 'created') || github.event.pull_request.head.repo.full_name == github.repository }}
-        tags: format(${{ steps.prepare.outputs.latest_tags }}, 'alpine')
+        tags: ${{ format(steps.prepare.outputs.latest_tags, 'alpine') }}
         file: ./Dockerfile.alpine
     - name: "Build and push Debian docker image to DockerHub"
       id: docker_build_debian
       uses: docker/build-push-action@v2
       with:
         push: ${{ (github.event_name == 'release' && github.event.action == 'created') || github.event.pull_request.head.repo.full_name == github.repository }}
-        tags: format(${{ steps.prepare.outputs.tags }}, 'debian')
+        tags: ${{ format(steps.prepare.outputs.latest_tags, 'debian') }}
         file: ./Dockerfile.debian

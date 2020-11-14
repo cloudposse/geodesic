@@ -1,12 +1,9 @@
-codefresh:
-- codefresh/**
-- rootfs/etc/codefresh/**
-
 direnv:
 - rootfs/etc/direnv/**
 
 docker:
-- Dockerfile
+- Dockerfile.alpine
+- Dockerfile.debian
 
 docs:
 - docs/**
@@ -15,8 +12,8 @@ github:
 - .github/**
 
 packages:
-- packages.txt
-- requirements.txt
+- packages*.txt
+- requirements*.txt
 
 scripts:
 - rootfs/usr/local/bin/**

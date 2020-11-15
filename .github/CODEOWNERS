@@ -1,7 +1,7 @@
 # Use this file to define individuals or teams that are responsible for code in a repository.
 # Read more: <https://help.github.com/articles/about-codeowners/>
 #
-# Order is important: the last matching pattern takes the most precedence
+# Order is important: the last (not first) matching pattern "wins"
 
 # These owners will be the default owners for everything
 *               @cloudposse/engineering @cloudposse/contributors
@@ -16,3 +16,6 @@
 
 # Cloud Posse must review any changes to GitHub actions or configuration
 .github/*       @cloudposse/engineering
+
+Of course, admins must approve changes to CODEOWNERS itself
+.github/CODEOWNERS  @cloudposse/admins

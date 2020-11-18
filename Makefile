@@ -4,7 +4,7 @@ export DOCKER_BASE_OS ?= alpine
 export DOCKER_TAG ?= $(DOCKER_BASE_TAG)-$(DOCKER_BASE_OS)
 export DOCKER_IMAGE_NAME_BASE ?= $(DOCKER_IMAGE):$(DOCKER_BASE_TAG)
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
-export DOCKER_FILE ?= Dockerfile.$(DOCKER_BASE_OS)
+export DOCKER_FILE ?= os/$(DOCKER_BASE_OS)/Dockerfile.$(DOCKER_BASE_OS)
 export DOCKER_BUILD_FLAGS =
 export INSTALL_PATH ?= /usr/local/bin
 
@@ -53,10 +53,10 @@ bash/fmt/check:
 
 apk-update geodesic_apkindex.md5: DOCKER_BASE_OS = alpine
 apk-update geodesic_apkindex.md5:
-	@echo geodesic_apkindex.md5 old $$(cat geodesic_apkindex.md5 || echo '<not found>')
+	@echo geodesic_apkindex.md5 old $$(cat os/alpine/geodesic_apkindex.md5 || echo '<not found>')
 	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
-	'apk update >/dev/null && geodesic-apkindex-md5' > geodesic_apkindex.md5
-	@echo geodesic_apkindex.md5 new $$(cat geodesic_apkindex.md5 || echo '<not found>')
+	'apk update >/dev/null && geodesic-apkindex-md5' > os/alpine/geodesic_apkindex.md5
+	@echo geodesic_apkindex.md5 new $$(cat os/alpine/geodesic_apkindex.md5 || echo '<not found>')
 
 apt-update geodesic_aptindex: DOCKER_BASE_OS = debian
 apt-update geodesic_aptindex.md5:

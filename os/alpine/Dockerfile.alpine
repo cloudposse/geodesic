@@ -68,17 +68,17 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
     echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories
 
 # Install alpine package manifest
-COPY packages.txt packages-alpine.txt /etc/apk/
+COPY packages.txt os/alpine/packages-alpine.txt /etc/apk/
 # Install repo checksum in an attempt to ensure updates bust the Docker build cache
-COPY geodesic_apkindex.md5 /var/cache/apk/
-COPY rootfs/usr/local/bin/geodesic-apkindex-md5 /tmp/
+COPY os/alpine/geodesic_apkindex.md5 /tmp/geodesic_apkindex.md5
+COPY os/alpine/rootfs/usr/local/bin/geodesic-apkindex-md5 /usr/local/bin/
 
 RUN apk add --update $(grep -h -v '^#' /etc/apk/packages.txt /etc/apk/packages-alpine.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
-RUN [[ $(/tmp/geodesic-apkindex-md5) == $(cat /var/cache/apk/geodesic_apkindex.md5) ]] || echo "WARNING: apk package repos mismatch: '$(/tmp/geodesic-apkindex-md5)' != '$(cat /var/cache/apk/geodesic_apkindex.md5)'" 1>&2
-RUN rm -f /tmp/geodesic-apkindex-md5
+RUN [[ $(geodesic-apkindex-md5) == $(cat /tmp/geodesic_apkindex.md5) ]] || echo "WARNING: apk package repos mismatch: '$(geodesic-apkindex-md5)' != '$(cat /tmp/geodesic_apkindex.md5)'" 1>&2
+RUN rm -f /tmp/geodesic-apkindex.md5
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -100,15 +100,16 @@ COPY --from=google-cloud-sdk /google-cloud-sdk/ /usr/local/google-cloud-sdk/
 RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d/gcloud.sh && \
     ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
     ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/ && \
-    gcloud config set core/disable_usage_reporting true --installation && \
-    gcloud config set component_manager/disable_update_check true --installation && \
-    gcloud config set metrics/environment github_docker_image --installation
+    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
 
-#
-# Configure aws-okta to easily assume roles
-#
-ENV AWS_OKTA_ENABLED=false
+# gcloud config writes successful status updates to stderr, but we want to preserve
+# stderr for real errors in need of action.
+RUN { gcloud config set core/disable_usage_reporting true --installation && \
+      gcloud config set component_manager/disable_update_check true --installation && \
+      gcloud config set metrics/environment github_docker_image --installation; } 2>&1
+
+# Install an empty kubeconfig to suppress some errors
+COPY rootfs/conf/.kube/config /conf/.kube/config
 
 #
 # Install kubectl
@@ -119,40 +120,6 @@ RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 ENV KUBECTX_COMPLETION_VERSION 0.9.1
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
-
-#
-# Install kops
-#
-ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
-ENV KOPS_TEMPLATE=/templates/kops/default.yaml
-## Set these to better values in child Dockerfile:
-#ENV KOPS_STATE_STORE s3://undefined
-#ENV KOPS_STATE_STORE_REGION us-east-1
-#ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
-
-ENV KOPS_BASTION_PUBLIC_NAME="bastion"
-
-# Set the KOPS_BASE_IMAGE to match your kops version. See:
-# https://github.com/kubernetes/kops/blob/master/channels/stable
-# https://github.com/kubernetes/kops/blob/master/docs/images.md
-#
-# Do not rely on KOPS_BASE_IMAGE being set in Geodesic. This will go away in future versions.
-# Set it in your /conf/kops/kops.envrc file, along with KUBERNETES_VERSION
-# ENV KOPS_BASE_IMAGE=kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
-
-ENV KUBECONFIG=/dev/shm/kubecfg
-ENV KUBECONFIG_TEMPLATE=/templates/kops/kubecfg.yaml
-
-RUN /usr/bin/kops completion bash > /etc/bash_completion.d/kops.sh
-
-# Instance sizes
-ENV BASTION_MACHINE_TYPE "t3.small"
-ENV MASTER_MACHINE_TYPE "t3.medium"
-ENV NODE_MACHINE_TYPE "t3.medium"
-
-# Min/Max number of nodes (aka workers)
-ENV NODE_MAX_SIZE 2
-ENV NODE_MIN_SIZE 2
 
 #
 # Install helm
@@ -189,6 +156,41 @@ RUN chmod -R a+rwX ${HELM_HOME}
 # XDG directory permissions updated at end of installs.
 # See https://helm.sh/docs/faq/#xdg-base-directory-support
 
+#
+# Install kops
+#
+ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
+ENV KOPS_TEMPLATE=/templates/kops/default.yaml
+## Set these to better values in child Dockerfile:
+#ENV KOPS_STATE_STORE s3://undefined
+#ENV KOPS_STATE_STORE_REGION us-east-1
+#ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
+
+ENV KOPS_BASTION_PUBLIC_NAME="bastion"
+
+# Set the KOPS_BASE_IMAGE to match your kops version. See:
+# https://github.com/kubernetes/kops/blob/master/channels/stable
+# https://github.com/kubernetes/kops/blob/master/docs/images.md
+#
+# Do not rely on KOPS_BASE_IMAGE being set in Geodesic. This will go away in future versions.
+# Set it in your /conf/kops/kops.envrc file, along with KUBERNETES_VERSION
+# ENV KOPS_BASE_IMAGE=kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
+
+ENV KUBECONFIG=/dev/shm/kubecfg
+ENV KUBECONFIG_TEMPLATE=/templates/kops/kubecfg.yaml
+
+RUN /usr/bin/kops completion bash > /etc/bash_completion.d/kops.sh
+
+# Instance sizes
+ENV BASTION_MACHINE_TYPE "t3.small"
+ENV MASTER_MACHINE_TYPE "t3.medium"
+ENV NODE_MACHINE_TYPE "t3.medium"
+
+# Min/Max number of nodes (aka workers)
+ENV NODE_MAX_SIZE 2
+ENV NODE_MIN_SIZE 2
+
+
 # 
 # Install fancy Kube PS1 Prompt
 #
@@ -213,6 +215,11 @@ ENV AWS_VAULT_SESSION_TTL=12h
 #ENV AWS_VAULT_FILE_PASSPHRASE=
 
 #
+# Configure aws-okta to easily assume roles
+#
+ENV AWS_OKTA_ENABLED=false
+
+#
 # Shell
 #
 ENV SHELL=/bin/bash
@@ -227,9 +234,7 @@ ENV MAKEFLAGS="--no-print-directory"
 ENV MAKE_INCLUDES="Makefile Makefile.*"
 # Install "root" filesystem
 COPY rootfs/ /
-
-# Configure syslog-ng (different versions on different OSes)
-RUN mv -f /etc/syslog-ng/syslog-ng.conf /etc/syslog-ng/Geodesic/alpine/syslog-ng.conf.dist && ln -s /etc/syslog-ng/Geodesic/alpine/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
+COPY os/alpine/rootfs/ /
 
 # Install documentation
 COPY docs/ /usr/share/docs/

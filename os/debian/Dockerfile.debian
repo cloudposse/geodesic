@@ -74,10 +74,10 @@ USER root
 # Keep dpkg quiet about running non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-COPY packages.txt packages-debian.txt /etc/apt/
+COPY packages.txt os/debian/packages-debian.txt /etc/apt/
 # Install repo checksum in an attempt to ensure updates bust the Docker build cache
-COPY geodesic_aptindex.md5 /var/cache/apt/
-COPY rootfs/usr/local/bin/geodesic-aptindex-md5 /usr/local/bin/
+COPY os/debian/geodesic_aptindex.md5 /var/cache/apt/
+COPY os/debian/rootfs/usr/local/bin/geodesic-aptindex-md5 /usr/local/bin/
 
 # Add CloudPosse package repo
 RUN apt-get update && apt-get install -y apt-utils && apt-get install -y curl
@@ -195,11 +195,7 @@ ENV MAKE_INCLUDES="Makefile Makefile.*"
 
 # Install "root" filesystem
 COPY rootfs/ /
-
-# Configure syslog-ng (different versions on different OSes)
-RUN mv -f /etc/syslog-ng/syslog-ng.conf /etc/syslog-ng/Geodesic/debian/syslog-ng.conf.dist && \
- ln -s /etc/syslog-ng/Geodesic/debian/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf && \
- rm -f /etc/default/syslog-ng && cp /etc/syslog-ng/Geodesic/debian/syslog-ng.defaults /etc/default/syslog-ng
+COPY os/debian/rootfs/ /
 
 # Install documentation
 COPY docs/ /usr/share/docs/

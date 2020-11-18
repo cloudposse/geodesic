@@ -12,5 +12,6 @@ jobs:
       uses: actions/checkout@v2
     - uses: mszostok/codeowners-validator@v0.5.0
       with:
+        checks: "syntax,owners,duppatterns"
         # GitHub access token is required only if the `owners` check is enabled
-        github_access_token: "${{ secrets.GITHUB_TOKEN }}"
+        github_access_token: "${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}"

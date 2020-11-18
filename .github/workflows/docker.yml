@@ -54,11 +54,11 @@ jobs:
       with:
         push: ${{ (github.event_name == 'release' && github.event.action == 'created') || github.event.pull_request.head.repo.full_name == github.repository }}
         tags: ${{ format(steps.prepare.outputs.latest_tags, 'alpine') }}
-        file: ./Dockerfile.alpine
+        file: .os/alpine/Dockerfile.alpine
     - name: "Build and push Debian docker image to DockerHub"
       id: docker_build_debian
       uses: docker/build-push-action@v2
       with:
         push: ${{ (github.event_name == 'release' && github.event.action == 'created') || github.event.pull_request.head.repo.full_name == github.repository }}
         tags: ${{ format(steps.prepare.outputs.latest_tags, 'debian') }}
-        file: ./Dockerfile.debian
+        file: .os/debian/Dockerfile.debian

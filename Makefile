@@ -60,7 +60,7 @@ apk-update geodesic_apkindex.md5:
 
 apt-update geodesic_aptindex: DOCKER_BASE_OS = debian
 apt-update geodesic_aptindex.md5:
-	@echo geodesic_aptindex.md5 old $$(cat geodesic_aptindex.md5 || echo '<not found>')
+	@echo geodesic_aptindex.md5 old $$(cat os/debian/geodesic_aptindex.md5 || echo '<not found>')
 	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
-	'apt-get update >/dev/null && geodesic-aptindex-md5' > geodesic_aptindex.md5
-	@echo geodesic_aptindex.md5 new $$(cat geodesic_aptindex.md5 || echo '<not found>')
+	'apt-get update >/dev/null && geodesic-aptindex-md5' > os/debian/geodesic_aptindex.md5
+	@echo geodesic_aptindex.md5 new $$(cat os/debian/geodesic_aptindex.md5 || echo '<not found>')

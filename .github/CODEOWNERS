@@ -17,5 +17,5 @@
 # Cloud Posse must review any changes to GitHub actions or configuration
 .github/*       @cloudposse/engineering
 
-Of course, admins must approve changes to CODEOWNERS itself
+# Of course, admins must approve changes to CODEOWNERS itself
 .github/CODEOWNERS  @cloudposse/admins

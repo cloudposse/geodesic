@@ -1,4 +1,4 @@
-# Geodesic [![Codefresh Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/cloudposse%2Fgeodesic%2Fbuild?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/cloudposse/geodesic/build) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic?ref=badge_shield) [![Latest Release](https://img.shields.io/github/release/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com) [![Slack Archive](https://img.shields.io/badge/slack-archive-blue.svg)](https://archive.sweetops.com/geodesic)
+# Geodesic [![Build Status](https://github.com/cloudposse/geodesic/workflows/docker/badge.svg)](https://github.com/cloudposse/geodesic/actions?query=workflow%3Adocker) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic?ref=badge_shield) [![Latest Release](https://img.shields.io/github/release/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com) [![Slack Archive](https://img.shields.io/badge/slack-archive-blue.svg)](https://archive.sweetops.com/geodesic)
 
 [![README Header][readme_header_img]][readme_header_link]
 
@@ -78,11 +78,22 @@ These days, the typical software application is distributed as a docker image an
 
 Geodesic is composed of two parts:
 
-  1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools. Those tools are then integrated to work in concert with each other using a consistent framework. Installation of the shell is as easy as running a docker container.  
-  2. It is a distribution of essential services and [reference architectures](https://github.com/cloudposse?q=cloudposse.co). The distribution includes a collection of [100+ Free Terraform Modules](https://github.com/cloudposse?q=terraform-) and their [invocations](https://github.com/cloudposse/terraform-root-modules), dozens of preconfigured [Helmfiles](https://github.com/cloudposse/helmfiles), [Helm charts](https://github.com/cloudposse/charts) for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS, Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up to work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
+  1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools.
+  Those tools are then integrated to work in concert with each other using a consistent framework.
+  Installation of the shell is as easy as running a docker container.
+  2. It is a distribution of essential services and reference architectures. The distribution includes a collection of [100+ Free Terraform Modules](https://github.com/cloudposse?q=terraform-) and their [invocations](https://github.com/cloudposse/terraform-aws-components), dozens of preconfigured [Helmfiles](https://github.com/cloudposse/helmfiles), [Helm charts](https://github.com/cloudposse/charts) for CI/CD, VPN, SSH Bastion, Automatic DNS, Automatic TLS, Automatic Monitoring, Account Management, Log Collection, Load Balancing/Routing, Image Serving, and much more. What makes these charts even more valuable is that they were designed from the ground up to work well with each other and integrate with external services for authentication (SSO/OAuth2, MFA).
 
 An organization may chose to leverage all of these components, or just the parts that make their life easier.
-We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM cloudposse/geodesic:...` pinned to a release) in your projects.
+We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM cloudposse/geodesic:...` pinned to a release and base OS) in your projects.
+
+**Note**: Starting with Geodesic version 0.138.0, we distribute 2 versions of Geodesic Docker images, one based on [Alpine](https://alpinelinux.org/)
+and one based on [Debian](https://debian.org), tagged `VERSION-BASE_OS`, e.g. `0.138.0-alpine`.
+Prior to this, all Docker images were based on Alpine only and simply tagged `VERSION`. At present, the Alpine version is the most thoroughly tested
+and best supported version, and the special Docker tag `latest` will continue to point to the latest Alpine version while this
+remains the case. However, we encourage people to use the Debian version and report any issues by opening a GitHub issue,
+so that we may eventually make it the preferred version, after which point the `latest` tag will point to latest Debian image. We
+will maintain the `latest-alpine` and `latest-debian` Docker tags for those who want to commit to using one base OS or
+the other but still want automatic updates.
 
 Let's roll...
 
@@ -91,77 +102,74 @@ Let's roll...
 3. Use our [coldstart automation](https://github.com/cloudposse/reference-architectures) to get started quickly
 4. Quickly provision [kops clusters](docs/kops.md)
 
+## Usage
+
+
+
+In general we recommend creating a customized version of Geodesic by creating your own Dockerfile starting with
+```
+ARG VERSION=0.138.0
+ARG OS=debian
+FROM cloudposse/geodesic:$VERSION-$OS
+
+# Add configuration options such as setting a custom BANNER,
+# turning on built-in support for aws-vault or aws-okta,
+# setting kops configuration parameters, etc. here
+
+ENV BANNER="my-custom-geodesic"
+```
+You can see some example configuration options to include in [Dockerfile.options](./Dockerfile.options).
+
+You can also add extra commands by installing "packages". Both Alpine and Debian have a large selection
+of packages to choose from. Cloud Posse also provides a large set of packages for installing common DevOps commands
+and utilities via [cloudposse/packages](https://github.com/cloudposse/packages).
+The package repositories are pre-installed in Geodesic, all you need to do is add the packages you want
+via `RUN` commands in your Dockerfile.
+
+#### Installing packages in Alpine
+
+Under Alpine, you install a package by specifying a package name and a repository label (if not the default repository).
+(You can also specify a version, see [the Alpine documentation](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management#Advanced_APK_Usage)
+for details). In addition to the default package repository, Geodesic installs 3 others:
+
+| Repository Label | Repository Name|
+|------------------|----------------|
+| @testing | edge/testing |
+| @community | edge/community |
+| @cloudposse | cloudposse/packages |
+
+As always, because of Docker layer caching, you should start your command line by updating the repo indexes,
+and then add your packages. Alpine uses [`apk`](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management).
+So, to install [Teleport](https://gravitational.com/teleport) support from the Cloud Posse package repository,
+pinned to version 4.2.x (which is the last to support Alpine), we can add this to our Dockerfile:
+
+```
+RUN apk update && apk add -u teleport@cloudposse=~4.2
+```
+
+#### Installing packages in Debian
+
+Debian uses [`apt`](https://wiki.debian.org/Apt) for package management and we generally recommend using
+the [`apt-get`](https://www.debian.org/doc/manuals/apt-guide/ch2.en.html) command to install packages.
+In addition to the default repositories, Geodesic pre-installs the Cloud Posse [package](https://github.com/cloudposse/packages) repository
+and the Google Cloud SDK package repository. Unlike with `apk`, you do not need to specify a package repository when
+installing a package because all repositories will be searched for it.
+Also unlike `apk`, `apt-get` does not let you specify a version range on the command line, only an exact version.
+So to install the Google Cloud SDK at a specific version, you need to include a trailing `-0` to indicate
+the package version. For example, to install version Google Cloud SDK 300.0.0:
+
+```
+RUN apt-get update && apt-get install -y google-cloud-sdk=300.0.0-0
+```
+
+Note the `-y` flag to `apt-get install`. That is required for scripted installation, otherwise the command
+will ask for confirmation from the keyboard before installing a package.
 
 
 
 
 
 
----
-title: ABOUT(1) | Geodesic
-author:
-- Erik Osterman
-date: May 2019
----
-
-## NAME
-
-about - About the Geodesic Cloud Automation Shell
-
-## FEATURES
-
-* **Secure** - TLS/PKI, OAuth2, MFA Everywhere, remote access VPN, [ultra secure bastion/jumphost](https://github.com/cloudposse/bastion) with audit capabilities and slack notifications, [IAM assumed roles](https://github.com/99designs/aws-vault/), automatic key rotation, encryption at rest, and VPCs
-* **Repeatable** - 100% Infrastructure-as-Code with change automation and support for scriptable admin tasks in any language, including Terraform
-* **Extensible** - A framework where everything can be extended to work the way you want to
-* **Comprehensive** - our [helm charts library](https://github.com/cloudposse/charts) are designed to tightly integrate your cloud-platform with Github Teams and Slack Notifications and CI/CD systems like TravisCI, CircleCI or Jenkins
-* **OpenSource** - Permissive [APACHE 2.0](LICENSE) license means no lock-in and no on-going license fees
-
-## TECHNOLOGIES
-
-At its core, Geodesic is a framework for provisioning cloud infrastructure and the applications that sit on top of it. We leverage as many existing tools as possible to facilitate cloud fabrication and administration. We're like the connective tissue that sits between all of the components of a modern cloud.
-
-* [`atlantis`](https://www.runatlantis.io/) - GitOps style operations by Pull Request. Ideal for terraform, helm and helmfile.
-* [`aws-vault`](https://github.com/99designs/aws-vault) for securely storing and accessing AWS credentials in an encrypted vault for the purpose of assuming IAM roles
-* [`aws-cli`](https://github.com/aws/aws-cli/) for interacting directly with the AWS APIs
-* [`chamber`](https://github.com/segmentio/chamber) for managing secrets with AWS SSM+KMS and exposing them as environment variables
-* [`direnv`](https://direnv.net) for managing environment variables per project or globally
-* [`helm`](https://github.com/kubernetes/helm/) for installing packages like Varnish or Apache on the Kubernetes cluster
-* [`helmfile`](https://github.com/roboll/helmfile) for 12-factorizing chart values and installing chart collections
-* [`kops`](https://github.com/kubernetes/kops/) for Kubernetes cluster orchestration
-* [`kubectl`](https://kubernetes.io/docs/user-guide/kubectl-overview/) for controlling kubernetes resources like deployments or load balancers
-* [`gcloud`, `gsutil`](https://cloud.google.com/sdk/) for integration with Google Cloud (e.g. GKE, GCE, Google Storage)
-* [`gomplate`](https://github.com/hairyhenderson/gomplate/) for template rendering configuration files using the GoLang template engine. Supports lots of local and remote datasources
-* [`goofys`](https://github.com/kahing/goofys/) a high-performance Amazon S3 file system for mounting encrypted S3 buckets that store cluster configurations and secrets
-* [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
-* [`tmate`](https://tmate.io) for remote terminal sharing with other engineers (pairing) and collaborative debugging
-
-[](https://media.giphy.com/media/26FmS6BRnPVPo2FDq/source.gif)
-
-## SEE MORE
-
-Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/geodesic). 
----
-title: LOGO(1) | Geodesic
-author:
-- Erik Osterman
-date: May 2019
----
-
-## NAME
-
-logo - Explanation of the Geodesic Logo
-
-## SYNOPSIS
-
-![Geodesic Logo](https://raw.githubusercontent.com/cloudposse/geodesic/master/docs/geodesic-small.png)
-
-In mathematics, a geodesic line is the shortest distance between two points on a sphere. It's also a solid structure composed of geometric shapes such as hexagons.
-
-## DESCRIPTION
-
-We like to think of geodesic as the shortest path to a rock-solid cloud infrastructure. The geodesic logo is a hexagon with a cube suspended at its center. The cube represents this geodesic container, which is central to everything and at the same time is what ties everything together.
-
-But look a little closer and you’ll notice there’s much more to it. It's also an isometric shape of a cube with a missing piece. This represents its pluggable design, which lets anyone extend it to suit their vision.
 
 
 
@@ -178,12 +186,7 @@ Check out these related projects.
 
 - [Packages](https://github.com/cloudposse/packages) - Cloud Posse installer and distribution of native apps
 - [Build Harness](https://github.com/cloudposse/dev) - Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more
-- [terraform-root-modules](https://github.com/cloudposse/terraform-root-modules) - Collection of Terraform "root module" invocations for provisioning reference architectures
-- [root.cloudposse.co](https://github.com/cloudposse/root.cloudposse.co) - Example Terraform Reference Architecture of a Geodesic Module for a Parent ("Root") Organization in AWS.
-- [audit.cloudposse.co](https://github.com/cloudposse/audit.cloudposse.co) - Example Terraform Reference Architecture of a Geodesic Module for an Audit Logs Organization in AWS.
-- [prod.cloudposse.co](https://github.com/cloudposse/prod.cloudposse.co) - Example Terraform Reference Architecture of a Geodesic Module for a Production Organization in AWS.
-- [staging.cloudposse.co](https://github.com/cloudposse/staging.cloudposse.co) - Example Terraform Reference Architecture of a Geodesic Module for a Staging Organization in AWS.
-- [dev.cloudposse.co](https://github.com/cloudposse/dev.cloudposse.co) - Example Terraform Reference Architecture of a Geodesic Module for a Development Sandbox Organization in AWS.
+- [terraform-aws-components](https://github.com/cloudposse/terraform-aws-components) - Catalog of reusable Terraform components and blueprints for provisioning reference architectures
 
 
 

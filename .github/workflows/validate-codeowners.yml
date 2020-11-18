@@ -1,0 +1,17 @@
+name: Validate Codeowners
+on:
+  pull_request:
+    paths:
+    - '**/CODEOWNERS'
+
+jobs:
+  validate-codeowners:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Checkout source code at current commit"
+      uses: actions/checkout@v2
+    - uses: mszostok/codeowners-validator@v0.5.0
+      with:
+        checks: "syntax,owners,duppatterns"
+        # GitHub access token is required only if the `owners` check is enabled
+        github_access_token: "${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}"

@@ -37,8 +37,8 @@ define env-to-arg
   $(shell printf -- '--%s=%s' $(shell echo $(1) | tr '[:upper:]' '[:lower:]' | tr '_' '-') $($(1)) | sed 's/^.*=$$//')
 endef
 
-
-default: help
+# This "default" definition conflicts with build-harness v0.44.2
+# default: help
 
 # Symbolically represents something handled by `cloud` as a module
 module: 
@@ -48,19 +48,20 @@ module:
 confirm:
 	@confirm KOPS_CLUSTER_NAME
 
-.PHONY : help
-## This help screen
-help:
-	@printf "Available targets:\n\n"
-	@awk '/^[a-zA-Z0-9%:\\_-]+:/ { \
-	  helpMessage = match(lastLine, /^## (.*)/); \
-	  if (helpMessage) { \
-	    helpCommand = $$1; \
-	    helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
-      gsub("\\\\", "", helpCommand); \
-      gsub(":+$$", "", helpCommand); \
-	    printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, helpMessage; \
-	  } \
-	} \
-	{ lastLine = $$0 }' $(MAKEFILE_LIST)
-	@printf "\n"
+# This "help" definition conflicts with build-harness v0.44.2
+#  .PHONY : help
+#  ## This help screen
+#  help:
+#    @printf "Available targets:\n\n"
+#    @awk '/^[a-zA-Z0-9%:\\_-]+:/ { \
+#      helpMessage = match(lastLine, /^## (.*)/); \
+#      if (helpMessage) { \
+#        helpCommand = $$1; \
+#        helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
+#        gsub("\\\\", "", helpCommand); \
+#        gsub(":+$$", "", helpCommand); \
+#        printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, helpMessage; \
+#      } \
+#    } \
+#    { lastLine = $$0 }' $(MAKEFILE_LIST)
+#    @printf "\n"

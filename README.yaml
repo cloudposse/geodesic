@@ -147,8 +147,6 @@ usage: |-
 
 # Other files to include in this README from the project folder
 include:
-  - "docs/about.md"
-  - "docs/logo.md"
 
 # Contributors to this project
 contributors:

@@ -9,6 +9,18 @@ ENV MOTD_URL=http://geodesic.sh/motd
 # other control codes that can cause `less` to mess up the screen formatting
 ENV LESS=R
 
+# Our older Geodesic configurations relied on `direnv`, which we no longer recommend,
+# preferring YAML configuration files instead.
+ENV DIRENV_ENABLED=true
+# Our older Geodesic configuration uses multiple Makefiles, like Makefile.tasks
+# and depends on this setting, however this setting is set by default by `direnv`
+# due to rootfs/conf/.envrc, but `direnv` is now disabled by default, too.
+# If you are using (and therefore enable) `direnv`, consider the advantage
+# of using `direnv` to set MAKE_INCLUDES, which is that it will only set
+# it for trusted directories under `/conf` and therefore it will not affect
+# `make` outside of this directory tree.
+ENV MAKE_INCLUDES="Makefile Makefile.*"
+
 #
 # Configure aws-okta to easily assume roles
 #

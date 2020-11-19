@@ -29,9 +29,12 @@ tasks:
       mkdir -p ${man_pages}
       for md in $(find /usr/share/docs -type f -name '*.md'); do
         man=${man_pages}/$(basename $md .md).$section
-        # Verbatim text (i.e. between backticks, `…`) doesn’t show in any particular way
-        sed 's/`/**/g' < $md | sed -E 's/^#(#+ )/\1/g' | \
-          pandoc -s -f markdown -t man | sed 's/\\\[en\]/-/' > $man
+        # Verbatim text (i.e. between backticks, `…`) doesn’t show in any particular way, so we bold it
+        # by using "**", but we need to preserve code fence triple backticks "```".
+        # We also need to disable latex_macros and tex_math_dollars because they can be
+        # accidentally triggered by dollar signs.
+        sed 's/```/~#~#/g' < $md | sed 's/`/**/g' | sed -E 's/^#(#+ )/\1/g' | sed 's/~#~#/```/g' | \
+          pandoc -s -f markdown-latex_macros-tex_math_dollars --variable=hyphenate:false -t man | sed 's/\\\[en\]/-/' > $man
         echo "Wrote $man"
       done
 

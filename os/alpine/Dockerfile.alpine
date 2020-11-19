@@ -1,10 +1,12 @@
+ARG ALPINE_VERSION=3.12.1
+ARG GOOGLE_CLOUD_SDK_VERSION=316.0.0
 #
 # Python Dependencies
 #
-FROM alpine:3.11.6 as python
+FROM alpine:$ALPINE_VERSION as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
-RUN apk add python3 python3-dev libffi-dev gcc linux-headers musl-dev openssl-dev make
+RUN apk add python3 python3-dev py3-pip libffi-dev gcc linux-headers musl-dev openssl-dev make
 
 ## Note:
 # To install aws-gogle-auth:
@@ -24,12 +26,12 @@ RUN python3 -m pip install --upgrade pip setuptools wheel && \
 #
 # Google Cloud SDK
 #
-FROM google/cloud-sdk:316.0.0-alpine as google-cloud-sdk
+FROM google/cloud-sdk:$GOOGLE_CLOUD_SDK_VERSION-alpine as google-cloud-sdk
 
 #
 # Geodesic base image
 #
-FROM alpine:3.11.6
+FROM alpine:$ALPINE_VERSION
 
 # Set XDG environment variables per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 # This is not a "multi-user" system, so we'll use special directories under
@@ -60,7 +62,7 @@ USER root
 
 # install the cloudposse alpine repository
 ADD https://apk.cloudposse.com/ops@cloudposse.com.rsa.pub /etc/apk/keys/
-RUN echo "@cloudposse https://apk.cloudposse.com/3.11/vendor" >> /etc/apk/repositories
+RUN echo "@cloudposse https://apk.cloudposse.com/3.12/vendor" >> /etc/apk/repositories
 
 # Use TLS for alpine default repos
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories && \
@@ -77,7 +79,7 @@ RUN apk add --update $(grep -h -v '^#' /etc/apk/packages.txt /etc/apk/packages-a
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
-RUN [[ $(geodesic-apkindex-md5) == $(cat /tmp/geodesic_apkindex.md5) ]] || echo "WARNING: apk package repos mismatch: '$(geodesic-apkindex-md5)' != '$(cat /tmp/geodesic_apkindex.md5)'" 1>&2
+RUN ["/bin/bash", "-c", "[[ $(geodesic-apkindex-md5) == $(cat /tmp/geodesic_apkindex.md5) ]] || echo \"WARNING: apk package repos mismatch: '$(geodesic-apkindex-md5)' != '$(cat /tmp/geodesic_apkindex.md5)'\" 1>&2"]
 RUN rm -f /tmp/geodesic-apkindex.md5
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
@@ -157,39 +159,10 @@ RUN chmod -R a+rwX ${HELM_HOME}
 # See https://helm.sh/docs/faq/#xdg-base-directory-support
 
 #
-# Install kops
+# We no longer install kops or defaults. See https://github.com/cloudposse/geodesic/blob/master/Dockerfile.options
+# for example settings you can add to your own Dockerfile, or see what we used to set
+# here: https://github.com/cloudposse/geodesic/blob/a7a47a0d3ed558e0f5d1116291b2f2f3aa1a1b97/Dockerfile#L123-L155
 #
-ENV KOPS_MANIFEST=/conf/kops/manifest.yaml
-ENV KOPS_TEMPLATE=/templates/kops/default.yaml
-## Set these to better values in child Dockerfile:
-#ENV KOPS_STATE_STORE s3://undefined
-#ENV KOPS_STATE_STORE_REGION us-east-1
-#ENV KOPS_FEATURE_FLAGS=+DrainAndValidateRollingUpdate
-
-ENV KOPS_BASTION_PUBLIC_NAME="bastion"
-
-# Set the KOPS_BASE_IMAGE to match your kops version. See:
-# https://github.com/kubernetes/kops/blob/master/channels/stable
-# https://github.com/kubernetes/kops/blob/master/docs/images.md
-#
-# Do not rely on KOPS_BASE_IMAGE being set in Geodesic. This will go away in future versions.
-# Set it in your /conf/kops/kops.envrc file, along with KUBERNETES_VERSION
-# ENV KOPS_BASE_IMAGE=kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
-
-ENV KUBECONFIG=/dev/shm/kubecfg
-ENV KUBECONFIG_TEMPLATE=/templates/kops/kubecfg.yaml
-
-RUN /usr/bin/kops completion bash > /etc/bash_completion.d/kops.sh
-
-# Instance sizes
-ENV BASTION_MACHINE_TYPE "t3.small"
-ENV MASTER_MACHINE_TYPE "t3.medium"
-ENV NODE_MACHINE_TYPE "t3.medium"
-
-# Min/Max number of nodes (aka workers)
-ENV NODE_MAX_SIZE 2
-ENV NODE_MIN_SIZE 2
-
 
 # 
 # Install fancy Kube PS1 Prompt
@@ -207,12 +180,12 @@ ENV AWS_SHARED_CREDENTIALS_FILE=${AWS_DATA_PATH}/credentials
 #
 # Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
 #
-ENV AWS_VAULT_ENABLED=true
+ENV AWS_VAULT_ENABLED=false
 ENV AWS_VAULT_SERVER_ENABLED=false
 ENV AWS_VAULT_BACKEND=file
-ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
-ENV AWS_VAULT_SESSION_TTL=12h
-#ENV AWS_VAULT_FILE_PASSPHRASE=
+# ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
+# ENV AWS_VAULT_SESSION_TTL=12h
+# ENV AWS_VAULT_FILE_PASSPHRASE=
 
 #
 # Configure aws-okta to easily assume roles
@@ -220,18 +193,39 @@ ENV AWS_VAULT_SESSION_TTL=12h
 ENV AWS_OKTA_ENABLED=false
 
 #
-# Shell
+# Shell customization
 #
-ENV SHELL=/bin/bash
+# options for `less`. `R` allows ANSI color codes to be displayed while stripping out
+# other control codes that can cause `less` to mess up the screen formatting
 ENV LESS=R
+# MANOPT=--no-hyphenation disables hyphenation for man pages, which is generally preferable
+# for the man pages in Geodesic to preserve the ability to copy and paste code.
+ENV MANOPT=--no-hyphenation
+# Support for using an SSH key file on the host. No longer favored now that
+# Docker supports forwarding SSH_AUTH_SOCK, but retained for backward compatibility.
+# See rootfs/etc/profile.d/ssh-agent.sh
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
-# Set a default terminal to "dumb" (headless) to make `tput` happy
+# Set a default terminal to "dumb" (headless) to make `tput` happy when running scripts.
+# When we launch Geodesic for interactive use, we forward the host value of `TERM`
 ENV TERM=dumb
+
+# Our older Geodesic configurations relied on `direnv`, which we no longer recommend,
+# preferring YAML configuration files instead.
+ENV DIRENV_ENABLED=false
+# Our older Geodesic configuration uses multiple Makefiles, like Makefile.tasks
+# and depends on setting
+# ENV MAKE_INCLUDES="Makefile Makefile.*"
+# but that setting causes problems in other situations, so we no longer set it by default.
+# We encourage you to use https://github.com/cloudposse/atmos instead of `make` for running commands.
+# If you are using (and therefore enable) `direnv`, consider the advantage
+# of using `direnv` to set MAKE_INCLUDES, which is that it will only set
+# it for trusted directories under `/conf` and therefore it will not affect
+# `make` outside of this directory tree.
 
 # Reduce `make` verbosity
 ENV MAKEFLAGS="--no-print-directory"
-ENV MAKE_INCLUDES="Makefile Makefile.*"
+
 # Install "root" filesystem
 COPY rootfs/ /
 COPY os/alpine/rootfs/ /
@@ -240,9 +234,7 @@ COPY os/alpine/rootfs/ /
 COPY docs/ /usr/share/docs/
 
 # Build man pages
-# man-db is not working as of 2020-10-20 with Alpine 3.11, so we are using man
-# TODO revert to RUN /usr/local/bin/docs update
-RUN /usr/local/bin/docs build
+RUN /usr/local/bin/docs update
 
 # Make sure that "user specific" directories we are sharing
 # are in fact available to all users

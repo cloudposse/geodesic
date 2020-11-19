@@ -106,6 +106,8 @@ Let's roll...
 
 
 
+### Customizing your Docker image
+
 In general we recommend creating a customized version of Geodesic by creating your own Dockerfile starting with
 ```
 ARG VERSION=0.138.0
@@ -164,6 +166,14 @@ RUN apt-get update && apt-get install -y google-cloud-sdk=300.0.0-0
 
 Note the `-y` flag to `apt-get install`. That is required for scripted installation, otherwise the command
 will ask for confirmation from the keyboard before installing a package.
+
+### Customizing your shell at launch time
+
+After you have build your Docker image, or if you are using a shared Docker image, you can
+add further customization at launch time. When Geodesic stars up, it looks for customization
+scripts and configuration so you can do things like add command aliases or override preconfigured options.
+Detailed information about launch-time configuration is in the [customization](./docs/customization.md)
+document, available from within the shell via `man customization`.
 
 
 

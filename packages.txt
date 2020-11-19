@@ -39,10 +39,7 @@ kubectx@cloudposse
 kubens@cloudposse
 less
 make
-# man-db 2.9.3-r2 require libgdbm.so.6 which is not available for Alpine 3.11
-# so we replace it with `man` for now
-# man-db@community
-man
+man-db
 musl-dev
 openssh-client
 openssl

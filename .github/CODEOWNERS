@@ -19,3 +19,4 @@
 
 # Of course, admins must approve changes to CODEOWNERS itself
 .github/CODEOWNERS  @cloudposse/admins
+.github/workflows/validate-codeowners.yml   @cloudposse/admins

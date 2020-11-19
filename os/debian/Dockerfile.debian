@@ -14,21 +14,28 @@ ENV LC_ALL=C.UTF-8
 # So we cannot install the packages: RUN apt-get update && apt-get install -y python3 python3-pip python3-dev
 # and instead we have to build Python ourselves and install it in /usr/local/bin (by Debian design).
 
+# Preload apt-utils
+RUN apt-get update && apt-get install -y apt-utils
+
+# Install the packages that are needed to build python3
 RUN apt-get update && apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
     libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev
 
+# Download the Python source code
 RUN curl -1sLfO https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz && \
     tar -xf Python-${PYTHON_VERSION}.tar.xz
 
+# Build Python to be installed in /usr/local/bin
 WORKDIR Python-${PYTHON_VERSION}
 RUN ./configure --enable-optimizations && make -j $(nproc) && make install
 
-
+# Build the Python packages, configured to use /usr/local/bin/python3, and install them under /dist
 COPY requirements.txt /requirements.txt
 
 RUN python3 -m pip install --upgrade --progress-bar off pip setuptools wheel && \
     pip install --progress-bar off -r /requirements.txt --ignore-installed --prefix=/dist --no-build-isolation --no-warn-script-location
 
+# Install /usr/local/bin/python3 under /dist so we can copy it to Geodesic
 RUN ./configure --enable-optimizations --prefix=/dist && make install
 
 #
@@ -36,7 +43,8 @@ RUN ./configure --enable-optimizations --prefix=/dist && make install
 #
 FROM debian:$DEBIAN_VERSION
 
-# Set terminal to be dumb for scripts, will override at run time
+# Set a default terminal to "dumb" (headless) to make `tput` happy when running scripts.
+# When we launch Geodesic for interactive use, we forward the host value of `TERM`
 ENV TERM=dumb
 # Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
 # Recommended: LC_ALL=C.UTF-8
@@ -83,9 +91,9 @@ COPY os/debian/rootfs/usr/local/bin/geodesic-aptindex-md5 /usr/local/bin/
 RUN apt-get update && apt-get install -y apt-utils && apt-get install -y curl
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/bash.deb.sh' | bash
 
-# Insall Google package repo
+# Install Google package repo
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-RUN curl -1sLf https://packages.cloud.google.com/apt/doc/apt-key.gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 
 RUN apt-get update && apt-get install -y \
     $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
@@ -94,15 +102,18 @@ RUN apt-get update && apt-get install -y \
 
 #
 # Install Google Cloud SDK
+# This is separate so that updating it does not invalidate the Docker cache layer with all the packages installed above
 #
 ARG GOOGLE_CLOUD_SDK_VERSION=316.0.0-0
 ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
 
 RUN apt-get update && apt-get install -y google-cloud-sdk=$GOOGLE_CLOUD_SDK_VERSION
 
+# gcloud config writes successful status updates to stderr, but we want to preserve
+# stderr for real errors in need of action.
 RUN { gcloud config set core/disable_usage_reporting true --installation && \
-    gcloud config set component_manager/disable_update_check true --installation && \
-    gcloud config set metrics/environment github_docker_image --installation; } 2>&1
+      gcloud config set component_manager/disable_update_check true --installation && \
+      gcloud config set metrics/environment github_docker_image --installation; } 2>&1
 
 RUN ["/bin/bash", "-c", "[[ $(/usr/local/bin/geodesic-aptindex-md5) == $(cat /var/cache/apt/geodesic_aptindex.md5) ]] || echo \"WARNING: apt package repos mismatch: '$(/usr/local/bin/geodesic-aptindex-md5)' != '$(cat /var/cache/apt/geodesic_aptindex.md5)'\" 1>&2"]
 
@@ -184,14 +195,29 @@ ENV AWS_OKTA_ENABLED=false
 # options for `less`. `R` allows ANSI color codes to be displayed while stripping out
 # other control codes that can cause `less` to mess up the screen formatting
 ENV LESS=R
+# MANOPT=--no-hyphenation disables hyphenation for man pages, which is generally preferable
+# for the man pages in Geodesic to preserve the ability to copy and paste code.
+ENV MANOPT=--no-hyphenation
 # Support for using an SSH key file on the host. No longer favored now that
 # Docker supports forwarding SSH_AUTH_SOCK, but retained for backward compatibility.
 # See rootfs/etc/profile.d/ssh-agent.sh
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
+# Our older Geodesic configurations relied on `direnv`, which we no longer recommend,
+# preferring YAML configuration files instead.
+ENV DIRENV_ENABLED=false
+# Our older Geodesic configuration uses multiple Makefiles, like Makefile.tasks
+# and depends on setting
+# ENV MAKE_INCLUDES="Makefile Makefile.*"
+# but that setting causes problems in other situations, so we no longer set it by default.
+# We encourage you to use https://github.com/cloudposse/atmos instead of `make` for running commands.
+# If you are using (and therefore enable) `direnv`, consider the advantage
+# of using `direnv` to set MAKE_INCLUDES, which is that it will only set
+# it for trusted directories under `/conf` and therefore it will not affect
+# `make` outside of this directory tree.
+
 # Reduce `make` verbosity
 ENV MAKEFLAGS="--no-print-directory"
-ENV MAKE_INCLUDES="Makefile Makefile.*"
 
 # Install "root" filesystem
 COPY rootfs/ /

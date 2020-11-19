@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "github-actions": {
+    "enabled": false
+  },
+  "docker": {
+    "ignorePaths": ["rootfs/**"]
+  }
+}

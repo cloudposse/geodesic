@@ -135,6 +135,25 @@ WORKDIR /tmp
 COPY --from=python /dist/ /usr/local/
 
 
+# Install an empty kubeconfig to suppress some errors
+COPY rootfs/conf/.kube/config /conf/.kube/config
+
+#
+# Install kubectl
+#
+# Set KUBERNETES_VERSION and KOPS_BASE_IMAGE in /conf/kops/kops.envrc
+#
+RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
+ENV KUBECTX_COMPLETION_VERSION 0.9.1
+ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
+ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
+
+#
+# Install fancy Kube PS1 Prompt
+#
+ENV KUBE_PS1_VERSION 0.7.0
+ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
+
 
 #
 # Install helm
@@ -170,12 +189,6 @@ RUN chmod -R a+rwX ${HELM_HOME}
 # helm version 3 uses XDG variables set above.
 # XDG directory permissions updated at end of installs.
 # See https://helm.sh/docs/faq/#xdg-base-directory-support
-
-#
-# Install fancy Kube PS1 Prompt
-#
-ENV KUBE_PS1_VERSION 0.7.0
-ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #
 # Configure host AWS configuration to be available from inside Docker image

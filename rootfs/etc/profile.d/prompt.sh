@@ -124,7 +124,7 @@ function geodesic_prompt() {
 
 	local dir_prompt
 	dir_prompt="${STATUS}${level_prompt} "
-	if [[ $PWD =~ ^/localhost/ ]]; then
+	if [[ $(pwd -P) =~ ^/localhost/ ]]; then
 		dir_prompt+="${ROLE_PROMPT} ("$'\x01'$(tput bold)$(tput setaf 1)$'\x02HOST\x01'$(tput sgr0)$'\x02'") \W "
 	else
 		dir_prompt+="${ROLE_PROMPT} \W "

@@ -1,22 +1,19 @@
-if [ ! -d "${AWS_DATA_PATH}" ]; then
-	echo "* Initializing ${AWS_DATA_PATH}"
-	mkdir -p "${AWS_DATA_PATH}"
-fi
+#!/bin/bash
 
 # `aws configure` does not respect ENVs
 if [ ! -e "${HOME}/.aws" ]; then
-	ln -s "${AWS_DATA_PATH}" "${HOME}/.aws"
+	ln -s "${GEODESIC_AWS_HOME:-/localhost/.aws}" "${HOME}/.aws"
 fi
 
-if [ ! -f "${AWS_CONFIG_FILE}" ]; then
+if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME:-/localhost/.aws}/config}" ]; then
 	echo "* Initializing ${AWS_CONFIG_FILE}"
 	# Required for AWS_PROFILE=default
 	echo '[default]' >${AWS_CONFIG_FILE}
 fi
 
 # Install autocompletion rules
-if which aws_completer >/dev/null; then
-	complete -C "$(which aws_completer)" aws
+if command -v aws_completer >/dev/null; then
+	complete -C "$(command -v aws_completer)" aws
 fi
 
 # Asks AWS what the currently active identity is and
@@ -48,10 +45,10 @@ function export_current_aws_role() {
 	if [[ -z $role_name ]]; then
 		if [[ "$role_arn" =~ "role/OrganizationAccountAccessRole" ]]; then
 			role_name="$(printf "%s" "$role_arn" | cut -d: -f 5):OrgAccess"
-			echo "* $(red Could not find profile name for ${role_arn}\; calling it \"${role_name}\")" >&2
+			echo "* $(red "Could not find profile name for ${role_arn}\; calling it \"${role_name}\"")" >&2
 		else
 			role_name="$(printf "%s" "$role_arn" | cut -d/ -f 2)"
-			echo "* $(green Could not find profile name for ${role_arn}\; calling it \"${role_name}\")" >&2
+			echo "* $(green "Could not find profile name for ${role_arn}\; calling it \"${role_name}\"")" >&2
 		fi
 	fi
 	export ASSUME_ROLE="$role_name"
@@ -59,6 +56,7 @@ function export_current_aws_role() {
 
 # Keep track of AWS credentials and updates to AWS role environment variables.
 # When changes are noticed, update prompt with current role.
+unset GEODESIC_AWS_ROLE_CACHE # clear out value inherited from supershell
 function refresh_current_aws_role_if_needed() {
 	local is_exported="^declare -[^ x]*x[^ x]* "
 	local aws_profile=$(declare -p AWS_PROFILE 2>/dev/null)
@@ -71,8 +69,8 @@ function refresh_current_aws_role_if_needed() {
 	fi
 }
 
-# If OKTA oar aws-vault are running, we have better hooks for keeping track of
-# the current AWS role, so only use refresh_current_aws_role_if_needed if they are disabled
-if [[ $AWS_OKTA_ENABLED != "true" ]] && [[ ${AWS_VAULT_ENABLED:-true} != "true" ]]; then
+# If OKTA or aws-vault are running, we have better hooks for keeping track of the current AWS role,
+# so only use refresh_current_aws_role_if_needed if they are disabled or overridden
+if [[ ($AWS_OKTA_ENABLED != "true" && ${AWS_VAULT_ENABLED:-true} != "true") || -n $AWS_PROFILE ]]; then
 	PROMPT_HOOKS+=("refresh_current_aws_role_if_needed")
 fi

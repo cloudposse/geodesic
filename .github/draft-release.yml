@@ -33,20 +33,15 @@ categories:
   - 'bugfix'
   - 'bug'
   - 'hotfix'
-- title: '🤖 Included Tools'
+- title: '🧰 Included Tools'
   labels:
   - 'auto-update'
   - 'packages'
   - 'docker'
-- title: '🤖 Included Tools'
-  labels:
-  - 'auto-update'
-  - 'packages'
-  - 'docker'
-- title '📚️ Documentation'
+- title: '📚️ Documentation'
   labels:
   - 'docs'
-- title '🏗️ Build/Release Maintenance'
+- title: '🏗️ Build/Release Maintenance'
   labels:
   - 'github'
 

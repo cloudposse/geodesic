@@ -1,0 +1,61 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: '$RESOLVED_VERSION'
+version-template: '$MAJOR.$MINOR.$PATCH'
+version-resolver:
+  major:
+    labels:
+    - 'major'
+  minor:
+    labels:
+    - 'minor'
+    - 'enhancement'
+  patch:
+    labels:
+    - 'auto-update'
+    - 'patch'
+    - 'fix'
+    - 'bugfix'
+    - 'bug'
+    - 'hotfix'
+  default: 'minor'
+
+categories:
+- title: '🚀 Enhancements'
+  labels:
+  - 'enhancement'
+  - 'patch'
+  - 'shell'
+  - 'scripts'
+  - 'terraform'
+- title: '🐛 Bug Fixes'
+  labels:
+  - 'fix'
+  - 'bugfix'
+  - 'bug'
+  - 'hotfix'
+- title: '🤖 Included Tools'
+  labels:
+  - 'auto-update'
+  - 'packages'
+  - 'docker'
+- title: '🤖 Included Tools'
+  labels:
+  - 'auto-update'
+  - 'packages'
+  - 'docker'
+- title '📚️ Documentation'
+  labels:
+  - 'docs'
+- title '🏗️ Build/Release Maintenance'
+  labels:
+  - 'github'
+
+change-template: |
+  <details>
+    <summary>$TITLE @$AUTHOR (#$NUMBER)</summary>
+
+    $BODY
+  </details>
+
+template: |
+  $CHANGES

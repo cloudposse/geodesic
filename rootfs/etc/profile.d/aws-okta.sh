@@ -20,7 +20,7 @@ if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
 
 	PROMPT_HOOKS+=("aws_okta_prompt")
 	function aws_okta_prompt() {
-		if [ -z "${AWS_OKTA_PROFILE}" ]; then
+		if [[  -z "${AWS_OKTA_PROFILE}" && -z "${ASSUME_ROLE}" ]]; then
 			echo -e "-> Run '$(green assume-role)' to login to AWS with aws-okta"
 		fi
 	}

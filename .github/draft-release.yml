@@ -35,7 +35,6 @@ categories:
   - 'hotfix'
 - title: '🧰 Included Tools'
   labels:
-  - 'auto-update'
   - 'packages'
   - 'docker'
 - title: '📚️ Documentation'
@@ -54,3 +53,11 @@ change-template: |
 
 template: |
   $CHANGES
+
+replacers:
+# Remove irrelevant information from Renovate bot
+- search: '/---\s+^#.*Renovate configuration(.|\n)*This PR has been generated .*/gm'
+  replace: ''
+# Remove Renovate bot banner iamge
+- search: '/\[!\[[^\]]*Renovate\][^\]]*\](\([^)]*\))?\s*\n+/gm'
+  replace: ''

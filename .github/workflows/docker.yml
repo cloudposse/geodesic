@@ -4,6 +4,8 @@ on:
     types: [opened, synchronize, reopened]
   release:
     types:
+    # "released" excludes pre-releases
+    # "published" is either a release or a pre-release
     - published
 jobs:
   build-and-push:

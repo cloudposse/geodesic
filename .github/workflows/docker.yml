@@ -4,7 +4,9 @@ on:
     types: [opened, synchronize, reopened]
   release:
     types:
-    - created
+    # "released" excludes pre-releases
+    # "published" is either a release or a pre-release
+    - published
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -25,7 +27,7 @@ jobs:
         LATEST_TAG_OS: 'alpine'
         BASE_OS: ${{matrix.os}} 
       run: |
-        echo ::set-output name=publish::${{ (github.event_name == 'release' && github.event.action == 'created') || (github.event.pull_request.head.repo.full_name == github.repository) }}
+        echo ::set-output name=publish::${{ (github.event_name == 'release' && github.event.action == 'published') || (github.event.pull_request.head.repo.full_name == github.repository) }}
         COMMIT_SHA="${GITHUB_SHA}"
         if [[ $GITHUB_REF == refs/tags/* ]]; then
           VERSION=${GITHUB_REF#refs/tags/}

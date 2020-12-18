@@ -1,6 +1,13 @@
 #!/bin/bash
-# Converts AWS region names from full names to 3 character names and back.
-# Generally, AWS region names have 3 parts and the short name
+# Converts AWS region names from full names to either
+# "fixed" (always 3 characters) or "short" (usually 4 or 5 characters)
+# abbreviations, following the same map as
+# https://github.com/cloudposse/terraform-aws-utils
+#
+# Short abbreviations are generally the same as official AWS 
+# availability zone IDs.
+#
+# Generally, AWS region names have 3 parts and the "fixed" abbreviation
 # is the first character of each part. Exceptions (due to collisions):
 # - Africa and China use second letter of first part.
 # - ap-south-1 is shortened to as0 to avoid conflict with ap-southeast-1
@@ -12,14 +19,14 @@
 # See https://github.com/jsonmaur/aws-regions for more complete list
 
 usage() {
-	printf "\nConvert between long and short region codes\n\n"
-	printf "  %s [-l | --long | -s | --short] region-code\n\n" "$0"
-	echo '  If neither --long nor --short is provided, short inputs'
-	echo '  are converted to long, long inputs are converted to short'
+	printf "\nConvert between long short, and fixed region codes\n\n"
+	printf "  %s [-l | --long | -f | -fixed | -s | --short] region-code\n\n" "$0"
+	echo '  If no option is provided, short and fixed inputs'
+	echo '  are converted to long, long inputs are converted to fixed'
 }
 
-declare -A short_map
-short_map=(
+declare -A fixed_map
+fixed_map=(
 	[ae1]=ap-east-1
 	[an1]=ap-northeast-1
 	[an2]=ap-northeast-2
@@ -47,13 +54,41 @@ short_map=(
 	[uw2]=us-west-2
 )
 
+declare -A short_map
+short_map=(
+  [ape1]="ap-east-1"
+  [apne1]="ap-northeast-1"
+  [apne2]="ap-northeast-2"
+  [aps1]="ap-south-1"
+  [apse1]="ap-southeast-1"
+  [apse2]="ap-southeast-2"
+  [cac1]="ca-central-1"
+  [euc1]="eu-central-1"
+  [eun1]="eu-north-1"
+  [eus1]="eu-south-1"
+  [euw1]="eu-west-1"
+  [euw2]="eu-west-2"
+  [euw3]="eu-west-3"
+  [afs1]="af-south-1"
+  [usge1]="us-gov-east-1"
+  [usgw1]="us-gov-west-1"
+  [mes1]="me-south-1"
+  [cnn1]="cn-north-1"
+  [cnnw1]="cn-northwest-1"
+  [sae1]="sa-east-1"
+  [use1]="us-east-1"
+  [use2]="us-east-2"
+  [usw1]="us-west-1"
+  [usw2]="us-west-2"
+)
+
 # It is faster just to loop through the array
 # than to create another array and index it
-short() {
-	# If we are given a short region code, then just
+_abbr() {
+	# If we are given a abbr region code, then just
 	# validate it and return it if valid.
 	if ((${#1} == 3)); then
-		if [[ -n "${short_map[${1,,}]}" ]]; then
+		if [[ -n "${abbr_map[${1,,}]}" ]]; then
 			echo ${1,,}
 			return 0
 		fi
@@ -61,12 +96,12 @@ short() {
 		return 1
 	fi
 
-	# Loop through the keys in short_map and return the one
+	# Loop through the keys in abbr_map and return the one
 	# whose value matches what we were given (folded to lower case)
 	local long="${1,,}"
-	for short in "${!short_map[@]}"; do
-		if [[ $long == ${short_map[$short]} ]]; then
-			echo $short
+	for abbr in "${!abbr_map[@]}"; do
+		if [[ $long == ${abbr_map[$abbr]} ]]; then
+			echo $abbr
 			return 0
 		fi
 	done
@@ -74,17 +109,30 @@ short() {
 	return 1
 }
 
+fixed() {
+  declare -n abbr_map="fixed_map"
+  _abbr "$@"
+}
+
+short() {
+  declare -n abbr_map="short_map"
+  _abbr "$@"
+}
+
 long() {
-	# Fold our argument to lower case and look it up in short_map
+	# Fold our argument to lower case and look it up in fixed_map and short_map
+	local fixed="${fixed_map[${1,,}]}"
 	local short="${short_map[${1,,}]}"
-	if [[ -n $short ]]; then
-		echo $short
+	if [[ -n $fixed ]]; then
+		echo $fixed
+	elif [[ -n $short ]]; then
+	  echo $short
 	else
-		# If we are given something that is not a short region code
+		# If we are given something that is not a fixed or short region code
 		# see if it matches an existing long region code, and return
 		# it if it does.
-		short="$(short $1)"
-		if [[ -n $short ]]; then
+		fixed="$(fixed $1)"
+		if [[ -n $fixed ]]; then
 			echo "${1,,}"
 		else
 			echo Not found >&2
@@ -93,25 +141,32 @@ long() {
 	fi
 }
 
-# Test that all the short code entries map back to themselves
+# Test that all the abbreviations map back to themselves
 test() {
-	for short in "${!short_map[@]}"; do
-		if [[ $(short $(long $short)) != $short ]]; then
-			echo Failed: $short - - >$(long $short) >$(short $(long $short)) >&2
-			return 1
-		fi
-	done
+  for type in fixed short; do
+    declare -n abbr_map="${type}_map"
+    for abbr in "${!abbr_map[@]}"; do
+      if [[ $($type $(long $abbr)) != $abbr ]]; then
+        echo Failed: $abbr - - >$(long $abbr) >$($type $(long $abbr)) >&2
+        return 1
+      fi
+    done
+  done
 	echo Passed
 }
 
+trap "unset -n abbr_map" EXIT RETURN
+
 if [[ $1 == "test" ]]; then
 	test
-elif [[ $1 =~ l ]] && ! [[ $1 =~ central ]]; then
+elif [[ $1 =~ ^--?l ]]; then
 	long $2
-elif (($# == 2)); then
+elif [[ $1 =~ ^--?s ]]; then
 	short $2
-elif ((${#1} == 3)); then
+elif (($# == 2)); then
+	fixed $2
+elif ((${#1} < 9)); then
 	long $1
 else
-	short $1
+	fixed $1
 fi

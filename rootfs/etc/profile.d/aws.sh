@@ -16,6 +16,52 @@ if command -v aws_completer >/dev/null; then
 	complete -C "$(command -v aws_completer)" aws
 fi
 
+# This is the default assume-role function, but it can be overridden/replaced later
+# by aws-okta or aws-vault, etc. or could have already been overridden.
+if ! declare -f assume-role >/dev/null; then
+	function assume-role() {
+		aws_sdk_assume_role "$@"
+	}
+fi
+
+function aws_choose_role() {
+	_preview="${FZF_PREVIEW:-crudini --format=ini --get "$AWS_CONFIG_FILE" 'profile {}'}"
+	crudini --get "${AWS_CONFIG_FILE}" |
+		awk -F ' ' '{print $2}' |
+		fzf \
+			--height 30% \
+			--preview-window right:70% \
+			--reverse \
+			--select-1 \
+			--prompt='-> ' \
+			--tiebreak='begin,index' \
+			--header 'Select AWS profile' \
+			--query "${ASSUME_ROLE_INTERACTIVE_QUERY:-${NAMESPACE}-${STAGE}-}" \
+			--preview "$_preview"
+}
+
+
+function aws_sdk_assume_role() {
+	local role=$1
+	shift
+
+	[[ -z $role && "${ASSUME_ROLE_INTERACTIVE:-true}" == "true" ]] && role=$(aws_choose_role)
+
+	if [ -z "${role}" ]; then
+		echo "Usage: assume-role <role> [command...]"
+		return 1
+	fi
+
+	local assume_role="${ASSUME_ROLE}"
+	trap '[[ -n $assume_role ]] && ASSUME_ROLE="$assume_role"' RETURN EXIT
+	ASSUME_ROLE="$role"
+	if [ $# -eq 0 ]; then
+		AWS_PROFILE="$role" bash -l
+	else
+		AWS_PROFILE="$role" $*
+	fi
+}
+
 # Asks AWS what the currently active identity is and
 # sets environment variables accordingly
 function export_current_aws_role() {

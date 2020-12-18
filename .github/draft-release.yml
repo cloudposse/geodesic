@@ -17,6 +17,10 @@ version-resolver:
     - 'bugfix'
     - 'bug'
     - 'hotfix'
+    - 'packages'
+    - 'docker'
+    - 'docs'
+    - 'github'
   default: 'minor'
 
 categories:
@@ -56,8 +60,8 @@ template: |
 
 replacers:
 # Remove irrelevant information from Renovate bot
-- search: '/---\s+^#.*Renovate configuration(.|\n)*This PR has been generated .*/gm'
+- search: '/---\s+^#.*Renovate configuration(?:.|\n)*?This PR has been generated .*/gm'
   replace: ''
-# Remove Renovate bot banner iamge
+# Remove Renovate bot banner image
 - search: '/\[!\[[^\]]*Renovate\][^\]]*\](\([^)]*\))?\s*\n+/gm'
   replace: ''

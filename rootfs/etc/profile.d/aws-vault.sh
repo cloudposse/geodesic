@@ -126,7 +126,11 @@ function sync_clocks() {
 	fi
 }
 
-if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
+if [[ "${AWS_VAULT_ENABLED:-true}" != "true" ]]; then
+	# Even if we are not going to turn on Geodesic support for aws-vault, we
+	# want to enable aws-vault use if a configuration already exits.
+	[[ -d /localhost/.awsvault ]] && ln -sf /localhost/.awsvault ${HOME}
+else
 	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"
 		exit 1
@@ -209,27 +213,11 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		fi
 	}
 
-	function choose_role_interactive() {
-		_preview="${FZF_PREVIEW:-crudini --format=ini --get "$AWS_CONFIG_FILE" 'profile {}'}"
-		crudini --get "${AWS_CONFIG_FILE}" |
-			awk -F ' ' '{print $2}' |
-			fzf \
-				--height 30% \
-				--preview-window right:70% \
-				--reverse \
-				--select-1 \
-				--prompt='-> ' \
-				--tiebreak='begin,index' \
-				--header 'Select AWS profile' \
-				--query "${ASSUME_ROLE_INTERACTIVE_QUERY:-${NAMESPACE}-${STAGE}-}" \
-				--preview "$_preview"
-	}
-
-	function choose_role() {
+	function aws_vault_choose_role() {
 		if [[ -n $AWS_PROFILE && -z $AWS_VAULT ]]; then
 			echo "$AWS_PROFILE"
 		elif [ "${ASSUME_ROLE_INTERACTIVE:-true}" == "true" ]; then
-			echo "$(choose_role_interactive)"
+			echo "$(aws_choose_role)"
 		else
 			echo "${AWS_DEFAULT_PROFILE}"
 		fi
@@ -260,7 +248,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 			fi
 		fi
 
-		role=${1:-$(choose_role)}
+		role=${1:-$(aws_vault_choose_role)}
 
 		if [ -z "${role}" ]; then
 			echo "Usage: assume-role <role> [command...]"
@@ -280,31 +268,10 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		fi
 	}
 
-	function _aws_sdk_assume_role() {
-		local role=$1
-		shift
-
-		[[ -z $role && "${ASSUME_ROLE_INTERACTIVE:-true}" == "true" ]] && role=$(choose_role_interactive)
-
-		if [ -z "${role}" ]; then
-			echo "Usage: assume-role <role> [command...]"
-			return 1
-		fi
-
-		local assume_role="${ASSUME_ROLE}"
-		trap '[[ -n $assume_role ]] && ASSUME_ROLE="$assume_role"' RETURN EXIT
-		ASSUME_ROLE="$role"
-		if [ $# -eq 0 ]; then
-			AWS_PROFILE="$role" bash -l
-		else
-			AWS_PROFILE="$role" $*
-		fi
-	}
-
 	function assume-role() {
 		if [[ -n "${AWS_VAULT}" && ${AWS_VAULT_SERVER_DISABLED:-false} != "false" ]]; then
 			green "* aws-vault is already running; changing roles via AWS_PROFILE" && sleep 2
-			_aws_sdk_assume_role $*
+			aws_sdk_assume_role $*
 		else
 			_aws_vault_assume_role $*
 		fi
@@ -321,7 +288,7 @@ if [ "${AWS_VAULT_ENABLED:-true}" == "true" ]; then
 		trap 'AWS_VAULT_ARGS=("${aws_vault_args[@]}")' RETURN
 
 		[[ ${AWS_VAULT_ARGS[*]} =~ --debug ]] || AWS_VAULT_ARGS+=("--debug")
-		_aws_vault_assume_role "${1:-$(choose_role)}" sleep inf
+		_aws_vault_assume_role "${1:-$(aws_vault_choose_role)}" sleep inf
 	}
 
 fi

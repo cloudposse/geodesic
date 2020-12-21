@@ -1,6 +1,14 @@
 {
+  "timezone": "America/Los_Angeles",
   "extends": [
     "config:base"
+  ],
+  "packageRules": [
+    {
+      "packageNames": ["awscli","boto3"],
+      "groupName": ["AWS CLI packages"],
+      "schedule": ["after 4pm on friday"]
+    }
   ],
   "github-actions": {
     "enabled": false

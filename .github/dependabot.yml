@@ -1,0 +1,3 @@
+# Attempt to disable Dependabot updates now that we have Renovate
+version: 2
+updates: []

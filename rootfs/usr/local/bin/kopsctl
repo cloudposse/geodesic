@@ -19,7 +19,7 @@ tasks:
 
   login:
     # Write out kubecfg
-    description: "Login to Kops cluster uusing IAM role"
+    description: "Login to Kops cluster using IAM role"
     script:
     - *exit_on_errors
     - build-kubecfg
@@ -70,7 +70,7 @@ tasks:
             - |
               eval $(ssh-agent -s)
               ssh-add - <<<${KOPS_SSH_PRIVATE_KEY}
-              ssh -A admin@bastion.${KOPS_CLUSTER_NAME}
+              ssh -A ubuntu@bastion.${KOPS_CLUSTER_NAME}
               eval $(ssh-agent -k) >/dev/null
 
            # Create Public Key 

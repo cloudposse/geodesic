@@ -110,8 +110,12 @@ RUN { gcloud config set core/disable_usage_reporting true --installation && \
       gcloud config set component_manager/disable_update_check true --installation && \
       gcloud config set metrics/environment github_docker_image --installation; } 2>&1
 
-# Install an empty kubeconfig to suppress some errors
+# Explicitly set  KUBECONFIG to enable kube_ps1 prompt
+ENV KUBECONFIG=/conf/.kube/config
+# Install an empty kubeconfig to suppress some warnings
 COPY rootfs/conf/.kube/config /conf/.kube/config
+# Set mode on kubeconfig to suppress some warnings
+RUN chmod 600 $KUBECONFIG
 
 #
 # Install kubectl

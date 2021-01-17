@@ -134,9 +134,12 @@ WORKDIR /tmp
 # Copy python dependencies
 COPY --from=python /dist/ /usr/local/
 
-
-# Install an empty kubeconfig to suppress some errors
+# Explicitly set  KUBECONFIG to enable kube_ps1 prompt
+ENV KUBECONFIG=/conf/.kube/config
+# Install an empty kubeconfig to suppress some warnings
 COPY rootfs/conf/.kube/config /conf/.kube/config
+# Set mode on kubeconfig to suppress some warnings
+RUN chmod 600 $KUBECONFIG
 
 #
 # Install kubectl

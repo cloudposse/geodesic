@@ -1,0 +1,19 @@
+name: mega-linter
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+
+jobs:
+  mega-linter:
+    name: mega-linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Commit"
+        uses: actions/checkout@v2
+      - name: "Mega-Lint"
+        uses: cloudposse/actions/github/mega-linter@a33474f

@@ -1,6 +1,6 @@
 # Pin requests because it creates dependency conflicts with urllib3
 requests==2.25.1
-PyYAML==5.3.1
+PyYAML==5.4.1
 ansible==2.10.6
 awscli==1.18.223
 boto==2.49.0

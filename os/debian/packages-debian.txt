@@ -10,6 +10,7 @@ iproute2
 ldnsutils
 # locales end up causing trouble because they change sort order, so best to avoid them
 # locales
+netcat
 oathtool
 procps
 

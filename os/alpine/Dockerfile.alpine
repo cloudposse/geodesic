@@ -1,5 +1,6 @@
 ARG ALPINE_VERSION=3.12.1
-ARG GOOGLE_CLOUD_SDK_VERSION=316.0.0
+# https://cloud.google.com/sdk/docs/release-notes
+ARG GOOGLE_CLOUD_SDK_VERSION=328.0.0
 #
 # Python Dependencies
 #
@@ -32,6 +33,9 @@ FROM google/cloud-sdk:$GOOGLE_CLOUD_SDK_VERSION-alpine as google-cloud-sdk
 # Geodesic base image
 #
 FROM alpine:$ALPINE_VERSION
+
+ARG VERSION
+ENV GEODESIC_VERSION=$VERSION
 
 # Set XDG environment variables per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 # This is not a "multi-user" system, so we'll use special directories under
@@ -71,16 +75,18 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 
 # Install alpine package manifest
 COPY packages.txt os/alpine/packages-alpine.txt /etc/apk/
-# Install repo checksum in an attempt to ensure updates bust the Docker build cache
-COPY os/alpine/geodesic_apkindex.md5 /tmp/geodesic_apkindex.md5
-COPY os/alpine/rootfs/usr/local/bin/geodesic-apkindex-md5 /usr/local/bin/
+# Now that we have GEODESIC_VERSION, we should not need to bust the package cache
+## Install repo checksum in an attempt to ensure updates bust the Docker build cache
+#COPY os/alpine/geodesic_apkindex.md5 /tmp/geodesic_apkindex.md5
+#COPY os/alpine/rootfs/usr/local/bin/geodesic-apkindex-md5 /usr/local/bin/
 
 RUN apk add --update $(grep -h -v '^#' /etc/apk/packages.txt /etc/apk/packages-alpine.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
-RUN ["/bin/bash", "-c", "[[ $(geodesic-apkindex-md5) == $(cat /tmp/geodesic_apkindex.md5) ]] || echo \"WARNING: apk package repos mismatch: '$(geodesic-apkindex-md5)' != '$(cat /tmp/geodesic_apkindex.md5)'\" 1>&2"]
-RUN rm -f /tmp/geodesic-apkindex.md5
+# Now that we have GEODESIC_VERSION, we should not need to bust the package cache
+# RUN ["/bin/bash", "-c", "[[ $(geodesic-apkindex-md5) == $(cat /tmp/geodesic_apkindex.md5) ]] || echo \"WARNING: apk package repos mismatch: '$(geodesic-apkindex-md5)' != '$(cat /tmp/geodesic_apkindex.md5)'\" 1>&2"]
+# UN rm -f /tmp/geodesic-apkindex.md5
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -150,7 +156,7 @@ RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
 #
 ENV HELM_DIFF_VERSION 3.1.3
 ENV HELM_GIT_VERSION 0.8.1
-ENV HELM_HELM_2TO3_VERSION 0.7.0
+ENV HELM_HELM_2TO3_VERSION 0.8.1
 
 # Install plugins and then remove cache
 RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \

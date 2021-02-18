@@ -35,6 +35,8 @@ jobs:
           VERSION=pr-${{ github.event.pull_request.number }}
           COMMIT_SHA=${{ github.event.pull_request.head.sha }}
         fi
+        printf "Version resolved to %s\n" "${VERSION}"
+        echo ::set-output name=version::${VERSION}
         TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
         if [[ -n $VERSION ]]; then
           TAGS="$TAGS,${{ github.repository }}:${VERSION}-${BASE_OS}"
@@ -68,3 +70,5 @@ jobs:
         push: ${{ steps.prepare.outputs.publish == 'true' }}
         tags: ${{ steps.prepare.outputs.tags }}
         file: ./os/${{matrix.os}}/Dockerfile.${{matrix.os}}
+        build-args: |
+          VERSION=${{ steps.prepare.outputs.version }}

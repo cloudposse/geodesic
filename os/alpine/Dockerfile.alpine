@@ -75,18 +75,14 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
 
 # Install alpine package manifest
 COPY packages.txt os/alpine/packages-alpine.txt /etc/apk/
-# Now that we have GEODESIC_VERSION, we should not need to bust the package cache
-## Install repo checksum in an attempt to ensure updates bust the Docker build cache
-#COPY os/alpine/geodesic_apkindex.md5 /tmp/geodesic_apkindex.md5
-#COPY os/alpine/rootfs/usr/local/bin/geodesic-apkindex-md5 /usr/local/bin/
+
+## Here is where we would copy in the repo checksum in an attempt to ensure updates bust the Docker build cache
 
 RUN apk add --update $(grep -h -v '^#' /etc/apk/packages.txt /etc/apk/packages-alpine.txt) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
-# Now that we have GEODESIC_VERSION, we should not need to bust the package cache
-# RUN ["/bin/bash", "-c", "[[ $(geodesic-apkindex-md5) == $(cat /tmp/geodesic_apkindex.md5) ]] || echo \"WARNING: apk package repos mismatch: '$(geodesic-apkindex-md5)' != '$(cat /tmp/geodesic_apkindex.md5)'\" 1>&2"]
-# UN rm -f /tmp/geodesic-apkindex.md5
+# Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -120,7 +116,7 @@ RUN { gcloud config set core/disable_usage_reporting true --installation && \
 ENV KUBECONFIG=/conf/.kube/config
 # Install an empty kubeconfig to suppress some warnings
 COPY rootfs/conf/.kube/config /conf/.kube/config
-# Set mode on kubeconfig to suppress some warnings
+# Set mode on kubeconfig to suppress some warnings while installing tools
 RUN chmod 600 $KUBECONFIG
 
 #
@@ -252,6 +248,9 @@ RUN /usr/local/bin/docs update
 # are in fact available to all users
 RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 	chmod -R a+rwX $dir; done
+
+# Set mode on kubeconfig to suppress some warnings (mode was reset by above "COPY rootfs/ /"
+RUN chmod 600 $KUBECONFIG
 
 WORKDIR /conf
 

@@ -86,10 +86,8 @@ USER root
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 COPY packages.txt os/debian/packages-debian.txt /etc/apt/
-# Now that we have GEODESIC_VERSION, we should not need to bust the package cache
-## Install repo checksum in an attempt to ensure updates bust the Docker build cache
-#COPY os/debian/geodesic_aptindex.md5 /var/cache/apt/
-#COPY os/debian/rootfs/usr/local/bin/geodesic-aptindex-md5 /usr/local/bin/
+
+## Here is where we would copy in the repo checksum in an attempt to ensure updates bust the Docker build cache
 
 # Add CloudPosse package repo
 RUN apt-get update && apt-get install -y apt-utils && apt-get install -y curl
@@ -119,8 +117,7 @@ RUN { gcloud config set core/disable_usage_reporting true --installation && \
       gcloud config set component_manager/disable_update_check true --installation && \
       gcloud config set metrics/environment github_docker_image --installation; } 2>&1
 
-# Now that we have GEODESIC_VERSION, we should not need to bust the package cache
-# RUN ["/bin/bash", "-c", "[[ $(/usr/local/bin/geodesic-aptindex-md5) == $(cat /var/cache/apt/geodesic_aptindex.md5) ]] || echo \"WARNING: apt package repos mismatch: '$(/usr/local/bin/geodesic-aptindex-md5)' != '$(cat /var/cache/apt/geodesic_aptindex.md5)'\" 1>&2"]
+# Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)
 
 # Using the en_US.UTF-8 local breaks our login setup because it changes the sort order,
 # and therefore the order of execution, of our profile files. We use locale C.UTF-8 instead,
@@ -143,7 +140,7 @@ COPY --from=python /dist/ /usr/local/
 ENV KUBECONFIG=/conf/.kube/config
 # Install an empty kubeconfig to suppress some warnings
 COPY rootfs/conf/.kube/config /conf/.kube/config
-# Set mode on kubeconfig to suppress some warnings
+# Set mode on kubeconfig to suppress some warnings while installing tools
 RUN chmod 600 $KUBECONFIG
 
 #
@@ -261,6 +258,9 @@ RUN /usr/local/bin/docs update
 # are in fact available to all users
 RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 	chmod -R a+rwX $dir; done
+
+# Set mode on kubeconfig to suppress some warnings (mode was reset by above "COPY rootfs/ /"
+RUN chmod 600 $KUBECONFIG
 
 WORKDIR /conf
 

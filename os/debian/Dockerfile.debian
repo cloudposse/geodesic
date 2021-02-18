@@ -43,6 +43,9 @@ RUN ./configure --enable-optimizations --prefix=/dist && make install
 #
 FROM debian:$DEBIAN_VERSION
 
+ARG VERSION
+ENV GEODESIC_VERSION=$VERSION
+
 # Set a default terminal to "dumb" (headless) to make `tput` happy when running scripts.
 # When we launch Geodesic for interactive use, we forward the host value of `TERM`
 ENV TERM=dumb
@@ -83,9 +86,8 @@ USER root
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 COPY packages.txt os/debian/packages-debian.txt /etc/apt/
-# Install repo checksum in an attempt to ensure updates bust the Docker build cache
-COPY os/debian/geodesic_aptindex.md5 /var/cache/apt/
-COPY os/debian/rootfs/usr/local/bin/geodesic-aptindex-md5 /usr/local/bin/
+
+## Here is where we would copy in the repo checksum in an attempt to ensure updates bust the Docker build cache
 
 # Add CloudPosse package repo
 RUN apt-get update && apt-get install -y apt-utils && apt-get install -y curl
@@ -103,8 +105,8 @@ RUN apt-get update && apt-get install -y \
 #
 # Install Google Cloud SDK
 # This is separate so that updating it does not invalidate the Docker cache layer with all the packages installed above
-#
-ARG GOOGLE_CLOUD_SDK_VERSION=316.0.0-0
+# https://cloud.google.com/sdk/docs/release-notes
+ARG GOOGLE_CLOUD_SDK_VERSION=328.0.0-0
 ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
 
 RUN apt-get update && apt-get install -y google-cloud-sdk=$GOOGLE_CLOUD_SDK_VERSION
@@ -115,7 +117,7 @@ RUN { gcloud config set core/disable_usage_reporting true --installation && \
       gcloud config set component_manager/disable_update_check true --installation && \
       gcloud config set metrics/environment github_docker_image --installation; } 2>&1
 
-RUN ["/bin/bash", "-c", "[[ $(/usr/local/bin/geodesic-aptindex-md5) == $(cat /var/cache/apt/geodesic_aptindex.md5) ]] || echo \"WARNING: apt package repos mismatch: '$(/usr/local/bin/geodesic-aptindex-md5)' != '$(cat /var/cache/apt/geodesic_aptindex.md5)'\" 1>&2"]
+# Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)
 
 # Using the en_US.UTF-8 local breaks our login setup because it changes the sort order,
 # and therefore the order of execution, of our profile files. We use locale C.UTF-8 instead,
@@ -138,7 +140,7 @@ COPY --from=python /dist/ /usr/local/
 ENV KUBECONFIG=/conf/.kube/config
 # Install an empty kubeconfig to suppress some warnings
 COPY rootfs/conf/.kube/config /conf/.kube/config
-# Set mode on kubeconfig to suppress some warnings
+# Set mode on kubeconfig to suppress some warnings while installing tools
 RUN chmod 600 $KUBECONFIG
 
 #
@@ -147,13 +149,15 @@ RUN chmod 600 $KUBECONFIG
 # Set KUBERNETES_VERSION and KOPS_BASE_IMAGE in /conf/kops/kops.envrc
 #
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
+
+# https://github.com/ahmetb/kubectx/releases
 ENV KUBECTX_COMPLETION_VERSION 0.9.1
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
 
 #
 # Install fancy Kube PS1 Prompt
-#
+# https://github.com/jonmosco/kube-ps1/releases
 ENV KUBE_PS1_VERSION 0.7.0
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
@@ -172,10 +176,13 @@ RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
 
 #
 # Install minimal helm plugins
-#
+# https://github.com/databus23/helm-diff/releases
 ENV HELM_DIFF_VERSION 3.1.3
+# https://github.com/aslafy-z/helm-git/releases
+# We had issues with helm-diff + helm-git 0.9.0, so keeping it at 0.8.1
 ENV HELM_GIT_VERSION 0.8.1
-ENV HELM_HELM_2TO3_VERSION 0.7.0
+# https://github.com/helm/helm-2to3/releases
+ENV HELM_HELM_2TO3_VERSION 0.8.1
 
 # Install plugins and then remove cache
 RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
@@ -251,6 +258,9 @@ RUN /usr/local/bin/docs update
 # are in fact available to all users
 RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 	chmod -R a+rwX $dir; done
+
+# Set mode on kubeconfig to suppress some warnings (mode was reset by above "COPY rootfs/ /"
+RUN chmod 600 $KUBECONFIG
 
 WORKDIR /conf
 

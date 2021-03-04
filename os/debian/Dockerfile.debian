@@ -1,8 +1,8 @@
-ARG DEBIAN_VERSION=10.6-slim
+ARG DEBIAN_VERSION=10.8-slim
 
 FROM debian:$DEBIAN_VERSION as python
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.8.6
+ARG PYTHON_VERSION=3.8.8
 
 # Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
 # Recommended: LC_ALL=C.UTF-8
@@ -106,7 +106,7 @@ RUN apt-get update && apt-get install -y \
 # Install Google Cloud SDK
 # This is separate so that updating it does not invalidate the Docker cache layer with all the packages installed above
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=328.0.0-0
+ARG GOOGLE_CLOUD_SDK_VERSION=330.0.0-0
 ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
 
 RUN apt-get update && apt-get install -y google-cloud-sdk=$GOOGLE_CLOUD_SDK_VERSION
@@ -208,6 +208,9 @@ RUN chmod -R a+rwX ${HELM_HOME}
 ARG GEODESIC_AWS_HOME=/localhost/.aws
 ENV AWS_CONFIG_FILE=${GEODESIC_AWS_HOME}/config
 ENV AWS_SHARED_CREDENTIALS_FILE=${GEODESIC_AWS_HOME}/credentials
+# Region abbreviation types are "fixed" (always 3 chars), "short" (4-5 chars), or "long" (the full AWS string)
+# See https://github.com/cloudposse/terraform-aws-utils#introduction
+ENV AWS_REGION_ABBREVIATION_TYPE=short
 
 #
 # Disable aws-vault and okta support by default, enable in child Dockerfile or personal configuration if needed
@@ -258,9 +261,6 @@ RUN /usr/local/bin/docs update
 # are in fact available to all users
 RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 	chmod -R a+rwX $dir; done
-
-# Set mode on kubeconfig to suppress some warnings (mode was reset by above "COPY rootfs/ /"
-RUN chmod 600 $KUBECONFIG
 
 WORKDIR /conf
 

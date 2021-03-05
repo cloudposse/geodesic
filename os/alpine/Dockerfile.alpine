@@ -1,6 +1,6 @@
-ARG ALPINE_VERSION=3.12.1
+ARG ALPINE_VERSION=3.12.4
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=328.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=330.0.0
 #
 # Python Dependencies
 #
@@ -184,6 +184,9 @@ RUN chmod -R a+rwX ${HELM_HOME}
 ARG GEODESIC_AWS_HOME=/localhost/.aws
 ENV AWS_CONFIG_FILE=${GEODESIC_AWS_HOME}/config
 ENV AWS_SHARED_CREDENTIALS_FILE=${GEODESIC_AWS_HOME}/credentials
+# Region abbreviation types are "fixed" (always 3 chars), "short" (4-5 chars), or "long" (the full AWS string)
+# See https://github.com/cloudposse/terraform-aws-utils#introduction
+ENV AWS_REGION_ABBREVIATION_TYPE=fixed
 
 #
 # Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
@@ -248,9 +251,6 @@ RUN /usr/local/bin/docs update
 # are in fact available to all users
 RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 	chmod -R a+rwX $dir; done
-
-# Set mode on kubeconfig to suppress some warnings (mode was reset by above "COPY rootfs/ /"
-RUN chmod 600 $KUBECONFIG
 
 WORKDIR /conf
 

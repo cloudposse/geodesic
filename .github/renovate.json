@@ -14,6 +14,7 @@
     "enabled": false
   },
   "docker": {
-    "ignorePaths": ["rootfs/**"]
+    "ignorePaths": ["rootfs/**"],
+    "matchPaths": ["Dockerfile.alpine", "Dockerfile.debian"]
   }
 }

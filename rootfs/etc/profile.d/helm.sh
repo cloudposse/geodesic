@@ -2,6 +2,7 @@ if command -v helm >/dev/null; then
 	# Initialize auto-completion for whichever helm version is the installed default
 	# Suppress error message about KUBECONFIG not found or being world readable
 	if [[ -r $KUBECONFIG ]]; then
+		chmod 600 $KUBECONFIG
 		source <(helm completion bash)
 	else
 		touch /tmp/kubecfg

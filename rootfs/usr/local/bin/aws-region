@@ -59,6 +59,7 @@ short_map=(
   [ape1]="ap-east-1"
   [apne1]="ap-northeast-1"
   [apne2]="ap-northeast-2"
+  [apne3]="ap-northeast-3"
   [aps1]="ap-south-1"
   [apse1]="ap-southeast-1"
   [apse2]="ap-southeast-2"

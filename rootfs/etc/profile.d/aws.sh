@@ -1,11 +1,20 @@
 #!/bin/bash
 
+export AWS_REGION_ABBREVIATION_TYPE=${AWS_REGION_ABBREVIATION_TYPE:-fixed}
+export AWS_DEFAULT_SHORT_REGION=${AWS_DEFAULT_SHORT_REGION:-$(aws-region --${AWS_REGION_ABBREVIATION_TYPE} ${AWS_DEFAULT_REGION:-us-west-2})}
+export GEODESIC_AWS_HOME="${GEODESIC_AWS_HOME:-/localhost/.aws}"
+
 # `aws configure` does not respect ENVs
 if [ ! -e "${HOME}/.aws" ]; then
-	ln -s "${GEODESIC_AWS_HOME:-/localhost/.aws}" "${HOME}/.aws"
+	# -e fails if the target is a link to a non-existent file, remove dead link if it exists
+	[ -L "${HOME}/.aws" ] && rm -f "${HOME}/.aws"
+	if [ ! -d "${GEODESIC_AWS_HOME}" ]; then
+		mkdir ${GEODESIC_AWS_HOME} && chmod 700 ${GEODESIC_AWS_HOME}
+	fi
+	ln -s "${GEODESIC_AWS_HOME}" "${HOME}/.aws"
 fi
 
-if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME:-/localhost/.aws}/config}" ]; then
+if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME}/config}" ] && [ -d ${GEODESIC_AWS_HOME} ]; then
 	echo "* Initializing ${AWS_CONFIG_FILE}"
 	# Required for AWS_PROFILE=default
 	echo '[default]' >${AWS_CONFIG_FILE}

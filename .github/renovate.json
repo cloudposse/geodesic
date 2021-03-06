@@ -1,7 +1,8 @@
 {
   "timezone": "America/Los_Angeles",
   "extends": [
-    "config:base"
+    "config:base",
+    "docker:disableMajor"
   ],
   "packageRules": [
     {
@@ -14,7 +15,6 @@
     "enabled": false
   },
   "docker": {
-    "ignorePaths": ["rootfs/**"],
-    "matchPaths": ["Dockerfile.alpine", "Dockerfile.debian"]
+    "ignorePaths": ["rootfs/**"]
   }
 }

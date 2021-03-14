@@ -47,7 +47,16 @@ elif [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 fi
 
 if [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
-	if mkdir -p $GEODESIC_CONFIG_HOME; then
+	if ! df | grep -q /localhost; then
+		if [[ -z $KUBERNETES_PORT ]]; then
+			echo $(red "########################################################################################")
+			echo $(red \* No filesystem is mounted at $(bold /localhost) which limits Geodesic functionality.)
+			boot install
+		else
+			echo $(green Kubernetes host detected, Geodesic customization disabled.)
+		fi
+		export GEODESIC_CUSTOMIZATION_DISABLED="/localhost not a volume"
+	elif mkdir -p $GEODESIC_CONFIG_HOME; then
 		echo $(yellow Created directory "$GEODESIC_CONFIG_HOME" '(GEODESIC_CONFIG_HOME)')
 	else
 		echo $(red Cannot create directory "$GEODESIC_CONFIG_HOME" '(GEODESIC_CONFIG_HOME)')
@@ -70,7 +79,7 @@ function _load_geodesic_preferences() {
 }
 
 if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} != false ]]; then
-	echo $(yellow Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is set and not 'false')
+	echo $(red Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is \'"${GEODESIC_CUSTOMIZATION_DISABLED}"\')
 else
 	_load_geodesic_preferences
 fi

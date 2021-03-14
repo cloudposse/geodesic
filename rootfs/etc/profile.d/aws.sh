@@ -100,10 +100,10 @@ function export_current_aws_role() {
 	if [[ -z $role_name ]]; then
 		if [[ "$role_arn" =~ "role/OrganizationAccountAccessRole" ]]; then
 			role_name="$(printf "%s" "$role_arn" | cut -d: -f 5):OrgAccess"
-			echo "* $(red "Could not find profile name for ${role_arn}\; calling it \"${role_name}\"")" >&2
+			echo "* $(red "Could not find profile name for ${role_arn} ; calling it \"${role_name}\"")" >&2
 		else
 			role_name="$(printf "%s" "$role_arn" | cut -d/ -f 2)"
-			echo "* $(green "Could not find profile name for ${role_arn}\; calling it \"${role_name}\"")" >&2
+			echo "* $(green "Could not find profile name for ${role_arn} ; calling it \"${role_name}\"")" >&2
 		fi
 	fi
 	export ASSUME_ROLE="$role_name"

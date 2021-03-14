@@ -1,0 +1,24 @@
+#!/bin/bash
+
+[[ -t 1 ]] && (($# == 0)) && exec bash --login
+
+source /etc/os-release
+
+if [[ $1 == "install" ]]; then
+  function color() { echo "$(tput setaf 1)$*$(tput setaf 0)" >&2; }
+  color "# EXIT THIS SHELL and on your host computer,"
+elif [[ -n $DOCKER_IMAGE ]] && [[ -n $DOCKER_TAG ]]; then
+  exec /usr/local/bin/init
+else
+  function color() { echo "$*"  >&2; }
+  color "########################################################################################"
+  color "# Attach a terminal (docker run --rm --it ...) if you want to run a shell."
+fi
+
+color "# Run the following to install a script with that runs "
+color "# Geodesic with all its features (the recommended way to use Geodesic):"
+color "#   docker run --rm cloudposse/geodesic:latest-${ID} init | bash"
+color "# (On a Linux workstation, you might need to use \"sudo bash\" instead of just \"bash\")"
+color "########################################################################################"
+echo
+echo

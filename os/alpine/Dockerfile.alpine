@@ -255,4 +255,4 @@ RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 WORKDIR /conf
 
 ENTRYPOINT ["/bin/bash"]
-CMD ["-c", "init"]
+CMD ["-c", "boot"]

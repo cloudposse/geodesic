@@ -45,6 +45,7 @@ FROM debian:$DEBIAN_VERSION
 
 ARG VERSION
 ENV GEODESIC_VERSION=$VERSION
+ENV GEODESIC_OS=debian
 
 # Set a default terminal to "dumb" (headless) to make `tput` happy when running scripts.
 # When we launch Geodesic for interactive use, we forward the host value of `TERM`
@@ -266,3 +267,7 @@ WORKDIR /conf
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c", "boot"]
+
+ARG DEV_VERSION
+ENV GEODESIC_DEV_VERSION=$DEV_VERSION
+ENV GEODESIC_VERSION="${GEODESIC_VERSION}${GEODESIC_DEV_VERSION:+ (${GEODESIC_DEV_VERSION})}"

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# If output is a TTY, turn off conversion of NewLine to CarriageReturn-NewLine
+# (If output is not a TTY, `stty` will complain about that)
+[[ -t 1 ]] && stty -onlcr
+
 cd /etc/init.d
 for i in *.sh; do
 	source $i

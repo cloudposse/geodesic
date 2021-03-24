@@ -36,6 +36,7 @@ FROM alpine:$ALPINE_VERSION
 
 ARG VERSION
 ENV GEODESIC_VERSION=$VERSION
+ENV GEODESIC_OS=alpine
 
 # Set XDG environment variables per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 # This is not a "multi-user" system, so we'll use special directories under
@@ -256,3 +257,7 @@ WORKDIR /conf
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c", "boot"]
+
+ARG DEV_VERSION
+ENV GEODESIC_DEV_VERSION=$DEV_VERSION
+ENV GEODESIC_VERSION="${GEODESIC_VERSION}${GEODESIC_DEV_VERSION:+ (${GEODESIC_DEV_VERSION})}"

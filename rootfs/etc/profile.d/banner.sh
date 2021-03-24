@@ -9,8 +9,12 @@ if [ "${SHLVL}" == "1" ]; then
 		local vstring
 		local debian_version="/etc/debian_version"
 
+		# Development version of GEODESIC_VERSION might have version string
+		# like ' (0.143.1-7-g444f3c8/branch)' (note leading space)
+		# so we clean that up a bit
+		vstring=$(printf "%s" "${GEODESIC_VERSION}" | sed -E 's/^ ?\((.*)\)/\1/')
 		# Display a banner message for interactive shells (if we're not in aws-vault or aws-okta)
-		[ -n "${GEODESIC_VERSION}" ] && vstring=" version ${GEODESIC_VERSION}"
+		[ -n "${vstring}" ] && vstring=" version ${vstring}"
 		if source /etc/os-release; then
 			[[ -r $debian_version ]] && VERSION_ID=$(cat $debian_version)
 			printf "# Geodesic${vstring} based on %s (%s)\n\n" "$PRETTY_NAME" "$VERSION_ID"

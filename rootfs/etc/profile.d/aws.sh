@@ -15,7 +15,7 @@ if [ ! -e "${HOME}/.aws" ]; then
 fi
 
 if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME}/config}" ] && [ -d ${GEODESIC_AWS_HOME} ]; then
-	echo "* Initializing ${AWS_CONFIG_FILE}"
+	echo "# Initializing ${AWS_CONFIG_FILE}"
 	# Required for AWS_PROFILE=default
 	echo '[default]' >${AWS_CONFIG_FILE}
 fi

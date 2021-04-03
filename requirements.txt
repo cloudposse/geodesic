@@ -4,8 +4,8 @@ requests==2.25.1
 # See: https://github.com/Azure/azure-cli/issues/16858
 cryptography==3.4.7
 PyYAML==5.4.1
-awscli==1.19.39
+awscli==1.19.44
 boto==2.49.0
-boto3==1.17.39
+boto3==1.17.44
 crudini==0.9.3
 Jinja2==2.11.3

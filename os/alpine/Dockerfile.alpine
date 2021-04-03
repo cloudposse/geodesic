@@ -1,13 +1,14 @@
-ARG ALPINE_VERSION=3.12.4
+ARG ALPINE_VERSION=3.13.4
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=330.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=334.0.0
 #
 # Python Dependencies
 #
 FROM alpine:$ALPINE_VERSION as python
 
 RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net|g' /etc/apk/repositories
-RUN apk add python3 python3-dev py3-pip libffi-dev gcc linux-headers musl-dev openssl-dev make
+# The cryptography Python package require "cargo" to build
+RUN apk add --update -U python3 python3-dev py3-pip libffi-dev gcc linux-headers musl-dev openssl-dev make cargo
 
 ## Note:
 # To install aws-gogle-auth:
@@ -21,7 +22,10 @@ RUN apk add python3 python3-dev py3-pip libffi-dev gcc linux-headers musl-dev op
 
 COPY requirements.txt /requirements.txt
 
+# The cryptography package has to be built specially for Alpine before it can be installed,
+# so we have to install it on the "host" (which builds a wheel) before installing for the distribution.
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
+    pip install $(grep cryptography /requirements.txt) && \
     pip install -r /requirements.txt --ignore-installed --prefix=/dist --no-build-isolation --no-warn-script-location
 
 #

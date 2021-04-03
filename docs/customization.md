@@ -61,6 +61,7 @@ Resources can be in several places, and will be loaded from most general to most
 
 - The most general resources are the ones directly in `$GEODESIC_CONFIG_HOME`. These are applied first. To keep the top-level directory less cluttered and to avoid name clashes, you can put them in a subdirectory named `defaults`. If that subdirectory exists, then `GEODESIC_CONFIG_HOME ` itself is not searched.
 - The `DOCKER_IMAGE` name is then parsed. Everything before the final `/` is considered the "company" name and everything after is, following the Cloudposse reference architecture, referred to as the "stage" name. So for the `DOCKER_IMAGE` name `cloudposse/geodesic`, the company name is `cloudposse` and the stage name is `geodesic`
+- The next place searched for resources is the directory with the same name as the "company". In our example, that would be `~/.geodesic/cloudposse`. Resources here would apply to all containers from the same company.
 - The next place searched for resources is the directory with the same name as the "stage", which is generally the name of the project. In our example, that would be `~/.geodesic/geodesic`. Resources here would apply to all containers with the same base name, perhaps various forks of the same project.
 - The final place searched is the directory with the full name of the Docker image: `$GEODESIC_CONFIG_HOME/$DOCKER_IMAGE`, 
 i.e. `~/.geodesic/cloudposse/geodesic`. Files here are the most specific to this container. 

@@ -77,13 +77,8 @@ introduction: |-
   so that we may eventually make it the preferred version, after which point the `latest` tag will point to latest Debian image. We
   will maintain the `latest-alpine` and `latest-debian` Docker tags for those who want to commit to using one base OS or
   the other but still want automatic updates.
-
-  Let's roll...
-
-  1. Review our [documentation](https://docs.cloudposse.com/geodesic/)
-  2. Check our [reference architectures](https://docs.cloudposse.com/reference-architectures/) to learn how we architect the infrastructure
-  3. Use our [coldstart automation](https://github.com/cloudposse/reference-architectures) to get started quickly
-  4. Quickly provision [kops clusters](docs/kops.md)
+  
+  Want to learn more? [Check out our getting started with Geodesic guide!](https://docs.cloudposse.com/tutorials/geodesic-getting-started/)
 
 usage: |-
   ### Customizing your Docker image

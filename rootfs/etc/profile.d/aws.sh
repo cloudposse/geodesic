@@ -49,7 +49,6 @@ function aws_choose_role() {
 			--preview "$_preview"
 }
 
-
 function aws_sdk_assume_role() {
 	local role=$1
 	shift
@@ -76,10 +75,25 @@ function aws_sdk_assume_role() {
 function export_current_aws_role() {
 	local role_name
 	# Could be a primary or assumed role. If we have assumed a role, cut off the session name.
-	local current_role=$(aws sts get-caller-identity --output text --query 'Arn' | cut -d/ -f1-2 2>/dev/null)
+	local current_role=$(aws sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
 	if [[ -z $current_role ]]; then
 		unset ASSUME_ROLE
 		return 0
+	fi
+
+	# Quick check, are we who we say we are?
+	local profile_arn
+	local profile_target=${AWS_PROFILE:-${AWS_VAULT}}
+	if [[ -n $profile_target ]]; then
+		profile_arn=$(aws --profile "${profile_target}" sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
+		if [[ $profile_arn == $current_role ]]; then
+			export ASSUME_ROLE="$profile_target"
+			return
+		fi
+		echo "* $(red Profile is set to $profile_target but current role does not match:)"
+		echo "*   $(red $current_role)"
+		export ASSUME_ROLE=$(red '!mixed!')
+		return
 	fi
 
 	# saml2aws will store the assumed role from sign-in as x_principal_arn in credentials file

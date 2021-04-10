@@ -26,6 +26,8 @@ if [ "${SHLVL}" == "1" ]; then
 				echo "${COLOR_RESET}"
 			elif [ "$BANNER_COMMAND" == "figurine" ]; then
 				${BANNER_COMMAND} -f "${BANNER_FONT}" "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
+			else
+			  ${BANNER_COMMAND}
 			fi
 		fi
 	}

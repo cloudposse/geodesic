@@ -9,7 +9,7 @@ cfssl@cloudposse
 coreutils
 chamber@cloudposse
 curl
-direnv@testing
+direnv@community
 dumb-init
 emacs-nox
 fetch@cloudposse

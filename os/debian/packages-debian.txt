@@ -14,6 +14,7 @@ net-tools
 netcat
 oathtool
 procps
+wget
 
 # Not installing keybase
 # curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb

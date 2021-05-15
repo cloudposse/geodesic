@@ -14,6 +14,16 @@ ENV LC_ALL=C.UTF-8
 # So we cannot install the packages: RUN apt-get update && apt-get install -y python3 python3-pip python3-dev
 # and instead we have to build Python ourselves and install it in /usr/local/bin (by Debian design).
 
+# Also bad is the fact that, python being an interpreted language, installs a lot of shell scripts
+# that specifically reference the location of the python interpreter or other things, those
+# locations being baked in at install time. So it does not work to install python in `/dist`
+# and then later copy `/dist` to `/usr/local`: The installed scripts have `!#/dist/bin/python`
+# baked in and will fail. So we take the somewhat unorthodox approach of deleting
+# /usr/local entirely, the installing python in /usr/local, and then copying /usr/local over.
+#
+
+RUN rm -rf /usr/local && mkdir /usr/local
+
 # Preload apt-utils
 RUN apt-get update && apt-get install -y apt-utils
 
@@ -27,16 +37,16 @@ RUN curl -1sLfO https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYT
 
 # Build Python to be installed in /usr/local/bin
 WORKDIR Python-${PYTHON_VERSION}
-RUN ./configure --enable-optimizations && make -j $(nproc) && make install
+RUN ./configure --enable-optimizations --prefix=/usr/local && make -j $(nproc) && make install
 
 # Build the Python packages, configured to use /usr/local/bin/python3, and install them under /dist
 COPY requirements.txt /requirements.txt
 
 RUN python3 -m pip install --upgrade --progress-bar off pip setuptools wheel && \
-    pip install --progress-bar off -r /requirements.txt --ignore-installed --prefix=/dist --no-build-isolation --no-warn-script-location
+    pip install --progress-bar off -r /requirements.txt --ignore-installed --prefix=/usr/local --no-build-isolation
 
-# Install /usr/local/bin/python3 under /dist so we can copy it to Geodesic
-RUN ./configure --enable-optimizations --prefix=/dist && make install
+# Remove Python cache files
+RUN find / -name __pycache__ -exec rm -rf {} \; -prune
 
 #
 # Geodesic base image
@@ -135,7 +145,7 @@ RUN echo 'set noswapfile' >> /etc/vim/vimrc
 WORKDIR /tmp
 
 # Copy python dependencies
-COPY --from=python /dist/ /usr/local/
+COPY --from=python /usr/local/ /usr/local/
 
 # Explicitly set  KUBECONFIG to enable kube_ps1 prompt
 ENV KUBECONFIG=/conf/.kube/config

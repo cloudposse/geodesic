@@ -13,9 +13,20 @@ fi
 
 [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: GEODESIC_CONFIG_HOME is found to be "${GEODESIC_CONFIG_HOME:-<unset>}"
 
+# Detect root user in order to run as non-root users with the sudo command
+function _root_detection() {
+  [ ! "${SUDO_CMD+1}" ] || return 0 # SUDO_CMD already set
+  if [ "$(echo "$UID")" = "0" ]; then
+    SUDO_CMD=''
+  else
+    SUDO_CMD='sudo'
+  fi
+}
+_root_detection
+
 # If LOCAL_HOME is set, create a symbolic link so host pathnames (at least the ones under $HOME) work inside the shell
 if [[ -n $LOCAL_HOME && ! -e $LOCAL_HOME ]]; then
-	mkdir -p $(dirname "${LOCAL_HOME}") && ln -s /localhost "${LOCAL_HOME}" ||
+	$SUDO_CMD mkdir -p $(dirname "${LOCAL_HOME}") && $SUDO_CMD ln -s /localhost "${LOCAL_HOME}" ||
 		echo $(red Unable to create symbolic link $LOCAL_HOME '->' /localhost)
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: linked $LOCAL_HOME '->' /localhost
 fi

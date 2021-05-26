@@ -171,7 +171,7 @@ ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSI
 # https://github.com/jonmosco/kube-ps1/releases
 ENV KUBE_PS1_VERSION 0.7.0
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
-
+RUN chmod a+r /etc/profile.d/prompt:kube-ps1.sh
 
 #
 # Install helm

@@ -1,4 +1,8 @@
 ARG DEBIAN_VERSION=10.9-slim
+# https://cloud.google.com/sdk/docs/release-notes
+ARG GOOGLE_CLOUD_SDK_VERSION=342.0.0-0
+# https://github.com/ahmetb/kubectx/releases
+ARG KUBECTX_COMPLETION_VERSION=0.9.3
 
 FROM debian:$DEBIAN_VERSION as python
 # Find the current version of Python at https://www.python.org/downloads/source/
@@ -117,7 +121,7 @@ RUN apt-get update && apt-get install -y \
 # Install Google Cloud SDK
 # This is separate so that updating it does not invalidate the Docker cache layer with all the packages installed above
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=334.0.0-0
+ARG GOOGLE_CLOUD_SDK_VERSION
 ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
 
 RUN apt-get update && apt-get install -y google-cloud-sdk=$GOOGLE_CLOUD_SDK_VERSION
@@ -162,7 +166,7 @@ RUN chmod 600 $KUBECONFIG
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
 # https://github.com/ahmetb/kubectx/releases
-ENV KUBECTX_COMPLETION_VERSION 0.9.1
+ARG KUBECTX_COMPLETION_VERSION
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
 
@@ -261,6 +265,37 @@ ENV MAKEFLAGS="--no-print-directory"
 # Install "root" filesystem
 COPY rootfs/ /
 COPY os/debian/rootfs/ /
+
+# Move AWS CLI v1 aside and install AWS CLI v2 as default, leaving both available as alternatives.
+# We do this at the end because we need cache busting from above to get us the latest AWS CLI v2
+
+RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
+    update-alternatives --install /usr/local/bin/aws aws /usr/local/bin/aws1 1
+
+# Install AWS CLI 2
+# Get AWS CLI V2 version from https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst if you want
+# but it is updated several times a week, so we choose to just get the latest.
+# ARG AWS_CLI_VERSION=2.2.8
+RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
+    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
+    cd $AWSTMPDIR && \
+    unzip -qq awscliv2.zip && \
+    ./aws/install -i /usr/share/aws/v2 -b /usr/share/aws/v2/bin && \
+    update-alternatives --install /usr/local/bin/aws aws /usr/share/aws/v2/bin/aws 2 && \
+    update-alternatives --set aws /usr/share/aws/v2/bin/aws && ln -s /usr/share/aws/v2/bin/aws /usr/local/bin/aws2 && \
+    rm -rf $AWSTMPDIR
+
+# We recommend AWS_PAGER="less -FRX" but you can override it in your Dockerfile
+# or in your Geodesic preferences (see `man customization`).
+# FRX acts like it does not invoke the pager unless the output would be
+# more than can fit on one scree, while preserving text color/bold.
+# FRX is actually the AWS default, except we overrode the default above by setting ENV LESS.
+# options to `less`:
+#  F = Quit if output fits on one screen, so short output remains visible after the command finishes
+#  R = Output "raw" control characters, so that text treatment like "bold" text is retained as "bold" text rather than quoted escapes
+#  X = Disable termcap init/de-init sequences, keeps the pager from clearing the screen when it finishes
+ENV AWS_PAGER="less -FRX"
+
 
 # Install documentation
 COPY docs/ /usr/share/docs/

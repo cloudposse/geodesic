@@ -1,6 +1,9 @@
-ARG ALPINE_VERSION=3.13.4
+ARG ALPINE_VERSION=3.13.5
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=334.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=342.0.0
+# https://github.com/ahmetb/kubectx/releases
+ARG KUBECTX_COMPLETION_VERSION=0.9.3
+
 #
 # Python Dependencies
 #
@@ -78,6 +81,13 @@ RUN sed -i 's|http://dl-cdn.alpinelinux.org|https://alpine.global.ssl.fastly.net
     echo "@testing https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories && \
     echo "@community https://alpine.global.ssl.fastly.net/alpine/edge/community" >> /etc/apk/repositories
 
+##########################################################################################
+# See Dockerfile.options for how to install `glibc` for greater compatibility, including #
+# being able to use AWS CLI v2. You would install `glibc` and `libc6-compat` here, then  #
+# install the packages below, then the Python stuff, then move AWS CLI v1 aside, and     #
+# then install the AWS CLI v2                                                            #
+##########################################################################################
+
 # Install alpine package manifest
 COPY packages.txt os/alpine/packages-alpine.txt /etc/apk/
 
@@ -130,7 +140,7 @@ RUN chmod 600 $KUBECONFIG
 # Set KUBERNETES_VERSION and KOPS_BASE_IMAGE in /conf/kops/kops.envrc
 #
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
-ENV KUBECTX_COMPLETION_VERSION 0.9.1
+ARG KUBECTX_COMPLETION_VERSION
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
 #

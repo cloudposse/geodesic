@@ -68,3 +68,64 @@ ENV NODE_MIN_SIZE 2
 
 # end of kops support section
 ####################################################################################
+
+#### ALPINE ONLY ####
+# Alpine does not include the very common `glibc` GNU C Standard Library, which
+# causes compatibility problems. Among other things, AWS CLI v2 does not work
+# out of the box with Alpine. The following recipe installs `glibc` , and has to be run
+# before installing other packages, particularly `libc6-compat`, and then,
+# because it conflicts, you have to tweak a bit and then install `libc6-compat`.
+# So put this in Dockerfile.alpine after setting up the package repositories
+# but before installing any packages https://github.com/cloudposse/geodesic/blob/91336bf56fb7ff0d9812e01ceacc40ca59a17cce/os/alpine/Dockerfile.alpine#L81
+# (Not verified)
+
+# Install glibc and glibc-bin and the C.UTF-8 locale
+ENV LANG=C.UTF-8
+ARG ALPINE_GLIBC_PACKAGE_VERSION=2.33-r0
+RUN apk update && apk add -u curl && \
+  ALPINE_GLIBC_PACKAGE_VERSION="${ALPINE_GLIBC_PACKAGE_VERSION}" && \
+  curl -sSLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${ALPINE_GLIBC_PACKAGE_VERSION}/glibc-${ALPINE_GLIBC_PACKAGE_VERSION}.apk &&
+  apk add --allow-untrusted glibc-${ALPINE_GLIBC_PACKAGE_VERSION}.apk && rm glibc-${ALPINE_GLIBC_PACKAGE_VERSION}.apk && \
+  curl -sSLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${ALPINE_GLIBC_PACKAGE_VERSION}/glibc-bin-${ALPINE_GLIBC_PACKAGE_VERSION}.apk &&
+  apk add --allow-untrusted glibc-bin-${ALPINE_GLIBC_PACKAGE_VERSION}.apk && rm glibc-bin-${ALPINE_GLIBC_PACKAGE_VERSION}.apk && \
+  curl -sSLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${ALPINE_GLIBC_PACKAGE_VERSION}/glibc-i18n-${ALPINE_GLIBC_PACKAGE_VERSION}.apk &&
+  apk add --allow-untrusted glibc-i18n-${ALPINE_GLIBC_PACKAGE_VERSION}.apk && rm glibc-i18n-${ALPINE_GLIBC_PACKAGE_VERSION}.apk && \
+  /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 "$LANG" || true && \
+  printf "export LANG=%s\n" "$LANG" > /etc/profile.d/locale.sh && \
+  apk del glibc-i18n && \
+  rm -f /usr/glibc-compat/lib/ld-linux-x86-64.so.2 && \
+  /usr/glibc-compat/sbin/ldconfig
+
+
+# Remove conflicting link, install libc6-compat, restore link to glibc
+RUN mv /lib64/ld-linux-x86-64.so.2 /lib64/glibc-ld-linux-x86-64.so.2 && \
+  apk add --force-overwrite libc6-compat && \
+  rm -f /lib64/ld-linux-x86-64.so.2 && \
+  mv /lib64/glibc-ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2  && \
+  /usr/glibc-compat/sbin/ldconfig
+
+
+# Now you can install packages
+# https://github.com/cloudposse/geodesic/blob/91336bf56fb7ff0d9812e01ceacc40ca59a17cce/os/alpine/Dockerfile.alpine#L81-L88
+
+
+# Now you can move AWS CLI v1 aside, keep it as an alternative, and install AWS CLI v2
+
+# Move AWS CLI v1 to aws1 and set up alternatives
+RUN mv /usr/bin/aws /usr/local/bin/aws1 && \
+    update-alternatives --install /usr/local/bin/aws aws /usr/local/bin/aws1 1
+
+
+# Install AWS CLI 2
+# Get version from https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst
+# We cannot automatically track the release versions, so we just install the latest
+# ARG AWS_CLI_VERSION=2.1.34
+RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
+    curl -sSsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
+    cd $AWSTMPDIR && \
+    unzip -qq awscliv2.zip && \
+    ./aws/install -i /usr/share/aws/v2 -b /usr/share/aws/v2/bin && \
+    update-alternatives --install /usr/local/bin/aws aws /usr/share/aws/v2/bin/aws 2 && \
+    rm -rf $AWSTMPDIR
+
+

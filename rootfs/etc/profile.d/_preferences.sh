@@ -16,7 +16,7 @@ fi
 # Detect root user in order to run as non-root users with the sudo command
 function _root_detection() {
   [ ! "${SUDO_CMD+1}" ] || return 0 # SUDO_CMD already set
-  if [ "$(echo "$UID")" = "0" ]; then
+  if [ "$UID" == "0" ]; then
     SUDO_CMD=''
   else
     SUDO_CMD='sudo'

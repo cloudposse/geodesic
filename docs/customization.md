@@ -75,7 +75,7 @@ just create an empty history file in the appropriate place.
 
 While Preferences and Override files themselves must be `bash` scripts and will be directly loaded into 
 the top-level Geodesic shell, they can of course call other programs. 
-You can even use them to pull configuration out of other places.
+You can even use them to pull configurations out of other places.
 
 Symbolic links must be relative if you want them to work both inside Geodesic and outside of it. 
 Symbolic links that reference directories that are not below `$HOME` on the host will not work.
@@ -104,7 +104,7 @@ to any value other than "false" before launching Geodesic.
 
 ## TROUBLESHOOTING
 If customizations are not being found or are not working as expected, 
-you can set the host enviornment variable `$GEODESIC_TRACE` to "custom" before
+you can set the host environment variable `$GEODESIC_TRACE` to "custom" before
 launching Geodesic and a trace of the customization process will be output
 to the console.
 

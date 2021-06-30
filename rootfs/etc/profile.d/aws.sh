@@ -86,13 +86,14 @@ function export_current_aws_role() {
 	local profile_target=${AWS_PROFILE:-${AWS_VAULT}}
 	if [[ -n $profile_target ]]; then
 		profile_arn=$(aws --profile "${profile_target}" sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
-		if [[ $profile_arn == $current_role ]]; then
-			export ASSUME_ROLE="$profile_target"
-			return
+
+		# If the profile name and the role / user we're assuming do not match then warn the user.
+		if [[ $profile_arn != $current_role ]]; then
+			echo "* $(yellow Profile is set to $profile_target but current role does not match:)"
+			echo "*   $(yellow $current_role)"
 		fi
-		echo "* $(red Profile is set to $profile_target but current role does not match:)"
-		echo "*   $(red $current_role)"
-		export ASSUME_ROLE=$(red '!mixed!')
+
+		export ASSUME_ROLE="$profile_target"
 		return
 	fi
 

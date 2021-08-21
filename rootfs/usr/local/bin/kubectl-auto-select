@@ -40,7 +40,7 @@ function normalize_version() {
 	# Customized Kubernetes versions, such as from AWS EKS, may have more than just the
 	# digits in the minor version, e.g. "16+", so strip out everything after leading digits,
 	# including patch version.
-	version=$(sed -E 's/((\d\.)?(\d+))([^d].*)?/\1/' <<<$version)
+	version=$(sed -E 's/(([0-9]\.)?([0-9]+))([^0-9].*)?/\1/' <<<$version)
 	[[ $version =~ ^1\. ]] || version="1.${version}"
 	echo "$version"
 }

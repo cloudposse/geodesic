@@ -21,21 +21,6 @@ ENV DIRENV_ENABLED=true
 # `make` outside of this directory tree.
 ENV MAKE_INCLUDES="Makefile Makefile.*"
 
-#
-# Configure aws-okta to easily assume roles
-#
-ENV AWS_OKTA_ENABLED=true
-
-#
-# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
-#
-ENV AWS_VAULT_ENABLED=true
-ENV AWS_VAULT_SERVER_ENABLED=true
-ENV AWS_VAULT_BACKEND=file
-ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
-ENV AWS_VAULT_SESSION_TTL=12h
-#ENV AWS_VAULT_FILE_PASSPHRASE=
-
 
 ####################################################################################
 # kops support

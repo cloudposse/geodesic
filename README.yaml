@@ -78,6 +78,15 @@ introduction: |-
   will maintain the `latest-alpine` and `latest-debian` Docker tags for those who want to commit to using one base OS or
   the other but still want automatic updates.
   
+  **Note**: Geodesic is a large collection of tools. As such, support for the Apple M1 chip is not under
+  Cloud Posse's control, rather it depends on each tool author updating each tool for the M1 chip.
+  All of the compiled tools that Cloud Posse has authored and are included in Geodesic are compiled
+  for M1 (`darwin_arm64`), and of course all of the scripts work on M1 if the interpreters (e.g.
+  `bash`, `python`) are compiled for M1. Unfortunatetly, this is only a small portion of the overall
+  toolkit that is assembled in Geodesic. Therefore we do not advise using Geodesic on the M1 at this time
+  and do not anticipate M1 will be well supported before 2022. Historically, widespread support for a new
+  chip takes several years to establish; we hope we will not have to wait that long.
+  
   Want to learn more? [Check out our getting started with Geodesic guide!](https://docs.cloudposse.com/tutorials/geodesic-getting-started/)
 
 usage: |-
@@ -90,8 +99,7 @@ usage: |-
   FROM cloudposse/geodesic:$VERSION-$OS
 
   # Add configuration options such as setting a custom BANNER,
-  # turning on built-in support for aws-vault or aws-okta,
-  # setting kops configuration parameters, etc. here
+  # setting the initial AWS_PROFILE and AWS_DEFAULT_REGION, etc. here
 
   ENV BANNER="my-custom-geodesic"
   ```

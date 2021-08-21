@@ -1,12 +1,12 @@
-ARG DEBIAN_VERSION=10.9-slim
+ARG DEBIAN_VERSION=10.10-slim
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=342.0.0-0
+ARG GOOGLE_CLOUD_SDK_VERSION=352.0.0-0
 # https://github.com/ahmetb/kubectx/releases
-ARG KUBECTX_COMPLETION_VERSION=0.9.3
+ARG KUBECTX_COMPLETION_VERSION=0.9.4
 
 FROM debian:$DEBIAN_VERSION as python
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.8.9
+ARG PYTHON_VERSION=3.8.11
 
 # Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
 # Recommended: LC_ALL=C.UTF-8
@@ -226,13 +226,6 @@ ENV AWS_SHARED_CREDENTIALS_FILE=${GEODESIC_AWS_HOME}/credentials
 # Region abbreviation types are "fixed" (always 3 chars), "short" (4-5 chars), or "long" (the full AWS string)
 # See https://github.com/cloudposse/terraform-aws-utils#introduction
 ENV AWS_REGION_ABBREVIATION_TYPE=short
-
-#
-# Disable aws-vault and okta support by default, enable in child Dockerfile or personal configuration if needed
-#
-ENV AWS_VAULT_ENABLED=false
-ENV AWS_VAULT_SERVER_ENABLED=false
-ENV AWS_OKTA_ENABLED=false
 
 # Shell customization
 # options for `less`. `R` allows ANSI color codes to be displayed while stripping out

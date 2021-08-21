@@ -56,7 +56,8 @@ function assume_active_aws_role() {
 	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
 
 	local aws_default_profile="$AWS_DEFAULT_PROFILE"
-	trap '[[ -n $aws_default_profile ]] && AWS_DEFAULT_PROFILE=${AWS_DEFAULT_PROFILE:-$aws_default_profile}' RETURN
+	local save_traps=$(trap -p RETURN)
+	trap '[[ -n $aws_default_profile ]] && AWS_DEFAULT_PROFILE=${AWS_DEFAULT_PROFILE:-$aws_default_profile}; eval "${save_traps:-trap - RETURN}"' RETURN
 	unset AWS_DEFAULT_PROFILE
 
 	local sts=$({ aws sts get-caller-identity --output text --query 'Arn' ||
@@ -131,6 +132,21 @@ if [[ "${AWS_VAULT_ENABLED:-true}" != "true" ]]; then
 	# want to enable aws-vault use if a configuration already exits.
 	[[ -d /localhost/.awsvault ]] && ln -sf /localhost/.awsvault ${HOME}
 else
+	echo
+	echo
+	red '* You have AWS_VAULT_ENABLED set to "true".'
+	red '* Cloud Posse no longer recommends using aws-vault and is'
+	red '* discontinuing support for aws-vault use inside Geodesic.'
+	red '* Cloud Posse recommends using Leapp to manage credentials'
+	red '* and the standard AWS config file and AWS_PROFILE'
+	red '* environment variable for switching roles.'
+	red '* Leapp is free and available from https://leapp.cloud'
+	red '* When AWS_VAULT_ENABLED is not set to true, the'
+	red '* assume-role command is available to allow you to'
+	red '* interactively set your AWS_PROFILE in a new shell.'
+	echo
+	echo
+
 	if ! which aws-vault >/dev/null; then
 		echo "aws-vault not installed"
 		exit 1
@@ -239,7 +255,8 @@ else
 				local aws_vault_server_enabled="${AWS_VAULT_SERVER_ENABLED:-true}"
 				# Be sure to restore the values of AWS_VAULT and AWS_VAULT_SERVER_ENABLED when
 				# this function returns, regardless of how it returns (e.g. in case of errors).
-				trap 'export AWS_VAULT="$aws_vault" && export AWS_VAULT_SERVER_ENABLED="$aws_vault_server_enabled"' RETURN
+				local save_traps=$(trap -p RETURN)
+				trap 'export AWS_VAULT="$aws_vault" && export AWS_VAULT_SERVER_ENABLED="$aws_vault_server_enabled"; eval "${save_traps:-trap - RETURN}"' RETURN
 				unset AWS_VAULT
 				AWS_VAULT_SERVER_DISABLED="server running in other shell session"
 			else
@@ -285,7 +302,8 @@ else
 
 		# We add --debug for the role server, but want to remove it when done
 		local aws_vault_args=("${AWS_VAULT_ARGS[@]}")
-		trap 'AWS_VAULT_ARGS=("${aws_vault_args[@]}")' RETURN
+		local save_traps=$(trap -p RETURN)
+		trap 'AWS_VAULT_ARGS=("${aws_vault_args[@]}"); eval "${save_traps:-trap - RETURN}"' RETURN
 
 		[[ ${AWS_VAULT_ARGS[*]} =~ --debug ]] || AWS_VAULT_ARGS+=("--debug")
 		_aws_vault_assume_role "${1:-$(aws_vault_choose_role)}" sleep inf

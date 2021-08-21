@@ -35,8 +35,8 @@ fi
 
 function aws_choose_role() {
 	_preview="${FZF_PREVIEW:-crudini --format=ini --get "$AWS_CONFIG_FILE" 'profile {}'}"
-	crudini --get "${AWS_CONFIG_FILE}" |
-		awk -F ' ' '{print $2}' |
+	cat "${AWS_SHARED_CREDENTIALS_FILE:-~/.aws/credentials}" "${AWS_CONFIG_FILE:-~/.aws/config}" 2>/dev/null | \
+	crudini --get - | sed 's/^ *profile *//' | \
 		fzf \
 			--height 30% \
 			--preview-window right:70% \
@@ -45,7 +45,7 @@ function aws_choose_role() {
 			--prompt='-> ' \
 			--tiebreak='begin,index' \
 			--header 'Select AWS profile' \
-			--query "${ASSUME_ROLE_INTERACTIVE_QUERY:-${NAMESPACE}-${STAGE}-}" \
+			--query "${ASSUME_ROLE_INTERACTIVE_QUERY:-${NAMESPACE:+${NAMESPACE}-}${STAGE:+${STAGE}-}}" \
 			--preview "$_preview"
 }
 
@@ -61,13 +61,13 @@ function aws_sdk_assume_role() {
 	fi
 
 	local assume_role="${ASSUME_ROLE}"
-	trap '[[ -n $assume_role ]] && ASSUME_ROLE="$assume_role"' RETURN EXIT
 	ASSUME_ROLE="$role"
 	if [ $# -eq 0 ]; then
 		AWS_PROFILE="$role" bash -l
 	else
 		AWS_PROFILE="$role" $*
 	fi
+	ASSUME_ROLE="$assume_role";
 }
 
 # Asks AWS what the currently active identity is and

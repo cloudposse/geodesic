@@ -1,4 +1,4 @@
-if [ -z "${ASSUME_ROLE}" ]; then
+if [[ $SHLVL -eq 1 ]]; then
 	if [ -f "/etc/motd" ]; then
 		cat "/etc/motd"
 	fi

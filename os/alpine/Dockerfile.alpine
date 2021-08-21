@@ -1,8 +1,8 @@
 ARG ALPINE_VERSION=3.13.5
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=342.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=352.0.0
 # https://github.com/ahmetb/kubectx/releases
-ARG KUBECTX_COMPLETION_VERSION=0.9.3
+ARG KUBECTX_COMPLETION_VERSION=0.9.4
 
 #
 # Python Dependencies
@@ -204,7 +204,8 @@ ENV AWS_SHARED_CREDENTIALS_FILE=${GEODESIC_AWS_HOME}/credentials
 ENV AWS_REGION_ABBREVIATION_TYPE=fixed
 
 #
-# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
+# Support for aws-vault (not related to HashiCorp Vault) is deprecated
+# in favor of Leapp.  https://leapp.cloud
 #
 ENV AWS_VAULT_ENABLED=false
 ENV AWS_VAULT_SERVER_ENABLED=false
@@ -214,7 +215,8 @@ ENV AWS_VAULT_BACKEND=file
 # ENV AWS_VAULT_FILE_PASSPHRASE=
 
 #
-# Configure aws-okta to easily assume roles
+# Support for aws-okta is deprecated
+# in favor of Leapp.  https://leapp.cloud
 #
 ENV AWS_OKTA_ENABLED=false
 

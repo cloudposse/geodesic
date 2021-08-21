@@ -20,14 +20,8 @@ function yaml-diff() {
 	local new=$(mktemp)
 	trap "rm -rf $old $new" RETURN EXIT
 
-	local sort_array_filter='walk( if type == "array" then sort else . end )'
-	local filter="."
-
-	# TODO add a switch for this
-	false && filter="$sort_array_filter"
-
-	yq r -j "$1" | jq -S "$filter" | yq r - >"$old"
-	yq r -j "$2" | jq -S "$filter" | yq r - >"$new"
+	yq eval --no-colors 'sortKeys(..)' "$1" > "$old"
+	yq eval --no-colors 'sortKeys(..)' "$2" > "$new"
 
 	local color=never
 	[[ -t 1 ]] && color=always

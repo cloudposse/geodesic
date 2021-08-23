@@ -6,5 +6,7 @@
 
 cd /etc/init.d
 for i in *.sh; do
+  # Do not run hwclock.sh included by default on Debian systems
+  [[ "$i" == "hwclock.sh" ]] && continue
 	source $i
 done

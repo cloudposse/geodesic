@@ -5,6 +5,8 @@
 # This file loads user preferences/customizations and must load before any user-visible configuration takes place.
 
 # In case this output is being piped into a shell, print a warning message
+# Specifically, this guards against:
+#   docker run -it cloudposse/geodesic:latest-debian  | bash
 printf 'printf "\\nIf piping Geodesic output into a shell, do not attach a terminal (-t flag)\\n" >&2; exit 8;'
 # In case this output is not being piped into a shell, hide the warning message
 printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'

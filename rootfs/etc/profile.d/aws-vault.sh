@@ -4,7 +4,7 @@
 [[ $SHLVL -gt 1 && AWS_VAULT_SERVER_ENABLED == "true" && -n $AWS_VAULT_SERVER_DISABLED ]] && export AWS_VAULT_SERVER_ENABLED="false: ${AWS_VAULT_SERVER_DISABLED}"
 
 function _validate_aws_vault_server() {
-	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
+	[[ ${AWS_VAULT_SERVER_ENABLED:-false} == "true" ]] || return 0
 
 	local instance
 	local curl_exit_code
@@ -53,7 +53,7 @@ function _force_start_aws_vault_server() {
 }
 
 function assume_active_aws_role() {
-	[[ ${AWS_VAULT_SERVER_ENABLED:-true} == "true" ]] || return 0
+	[[ ${AWS_VAULT_SERVER_ENABLED:-false} == "true" ]] || return 0
 
 	local aws_default_profile="$AWS_DEFAULT_PROFILE"
 	local save_traps=$(trap -p RETURN)
@@ -127,7 +127,7 @@ function sync_clocks() {
 	fi
 }
 
-if [[ "${AWS_VAULT_ENABLED:-true}" != "true" ]]; then
+if [[ "${AWS_VAULT_ENABLED:-false}" != "true" ]]; then
 	# Even if we are not going to turn on Geodesic support for aws-vault, we
 	# want to enable aws-vault use if a configuration already exits.
 	[[ -d /localhost/.awsvault ]] && ln -sf /localhost/.awsvault ${HOME}
@@ -217,7 +217,7 @@ else
 
 		[ -d /localhost/.awsvault ] || mkdir -p /localhost/.awsvault
 		ln -sf /localhost/.awsvault ${HOME}
-		if [ "${AWS_VAULT_SERVER_ENABLED:-true}" == "true" ]; then
+		if [ "${AWS_VAULT_SERVER_ENABLED:-false}" == "true" ]; then
 			_validate_aws_vault_server
 		fi
 	fi
@@ -249,10 +249,10 @@ else
 			# an aws-vault shell to start with. We have to allow this (a) in order to assume a role other
 			# than the one the credential server is serving and (b) to continue to be able to work if
 			# the process that started the server ends and takes the credential server with it.
-			if [ "$SHLVL" -eq 1 ] && [ "${AWS_VAULT_SERVER_ENABLED:-true}" == "true" ]; then
+			if [ "$SHLVL" -eq 1 ] && [ "${AWS_VAULT_SERVER_ENABLED:-false}" == "true" ]; then
 				# Save the current values of AWS_VAULT and AWS_VAULT_SERVER_ENABLED
 				local aws_vault="$AWS_VAULT"
-				local aws_vault_server_enabled="${AWS_VAULT_SERVER_ENABLED:-true}"
+				local aws_vault_server_enabled="${AWS_VAULT_SERVER_ENABLED:-false}"
 				# Be sure to restore the values of AWS_VAULT and AWS_VAULT_SERVER_ENABLED when
 				# this function returns, regardless of how it returns (e.g. in case of errors).
 				local save_traps=$(trap -p RETURN)
@@ -277,7 +277,7 @@ else
 		fi
 
 		shift
-		[[ "${AWS_VAULT_SERVER_ENABLED:-true}" == "true" ]] && export AWS_VAULT_SERVER_DISABLED="${AWS_VAULT_SERVER_DISABLED:-server already started}"
+		[[ "${AWS_VAULT_SERVER_ENABLED:-false}" == "true" ]] && export AWS_VAULT_SERVER_DISABLED="${AWS_VAULT_SERVER_DISABLED:-server already started}"
 		if [ $# -eq 0 ]; then
 			aws-vault exec ${AWS_VAULT_ARGS[@]} $role -- bash -l
 		else
@@ -295,7 +295,7 @@ else
 	}
 
 	function role-server() {
-		if [[ ${AWS_VAULT_SERVER_ENABLED:-true} != "true" ]]; then
+		if [[ ${AWS_VAULT_SERVER_ENABLED:-false} != "true" ]]; then
 			echo $(red Not starting role server becuase AWS_VAULT_SERVER_ENABLED is "${AWS_VAULT_SERVER_ENABLED}")
 			exit 99
 		fi

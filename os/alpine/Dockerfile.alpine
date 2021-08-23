@@ -207,9 +207,9 @@ ENV AWS_REGION_ABBREVIATION_TYPE=fixed
 # Support for aws-vault (not related to HashiCorp Vault) is deprecated
 # in favor of Leapp.  https://leapp.cloud
 #
-ENV AWS_VAULT_ENABLED=false
-ENV AWS_VAULT_SERVER_ENABLED=false
-ENV AWS_VAULT_BACKEND=file
+# ENV AWS_VAULT_ENABLED=false
+# ENV AWS_VAULT_SERVER_ENABLED=false
+# ENV AWS_VAULT_BACKEND=file
 # ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
 # ENV AWS_VAULT_SESSION_TTL=12h
 # ENV AWS_VAULT_FILE_PASSPHRASE=
@@ -218,7 +218,7 @@ ENV AWS_VAULT_BACKEND=file
 # Support for aws-okta is deprecated
 # in favor of Leapp.  https://leapp.cloud
 #
-ENV AWS_OKTA_ENABLED=false
+# ENV AWS_OKTA_ENABLED=false
 
 #
 # Shell customization

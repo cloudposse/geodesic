@@ -140,6 +140,6 @@ function refresh_current_aws_role_if_needed() {
 
 # If OKTA or aws-vault are running, we have better hooks for keeping track of the current AWS role,
 # so only use refresh_current_aws_role_if_needed if they are disabled or overridden
-if [[ ($AWS_OKTA_ENABLED != "true" && ${AWS_VAULT_ENABLED:-true} != "true") || -n $AWS_PROFILE ]]; then
+if [[ ($AWS_OKTA_ENABLED != "true" && ${AWS_VAULT_ENABLED:-false} != "true") || -n $AWS_PROFILE ]]; then
 	PROMPT_HOOKS+=("refresh_current_aws_role_if_needed")
 fi

@@ -12,6 +12,10 @@ ENV LESS=R
 # Our older Geodesic configurations relied on `direnv`, which we no longer recommend,
 # preferring YAML configuration files instead.
 ENV DIRENV_ENABLED=true
+# When using DIRENV with Terraform, you can enable special prompt support
+ENV GEODESIC_TERRAFORM_WORKSPACE_PROMPT_ENABLED=true
+ENV GEODESIC_TF_PROMPT_ACTIVE=true
+
 # Our older Geodesic configuration uses multiple Makefiles, like Makefile.tasks
 # and depends on this setting, however this setting is set by default by `direnv`
 # due to rootfs/conf/.envrc, but `direnv` is now disabled by default, too.

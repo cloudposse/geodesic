@@ -4,6 +4,15 @@
 # This file has depends on _geodesic-config.sh and should come third.
 # This file loads user preferences/customizations and must load before any user-visible configuration takes place.
 
+# In case this output is being piped into a shell, print a warning message
+printf 'printf "\\nIf piping Geodesic output into a shell, do not attach a terminal (-t flag)\\n" >&2; exit 8;'
+# In case this output is not being piped into a shell, hide the warning message
+printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
+printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
+printf '                                                                                                    '
+printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
+printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
+
 # Parse the GEODESIC_TRACE variable and set the internal _GEODESIC_TRACE_CUSTOMIZATION flag if needed
 if [[ $GEODESIC_TRACE =~ custom ]]; then
 	export _GEODESIC_TRACE_CUSTOMIZATION=true
@@ -49,8 +58,8 @@ fi
 if [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 	if ! df | grep -q /localhost; then
 		if [[ -z $KUBERNETES_PORT ]]; then
-			red "########################################################################################"
-			red "# No filesystem is mounted at $(bold /localhost) which limits Geodesic functionality."
+			red "########################################################################################" >&2
+			red "# No filesystem is mounted at $(bold /localhost) which limits Geodesic functionality." >&2
 			boot install
 		else
 			echo $(green Kubernetes host detected, Geodesic customization disabled.)

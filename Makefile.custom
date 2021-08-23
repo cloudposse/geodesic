@@ -18,11 +18,11 @@
 # `make build`.
 
 
+export APP_NAME = what-you-want-to-type-to-run-your-image
 export DOCKER_ORG ?= your-dockerhub-org-name
 export DOCKER_IMAGE ?= $(DOCKER_ORG)/your-desired-docker-image-name
 export DOCKER_TAG ?= latest
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
-export APP_NAME = what-you-want-to-type-to-run-your-image
 GEODESIC_INSTALL_PATH ?= /usr/local/bin
 export INSTALL_PATH ?= $(GEODESIC_INSTALL_PATH)
 export SCRIPT = $(INSTALL_PATH)/$(APP_NAME)

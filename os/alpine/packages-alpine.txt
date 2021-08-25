@@ -1,5 +1,6 @@
 # Essential alpine-only packages
 busybox-extras
+diffutils
 drill
 fzf-bash-completion
 iputils

@@ -156,8 +156,6 @@ test() {
 	echo Passed
 }
 
-trap "unset -n abbr_map" EXIT RETURN
-
 if [[ $1 == "test" ]]; then
 	test
 elif [[ $1 =~ ^--?l ]]; then

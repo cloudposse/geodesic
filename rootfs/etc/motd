@@ -1,7 +1,10 @@
 
 IMPORTANT:
-* Your $HOME directory has been mounted to `/localhost`
-* Use `aws-vault` to manage your sessions
-* Run `assume-role` to start a session
+* Your host $HOME directory has been mounted to `/localhost`.
+* Your host AWS configuration and credentials should be available.
+* Use Leapp on your host computer to manage your credentials.
+* Leapp is free, open source, and available from https://leapp.cloud
+* Use AWS_PROFILE environment variable to manage your AWS IAM role.
+* You can interactively select AWS profiles via the `assume-role` command.
 
 

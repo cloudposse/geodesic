@@ -7,9 +7,12 @@ date: May 2019
 
 ## NAME
 
-`assume_active_aws_role` - assume a role provided by the `aws-vault` server
+_(Deprecated)_ `assume_active_aws_role` - assume a role provided by the `aws-vault` server
 
 ## SYNOPSIS
+
+_Note: Support for `aws-vault`, including `assume_active_aws_role` has been discontinued.
+Cloud Posse recommends using [Leapp](https://leapp.cloud) instead._
 
 For the case where you have an active `aws-vault` server but the current shell is not using it, 
 you can run `assume_active_aws_role` to assume the role being served by the server.  Normally 

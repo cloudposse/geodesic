@@ -12,6 +12,10 @@ ENV LESS=R
 # Our older Geodesic configurations relied on `direnv`, which we no longer recommend,
 # preferring YAML configuration files instead.
 ENV DIRENV_ENABLED=true
+# When using DIRENV with Terraform, you can enable special prompt support
+ENV GEODESIC_TERRAFORM_WORKSPACE_PROMPT_ENABLED=true
+ENV GEODESIC_TF_PROMPT_ACTIVE=true
+
 # Our older Geodesic configuration uses multiple Makefiles, like Makefile.tasks
 # and depends on this setting, however this setting is set by default by `direnv`
 # due to rootfs/conf/.envrc, but `direnv` is now disabled by default, too.
@@ -20,21 +24,6 @@ ENV DIRENV_ENABLED=true
 # it for trusted directories under `/conf` and therefore it will not affect
 # `make` outside of this directory tree.
 ENV MAKE_INCLUDES="Makefile Makefile.*"
-
-#
-# Configure aws-okta to easily assume roles
-#
-ENV AWS_OKTA_ENABLED=true
-
-#
-# Configure aws-vault to easily assume roles (not related to HashiCorp Vault)
-#
-ENV AWS_VAULT_ENABLED=true
-ENV AWS_VAULT_SERVER_ENABLED=true
-ENV AWS_VAULT_BACKEND=file
-ENV AWS_VAULT_ASSUME_ROLE_TTL=1h
-ENV AWS_VAULT_SESSION_TTL=12h
-#ENV AWS_VAULT_FILE_PASSPHRASE=
 
 
 ####################################################################################

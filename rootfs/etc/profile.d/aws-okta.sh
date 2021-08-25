@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 
 if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
+  echo
+	echo
+	red '* You have AWS_OKTA_ENABLED set to "true".'
+	red '* Cloud Posse no longer recommends using aws-okta and is'
+	red '* discontinuing support for aws-okta use inside Geodesic.'
+	red '* Cloud Posse recommends using Leapp to manage credentials'
+	red '* and the standard AWS config file and AWS_PROFILE'
+	red '* environment variable for switching roles.'
+	red '* Leapp is free and available from https://leapp.cloud'
+	red '* When AWS_OKTA_ENABLED is not set to true, the'
+	red '* assume-role command is available to allow you to'
+	red '* interactively set your AWS_PROFILE in a new shell.'
+	echo
+	echo
+
 	if ! which aws-okta >/dev/null; then
 		echo "aws-okta not installed"
 		exit 1

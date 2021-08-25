@@ -5,6 +5,23 @@ BANNER_INDENT="${BANNER_INDENT:-    }"
 BANNER_FONT="${BANNER_FONT:-Nancyj.flf}" # " IDE parser fix
 
 if [ "${SHLVL}" == "1" ]; then
+  function _check_support() {
+		[[ $(arch) != "x86_64" ]] || grep -qs GenuineIntel /proc/cpuinfo && return
+		echo
+		echo
+		red '**********************************************************************'
+		red '**********************************************************************'
+		red '**                                                                  **'
+		red '**    You appear to be running Geodesic on an Apple M1 CPU          **'
+		red '**  Geodesic is not supported on the Apple M1 and has known issues  **'
+		red '**     See https://github.com/cloudposse/geodesic/issues/719        **'
+		red '**                                                                  **'
+		red '**********************************************************************'
+		red '**********************************************************************'
+		echo
+		echo
+  }
+
 	function _header() {
 		local vstring
 		local debian_version="/etc/debian_version"
@@ -31,6 +48,11 @@ if [ "${SHLVL}" == "1" ]; then
 			fi
 		fi
 	}
+	# We call _check_support twice so that the warning appears
+	# both above and below the banner
+	_check_support
 	_header
+	_check_support
+	unset _check_support
 	unset _header
 fi

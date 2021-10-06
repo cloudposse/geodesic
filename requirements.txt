@@ -1,6 +1,6 @@
 # Pin crypography because later version require `setuptools_rust` which is not available for Alpine
 # See: https://github.com/Azure/azure-cli/issues/16858
-cryptography==3.4.8
+cryptography==35.0.0
 PyYAML==5.4.1
 awscli==1.20.49
 boto==2.49.0

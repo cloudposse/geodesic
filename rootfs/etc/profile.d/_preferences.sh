@@ -81,6 +81,7 @@ unset _GEODESIC_CONFIG_HOME_DEFAULT
 
 function _load_geodesic_preferences() {
 	local preference_list=()
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: LOADING preference files
 
 	_search_geodesic_dirs preference_list preferences
 	for file in "${preference_list[@]}"; do

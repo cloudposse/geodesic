@@ -31,7 +31,7 @@ function _search_geodesic_dirs() {
 	local resource=$2
 	local base="${GEODESIC_CONFIG_HOME}"
 
-	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource"
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: LOOKING for resources of type "$resource"
 
 	if [[ ! -d $base ]]; then
 		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: "$base" is not a directory, giving up the search for "$resource"
@@ -47,7 +47,8 @@ function _search_geodesic_dirs() {
 	local company=$(dirname "${DOCKER_IMAGE}")
 	local stage=$(basename "${DOCKER_IMAGE}")
 
-	if [[ -n $company && -d $base/$company ]]; then
+	if [[ $company != "." && -d $base/$company ]]; then
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for company-level resources in "$base/$company"
 		if [[ -d $base/$company/defaults ]]; then
 			_expand_dir_or_file search_list "${resource}" "${base}/${company}/defaults"
 		else
@@ -56,10 +57,12 @@ function _search_geodesic_dirs() {
 	fi
 
 	if [[ -n $stage && ($stage != $company) && -d $base/$stage ]]; then
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for repo-level resources in "$base/$stage"
 		_expand_dir_or_file search_list "${resource}" "${base}/${stage}"
 	fi
 
-	if [[ -n $DOCKER_IMAGE && -d $base/$DOCKER_IMAGE ]]; then
+	if [[ -n $DOCKER_IMAGE && ($DOCKER_IMAGE != $stage) && -d $base/$DOCKER_IMAGE ]]; then
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for image-specific resources in "$base/$DOCKER_IMAGE"
 		_expand_dir_or_file search_list "${resource}" "${base}/${DOCKER_IMAGE}"
 	fi
 }

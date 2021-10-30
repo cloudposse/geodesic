@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Simple utility to output the correct command to use to install Docker on this OS
+
+source /etc/os-release
+
+if [[ $ID == "alpine" ]]; then
+  echo "apk add docker-cli"
+elif [[ $ID == "debian" ]]; then
+  echo "apt-get install -y docker.io"
+else
+  echo "Unknown OS $ID. Use Google to find how to install Docker on this OS."
+  exit 1
+fi

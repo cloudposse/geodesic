@@ -1,7 +1,8 @@
 
 IMPORTANT:
-* Your host $HOME directory has been mounted to `/localhost`.
-* Your host AWS configuration and credentials should be available.
+* Unless there were errors reported above,
+* your host $HOME directory should be mounted to `/localhost`, and
+* your host AWS configuration and credentials should be available.
 * Use Leapp on your host computer to manage your credentials.
 * Leapp is free, open source, and available from https://leapp.cloud
 * Use AWS_PROFILE environment variable to manage your AWS IAM role.

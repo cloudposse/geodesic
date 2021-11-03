@@ -87,7 +87,7 @@ function use() {
 		# Note that the mounted /var/run/docker.sock is not a file or
 		# socket in the Mac host OS, it is in the dockerd VM.
 		# https://docs.docker.com/docker-for-mac/osxfs/#namespaces
-		echo "# Enabling docker support. Be sure you install a docker CLI binary (apk add docker-cli)."
+		echo "# Enabling docker support. Be sure you install a docker CLI binary{{getenv "DOCKER_INSTALL_PROMPT"}}."
 		DOCKER_ARGS+=(--volume "/var/run/docker.sock:/var/run/docker.sock")
 		# Some reports say this is needed for Windows WSL
 		if [[ $(uname -r) =~ Microsoft$ ]]; then

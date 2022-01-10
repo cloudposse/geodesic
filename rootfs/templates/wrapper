@@ -6,6 +6,9 @@ set -o pipefail
 # Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$ % 30000))}
 
+# If this env var is unset, set it to the current directory without the home dir
+export GEODESIC_WORKDIR=${GEODESIC_WORKDIR:-/localhost/$(echo "$PWD/${1#./}" | sed -e "s,^$HOME/,,g")}
+
 readonly OS=$(uname -s)
 
 export USER_ID=$(id -u)
@@ -165,7 +168,8 @@ function use() {
 		--env GEODESIC_PORT=${GEODESIC_PORT}
 		--env DOCKER_IMAGE="${DOCKER_IMAGE%:*}"
 		--env DOCKER_NAME="${DOCKER_NAME}"
-		--env DOCKER_TAG="${DOCKER_TAG}")
+		--env DOCKER_TAG="${DOCKER_TAG}"
+		--workdir "${GEODESIC_WORKDIR}")
 
 	trap run_exit_hooks EXIT
 	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script

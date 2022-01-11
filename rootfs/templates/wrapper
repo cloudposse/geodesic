@@ -156,6 +156,12 @@ function use() {
 		echo "# Mounting ${local_home} into container"
 		DOCKER_ARGS+=(--volume=${local_home}:/localhost)
 		DOCKER_ARGS+=(--env LOCAL_HOME=${local_home})
+
+                if [[ ${PWD}/ = ${local_home}/* ]]; then
+                    work_dir="/localhost/${PWD#"$local_home"/}"
+                    echo "# Using $work_dir as workdir"
+                    DOCKER_ARGS+=(--workdir "$work_dir")
+                fi
 	fi
 
 	DOCKER_ARGS+=(--privileged

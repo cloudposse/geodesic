@@ -7,7 +7,7 @@ set -o pipefail
 export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$ % 30000))}
 
 # If this env var is unset, set it to the current directory without the home dir
-export GEODESIC_WORKDIR=${GEODESIC_WORKDIR:-/localhost/$(echo "$PWD/${1#./}" | sed -e "s,^$HOME/,,g")}
+export GEODESIC_WORKDIR=${GEODESIC_WORKDIR:-/localhost/${PWD#$HOME/}}
 
 readonly OS=$(uname -s)
 

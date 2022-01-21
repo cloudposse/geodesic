@@ -21,7 +21,7 @@ else
 fi
 
 function file_on_host() {
-  [[ $GEODESIC_LOCALHOST_MISSING != "true" ]] && [[  $(_file_device "$1") == ${GEODESIC_LOCALHOST_DEVICE} ]]
+	[[ $GEODESIC_LOCALHOST_MISSING != "true" ]] && [[ $(_file_device "$1") == ${GEODESIC_LOCALHOST_DEVICE} ]]
 }
 
 function _default_initial_wd() {

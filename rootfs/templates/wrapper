@@ -157,7 +157,7 @@ function use() {
 	else
 		echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
 		DOCKER_ARGS+=(
-		--volume="${local_home}:/localhost:"
+		--volume="${local_home}:/localhost"
 		--env LOCAL_HOME="${local_home}"
 		)
 	fi
@@ -171,7 +171,7 @@ function use() {
 		--env DOCKER_IMAGE="${DOCKER_IMAGE%:*}"
 		--env DOCKER_NAME="${DOCKER_NAME}"
 		--env DOCKER_TAG="${DOCKER_TAG}"
-		--env	GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}"
+		--env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}"
 		)
 
 	trap run_exit_hooks EXIT
@@ -182,7 +182,7 @@ function use() {
 		if [ $# -eq 0 ]; then
 			set -- "/bin/bash" "-l" "$@"
 		fi
-		docker exec -it --env	GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
+		docker exec -it --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
 	else
 		echo "# Starting new ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"

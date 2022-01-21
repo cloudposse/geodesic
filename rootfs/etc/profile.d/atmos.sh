@@ -19,12 +19,12 @@ function _configure_atmos_base_path() {
 
 	# If $GEODESIC_WORKDIR is a descendent of either a "stacks" or "components" directory,
 	# use the parent of that directory as ATMOS_BASE_PATH
-	if [[ "${GEODESIC_WORKDIR}" =~ /(stacks|components)/  ]]; then
-			if [[ "${GEODESIC_WORKDIR}" =~ /stacks/  ]]; then
-				export ATMOS_BASE_PATH="${GEODESIC_WORKDIR%/stacks/*}"
-			else
-				export ATMOS_BASE_PATH="${GEODESIC_WORKDIR%/components/*}"
-			fi
+	if [[ "${GEODESIC_WORKDIR}" =~ /(stacks|components)/ ]]; then
+		if [[ "${GEODESIC_WORKDIR}" =~ /stacks/ ]]; then
+			export ATMOS_BASE_PATH="${GEODESIC_WORKDIR%/stacks/*}"
+		else
+			export ATMOS_BASE_PATH="${GEODESIC_WORKDIR%/components/*}"
+		fi
 		green "# Setting ATMOS_BASE_PATH to \"$ATMOS_BASE_PATH\" based on parent of workdir"
 		return
 	fi

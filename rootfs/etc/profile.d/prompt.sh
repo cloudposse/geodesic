@@ -75,6 +75,17 @@ function geodesic_prompt() {
 		[[ -z $BANNER_MARK ]] && BANNER_MARK=$'\u29C9'                               # '⧉'
 		;;
 
+	fancy)
+		# Same as default, except for BLACK_RIGHTWARDS_ARROWHEAD, because the character used in the
+		# default set, Z NOTATION SCHEMA PIPING, is from the "Supplemental Mathematical Operators" Unicode block
+		# which is not included by default in the Ubuntu terminal font.
+		# See https://github.com/cloudposse/geodesic/issues/417
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u221a\x01'$(tput sgr0)$'\x02'     # green bold '√'
+		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 1)$'\x02\u2717\x01'$(tput sgr0)$'\x02' # red bold '✗'
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4' # '➤'
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
+		;;
+
 	*)
 		# default
 		#	ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u2713\x01'$(tput sgr0)$'\x02'   # green bold '✓'
@@ -88,7 +99,7 @@ function geodesic_prompt() {
 		# '▶︎' ($'\u25b6\ufe0e') BLACK RIGHT-POINTING TRIANGLE which is sometimes presented as an emoji (as GitHub likes to) '▶️'
 		# '⏩︎' ($'\u23e9\ufe0e') BLACK RIGHT-POINTING DOUBLE TRIANGLE
 		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20' # '⨠' Z NOTATION SCHEMA PIPING
-		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉'
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
 		;;
 	esac
 
@@ -132,7 +143,7 @@ function geodesic_prompt() {
 	else
 		dir_prompt+="${ROLE_PROMPT} \W "
 	fi
-	dir_prompt+=$'${GEODISIC_PROMPT_GLYPHS-${BLACK_RIGHTWARDS_ARROWHEAD} }'
+	dir_prompt+=$'${GEODESIC_PROMPT_GLYPHS-${BLACK_RIGHTWARDS_ARROWHEAD} }'
 
 	update_terraform_prompt
 	local old_kube_ps1_prefix="$KUBE_PS1_PREFIX"

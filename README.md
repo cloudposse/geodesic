@@ -1,3 +1,4 @@
+
 <!-- markdownlint-disable -->
 # Geodesic [![Build Status](https://github.com/cloudposse/geodesic/workflows/docker/badge.svg)](https://github.com/cloudposse/geodesic/actions?query=workflow%3Adocker) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcloudposse%2Fgeodesic?ref=badge_shield) [![Latest Release](https://img.shields.io/github/release/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com) [![Slack Archive](https://img.shields.io/badge/slack-archive-blue.svg)](https://archive.sweetops.com/geodesic)
 <!-- markdownlint-restore -->
@@ -41,7 +42,6 @@ It provides a fully customizable framework for defining and building cloud infra
 
 It's works natively with Mac OSX, Linux, and [Windows 10 (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
-
 ---
 
 This project is part of our comprehensive ["SweetOps"](https://cpco.io/sweetops) approach towards DevOps.
@@ -56,7 +56,6 @@ This project is part of our comprehensive ["SweetOps"](https://cpco.io/sweetops)
 
 
 It's 100% Open Source and licensed under the [APACHE2](LICENSE).
-
 
 
 
@@ -107,6 +106,10 @@ and do not anticipate M1 will be well supported before 2022. Historically, wides
 chip takes several years to establish; we hope we will not have to wait that long.
 
 Want to learn more? [Check out our getting started with Geodesic guide!](https://docs.cloudposse.com/tutorials/geodesic-getting-started/)
+
+
+
+
 
 ## Usage
 
@@ -195,6 +198,7 @@ Like this project? Please give it a ★ on [our GitHub](https://github.com/cloud
 Are you using this project or any of our other projects? Consider [leaving a testimonial][testimonial]. =)
 
 
+
 ## Related Projects
 
 Check out these related projects.
@@ -202,8 +206,6 @@ Check out these related projects.
 - [Packages](https://github.com/cloudposse/packages) - Cloud Posse installer and distribution of native apps
 - [Build Harness](https://github.com/cloudposse/dev) - Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more
 - [terraform-aws-components](https://github.com/cloudposse/terraform-aws-components) - Catalog of reusable Terraform components and blueprints for provisioning reference architectures
-
-
 
 ## Help
 
@@ -276,7 +278,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 ## Copyright
 
-Copyright © 2017-2021 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2022 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 

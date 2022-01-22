@@ -103,8 +103,9 @@ function geodesic_prompt() {
 		;;
 	esac
 
-	# "(HOST)" with "HOST" in bold red
-	[[ -z $HOST_PROMPT_MARK ]] && HOST_PROMPT_MARK=$'(\x01'$(tput bold)$(tput setaf 1)$'\x02HOST\x01'$(tput sgr0)$'\x02)'
+	# "(HOST)" with "HOST" in bold red. Only test for unset ("-") instead of unset or null (":-") so that
+	# the feature can be suppressed by setting PROMPT_HOST_MARK to null.
+	[[ -z $PROMPT_HOST_MARK ]] && PROMPT_HOST_MARK="${PROMPT_HOST_MARK-$'(\x01'$(tput bold)$(tput setaf 1)$'\x02HOST\x01'$(tput sgr0)$'\x02)'}"
 
 	local level_prompt
 	case $SHLVL in
@@ -138,8 +139,8 @@ function geodesic_prompt() {
 
 	local dir_prompt
 	dir_prompt=" ${STATUS} ${level_prompt} "
-	if file_on_host "$(pwd -P)"; then
-		dir_prompt+="${ROLE_PROMPT} ${HOST_PROMPT_MARK} \W "
+	if [[ -n $PROMPT_HOST_MARK ]] && file_on_host "$(pwd -P)"; then
+		dir_prompt+="${ROLE_PROMPT} ${PROMPT_HOST_MARK} \W "
 	else
 		dir_prompt+="${ROLE_PROMPT} \W "
 	fi

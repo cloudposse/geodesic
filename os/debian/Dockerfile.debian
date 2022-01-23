@@ -1,4 +1,4 @@
-ARG DEBIAN_VERSION=10.10-slim
+ARG DEBIAN_VERSION=10.11-slim
 # https://cloud.google.com/sdk/docs/release-notes
 ARG GOOGLE_CLOUD_SDK_VERSION=369.0.0-0
 # https://github.com/ahmetb/kubectx/releases

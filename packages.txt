@@ -31,9 +31,11 @@ helm3@cloudposse
 helmfile@cloudposse
 jq
 kops@cloudposse
-# The latest version of kubectl is wrong for all of our customers, so do not install it.
-# Instead, install a compatible version. For now, track the latest AWS EKS version.
-kubectl-1.16@cloudposse
+# The latest version of kubectl is wrong for most of our customers, so do not install it.
+# Instead, install a compatible version. For now, track the latest AWS EKS version,
+# which will support the previous and current EKS versions, and support the newly
+# released next version until we later update this to follow.
+kubectl-1.21@cloudposse
 kubectx@cloudposse
 kubens@cloudposse
 less

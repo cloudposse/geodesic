@@ -4,7 +4,7 @@ ARG GOOGLE_CLOUD_SDK_VERSION=369.0.0-0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.4
 # https://github.com/jonmosco/kube-ps1/releases
-ENV KUBE_PS1_VERSION 0.7.0
+ARG KUBE_PS1_VERSION=0.7.0
 
 FROM debian:$DEBIAN_VERSION as python
 # Find the current version of Python at https://www.python.org/downloads/source/

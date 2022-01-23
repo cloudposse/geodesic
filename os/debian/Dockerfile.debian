@@ -1,12 +1,14 @@
 ARG DEBIAN_VERSION=10.10-slim
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=352.0.0-0
+ARG GOOGLE_CLOUD_SDK_VERSION=369.0.0-0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.4
+# https://github.com/jonmosco/kube-ps1/releases
+ENV KUBE_PS1_VERSION 0.7.0
 
 FROM debian:$DEBIAN_VERSION as python
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.8.11
+ARG PYTHON_VERSION=3.8.12
 
 # Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
 # Recommended: LC_ALL=C.UTF-8
@@ -173,7 +175,7 @@ ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSI
 #
 # Install fancy Kube PS1 Prompt
 # https://github.com/jonmosco/kube-ps1/releases
-ENV KUBE_PS1_VERSION 0.7.0
+ARG KUBE_PS1_VERSION
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 

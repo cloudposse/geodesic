@@ -1,10 +1,19 @@
-ARG ALPINE_VERSION=3.13.7
+ARG ALPINE_VERSION=3.15.0
 # https://cloud.google.com/sdk/docs/release-notes
 ARG GOOGLE_CLOUD_SDK_VERSION=369.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.4
 # https://github.com/jonmosco/kube-ps1/releases
 ARG KUBE_PS1_VERSION=0.7.0
+
+# Helm plugins:
+# https://github.com/databus23/helm-diff/releases
+ARG HELM_DIFF_VERSION=3.3.2
+# https://github.com/aslafy-z/helm-git/releases
+# We had issues with helm-diff + helm-git 0.9.0, so keeping it at 0.8.1
+ARG HELM_GIT_VERSION=0.11.1
+# https://github.com/helm/helm-2to3/releases
+ARG HELM_HELM_2TO3_VERSION=0.9.0
 
 #
 # Python Dependencies
@@ -167,9 +176,9 @@ RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
 #
 # Install minimal helm plugins
 #
-ENV HELM_DIFF_VERSION 3.1.3
-ENV HELM_GIT_VERSION 0.8.1
-ENV HELM_HELM_2TO3_VERSION 0.8.1
+ARG HELM_DIFF_VERSION
+ARG HELM_GIT_VERSION
+ARG HELM_HELM_2TO3_VERSION
 
 # Install plugins and then remove cache
 RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \

@@ -4,7 +4,7 @@ function _configure_atmos_base_path() {
 	# Leave $ATMOS_BASE_PATH alone if it is already set
 	if [[ -n $ATMOS_BASE_PATH ]]; then
 		if [[ $SHLVL == 1 ]]; then
-			green "# Using configured $ATMOS_BASE_PATH of \"$ATMOS_BASE_PATH\""
+			green "# Using configured ATMOS_BASE_PATH of \"$ATMOS_BASE_PATH\""
 		fi
 		return
 	fi

@@ -14,10 +14,12 @@ function _file_device() {
 # Intended to support files on user-defined bind mounts in addition to `/localhost`.
 # This function is run by the command line prompt setup, so it should be very fast.
 # Therefore we cache some info in the environment.
-if df -a | grep -q /localhost; then
+if [[ $GEODESIC_LOCALHOST_DEVICE == "disabled" ]]; then
+	red "# Host filesystem device detection disabled."
+elif df -a | grep -q /localhost; then
 	export GEODESIC_LOCALHOST_DEVICE=$(_file_device /localhost)
 	if [[ $GEODESIC_LOCALHOST_DEVICE == $(_file_device /) ]]; then
-		red "# Host filesystem detection failed. Disabling HOST prompt."
+		red "# Host filesystem device detection failed. Falling back to \"path starts with /localhost\"."
 		GEODESIC_LOCALHOST_DEVICE="same-as-root"
 	fi
 else
@@ -25,9 +27,13 @@ else
 fi
 
 function file_on_host() {
-	[[ $GEODESIC_LOCALHOST_DEVICE != "same-as-root" ]] && \
-	[[ $GEODESIC_LOCALHOST_DEVICE != "missing" ]] && \
-	[[ $(_file_device "$1") == ${GEODESIC_LOCALHOST_DEVICE} ]]
+	if [[ $GEODESIC_LOCALHOST_DEVICE  =~ ^(disabled|missing)$ ]]; then
+		return 1
+	elif [[ $GEODESIC_LOCALHOST_DEVICE == "same-as-root" ]]; then
+		[[ $(readlink -e "$1") =~ ^/localhost(/.*)?$ ]]
+	else
+		[[ $(_file_device "$1") == ${GEODESIC_LOCALHOST_DEVICE} ]]
+	fi
 }
 
 function _default_initial_wd() {
@@ -46,7 +52,7 @@ if [[ -d $GEODESIC_WORKDIR ]]; then
 	[[ $SHLVL == 1 ]] && green "# Initial working directory configured as ${GEODESIC_WORKDIR}"
 else
 	if [[ -d $GEODESIC_HOST_CWD ]]; then
-		if [[ -n $LOCAL_HOME ]] && $(file_on_host "$GEODESIC_HOST_CWD"); then
+		if [[ -n $LOCAL_HOME ]] && { [[ $GEODESIC_LOCALHOST_DEVICE  == "disabled" ]] || $(file_on_host "$GEODESIC_HOST_CWD"); }; then
 			export GEODESIC_WORKDIR=$(readlink -e "${GEODESIC_HOST_CWD}")
 			green "# Initial working directory set from host CWD to ${GEODESIC_WORKDIR}"
 		else

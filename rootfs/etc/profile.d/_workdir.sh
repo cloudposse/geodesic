@@ -16,12 +16,18 @@ function _file_device() {
 # Therefore we cache some info in the environment.
 if df -a | grep -q /localhost; then
 	export GEODESIC_LOCALHOST_DEVICE=$(_file_device /localhost)
+	if [[ $GEODESIC_LOCALHOST_DEVICE == $(_file_device /) ]]; then
+		red "# Host filesystem detection failed. Disabling HOST prompt."
+		GEODESIC_LOCALHOST_DEVICE="same-as-root"
+	fi
 else
-	export GEODESIC_LOCALHOST_MISSING=true
+	export GEODESIC_LOCALHOST_DEVICE="missing"
 fi
 
 function file_on_host() {
-	[[ $GEODESIC_LOCALHOST_MISSING != "true" ]] && [[ $(_file_device "$1") == ${GEODESIC_LOCALHOST_DEVICE} ]]
+	[[ $GEODESIC_LOCALHOST_DEVICE != "same-as-root" ]] && \
+	[[ $GEODESIC_LOCALHOST_DEVICE != "missing" ]] && \
+	[[ $(_file_device "$1") == ${GEODESIC_LOCALHOST_DEVICE} ]]
 }
 
 function _default_initial_wd() {

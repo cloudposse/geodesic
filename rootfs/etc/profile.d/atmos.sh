@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function _configure_atmos_base_path() {
+function atmos_configure_base_path() {
 	# Leave $ATMOS_BASE_PATH alone if it is already set
 	if [[ -n $ATMOS_BASE_PATH ]]; then
 		if [[ $SHLVL == 1 ]]; then
@@ -31,8 +31,11 @@ function _configure_atmos_base_path() {
 	yellow "# No candidate for ATMOS_BASE_PATH found, leaving it unset"
 }
 
-# Only configure ATMOS_BASE_PATH if we find an `atmos` executable,
-# but otherwise leave the function available for the user to call explicitly.
+# Only configure ATMOS_BASE_PATH if we find an `atmos` executable.
+# Leave the function available for the user to call explicitly.
 # NOTE: If we start shipping `atmos` with Geodesic by default, change this to
-#   [[ -f /usr/local/etc/atmos/atmos.yaml ]] && _configure_atmos_base_path
-command -v atmos >/dev/null && _configure_atmos_base_path && unset -f _configure_atmos_base_path
+#   if [[ -f /usr/local/etc/atmos/atmos.yaml ]]; then
+if command -v atmos >/dev/null; then
+	atmos_configure_base_path
+	source <(atmos completion bash) || echo error setting up atmos auto-completion
+fi

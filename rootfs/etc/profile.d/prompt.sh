@@ -61,25 +61,36 @@ function geodesic_prompt() {
 	plain)
 		# 8859-1 codepoints:
 		# '\[' and '\]' are bash prompt delimiters around non-printing characters
-		ASSUME_ROLE_ACTIVE_MARK="\["$(tput bold)$(tput setab 2)"\]»\["$(tput sgr0)"\] " # green
-		ASSUME_ROLE_INACTIVE_MARK=$'· '
-		BLACK_RIGHTWARDS_ARROWHEAD=$'=> '
-		BANNER_MARK=$'§ '
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK="\["$(tput bold)$(tput setab 2)"\]»\["$(tput sgr0)"\]" # green
+		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'·'
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'=>'
+		[[ -z $BANNER_MARK ]] && BANNER_MARK=$'§'
 		;;
 
 	unicode)
 		# unicode
-		ASSUME_ROLE_ACTIVE_MARK=$'\u2705 '    # '✅'
-		ASSUME_ROLE_INACTIVE_MARK=$'\u274C '  # '❌'
-		BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4 ' # '➤', suggest '▶' may be present in more fonts
-		BANNER_MARK=$'\u29C9 '                # '⧉'
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\u2705'       # '✅'
+		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\u274C'   # '❌'
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4' # '➤', suggest '▶' may be present in more fonts
+		[[ -z $BANNER_MARK ]] && BANNER_MARK=$'\u29C9'                               # '⧉'
+		;;
+
+	fancy)
+		# Same as default, except for BLACK_RIGHTWARDS_ARROWHEAD, because the character used in the
+		# default set, Z NOTATION SCHEMA PIPING, is from the "Supplemental Mathematical Operators" Unicode block
+		# which is not included by default in the Ubuntu terminal font.
+		# See https://github.com/cloudposse/geodesic/issues/417
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u221a\x01'$(tput sgr0)$'\x02'     # green bold '√'
+		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 1)$'\x02\u2717\x01'$(tput sgr0)$'\x02' # red bold '✗'
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4' # '➤'
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
 		;;
 
 	*)
 		# default
-		#	ASSUME_ROLE_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u2713 \x01'$(tput sgr0)$'\x02'   # green bold '✓'
-		ASSUME_ROLE_ACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 2)$'\x02\u221a \x01'$(tput sgr0)$'\x02'   # green bold '√'
-		ASSUME_ROLE_INACTIVE_MARK=$' \x01'$(tput bold)$(tput setaf 1)$'\x02\u2717 \x01'$(tput sgr0)$'\x02' # red bold '✗'
+		#	ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u2713\x01'$(tput sgr0)$'\x02'   # green bold '✓'
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u221a\x01'$(tput sgr0)$'\x02'     # green bold '√'
+		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 1)$'\x02\u2717\x01'$(tput sgr0)$'\x02' # red bold '✗'
 		# Options for arrow per https://github.com/cloudposse/geodesic/issues/417#issuecomment-477836676
 		# '»' ($'\u00bb') RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK from the Latin-1 supplement Unicode block
 		# '≫' ($'\u226b') MUCH GREATER-THAN and
@@ -87,10 +98,14 @@ function geodesic_prompt() {
 		# '➤' ($'\u27a4') BLACK RIGHTWARDS ARROWHEAD from the Dingbats Unicode block
 		# '▶︎' ($'\u25b6\ufe0e') BLACK RIGHT-POINTING TRIANGLE which is sometimes presented as an emoji (as GitHub likes to) '▶️'
 		# '⏩︎' ($'\u23e9\ufe0e') BLACK RIGHT-POINTING DOUBLE TRIANGLE
-		BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20 ' # '⨠' Z NOTATION SCHEMA PIPING
-		BANNER_MARK='⧉ '
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20' # '⨠' Z NOTATION SCHEMA PIPING
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
 		;;
 	esac
+
+	# "(HOST)" with "HOST" in bold red. Only test for unset ("-") instead of unset or null (":-") so that
+	# the feature can be suppressed by setting PROMPT_HOST_MARK to null.
+	[[ -z $PROMPT_HOST_MARK ]] && PROMPT_HOST_MARK="${PROMPT_HOST_MARK-$'(\x01'$(tput bold)$(tput setaf 1)$'\x02HOST\x01'$(tput sgr0)$'\x02)'}"
 
 	local level_prompt
 	case $SHLVL in
@@ -123,13 +138,13 @@ function geodesic_prompt() {
 	done
 
 	local dir_prompt
-	dir_prompt="${STATUS}${level_prompt} "
-	if [[ $(pwd -P) =~ ^/localhost/ ]]; then
-		dir_prompt+="${ROLE_PROMPT} ("$'\x01'$(tput bold)$(tput setaf 1)$'\x02HOST\x01'$(tput sgr0)$'\x02'") \W "
+	dir_prompt=" ${STATUS} ${level_prompt} "
+	if [[ -n $PROMPT_HOST_MARK ]] && file_on_host "$(pwd -P)"; then
+		dir_prompt+="${ROLE_PROMPT} ${PROMPT_HOST_MARK} \W "
 	else
 		dir_prompt+="${ROLE_PROMPT} \W "
 	fi
-	dir_prompt+=$'${GEODISIC_PROMPT_GLYPHS-$BLACK_RIGHTWARDS_ARROWHEAD}'
+	dir_prompt+=$'${GEODESIC_PROMPT_GLYPHS-${BLACK_RIGHTWARDS_ARROWHEAD} }'
 
 	update_terraform_prompt
 	local old_kube_ps1_prefix="$KUBE_PS1_PREFIX"
@@ -143,7 +158,7 @@ function geodesic_prompt() {
 			tf_mark="${ASSUME_ROLE_ACTIVE_MARK}"
 		fi
 		if [[ -n ${GEODESIC_TF_PROMPT_LINE} ]]; then
-			tf_prompt="${tf_mark}${GEODESIC_TF_PROMPT_LINE}\n"
+			tf_prompt=" ${tf_mark} ${GEODESIC_TF_PROMPT_LINE}\n"
 		fi
 		if [[ $GEODESIC_TERRAFORM_WORKSPACE_PROMPT_ENABLED == "true" ]]; then
 			KUBE_PS1_PREFIX="$(yellow "cluster:")("
@@ -159,7 +174,7 @@ function geodesic_prompt() {
 	fi
 
 	if [ -n "${BANNER}" ]; then
-		PS1=$' ${BANNER_MARK}'" ${BANNER} ${kube_prompt}${secrets_active}\n${tf_prompt}${dir_prompt}"
+		PS1=$' ${BANNER_MARK}'"  ${BANNER} $(kube_prompt)${secrets_active}\n${tf_prompt}${dir_prompt}"
 	else
 		PS1="${tf_prompt}${dir_prompt}"
 	fi

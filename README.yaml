@@ -27,7 +27,7 @@ screenshots:
   - name: "Demo"
     description: "<br/>[Example of running a shell](https://github.com/cloudposse/testing.cloudposse.co) based on the `cloudposse/geodesic` base docker image."
     url: "https://sweetops.com/wp-content/uploads/2019/03/termtosvg_fmnxoium.svg"
- 
+
 related:
   - name: "Packages"
     description: "Cloud Posse installer and distribution of native apps"
@@ -44,21 +44,21 @@ related:
 
 description: |-
 
-  Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform built entirely from Open Source technologies. 
-  
+  Geodesic is the fastest way to get up and running with a rock solid, production grade cloud platform built entirely from Open Source technologies.
+
   It’s a swiss army knife for creating and building consistent platforms to be shared across a team environment.
 
   It easily versions staging environments in a repeatable manner that can be followed by any team member.
 
   It's a way of doing things that allows companies to collaborate on infrastructure (~snowflakes~) and radically reduce Total Cost of Ownership, along with a vibrant and active [slack community](https://slack.cloudposse.com).
 
-  It provides a fully customizable framework for defining and building cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security. 
+  It provides a fully customizable framework for defining and building cloud infrastructures backed by [AWS](https://aws.amazon.com/) and powered by [kubernetes](https://kubernetes.io/). It couples best-of-breed technologies with engineering best-practices to equip organizations with the tooling that enables clusters to be spun up in record time without compromising security.
 
   It's works natively with Mac OSX, Linux, and [Windows 10 (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 introduction: |-
   These days, the typical software application is distributed as a docker image and run as a container. Why should infrastructure be any different? Since everything we write is "Infrastructure as Code", we believe that it should be treated the same way. This is the "Geodesic Way". Use containers+envs instead of unconventional wrappers, complicated folder structures and symlink hacks. Geodesic is the container for all your infrastructure automation needs that enables you to truly achieve SweetOps.
-  
+
   Geodesic is composed of two parts:
 
     1. It is an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools.
@@ -77,7 +77,7 @@ introduction: |-
   so that we may eventually make it the preferred version, after which point the `latest` tag will point to latest Debian image. We
   will maintain the `latest-alpine` and `latest-debian` Docker tags for those who want to commit to using one base OS or
   the other but still want automatic updates.
-  
+
   **Note**: Geodesic is a large collection of tools. As such, support for the Apple M1 chip is not under
   Cloud Posse's control, rather it depends on each tool author updating each tool for the M1 chip.
   All of the compiled tools that Cloud Posse has authored and are included in Geodesic are compiled
@@ -86,7 +86,7 @@ introduction: |-
   toolkit that is assembled in Geodesic. Therefore we do not advise using Geodesic on the M1 at this time
   and do not anticipate M1 will be well supported before 2022. Historically, widespread support for a new
   chip takes several years to establish; we hope we will not have to wait that long.
-  
+
   Want to learn more? [Check out our getting started with Geodesic guide!](https://docs.cloudposse.com/tutorials/geodesic-getting-started/)
 
 usage: |-
@@ -158,7 +158,40 @@ usage: |-
   Detailed information about launch-time configuration is in the [customization](./docs/customization.md)
   document, available from within the shell via `man customization`.
 
+  #### Customizing the installation script
+
+  Copy the template from the upstream docker repository to your local branch and modify
+
+  ```sh
+  mkdir -p rfs/templates
+  wget -O- https://raw.githubusercontent.com/cloudposse/geodesic/master/rootfs/templates/wrapper > rfs/templates/wrapper
+
+  ```
+
+  #### Mapping folders permanently in installed script
+
+  Often, you may want to permanently map folders within the installed script in `/usr/local/bin`.  That can be achieved by passing additional
+  docker arguments (in this case the `volume` argument) after the `init` param.
+
+  For example, let's say you want to map `$HOME/SomeFolderNeeded` and you would traditionally use `--volume=$HOME/SomeFolderNeeded:/SomeFolderNeeded` when executing
+  `docker run` locally.  Now, to include these volumes in the installation script, take the command, remove all `--` and add them following `init` in the install:
+
+  Example:
+
+  Normally, your installation command would be:
+
+  ```sh
+  docker run -it --rm cloudposse/geodesic:latest-debian init | sudo bash -s latest-debian
+  ```
+
+  You can now do:
+
+  ```sh
+  docker run -it --rm cloudposse/geodesic:latest-debian init volume=$HOME/SomeFolderNeeded:/SomeFolderNeeded | sudo bash -s latest-debian
+  ```
+
 # Other files to include in this README from the project folder
+
 include:
 
 # Contributors to this project

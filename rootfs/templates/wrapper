@@ -17,6 +17,8 @@ export GROUP_ID=$(id -g)
 export options=()
 export targets=()
 
+export GEODESIC_ADDITIONAL_DOCKER_ARGS="{{getenv "GEODESIC_ADDITIONAL_DOCKER_ARGS" ""}}"
+
 function require_installed() {
 	if ! which $1 >/dev/null; then
 		echo "Cannot find $1 installed on this system. Please install and try again."
@@ -82,6 +84,10 @@ function use() {
 		fi
 	else
 		DOCKER_ARGS=()
+	fi
+
+	if [ "${OS}" == 'Linux' ]; then
+		DOCKER_ARGS+=(--user="$(id -u):$(id -g)")
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
@@ -169,6 +175,7 @@ function use() {
 		--env DOCKER_IMAGE="${DOCKER_IMAGE%:*}"
 		--env DOCKER_NAME="${DOCKER_NAME}"
 		--env DOCKER_TAG="${DOCKER_TAG}"
+		--env GEODESIC_WORKDIR="${GEODESIC_WORKDIR}"
 		--workdir "${GEODESIC_WORKDIR}")
 
 	trap run_exit_hooks EXIT
@@ -184,7 +191,7 @@ function use() {
 		echo "# Starting new ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
 		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		docker run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
+		docker run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${GEODESIC_ADDITIONAL_DOCKER_ARGS} ${DOCKER_IMAGE} -l $*
 	fi
 }
 

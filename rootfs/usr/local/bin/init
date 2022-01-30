@@ -4,6 +4,14 @@
 # (If output is not a TTY, `stty` will complain about that)
 [[ -t 1 ]] && stty -onlcr
 
+IFS=', ' read -r -a args <<< "$*"
+declare -a withdash
+for arg in "${args[@]}"; do
+    withdash+=(--${arg})
+done
+
+export GEODESIC_ADDITIONAL_DOCKER_ARGS="${withdash[@]}"
+
 cd /etc/init.d
 for i in *.sh; do
   # Do not run hwclock.sh included by default on Debian systems

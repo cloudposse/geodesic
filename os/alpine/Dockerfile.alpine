@@ -1,8 +1,10 @@
-ARG ALPINE_VERSION=3.13.5
+ARG ALPINE_VERSION=3.13.7
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=352.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=369.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.4
+# https://github.com/jonmosco/kube-ps1/releases
+ARG KUBE_PS1_VERSION=0.7.0
 
 #
 # Python Dependencies
@@ -146,7 +148,7 @@ ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSI
 #
 # Install fancy Kube PS1 Prompt
 #
-ENV KUBE_PS1_VERSION 0.7.0
+ARG KUBE_PS1_VERSION
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
 

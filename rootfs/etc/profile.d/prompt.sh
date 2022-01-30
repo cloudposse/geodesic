@@ -153,8 +153,13 @@ function geodesic_prompt() {
 		KUBE_PS1_KUBECONFIG_CACHE=""
 	fi
 
+	local kube_prompt=""
+	if typeset -f "${kube_ps1}" > /dev/null; then
+		kube_prompt="$(kube_ps1)"
+	fi
+
 	if [ -n "${BANNER}" ]; then
-		PS1=$' ${BANNER_MARK}'" ${BANNER} $(kube_ps1)${secrets_active}\n${tf_prompt}${dir_prompt}"
+		PS1=$' ${BANNER_MARK}'" ${BANNER} ${kube_prompt}${secrets_active}\n${tf_prompt}${dir_prompt}"
 	else
 		PS1="${tf_prompt}${dir_prompt}"
 	fi

@@ -61,15 +61,28 @@ function use() {
 
 		if [ -n "$SSH_AUTH_SOCK" ]; then
 			if [ "${OS}" == 'Linux' ]; then
+				if [ "${SSH_AUTH_SOCK:0:4}" == "/tmp" ]; then
+					echo "The ssh-agent socket at ${SSH_AUTH_SOCK} is in your /tmp folder and does not map to Docker"
+					echo "Start your ssh-agent with 'TMPDIR=/var/tmp ssh-agent'"
+					echo "or something like this in your ~/.bashrc script:"
+					echo '(umask 066; ssh-agent -a $(mktemp -d -t ssh-XXXXXXXXXX --tmpdir=/var/tmp)/agent.$$ > "${SSH_AGENT_ENV}")'
+				else
 				# Bind-mount SSH agent socket into container (linux only)
-				DOCKER_ARGS+=(--volume "$SSH_AUTH_SOCK:$SSH_AUTH_SOCK"
-					--env SSH_AUTH_SOCK
+					local HOST_SOCK_DIR="$(dirname $SSH_AUTH_SOCK)"
+					local HOST_SOCK_NAME="$(basename $SSH_AUTH_SOCK)"
+					local DOCKER_SSH_FOLDER="/var/tmp"
+					local DOCKER_SSH_HOST_DIR="$DOCKER_SSH_FOLDER/host"
+					local DOCKER_SSH_HOST_SOCKET="$DOCKER_SSH_HOST_DIR/$HOST_SOCK_NAME"
+					DOCKER_ARGS+=(--volume="$HOST_SOCK_DIR:$DOCKER_SSH_HOST_DIR"
+						--env SSH_AUTH_SOCK_HOST="$DOCKER_SSH_HOST_SOCKET"
 					--env SSH_CLIENT
 					--env SSH_CONNECTION
 					--env SSH_TTY
 					--env USER
 					--env USER_ID
 					--env GROUP_ID)
+					echo "# Binding your SSH_AUTH_SOCK of $SSH_AUTH_SOCK to $DOCKER_SSH_HOST_SOCKET"
+				fi
 			elif [ "${OS}" == 'Darwin' ] && [ "${GEODESIC_MAC_FORWARD_SOCKET}" == 'true' ]; then
 				# Bind-mount SSH-agent socket (available in docker-for mac Edge 2.2 release)
 				# Note that the file/socket /run/host-services/ssh-auth.sock does not exist

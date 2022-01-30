@@ -6,7 +6,7 @@ BANNER_FONT="${BANNER_FONT:-Nancyj.flf}" # " IDE parser fix
 
 if [ "${SHLVL}" == "1" ]; then
   function _check_support() {
-		[[ $(arch) != "x86_64" ]] || grep -qs GenuineIntel /proc/cpuinfo && return
+		[[ $(arch) != "x86_64" ]] || grep -qsE 'GenuineIntel|AuthenticAMD' /proc/cpuinfo && return
 		echo
 		echo
 		red '**********************************************************************'

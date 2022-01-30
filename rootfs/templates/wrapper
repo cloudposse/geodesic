@@ -6,8 +6,7 @@ set -o pipefail
 # Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$ % 30000))}
 
-# If this env var is unset, set it to the current directory without the home dir
-export GEODESIC_WORKDIR=${GEODESIC_WORKDIR:-/localhost/${PWD#$HOME/}}
+export GEODESIC_HOST_CWD=$(pwd -P 2>/dev/null || pwd)
 
 readonly OS=$(uname -s)
 
@@ -162,12 +161,15 @@ function use() {
 	if [ "${local_home}" == "/localhost" ]; then
 		echo "WARNING: not mounting ${local_home} because it conflicts with geodesic"
 	else
-		echo "# Mounting ${local_home} into container"
-		DOCKER_ARGS+=(--volume=${local_home}:/localhost)
-		DOCKER_ARGS+=(--env LOCAL_HOME=${local_home})
+		echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
+		DOCKER_ARGS+=(
+		--volume="${local_home}:/localhost"
+		--env LOCAL_HOME="${local_home}"
+		)
 	fi
 
-	DOCKER_ARGS+=(--privileged
+	DOCKER_ARGS+=(
+		--privileged
 		--publish ${GEODESIC_PORT}:${GEODESIC_PORT}
 		--name "${DOCKER_NAME}"
 		--rm
@@ -175,8 +177,9 @@ function use() {
 		--env DOCKER_IMAGE="${DOCKER_IMAGE%:*}"
 		--env DOCKER_NAME="${DOCKER_NAME}"
 		--env DOCKER_TAG="${DOCKER_TAG}"
-		--env GEODESIC_WORKDIR="${GEODESIC_WORKDIR}"
 		--workdir "${GEODESIC_WORKDIR}")
+		--env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}"
+		)
 
 	trap run_exit_hooks EXIT
 	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
@@ -186,7 +189,7 @@ function use() {
 		if [ $# -eq 0 ]; then
 			set -- "/bin/bash" "-l" "$@"
 		fi
-		docker exec -it "${DOCKER_NAME}" $*
+		docker exec -it --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
 	else
 		echo "# Starting new ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"

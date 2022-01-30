@@ -1,6 +1,7 @@
 export SSH_KEY="${SSH_KEY:-/localhost/.ssh/id_rsa}"
 
 if [ "$SSH_AUTH_SOCK_HOST" != "" ]; then
+		# https://gist.github.com/d11wtq/8699521?permalink_comment_id=3878388#gistcomment-3878388
     export SSH_AUTH_SOCK="/var/tmp/ssh-geouser"
     sudo socat UNIX-LISTEN:$SSH_AUTH_SOCK,fork,user=geouser,group=geouser,mode=777 UNIX-CONNECT:$SSH_AUTH_SOCK_HOST  &
     echo "Looks like we have a host ssh-agent socket at $SSH_AUTH_SOCK_HOST. Mapping to user socket at $SSH_AUTH_SOCK"

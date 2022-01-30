@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y apt-utils
 
 # Install the packages that are needed to build python3
 RUN apt-get update && apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
-    libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev
+    libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev socat
 
 # Download the Python source code
 RUN curl -1sLfO https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz && \

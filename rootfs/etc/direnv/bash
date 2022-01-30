@@ -11,6 +11,6 @@ export DIRENV_LOG_FORMAT=
 eval "$(direnv export bash)"
 
 # Allow current working directory (if we have permission)
-if [ -f .envrc ] && [ -d /usr/share/xdg_data_home/direnv/allow ] && [ -w /usr/share/xdg_data_home/direnv/allow ]; then
+if [ -f .envrc ] && [ -d /usr/share/xdg_data_home/direnv ] && [ -w /usr/share/xdg_data_home/direnv ]; then
 	direnv allow .
 fi

@@ -110,6 +110,11 @@ function use() {
 		if [ -f "${geodesic_default_env_file}" ]; then
 			DOCKER_ARGS+=(--env-file=${geodesic_default_env_file})
 		fi
+		# persist direnv between sessions by putting in $HOME/.geodesic/direnv folder
+		local geodesic_folder="$(dirname "$geodesic_default_env_file")"
+		local geodesic_direnv_folder=${geodesic_folder}/direnv
+		mkdir -p $geodesic_direnv_folder
+		DOCKER_ARGS+=(--volume="$geodesic_direnv_folder:/usr/share/xdg_data_home/direnv")
 	else
 		echo "# Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is set and not 'false'"
 		DOCKER_ARGS+=(--env GEODESIC_CUSTOMIZATION_DISABLED)

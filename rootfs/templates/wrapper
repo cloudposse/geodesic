@@ -83,6 +83,10 @@ function use() {
 		DOCKER_ARGS=()
 	fi
 
+	if [ "${OS}" == 'Linux' ]; then
+		DOCKER_ARGS+=(--env GEODESIC_HOST_UID="$(id -u)" --env GEODESIC_HOST_GID="$(id -g)")
+	fi
+
 	if [ "${WITH_DOCKER}" == "true" ]; then
 		# Bind-mount docker socket into container
 		# Should work on Linux and Mac.
@@ -155,11 +159,11 @@ function use() {
 	if [ "${local_home}" == "/localhost" ]; then
 		echo "WARNING: not mounting ${local_home} because it conflicts with geodesic"
 	else
-		echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
-		DOCKER_ARGS+=(
-		--volume="${local_home}:/localhost"
-		--env LOCAL_HOME="${local_home}"
-		)
+		LOCALHOST="localhost"
+		[ "${OS}" == 'Linux' ] && LOCALHOST="localhost.bindfs"
+		echo "# Mounting ${local_home} into container"
+		DOCKER_ARGS+=(--volume=${local_home}:/$LOCALHOST)
+		DOCKER_ARGS+=(--env LOCAL_HOME=${local_home})
 	fi
 
 	DOCKER_ARGS+=(

@@ -1,6 +1,8 @@
 # Files in the profile.d directory are executed by the lexicographical order of their file names.
-# This file is named _colors.sh. The leading underscore is needed to ensure this file executes before
-# other files that depend on the functions defined here. This file has no dependencies and should come first.
+# This file is named _10-colors.sh. The leading underscore is needed to ensure this file executes before
+# other files that depend on the functions defined here. The number portion is to ensure proper ordering among
+# the high-priority scripts
+# This file has no dependencies and should come first.
 function red() {
 	echo "$(tput setaf 1)$*$(tput setaf 0)"
 }

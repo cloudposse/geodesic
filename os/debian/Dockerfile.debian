@@ -119,7 +119,7 @@ COPY packages.txt os/debian/packages-debian.txt /etc/apt/
 ## Here is where we would copy in the repo checksum in an attempt to ensure updates bust the Docker build cache
 
 # Add CloudPosse package repo
-RUN apt-get update && apt-get install -y apt-utils && apt-get install -y curl
+RUN apt-get update && apt-get install -y apt-utils curl
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/bash.deb.sh' | bash
 
 # Install Google package repo
@@ -190,6 +190,7 @@ ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSI
 ARG KUBE_PS1_VERSION
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
+RUN chmod 755 /etc/bash_completion.d/kubens.sh /etc/bash_completion.d/kubectx.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #
 # Install helm

@@ -83,6 +83,15 @@ function use() {
 		DOCKER_ARGS=()
 	fi
 
+	if [ "${GEODESIC_HOST_BINDFS}" = "forced" ] || { [ "${OS}" = 'Linux' ] && [ "${GEODESIC_HOST_BINDFS}" != "disabled" ]; }; then
+		DOCKER_ARGS+=(
+			--env GEODESIC_HOST_UID="${USER_ID}"
+			--env GEODESIC_HOST_GID="${GROUP_ID}"
+			--env GEODESIC_LOCALHOST="${GEODESIC_LOCALHOST:=/localhost.bindfs}"
+			--env GEODESIC_BINDFS_OPTIONS
+			)
+	fi
+
 	if [ "${WITH_DOCKER}" == "true" ]; then
 		# Bind-mount docker socket into container
 		# Should work on Linux and Mac.
@@ -157,7 +166,7 @@ function use() {
 	else
 		echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
 		DOCKER_ARGS+=(
-		--volume="${local_home}:/localhost"
+		--volume="${local_home}:${GEODESIC_LOCALHOST:-/localhost}"
 		--env LOCAL_HOME="${local_home}"
 		)
 	fi

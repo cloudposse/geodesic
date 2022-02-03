@@ -16,7 +16,10 @@ export SCREEN_SIZE="${LINES}x${COLUMNS}"
 # So we cannot just unthinkingly set PROMPT_COMMAND=prompter or PROMPT_COMMAND="${PROMPT_COMMAND};prompter"
 # Instead, we examine the PROMPT_COMMAND variable, initialize it to "prompter;" if it is empty,
 # or otherwise add "prompter;" to the end of the command string (inserting a ; before it if needed).
-export PROMPT_COMMAND
+# We do not want subshells to try to run prompt commands if they are not defined, so we do not export PROMPT_COMMAND
+export -n PROMPT_COMMAND
+# We do not want our dynamic prompt to be copied and not updated in a subshell, so we do not export PS1, either
+export -n PS1
 function _install_prompter() {
 	if ! [[ $PROMPT_COMMAND =~ prompter ]]; then
 		local final_colon=';$'

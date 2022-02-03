@@ -83,8 +83,13 @@ function use() {
 		DOCKER_ARGS=()
 	fi
 
-	if [ "${OS}" == 'Linux' ]; then
-		DOCKER_ARGS+=(--env GEODESIC_HOST_UID="$(id -u)" --env GEODESIC_HOST_GID="$(id -g)")
+	if [ "${GEODESIC_HOST_BINDFS}" = "forced" ] || { [ "${OS}" = 'Linux' ] && [ "${GEODESIC_HOST_BINDFS}" != "disabled" ]; }; then
+		DOCKER_ARGS+=(
+			--env GEODESIC_HOST_UID="${USER_ID}"
+			--env GEODESIC_HOST_GID="${GROUP_ID}"
+			--env GEODESIC_LOCALHOST="${GEODESIC_LOCALHOST:=/localhost.bindfs}"
+			--env GEODESIC_BINDFS_OPTIONS
+			)
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
@@ -159,11 +164,11 @@ function use() {
 	if [ "${local_home}" == "/localhost" ]; then
 		echo "WARNING: not mounting ${local_home} because it conflicts with geodesic"
 	else
-		LOCALHOST="localhost"
-		[ "${OS}" == 'Linux' ] && LOCALHOST="localhost.bindfs"
-		echo "# Mounting ${local_home} into container"
-		DOCKER_ARGS+=(--volume=${local_home}:/$LOCALHOST)
-		DOCKER_ARGS+=(--env LOCAL_HOME=${local_home})
+		echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
+		DOCKER_ARGS+=(
+		--volume="${local_home}:${GEODESIC_LOCALHOST:-/localhost}"
+		--env LOCAL_HOME="${local_home}"
+		)
 	fi
 
 	DOCKER_ARGS+=(

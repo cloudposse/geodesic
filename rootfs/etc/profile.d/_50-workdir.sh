@@ -5,8 +5,9 @@
 # This file depends on colors.sh, localhost.sh, and preferences,sh and must come after them
 #
 
+# Outputs the device the file resides on, or /dev/null if the file does not exist
 function _file_device() {
-	df --output=source "$1" | tail -1
+	{ [[ -e $1 ]] && df --output=source "$1" | tail -1; } || echo '/dev/null'
 }
 
 # file_on_host is true when the argument is a file or directory that appears to be on the Host file system.
@@ -26,13 +27,13 @@ else
 fi
 
 function file_on_host() {
-	if [[ $GEODESIC_LOCALHOST_DEVICE  =~ ^(disabled|missing)$ ]]; then
+	if [[ $GEODESIC_LOCALHOST_DEVICE =~ ^(disabled|missing)$ ]]; then
 		return 1
 	elif [[ $GEODESIC_LOCALHOST_DEVICE == "same-as-root" ]]; then
-		[[ $(readlink -e "$1") =~ ^/localhost(/.*)?$ ]]
+		[[ $(readlink -e "$1") =~ ^/localhost ]]
 	else
-		local regex="^(${GEODESIC_LOCALHOST_DEVICE}${GEODESIC_LOCALHOST_MAPPED_DEVICE:+|${GEODESIC_LOCALHOST_MAPPED_DEVICE}})\$"
-		[[ $(_file_device "$1") =~ ${regex} ]]
+		local dev="$(_file_device "$1")"
+		[[ $dev == $GEODESIC_LOCALHOST_DEVICE ]] || [[ $dev == $GEODESIC_LOCALHOST_MAPPED_DEVICE ]]
 	fi
 }
 
@@ -52,7 +53,7 @@ if [[ -d $GEODESIC_WORKDIR ]]; then
 	[[ $SHLVL == 1 ]] && green "# Initial working directory configured as ${GEODESIC_WORKDIR}"
 else
 	if [[ -d $GEODESIC_HOST_CWD ]]; then
-		if [[ -n $LOCAL_HOME ]] && { [[ $GEODESIC_LOCALHOST_DEVICE  == "disabled" ]] || file_on_host "$GEODESIC_HOST_CWD"; }; then
+		if [[ -n $LOCAL_HOME ]] && { [[ $GEODESIC_LOCALHOST_DEVICE == "disabled" ]] || file_on_host "$GEODESIC_HOST_CWD"; }; then
 			export GEODESIC_WORKDIR=$(readlink -e "${GEODESIC_HOST_CWD}")
 			green "# Initial working directory set from host CWD to ${GEODESIC_WORKDIR}"
 		else

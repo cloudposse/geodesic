@@ -3,8 +3,8 @@ export DOCKER_IMAGE="{{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}"
 export DOCKER_TAG="{{- getenv "DOCKER_TAG" (printf "${1:-%s-%s}" ((index (split (getenv "GEODESIC_VERSION") " ") 0) | default "dev") (getenv "GEODESIC_OS" "alpine")) -}}"
 export APP_NAME=${APP_NAME:-$(basename $DOCKER_IMAGE)}
 export INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
+export SAFE_INSTALL_PATH="$HOME/.local/bin" # per XDG recommendations
 export INSTALLER_NAME="${APP_NAME}-installer"
-export OUTPUT=${OUTPUT:-/dev/null} # Replace with /dev/stdout to audit output
 export REQUIRE_PULL=${REQUIRE_PULL:-false}
 
 if [ -z "${DOCKER_IMAGE}" ]; then
@@ -43,9 +43,23 @@ if [ $? -ne 0 ]; then
 fi
 
 # Check that we can write to install path
-if [ ! -w "${INSTALL_PATH}" ]; then
-	echo "Cannot write to ${INSTALL_PATH}. Please retry using sudo." 2>&1
-	exit 1
+if ! $([ -d "${INSTALL_PATH}" ] && [ -r "${INSTALL_PATH}" ] &&
+	[ -w "${INSTALL_PATH}" ] && [ -x "${INSTALL_PATH}" ]); then
+	if [ ! -d "${SAFE_INSTALL_PATH}" ]; then
+		mkdir -p "${SAFE_INSTALL_PATH}" 2>/dev/null &&
+			echo "Creating ${SAFE_INSTALL_PATH}" >&2
+	fi
+
+	if [ -d "${SAFE_INSTALL_PATH}" ] && [ -r "${SAFE_INSTALL_PATH}" ] &&
+		[ -w "${SAFE_INSTALL_PATH}" ] && [ -x "${SAFE_INSTALL_PATH}" ]; then
+		echo "Inadequate permissions to install to ${INSTALL_PATH}. Installing to ${SAFE_INSTALL_PATH}." >&2
+		INSTALL_PATH="${SAFE_INSTALL_PATH}"
+	else
+		echo "Inadequate permissions to install to ${INSTALL_PATH} or ${SAFE_INSTALL_PATH}." >&2
+		echo "Please \`chmod u+rwx \"$INSTALL_PATH\"\` (you may need to use \`sudo\`)"
+		echo "or set INSTALL_PATH to a writable directory where you want to install ${APP_NAME}." >&2
+		exit 1
+	fi
 fi
 
 # Proceed with installation
@@ -61,14 +75,35 @@ fi
 # Sometimes docker might not exit cleanly
 docker rm -f "${INSTALLER_NAME}" >/dev/null 2>&1
 
-(docker run --name "${INSTALLER_NAME}" --rm -e DOCKER_IMAGE -e DOCKER_TAG -e APP_NAME "${DOCKER_IMAGE}:${DOCKER_TAG}" -c wrapper | tee "${INSTALL_PATH}/${APP_NAME}" >${OUTPUT}) &&
+docker run --name "${INSTALLER_NAME}" --rm -e DOCKER_IMAGE -e DOCKER_TAG -e APP_NAME "${DOCKER_IMAGE}:${DOCKER_TAG}" -c wrapper >"${INSTALL_PATH}/${APP_NAME}" &&
 	chmod 755 "${INSTALL_PATH}/${APP_NAME}"
 
 if [ $? -eq 0 ]; then
 	echo "# Installed ${APP_NAME} to ${INSTALL_PATH}/${APP_NAME}"
-	exit 0
 else
+	echo
 	echo "# Failed to install ${APP_NAME}"
-	echo "# Please let us know! Send an email to < hello@cloudposse.com > with what went wrong."
+	echo "# If this is not due to file system permissions, please"
+	echo "# check for known issues and consider reporting the failure at"
+	echo "#    https://github.com/cloudposse/geodesic/issues"
+	echo
+	exit 1
+fi
+
+hash -r || true
+if [ "$(realpath "${INSTALL_PATH}/${APP_NAME}")" != "$(command -v "${APP_NAME}" 2>/dev/null)" ]; then
+	if [ -x "${INSTALL_PATH}/${APP_NAME}" ]; then
+		if [ -n "$(command -v "${APP_NAME}" 2>/dev/null)" ]; then
+			echo "# WARNING: \`${APP_NAME}\` installed in ${INSTALL_PATH} but"
+			echo "#          also found in $(dirname "$(command -v "${APP_NAME}")")"
+			echo "#          which appears earlier in \$PATH. "
+			echo "#          Fix your PATH or \`rm \"$(command -v "${APP_NAME}")\""
+			echo
+		else
+			echo "# WARNING: It appears ${INSTALL_PATH} is not on your PATH. Please add it."
+		fi
+	else
+		echo "# WARNING: Install appeared to succeed but ${INSTALL_PATH}/${APP_NAME} is not executable."
+	fi
 	exit 1
 fi

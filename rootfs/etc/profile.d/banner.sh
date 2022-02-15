@@ -5,22 +5,11 @@ BANNER_INDENT="${BANNER_INDENT:-    }"
 BANNER_FONT="${BANNER_FONT:-Nancyj.flf}" # " IDE parser fix
 
 if [ "${SHLVL}" == "1" ]; then
-  function _check_support() {
+	function _check_support() {
 		[[ $(arch) != "x86_64" ]] || grep -qsE 'GenuineIntel|AuthenticAMD' /proc/cpuinfo && return
-		echo
-		echo
-		red '**********************************************************************'
-		red '**********************************************************************'
-		red '**                                                                  **'
-		red '**    You appear to be running Geodesic on an Apple M1 CPU          **'
-		red '**  Geodesic is not supported on the Apple M1 and has known issues  **'
-		red '**     See https://github.com/cloudposse/geodesic/issues/719        **'
-		red '**                                                                  **'
-		red '**********************************************************************'
-		red '**********************************************************************'
-		echo
-		echo
-  }
+		yellow '# Detected Apple M1 emulating Intel CPU. Support for this configuration is evolving.'
+		yellow '# Report issues and read about solutions at https://github.com/cloudposse/geodesic/issues/719'
+	}
 
 	function _header() {
 		local vstring
@@ -44,15 +33,12 @@ if [ "${SHLVL}" == "1" ]; then
 			elif [ "$BANNER_COMMAND" == "figurine" ]; then
 				${BANNER_COMMAND} -f "${BANNER_FONT}" "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
 			else
-			  ${BANNER_COMMAND}
+				${BANNER_COMMAND}
 			fi
 		fi
 	}
-	# We call _check_support twice so that the warning appears
-	# both above and below the banner
 	_check_support
 	_header
-	_check_support
 	unset _check_support
 	unset _header
 fi

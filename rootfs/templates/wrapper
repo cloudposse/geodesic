@@ -83,13 +83,21 @@ function use() {
 		DOCKER_ARGS=()
 	fi
 
-	if [ "${GEODESIC_HOST_BINDFS}" = "forced" ] || { [ "${OS}" = 'Linux' ] && [ "${GEODESIC_HOST_BINDFS}" != "disabled" ]; }; then
-		DOCKER_ARGS+=(
-			--env GEODESIC_HOST_UID="${USER_ID}"
-			--env GEODESIC_HOST_GID="${GROUP_ID}"
-			--env GEODESIC_LOCALHOST="${GEODESIC_LOCALHOST:=/localhost.bindfs}"
-			--env GEODESIC_BINDFS_OPTIONS
-			)
+	if [ "${GEODESIC_HOST_BINDFS_ENABLED}" = "true" ]; then
+		if [ "${USER_ID}" = 0 ]; then
+			echo "# WARNING: Host user is root. This is DANGEROUS."
+			echo "  * Geodesic should not be launched by the host root user."
+			echo "  * Use \"rootless\" mode instead. See https://docs.docker.com/engine/security/rootless/"
+			echo "# Not enabling BindFS host filesystem mapping because host user is root."
+		else
+			echo "# Enabling BindFS mapping of file system owner and group ID."
+			DOCKER_ARGS+=(
+				--env GEODESIC_HOST_UID="${USER_ID}"
+				--env GEODESIC_HOST_GID="${GROUP_ID}"
+				--env GEODESIC_LOCALHOST="${GEODESIC_LOCALHOST:=/localhost.bindfs}"
+				--env GEODESIC_BINDFS_OPTIONS
+				)
+		fi
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
@@ -164,7 +172,11 @@ function use() {
 	if [ "${local_home}" == "/localhost" ]; then
 		echo "WARNING: not mounting ${local_home} because it conflicts with geodesic"
 	else
-		echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
+		if [ "${GEODESIC_LOCALHOST:-/localhost}" != "/localhost" ]; then
+			echo "# Mounting ${local_home} into container at ${GEODESIC_LOCALHOST} with workdir ${GEODESIC_HOST_CWD}"
+		else
+			echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
+		fi
 		DOCKER_ARGS+=(
 		--volume="${local_home}:${GEODESIC_LOCALHOST:-/localhost}"
 		--env LOCAL_HOME="${local_home}"

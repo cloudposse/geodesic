@@ -60,12 +60,12 @@ fi
 
 if [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 	if ! df -a | grep -q " ${GEODESIC_LOCALHOST:-/localhost}\$"; then
-		if [[ -z $KUBERNETES_PORT ]]; then
+		if [[ -n $KUBERNETES_PORT ]]; then
+			echo $(green Kubernetes host detected, Geodesic customization disabled.)
+		else
 			red "########################################################################################" >&2
 			red "# No filesystem is mounted at $(bold ${GEODESIC_LOCALHOST:-/localhost}) which limits Geodesic functionality." >&2
 			boot install
-		else
-			echo $(green Kubernetes host detected, Geodesic customization disabled.)
 		fi
 		export GEODESIC_CUSTOMIZATION_DISABLED="/localhost not a volume"
 	elif mkdir -p $GEODESIC_CONFIG_HOME; then

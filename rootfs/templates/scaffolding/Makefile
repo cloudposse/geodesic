@@ -19,7 +19,7 @@ push:
 	docker push $(DOCKER_IMAGE)
 
 install:
-	@docker run --rm -e DOCKER_IMAGE -e DOCKER_TAG $(DOCKER_IMAGE_NAME) | sudo bash -s $(DOCKER_TAG)
+	@docker run --rm -e DOCKER_IMAGE -e DOCKER_TAG $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG)
 
 run:
 	$(KOPS_CLUSTER_NAME)

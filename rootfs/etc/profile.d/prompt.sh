@@ -85,8 +85,8 @@ function geodesic_prompt() {
 		# See https://github.com/cloudposse/geodesic/issues/417
 		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u221a\x01'$(tput sgr0)$'\x02'     # green bold '√'
 		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 1)$'\x02\u2717\x01'$(tput sgr0)$'\x02' # red bold '✗'
-		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4' # '➤'
-		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4'                                                            # '➤'
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉'                                                                                                # \u29c9 TWO JOINED SQUARES
 		;;
 
 	*)
@@ -102,7 +102,7 @@ function geodesic_prompt() {
 		# '▶︎' ($'\u25b6\ufe0e') BLACK RIGHT-POINTING TRIANGLE which is sometimes presented as an emoji (as GitHub likes to) '▶️'
 		# '⏩︎' ($'\u23e9\ufe0e') BLACK RIGHT-POINTING DOUBLE TRIANGLE
 		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20' # '⨠' Z NOTATION SCHEMA PIPING
-		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉'                                     # \u29c9 TWO JOINED SQUARES
 		;;
 	esac
 

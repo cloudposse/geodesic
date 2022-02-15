@@ -3,6 +3,13 @@
 # Modify the variable settings to create your own version of Geodesic
 # with your own Docker image name and app name.
 #
+# See Dockerfile.custom and Dockerfile.options for
+# how to customize your Dockerfile.
+# Note that Geodesic supports runtime customizations that
+# do not require a custom Dockerfile: See
+#   https://github.com/cloudposse/geodesic/blob/master/docs/customization.md
+#
+#
 # The `make` variables build up to $(DOCKER_IMAGE):$(DOCKER_TAG) being
 # what you would use for `docker run` and `docker push`.
 # You probably want to use either `latest` or `dev` for DOCKER_TAG
@@ -47,7 +54,7 @@ push:
 
 ## Install wrapper script from geodesic container
 install:
-	@docker run --rm $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
+	@docker run --rm $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG)
 
 ## Start the geodesic shell by calling wrapper script
 run:

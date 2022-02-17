@@ -18,13 +18,53 @@ how to configure the customization.
 
 ## DESCRIPTION
 
-Users can place bash shell scripts on their host computer, to be read either at the start of `bash` profile 
+A great deal of customization can be implemented by placing shell scripts 
+on the host computer, to be read either at the start of `bash` profile 
 script processing or at the end of it. These shell scripts can set up environment variables, command
 aliases, shell functions, etc. and through setting environment variables, can cause Geodesic to 
 enable or disable certain features.
 
+Due to technical limitations, there are a small number of options 
+that can only be controlled via command line options or corresponding (exported) 
+shell environment variables set in the user's shell before launching 
+Geodesic via the wrapper script (which is the default and recommended way to launch Geodesic).
+
 Users can also choose whether to have a single `bash` history file 
 for all containers or to have separate history files.
+
+### Command line options (also environment variables)
+
+Geodesic accepts a small number of command line options, which can also be
+set by corresponding (exported) shell environment variables. In all cases, 
+the command line options must be introduced with double dashes and be
+set via `=`. Boolean options can be set `=true` with no argument on the command line.
+Command line options are lower case with words separated by dashes,
+while environment variables are upper case with words separated by underscored.
+
+Valid:
+```bash
+geodesic --env-file=~/.geodesic/extra-envs
+ENV_FILE=~/.geodesic/extra_envs geodesic
+geodesic --geodesic-host-bindfs-enabled
+```
+
+Not valid:
+```bash
+geodesic --env-file ~/.geodesic/extra-envs
+env-file=~/.geodesic/extra-envs
+ENV-FILE=~/.geodesic/extra-envs
+GEODESIC_HOST_BINDFS_ENABLED= geodesic
+```
+
+At the moment, underscores are accepted instead of dashes in command line arguments,
+but this behavior should not be relied on:
+
+Works, but not officially supported:
+```bash
+geodesic --env-file=~/.geodesic/extra_envs
+```
+
+TODO: Document all the command line options in [geodesic(1)](geodesic.md)
 
 ### Root directory for configuration 
 
@@ -36,14 +76,18 @@ then files would go in `~/work/config/geodesic/` and below on your Docker host m
 
 ### Resources
 
-There are currently 3 Resources used for configuration:
+There are currently 5 Resources used for configuration:
 - Preferences, which are shell scripts loaded very early in the launch of the Geodesic shell. 
 - Overrides, which are shell scripts loaded very late in the launch of the Geodesic shell.
 - `bash` history files, which store `bash` command line history.
+- A file of environment variable settings passed to `docker --env-file`
+- Command-line options (which can also be set by correspondingly named shell environment variables)
 
 Additionally, when Geodesic exits normally, it will run the host command `geodesic_on_exit`
 if it is available. This is intended to be a script that you write and install
 anywhere on your PATH to do whatever cleanup you want. For example, change the window title.
+
+#### Preferences and Overrides
 
 Both preferences and overrides can be either a single file, named `preferences` and `overrides` respectively, 
 or can be a collection of files in directories named `preferences.d` and `overrides.d`. 
@@ -51,10 +95,22 @@ If they are directories, all the visible files in the directories will be source
 except for hidden files and files with names matching the `GEODESIC_AUTO_LOAD_EXCLUSIONS` regex, 
 which defaults to `(~|.bak|.log|.old|.orig|.disabled)$`. 
 
+#### History files
+
 `bash` history is always stored in a single file named `history`, never a directory of files
 nor files with any other name. If you want to use a separate history file for one
 Geodesic-based Docker image not shared by other Geodesic-based Docker images, you 
 must create an empty `history` file in the image-specific configuration directory (see below).
+
+#### Environment file
+
+Geodesic passes a single argument to Docker's `--env-file` option when launching 
+via the installed wrapper script. By default, that file is `~/.geodesic/env`
+but that file name can be set via the `--geodesic-default-env-file` command line
+option or the `GEODESIC_DEFAULT_ENV_FILE` environment variable.
+
+A second environment file can be specified in addition to the default via the
+`--env-file` command line option or `ENV_FILE` 
 
 ### Configuration by file placement
 Resources can be in several places, and will be loaded from most general to most specific, according to the name of the docker container image. 

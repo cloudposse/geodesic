@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
-  echo
+	echo
 	echo
 	red '* You have AWS_OKTA_ENABLED set to "true".'
 	red '* Cloud Posse no longer recommends using aws-okta and is'
@@ -35,7 +35,7 @@ if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
 
 	PROMPT_HOOKS+=("aws_okta_prompt")
 	function aws_okta_prompt() {
-		if [[  -z "${AWS_OKTA_PROFILE}" && -z "${ASSUME_ROLE}" ]]; then
+		if [[ -z "${AWS_OKTA_PROFILE}" && -z "${ASSUME_ROLE}" ]]; then
 			echo -e "-> Run '$(green assume-role)' to login to AWS with aws-okta"
 		fi
 	}

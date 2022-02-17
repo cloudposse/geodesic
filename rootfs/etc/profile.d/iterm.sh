@@ -17,6 +17,3 @@ if [ "${TERM_PROGRAM}" == "iTerm.app" ]; then
 		trap _geodesic_iterm_exit EXIT
 	fi
 fi
-
-
-

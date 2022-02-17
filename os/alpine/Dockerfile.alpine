@@ -33,6 +33,14 @@ RUN python3 -m pip install --upgrade pip setuptools wheel && \
     pip install $(grep cryptography /requirements.txt) && \
     pip install -r /requirements.txt --ignore-installed --prefix=/dist --no-build-isolation --no-warn-script-location
 
+### While we have gcc installed, we take advantage of that and build bindfs
+### Use fuse (FUSE 2) rather than fuse3 for consistency with Debian
+RUN apk add curl fuse fuse-dev
+RUN curl -qOsSL https://bindfs.org/downloads/bindfs-1.15.1.tar.gz
+RUN tar zxf bindfs-1.15.1.tar.gz && cd bindfs-1.15.1/ && \
+    ./configure && make && make install
+
+
 #
 # Google Cloud SDK
 #
@@ -111,6 +119,9 @@ WORKDIR /tmp
 # Copy python dependencies
 COPY --from=python /dist/ /usr/
 
+# Install bindfs
+COPY --from=python /usr/local/bin/bindfs /usr/local/bin/bindfs
+
 #
 # Install Google Cloud SDK
 #
@@ -151,6 +162,7 @@ ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSI
 ARG KUBE_PS1_VERSION
 ADD https://raw.githubusercontent.com/jonmosco/kube-ps1/v${KUBE_PS1_VERSION}/kube-ps1.sh /etc/profile.d/prompt:kube-ps1.sh
 
+RUN chmod 755 /etc/bash_completion.d/kubens.sh /etc/bash_completion.d/kubectx.sh /etc/profile.d/prompt:kube-ps1.sh
 
 #
 # Install helm

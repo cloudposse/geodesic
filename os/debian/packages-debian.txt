@@ -1,4 +1,5 @@
 # Essential debian-only packages
+bindfs
 default-mysql-client
 dnsutils
 inetutils-ftp

@@ -3,6 +3,12 @@
 # for a customer using the Cloud Posse Reference Architecture.
 # Use it as a basis for your own customizations.
 #
+# Note that Geodesic supports runtime customizations that
+# do not require a custome Dockerfile. See:
+#   https://github.com/cloudposse/geodesic/blob/master/docs/customization.md
+#
+# See Dockerfile.options for some common options you might want.
+#
 # Note that the version numbers in this file are not maintained,
 # you will want to update them to current versions when you start
 # and then have a plan for regularly updating them as you go along.

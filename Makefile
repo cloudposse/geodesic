@@ -31,7 +31,7 @@ deps: init
 	docker tag $(DOCKER_IMAGE_NAME) $(DOCKER_IMAGE_NAME_BASE)
 
 %.install:
-	@docker run --rm --env DOCKER_IMAGE --env DOCKER_TAG $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG) || (echo "Try: sudo make install"; exit 1)
+	@docker run --rm --env DOCKER_IMAGE --env DOCKER_TAG $(DOCKER_IMAGE_NAME) | bash -s $(DOCKER_TAG)
 
 build: $(DOCKER_BASE_OS).build
 

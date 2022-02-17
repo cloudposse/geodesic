@@ -1,7 +1,9 @@
 # Files in the profile.d directory are executed by the lexicographical order of their file names.
-# This file is named _geodesic-config.sh. The leading underscore is needed to ensure this file executes before
-# other files that depend on the functions defined here.
-# This file has depends on _colors.sh and should come second.
+# This file is named _30-geodesic-config.sh. The leading underscore is needed to ensure this file
+# executes before other files that depend on the functions defined here.
+# The number portion is to ensure proper ordering among the high-priority scripts.
+# This file defines functions but does not execute them, so it can come anywhere
+# before the first script to use one of its functions, such as preferences.sh.
 
 # bash functions that support the user customization framework
 #

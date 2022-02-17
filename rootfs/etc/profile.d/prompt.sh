@@ -16,7 +16,10 @@ export SCREEN_SIZE="${LINES}x${COLUMNS}"
 # So we cannot just unthinkingly set PROMPT_COMMAND=prompter or PROMPT_COMMAND="${PROMPT_COMMAND};prompter"
 # Instead, we examine the PROMPT_COMMAND variable, initialize it to "prompter;" if it is empty,
 # or otherwise add "prompter;" to the end of the command string (inserting a ; before it if needed).
-export PROMPT_COMMAND
+# We do not want subshells to try to run prompt commands if they are not defined, so we do not export PROMPT_COMMAND
+export -n PROMPT_COMMAND
+# We do not want our dynamic prompt to be copied and not updated in a subshell, so we do not export PS1, either
+export -n PS1
 function _install_prompter() {
 	if ! [[ $PROMPT_COMMAND =~ prompter ]]; then
 		local final_colon=';$'
@@ -82,8 +85,8 @@ function geodesic_prompt() {
 		# See https://github.com/cloudposse/geodesic/issues/417
 		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u221a\x01'$(tput sgr0)$'\x02'     # green bold '√'
 		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 1)$'\x02\u2717\x01'$(tput sgr0)$'\x02' # red bold '✗'
-		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4' # '➤'
-		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4'                                                            # '➤'
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉'                                                                                                # \u29c9 TWO JOINED SQUARES
 		;;
 
 	*)
@@ -99,7 +102,7 @@ function geodesic_prompt() {
 		# '▶︎' ($'\u25b6\ufe0e') BLACK RIGHT-POINTING TRIANGLE which is sometimes presented as an emoji (as GitHub likes to) '▶️'
 		# '⏩︎' ($'\u23e9\ufe0e') BLACK RIGHT-POINTING DOUBLE TRIANGLE
 		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u2a20' # '⨠' Z NOTATION SCHEMA PIPING
-		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉' # \u29c9 TWO JOINED SQUARES
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉'                                     # \u29c9 TWO JOINED SQUARES
 		;;
 	esac
 

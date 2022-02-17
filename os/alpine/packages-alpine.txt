@@ -2,6 +2,7 @@
 busybox-extras
 diffutils
 drill
+fuse
 fzf-bash-completion
 iputils
 keybase-client@testing

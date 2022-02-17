@@ -1,7 +1,8 @@
 # Files in the profile.d directory are executed by the lexicographical order of their file names.
-# This file is named _preferences.sh. The leading underscore is needed to ensure this file executes before
-# other files that depend on the functions defined here.
-# This file has depends on _geodesic-config.sh and should come third.
+# This file is named _40-preferences.sh. The leading underscore is needed to ensure this file
+# executes before other files that depend on the functions defined here.
+# The number portion is to ensure proper ordering among the high-priority scripts.
+# This file has depends on colors.sh, geodesic-config.sh, and localhost.sh and should come after them.
 # This file loads user preferences/customizations and must load before any user-visible configuration takes place.
 
 # In case this output is being piped into a shell, print a warning message
@@ -58,13 +59,13 @@ elif [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 fi
 
 if [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
-	if ! df | grep -q /localhost; then
-		if [[ -z $KUBERNETES_PORT ]]; then
-			red "########################################################################################" >&2
-			red "# No filesystem is mounted at $(bold /localhost) which limits Geodesic functionality." >&2
-			boot install
-		else
+	if ! df -a | grep -q " ${GEODESIC_LOCALHOST:-/localhost}\$"; then
+		if [[ -n $KUBERNETES_PORT ]]; then
 			echo $(green Kubernetes host detected, Geodesic customization disabled.)
+		else
+			red "########################################################################################" >&2
+			red "# No filesystem is mounted at $(bold ${GEODESIC_LOCALHOST:-/localhost}) which limits Geodesic functionality." >&2
+			boot install
 		fi
 		export GEODESIC_CUSTOMIZATION_DISABLED="/localhost not a volume"
 	elif mkdir -p $GEODESIC_CONFIG_HOME; then

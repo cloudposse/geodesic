@@ -4,7 +4,7 @@
 # Use it as a basis for your own customizations.
 #
 # Note that Geodesic supports runtime customizations that
-# do not require a custome Dockerfile. See:
+# do not require a custom Dockerfile. See:
 #   https://github.com/cloudposse/geodesic/blob/master/docs/customization.md
 #
 # See Dockerfile.options for some common options you might want.

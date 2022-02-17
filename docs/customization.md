@@ -39,7 +39,7 @@ set by corresponding (exported) shell environment variables. In all cases,
 the command line options must be introduced with double dashes and be
 set via `=`. Boolean options can be set `=true` with no argument on the command line.
 Command line options are lower case with words separated by dashes,
-while environment variables are upper case with words separated by underscored.
+while environment variables are upper case with words separated by underscores.
 
 Valid:
 ```bash

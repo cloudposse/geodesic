@@ -90,8 +90,8 @@ else
 	exit 1
 fi
 
-hash -r || true
-if [ "$(realpath "${INSTALL_PATH}/${APP_NAME}")" != "$(command -v "${APP_NAME}" 2>/dev/null)" ]; then
+command -v hash 2>/dev/null && hash -r  # forget hashed location of $APP_NAME
+if [ ! "${INSTALL_PATH}/${APP_NAME}" -ef "$(command -v "${APP_NAME}" 2>/dev/null)" ]; then
 	if [ -x "${INSTALL_PATH}/${APP_NAME}" ]; then
 		if [ -n "$(command -v "${APP_NAME}" 2>/dev/null)" ]; then
 			echo "# WARNING: \`${APP_NAME}\` installed in ${INSTALL_PATH} but"

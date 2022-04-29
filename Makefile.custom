@@ -34,7 +34,7 @@ GEODESIC_INSTALL_PATH ?= /usr/local/bin
 export INSTALL_PATH ?= $(GEODESIC_INSTALL_PATH)
 export SCRIPT = $(INSTALL_PATH)/$(APP_NAME)
 
--include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
+-include $(shell curl -sSL -o .build-harness "https://cloudposse.tools/build-harness"; echo .build-harness)
 
 ## Initialize build-harness, install deps, build docker container, install wrapper script and run shell
 all: init deps build install run

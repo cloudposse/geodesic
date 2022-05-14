@@ -2,7 +2,7 @@
 # See: https://github.com/Azure/azure-cli/issues/16858
 cryptography==37.0.2
 PyYAML==5.4.1
-awscli==1.23.10
+awscli==1.24.0
 boto==2.49.0
-boto3==1.22.10
+boto3==1.23.0
 crudini==0.9.3

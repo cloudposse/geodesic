@@ -26,7 +26,6 @@ goofys@cloudposse
 gosu@cloudposse
 groff
 helm@cloudposse
-helm2@cloudposse
 helm3@cloudposse
 helmfile@cloudposse
 jq

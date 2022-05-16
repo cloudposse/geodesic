@@ -1,26 +1,27 @@
-ARG DEBIAN_VERSION=11.2-slim
+# https://www.debian.org/releases/
+ARG DEBIAN_VERSION=11.3-slim
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=369.0.0-0
+ARG GOOGLE_CLOUD_SDK_VERSION=385.0.0-0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.4
 # https://github.com/jonmosco/kube-ps1/releases
 ARG KUBE_PS1_VERSION=0.7.0
+# https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#plugin-version-history
+ARG SESSION_MANAGER_PLUGIN_VERSION=latest
 
 # Helm plugins:
 # https://github.com/databus23/helm-diff/releases
-ARG HELM_DIFF_VERSION=3.3.2
+ARG HELM_DIFF_VERSION=3.4.2
 # https://github.com/aslafy-z/helm-git/releases
 # We had issues with helm-diff 3.1.3 + helm-git 0.9.0,
 # previous workaround was to pin helm-git to version 0.8.1.
 # We expect this has been fixed now with helm-diff 3.3.2 + helm-git 0.11.1
 ARG HELM_GIT_VERSION=0.11.1
-# https://github.com/helm/helm-2to3/releases
-ARG HELM_HELM_2TO3_VERSION=0.9.0
 
 
 FROM debian:$DEBIAN_VERSION as python
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.9.10
+ARG PYTHON_VERSION=3.9.12
 
 # Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
 # Recommended: LC_ALL=C.UTF-8
@@ -195,32 +196,35 @@ RUN chmod 755 /etc/bash_completion.d/kubens.sh /etc/bash_completion.d/kubectx.sh
 #
 # Install helm
 #
-# helm version 2 config
-ENV HELM_HOME /var/lib/helm
-ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
 
-RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
-    && mkdir -p ${HELM_HOME} \
-    && helm2 init --client-only \
-    && mkdir -p ${HELM_HOME}/plugins
+############# End of Helm 2 support ################################
+# We no longer install helm2. If you want to install it yourself, copy and uncomment the following:
+#
+#    # helm version 2 config
+#    ENV HELM_HOME /var/lib/helm
+#    ENV HELM_VALUES_PATH=${SECRETS_PATH}/helm/values
+#
+#    RUN helm2 completion bash > /etc/bash_completion.d/helm2.sh \
+#        && mkdir -p ${HELM_HOME} \
+#        && helm2 init --client-only \
+#        && mkdir -p ${HELM_HOME}/plugins
+#
+#    # Enable Atlantis to use helm 2
+#    RUN chmod -R a+rwX ${HELM_HOME}
+#
+#   ARG HELM_HELM_2TO3_VERSION=0.10.0
+#   RUN helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION}
+#
+############# End of Helm 2 support ################################
 
 #
 # Install minimal helm plugins
 ARG HELM_DIFF_VERSION
 ARG HELM_GIT_VERSION
-ARG HELM_HELM_2TO3_VERSION
-
-# Install plugins and then remove cache
-RUN helm2 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
-    && helm2 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION}
 
 RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
     && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
-    && helm3 plugin install https://github.com/helm/helm-2to3 --version ${HELM_HELM_2TO3_VERSION} \
     && rm -rf $XDG_CACHE_HOME/helm
-
-# Enable Atlantis to use helm 2
-RUN chmod -R a+rwX ${HELM_HOME}
 
 # helm version 3 uses XDG variables set above.
 # XDG directory permissions updated at end of installs.
@@ -300,6 +304,12 @@ RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
 #  X = Disable termcap init/de-init sequences, keeps the pager from clearing the screen when it finishes
 ENV AWS_PAGER="less -FRX"
 
+# Install AWS Session Manager Plugin
+ARG SESSION_MANAGER_PLUGIN_VERSION
+RUN curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_64bit/session-manager-plugin.deb" \
+    -o "/tmp/session-manager-plugin.deb" && \
+    sudo dpkg -i /tmp/session-manager-plugin.deb && \
+    rm /tmp/session-manager-plugin.deb
 
 # Install documentation
 COPY docs/ /usr/share/docs/

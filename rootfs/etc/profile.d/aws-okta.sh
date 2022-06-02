@@ -63,7 +63,12 @@ if [ "${AWS_OKTA_ENABLED}" == "true" ]; then
 
 		shift
 		if [ $# -eq 0 ]; then
+			history -a # append history to file so it is available in subshell
 			aws-okta exec ${AWS_OKTA_ARGS[@]} $role -- bash -l
+			# read history from the subshell into the parent shell
+			# history -n does not work when HISTFILESIZE > HISTSIZE
+			history -c
+			history -r
 		else
 			aws-okta exec ${AWS_OKTA_ARGS[@]} $role -- $*
 		fi

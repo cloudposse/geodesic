@@ -279,7 +279,12 @@ else
 		shift
 		[[ "${AWS_VAULT_SERVER_ENABLED:-false}" == "true" ]] && export AWS_VAULT_SERVER_DISABLED="${AWS_VAULT_SERVER_DISABLED:-server already started}"
 		if [ $# -eq 0 ]; then
+			history -a # append history to file so it is available in subshell
 			aws-vault exec ${AWS_VAULT_ARGS[@]} $role -- bash -l
+			# read history from the subshell into the parent shell
+			# history -n does not work when HISTFILESIZE > HISTSIZE
+			history -c
+			history -r
 		else
 			aws-vault exec ${AWS_VAULT_ARGS[@]} $role -- $*
 		fi

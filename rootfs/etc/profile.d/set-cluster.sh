@@ -4,7 +4,7 @@
 #   set-cluster <cluster-short-name>|off
 #
 #   With <cluster-short-name> updates the kubecfg file for the cluster with that short name (e.g. "corp")
-#   and updates KUBECONFIG to point ot that file.
+#   and updates KUBECONFIG to point to that file.
 
 #   With "off", deletes the currently active kubecfg file and unsets KUBECONFIG
 #

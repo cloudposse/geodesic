@@ -63,7 +63,12 @@ function aws_sdk_assume_role() {
 	local assume_role="${ASSUME_ROLE}"
 	ASSUME_ROLE="$role"
 	if [ $# -eq 0 ]; then
+		history -a # append history to file so it is available in subshell
 		AWS_PROFILE="$role" bash -l
+		# read history from the subshell into the parent shell
+		# history -n does not work when HISTFILESIZE > HISTSIZE
+		history -c
+		history -r
 	else
 		AWS_PROFILE="$role" $*
 	fi

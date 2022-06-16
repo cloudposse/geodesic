@@ -16,7 +16,7 @@
 
 # We always recommend pinning versions where changes are likely to break things.
 # We put the versions up top here so they are easy to find and update.
-ARG VERSION=0.147.0
+ARG VERSION=1.2.1
 # Changing base OS for Geodesic is possible by changing this arg, but
 # unfortunately, the package managers are different, so it is not that simple.
 ARG OS=debian

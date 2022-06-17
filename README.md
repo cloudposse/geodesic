@@ -132,7 +132,6 @@ docker run -it --rm \
   --env LOCAL_HOME=$HOME \
   --privileged \
   --publish 37049:37049 \
-  --rm \
   --env GEODESIC_PORT=37049 \
   --env DOCKER_IMAGE=cloudposse/geodesic \
   --env DOCKER_NAME=custom-image-name \

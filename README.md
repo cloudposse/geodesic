@@ -115,9 +115,41 @@ Want to learn more? [Check out our getting started with Geodesic guide!](https:/
 
 
 
+### Quickstart
+
+#### docker run
+
+This will launch the latest version of the geodesic container
+
+```
+docker run -it --rm \
+  --name=custom-image-name \
+  --env LS_COLORS \
+  --env TERM \
+  --env TERM_COLOR \
+  --env TERM_PROGRAM \
+  --volume=$HOME:/localhost \
+  --env LOCAL_HOME=$HOME \
+  --privileged \
+  --publish 37049:37049 \
+  --env GEODESIC_PORT=37049 \
+  --env DOCKER_IMAGE=cloudposse/geodesic \
+  --env DOCKER_NAME=custom-image-name \
+  --env DOCKER_TAG=latest \
+  --env GEODESIC_HOST_CWD=$PWD cloudposse/geodesic:latest -l
+```
+
+#### install a script
+
+```
+git clone git@github.com:cloudposse/geodesic.git
+cd geodesic
+make all -f Makefile.custom
+```
+
 ### Customizing your Docker image
 
-In general we recommend creating a customized version of Geodesic by creating your own Dockerfile starting with
+In general we recommend creating a customized version of Geodesic by creating your own `Dockerfile` starting with
 ```
 ARG VERSION=0.138.0
 ARG OS=debian
@@ -128,6 +160,7 @@ FROM cloudposse/geodesic:$VERSION-$OS
 
 ENV BANNER="my-custom-geodesic"
 ```
+
 You can see some example configuration options to include in [Dockerfile.options](./Dockerfile.options).
 
 You can also add extra commands by installing "packages". Both Alpine and Debian have a large selection

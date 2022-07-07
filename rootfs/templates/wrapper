@@ -197,18 +197,18 @@ function use() {
 
 	trap run_exit_hooks EXIT
 	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
-	container_id=$(docker ps --quiet --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
+	container_id=$(${DOCKER_EXE} ps --quiet --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
 	if [ -n "$container_id" ]; then
 		echo "# Attaching to existing ${DOCKER_NAME} session ($container_id)"
 		if [ $# -eq 0 ]; then
 			set -- "/bin/bash" "-l" "$@"
 		fi
-		docker exec -it --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
+		${DOCKER_EXE} exec -it --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
 	else
 		echo "# Starting new ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
 		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		docker run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
+		${DOCKER_EXE} run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
 	fi
 }
 
@@ -248,15 +248,15 @@ function parse_args() {
 
 function uninstall() {
 	echo "# Uninstalling ${DOCKER_NAME}..."
-	docker rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
-	docker rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
+	${DOCKER_EXE} rm -f ${DOCKER_NAME} >/dev/null 2>&1 || true
+	${DOCKER_EXE} rmi -f ${DOCKER_IMAGE} >/dev/null 2>&1 || true
 	echo "# Not deleting $0"
 	exit 0
 }
 
 function update() {
 	echo "# Installing the latest version of ${DOCKER_IMAGE}"
-	docker run --rm ${DOCKER_IMAGE} | bash -s ${DOCKER_TAG}
+	${DOCKER_EXE} run --rm ${DOCKER_IMAGE} | bash -s ${DOCKER_TAG}
 	if [ $? -eq 0 ]; then
 		echo "# ${DOCKER_IMAGE} has been updated."
 		exit 0
@@ -268,7 +268,7 @@ function update() {
 
 function stop() {
 	echo "# Stopping ${DOCKER_NAME}..."
-	exec docker kill ${DOCKER_NAME} >/dev/null 2>&1
+	exec ${DOCKER_EXE} kill ${DOCKER_NAME} >/dev/null 2>&1
 }
 
 function help() {
@@ -292,6 +292,7 @@ parse_args "$@"
 options_to_env
 
 # Docker settings
+export DOCKER_EXE="{{getenv "DOCKER_EXE" "docker"}}"
 export DOCKER_IMAGE="{{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}"
 export DOCKER_TAG="{{getenv "DOCKER_TAG" "${DOCKER_TAG:-dev}"}}"
 export DOCKER_NAME="{{getenv "APP_NAME" "${DOCKER_NAME:-$(basename $DOCKER_IMAGE)}"}}"
@@ -324,7 +325,7 @@ fi
 
 require_installed docker
 
-docker ps >/dev/null 2>&1
+${DOCKER_EXE} ps >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
 	exit 1

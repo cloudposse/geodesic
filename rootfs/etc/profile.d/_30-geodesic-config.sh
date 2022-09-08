@@ -80,7 +80,7 @@ function _expand_dir_or_file() {
 	local -n expand_list=$1
 	local resource=$2
 	local dir=${3-${PWD}}
-	local default_exclusion_pattern="(~|.bak|.log|.old|.orig|.disabled)$"
+	local default_exclusion_pattern="(~|.bak|.log|.old|.orig|.txt|.md|.disabled)$"
 	local exclude="${GEODESIC_AUTO_LOAD_EXCLUSIONS:-$default_exclusion_pattern}"
 
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource" in "$dir"

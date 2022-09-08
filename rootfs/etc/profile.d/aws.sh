@@ -88,7 +88,7 @@ function export_current_aws_role() {
 
 	# Quick check, are we who we say we are?
 	local profile_arn
-	local profile_target=${AWS_PROFILE:-${AWS_VAULT}}
+	local profile_target=${AWS_PROFILE:-${AWS_VAULT:-default}}
 	if [[ -n $profile_target ]]; then
 		profile_arn=$(aws --profile "${profile_target}" sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
 		if [[ $profile_arn == $current_role ]]; then

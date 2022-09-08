@@ -1,0 +1,61 @@
+# Modified copy of /etc/profile distributed with Debian 11.3
+# Changed to preserve PATH rather than set it.
+
+# /etc/profile: system-wide .profile file for the Bourne shell (sh(1))
+# and Bourne compatible shells (bash(1), ksh(1), ash(1), ...).
+
+# Comment out what Debian distributes that always resets the PATH
+# if [ "$(id -u)" -eq 0 ]; then
+#   PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# else
+#   PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+# fi
+# export PATH
+
+# Copy this from Alpine, which copied it from Arch Linux, to set the Debian path
+# while somewhat respecting the PATH set in the Dockerfile
+
+append_path () {
+	case ":$PATH:" in
+		*:"$1":*)
+			;;
+		*)
+			PATH="${PATH:+$PATH:}$1"
+			;;
+	esac
+}
+
+append_path "/usr/local/sbin"
+append_path "/usr/local/bin"
+append_path "/usr/sbin"
+append_path "/usr/bin"
+append_path "/sbin"
+append_path "/bin"
+unset -f append_path
+
+# End of modifications, the rest is the same as what Debian distributes
+
+if [ "${PS1-}" ]; then
+  if [ "${BASH-}" ] && [ "$BASH" != "/bin/sh" ]; then
+    # The file bash.bashrc already sets the default PS1.
+    # PS1='\h:\w\$ '
+    if [ -f /etc/bash.bashrc ]; then
+      . /etc/bash.bashrc
+    fi
+  else
+    if [ "$(id -u)" -eq 0 ]; then
+      PS1='# '
+    else
+      PS1='$ '
+    fi
+  fi
+fi
+
+if [ -d /etc/profile.d ]; then
+  for i in /etc/profile.d/*.sh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  unset i
+fi

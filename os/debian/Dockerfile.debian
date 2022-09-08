@@ -1,5 +1,5 @@
 # https://www.debian.org/releases/
-ARG DEBIAN_VERSION=11.3-slim
+ARG DEBIAN_VERSION=11.4-slim
 # https://cloud.google.com/sdk/docs/release-notes
 ARG GOOGLE_CLOUD_SDK_VERSION=385.0.0-0
 # https://github.com/ahmetb/kubectx/releases

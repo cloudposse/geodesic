@@ -3,7 +3,7 @@ busybox-extras
 diffutils
 drill
 fuse
-fzf-bash-completion
+# fzf-bash-completion # not available in Alpine 3.16
 iputils
 keybase-client@testing
 libc6-compat

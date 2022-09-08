@@ -2,6 +2,7 @@ COLOR_RESET="[0m"
 BANNER_COMMAND="${BANNER_COMMAND:-figurine}"
 BANNER_COLOR="${BANNER_COLOR:-[36m}"
 BANNER_INDENT="${BANNER_INDENT:-    }"
+# See font examples at http://www.figlet.org/examples.html
 BANNER_FONT="${BANNER_FONT:-Nancyj.flf}" # " IDE parser fix
 
 if [ "${SHLVL}" == "1" ]; then

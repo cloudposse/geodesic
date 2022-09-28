@@ -341,7 +341,8 @@ RUN if [ "$(uname -m)" = 'aarch64' ] ; then \
 # Install documentation
 COPY docs/ /usr/share/docs/
 
-# Can be useful on Mac m1 as `/usr/bin/variant1` doesn't exist after build
+# Can be useful on Mac m1 as `/usr/bin/variant1` doesn't exist after build.
+# I was thinking that will fix the `docs` issue below but it didn't...
 # RUN if [ "$(uname- m)" = 'aarch64']; then \
 #         cd packages && \
 #         INSTALL_PATH=/usr/bin make -C install variant && \

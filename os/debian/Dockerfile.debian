@@ -127,9 +127,22 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/ba
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 
-RUN apt-get update && apt-get install -y \
-    $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
-    mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
+# If runnig Dokcer build on Macos m1:
+# Since the packages are not available for arm64 let's build them using sources from Cloudposse's `package` repository
+RUN if [ "$(uname -m)" = 'aarch64' ] ; then \
+        # Install commonly known packages from public Debian repo
+        apt-get update && apt-get install -y $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E '/@(cloudposse|testing)/d' | sed -E 's/@community//g') && \
+        git clone https://github.com/cloudposse/packages.git && \
+        cd packages && \
+        # Packages with `@cloudposse` or `@testing` annotation have to be built from source
+        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -nE 's/@(cloudposse|testing)//pg'); \
+    # On any other architecture proceed as usual. Packages will come from `https://dl.cloudsmith.io/public/cloudposse/packages/deb/debian bullseye main` repo.
+    else \
+        apt-get update && apt-get install -y \
+            $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) ; \
+    fi
+
+RUN mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
 #
@@ -155,6 +168,9 @@ RUN { gcloud config set core/disable_usage_reporting true --installation && \
 # we had a compelling reason to need en_US.UTF-8, we could install the
 # "locales" package and run the following command:
 # RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+# This directory doesn't exist on arm64 I guess because the next command throws an error "Directory doesn't exist" so let's make it. 
+RUN if [ "$(uname -m)" = 'aarch64' ] ; then mkdir -p /etc/sysctl.d ; fi
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -285,7 +301,13 @@ RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
 # but it is updated several times a week, so we choose to just get the latest.
 # ARG AWS_CLI_VERSION=2.2.8
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
-    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
+    # We have to use platform-specific binary
+    if [ "$(uname -m)" = 'aarch64' ] ; then \
+        export ARCH='aarch64' ; \
+    else \
+        export ARCH='x86_64' ; \
+    fi && \
+    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
     cd $AWSTMPDIR && \
     unzip -qq awscliv2.zip && \
     ./aws/install -i /usr/share/aws/v2 -b /usr/share/aws/v2/bin && \
@@ -306,7 +328,12 @@ ENV AWS_PAGER="less -FRX"
 
 # Install AWS Session Manager Plugin
 ARG SESSION_MANAGER_PLUGIN_VERSION
-RUN curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_64bit/session-manager-plugin.deb" \
+RUN if [ "$(uname -m)" = 'aarch64' ] ; then \
+        export ARCH='arm64' ; \
+    else \
+        export ARCH='64bit' ; \
+    fi && \
+    curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${ARCH}/session-manager-plugin.deb" \
     -o "/tmp/session-manager-plugin.deb" && \
     sudo dpkg -i /tmp/session-manager-plugin.deb && \
     rm /tmp/session-manager-plugin.deb
@@ -314,8 +341,19 @@ RUN curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION
 # Install documentation
 COPY docs/ /usr/share/docs/
 
+# Can be useful on Mac m1 as `/usr/bin/variant1` doesn't exist after build
+# RUN if [ "$(uname- m)" = 'aarch64']; then \
+#         cd packages && \
+#         INSTALL_PATH=/usr/bin make -C install variant && \
+#         mv /usr/bin/variant /usr/bin/variant1 ; \
+#     fi
+
+
 # Build man pages
-RUN /usr/local/bin/docs update
+
+## This throws error `#49 0.196 /bin/sh: 1: /usr/local/bin/docs: not found` on Mac m1 and I can't figure out why...
+RUN if [ "$(uname- m)" != 'aarch64']; then /usr/local/bin/docs update; fi
+
 
 # Make sure that "user specific" directories we are sharing
 # are in fact available to all users

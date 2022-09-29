@@ -139,7 +139,7 @@ function compare_pipeline() {
 
 	if (
 		set -o pipefail
-		codefresh get pipeline --limit 1 -o json "$name" | filter_pipeline | yq r - >"$old"
+		codefresh get pipeline --limit 1 -o json "$name" | filter_pipeline | yq -r - >"$old"
 	); then
 		yaml-diff "$old" "$1"
 	else

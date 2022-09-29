@@ -84,9 +84,9 @@ function download_pipelines() {
 function convert_to_yaml() {
 	if [[ -n "$2" ]]; then
 		if [[ $2 == "-" ]]; then
-			yq r "$1"
+			yq -r "$1"
 		else
-			yq r "$1" >"$2"
+			yq -r "$1" >"$2"
 		fi
 	else
 		local subdirs="$3"
@@ -103,7 +103,7 @@ function convert_to_yaml() {
 			[[ -d "$project" ]] || mkdir -p "$project"
 			target="${project}/${target}"
 		fi
-		yq r "$1" >"$target"
+		yq -r "$1" >"$target"
 		green "* Wrote  ${target}"
 	fi
 }
@@ -118,7 +118,7 @@ function filter_pipeline() {
 function compare_pipeline() {
 	# Check that the pipeline file exists and is parseable
 	local status
-	yq r "$1" >/dev/null 2>&1
+	yq -r "$1" >/dev/null 2>&1
 	status=$?
 
 	if (($status == 1)); then
@@ -130,7 +130,7 @@ function compare_pipeline() {
 	fi
 
 	local name
-	name=$(yq r -j "$1" | jq -r .metadata.name) || {
+	name=$(yq -r -j "$1" | jq -r .metadata.name) || {
 		red "! Cannot find pipeline name in $1"
 		return 1
 	}

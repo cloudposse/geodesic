@@ -40,7 +40,7 @@ function main() {
 
 	trap "rm -f $temp" EXIT
 
-	helm -n $namespace get manifest $release | yq r -j '-d*' - |
+	helm -n $namespace get manifest $release | yq -o=json - |
 		jq -c "$jqfilter" >"$temp"
 
 	if kubectl -n $namespace diff -f "$temp"; then

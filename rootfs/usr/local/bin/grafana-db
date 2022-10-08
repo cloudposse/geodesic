@@ -160,7 +160,7 @@ function parse_dashboard_definition() {
 		# Compact the JSON to a single line
 		jq -rc
 	else
-		yq r -j '-d*' - | jq -rc '.. | if .data? then (.data | to_entries | .[].value | fromjson) elif .json? then .json else empty end'
+		yq -o=json - | jq -rc '.. | if .data? then (.data | to_entries | .[].value | fromjson) elif .json? then .json else empty end'
 	fi
 }
 

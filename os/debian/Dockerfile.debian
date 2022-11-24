@@ -9,6 +9,8 @@ ARG KUBE_PS1_VERSION=0.7.0
 # https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#plugin-version-history
 ARG SESSION_MANAGER_PLUGIN_VERSION=latest
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # Helm plugins:
 # https://github.com/databus23/helm-diff/releases
 ARG HELM_DIFF_VERSION=3.5.0
@@ -43,11 +45,8 @@ ENV LC_ALL=C.UTF-8
 
 RUN rm -rf /usr/local && mkdir /usr/local
 
-# Preload apt-utils
-RUN apt-get update && apt-get install -y apt-utils
-
-# Install the packages that are needed to build python3
-RUN apt-get update && apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
+# Preload apt-utils & Install the packages that are needed to build python3
+RUN apt-get update && apt-get install -y apt-utils build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
     libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev
 
 # Download the Python source code

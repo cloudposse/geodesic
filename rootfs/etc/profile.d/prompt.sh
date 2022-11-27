@@ -11,7 +11,7 @@ export SCREEN_SIZE="${LINES}x${COLUMNS}"
 # in part because you cannot export an array or pass it to a child process.
 # However, not all the utilities we use support being managed through our PROMPT_HOOKS.
 # Some utilities (such as `direnv`) operate directly on the PROMPT_COMMAND variable, adding
-# themselves to it. Also, the PROMPT_COMMAND is inheritied by subshells, but we will be
+# themselves to it. Also, the PROMPT_COMMAND is inherited by subshells, but we will be
 # running this initialization script again in the subshell.
 # So we cannot just unthinkingly set PROMPT_COMMAND=prompter or PROMPT_COMMAND="${PROMPT_COMMAND};prompter"
 # Instead, we examine the PROMPT_COMMAND variable, initialize it to "prompter;" if it is empty,

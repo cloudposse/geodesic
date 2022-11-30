@@ -17,6 +17,10 @@
 # list of available options, their meanings and defaults, please see the
 # ssh_config(5) man page.
 
+# SSH over AWS Session Manager
+host i-* mi-*
+    ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
+
 # Host *
 #   ForwardAgent no
 #   ForwardX11 no

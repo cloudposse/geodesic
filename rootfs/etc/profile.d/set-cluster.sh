@@ -10,20 +10,18 @@
 #
 
 function _update_cluster_config() {
-	local new_config=
+	local new_config
 	new_config=$(eks-update-kubeconfig set-kubeconfig "$@") || return
 
 	local current_namespace
-	local set_namespace=1
 
-	current_namespace=$(KUBECONFIG="$new_config" kubens -c 2>/dev/null)
-	set_namespace=$?
+	current_namespace=$(KUBECONFIG="$new_config" kubens -c 2>/dev/null || kubens -c 2>/dev/null || echo "kube-system")
 	if ! KUBECONFIG="$new_config" kubectl auth can-i -Aq create selfsubjectaccessreviews.authorization.k8s.io >/dev/null 2>&1 </dev/null; then
 		eks-update-kubeconfig "$@" || return
 	fi
 	export KUBECONFIG="$new_config"
 	(($(kubectx | wc -l) > 1)) && kubectx "$(kubectx | grep "${1}-eks-cluster" | head -1)"
-	(($set_namespace == 0)) && kubens "$current_namespace"
+	kubens "$current_namespace"
 }
 
 function set-cluster() {

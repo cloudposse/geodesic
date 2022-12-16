@@ -79,3 +79,4 @@ variant2@cloudposse
 vert@cloudposse
 vim
 yq@cloudposse
+zip

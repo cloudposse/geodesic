@@ -14,9 +14,8 @@ jobs:
       id-token: write
       contents: read
     env:
-      IAM_ROLE_SESSION_NAME: cloudposse/geodesic/ci
+      IAM_ROLE_SESSION_NAME: geodesic-ci
       AWS_REGION: us-east-1
-
     strategy:
       matrix:
         os: ['alpine', 'debian']

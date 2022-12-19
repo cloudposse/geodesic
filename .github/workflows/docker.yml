@@ -13,12 +13,28 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    env:
+      IAM_ROLE_SESSION_NAME: cloudposse/geodesic/ci
+      AWS_REGION: us-east-1
+
     strategy:
       matrix:
         os: ['alpine', 'debian']
     steps:
     - name: "Checkout source code at current commit"
       uses: actions/checkout@v2
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ env.ECR_AWS_ROLE }}
+        role-session-name: ${{ env.IAM_ROLE_SESSION_NAME }}
+
+    - name: Login to Public Amazon ECR
+      run: |
+        aws ecr-public get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws
+
     - name: Prepare tags for Docker image
       id: prepare
       # Even though we are no longer releasing plain numbered version tags like "0.111.0"
@@ -30,8 +46,6 @@ jobs:
         LATEST_TAG_OS: 'alpine'
         BASE_OS: ${{matrix.os}}
         ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        IAM_ROLE_SEESION_NAME: cloudposse/geodesic/ci
-        AWS_REGION: us-east-1
 
       run: |
         echo ::set-output name=publish::${{ (github.event_name == 'release' && github.event.action == 'published') || (github.event.pull_request.head.repo.full_name == github.repository) }}
@@ -79,23 +93,6 @@ jobs:
         file: ./os/${{matrix.os}}/Dockerfile.${{matrix.os}}
         build-args: |
           VERSION=${{ steps.prepare.outputs.version }}
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: ${{ secrets.ECR_AWS_ROLE }}
-        aws-region: ${{ env.AWS_REGION }}
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-region: ${{ env.AWS_REGION }}
-        role-to-assume: ${{ env.ECR_AWS_ROLE }}
-        role-session-name: ${{ env.IAM_ROLE_SESSION_NAME }}
-
-    - name: Login to Public Amazon ECR
-      run: |
-        aws ecr-public get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws
 
 #    - name: Login to Amazon ECR Public
 #      id: login-ecr-public

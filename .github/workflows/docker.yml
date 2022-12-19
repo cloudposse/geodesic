@@ -10,6 +10,9 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       matrix:
         os: ['alpine', 'debian']
@@ -25,7 +28,9 @@ jobs:
       # as the one to get the "latest" tag. Initially that will be Alpine.
       env:
         LATEST_TAG_OS: 'alpine'
-        BASE_OS: ${{matrix.os}} 
+        BASE_OS: ${{matrix.os}}
+        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+
       run: |
         echo ::set-output name=publish::${{ (github.event_name == 'release' && github.event.action == 'published') || (github.event.pull_request.head.repo.full_name == github.repository) }}
         COMMIT_SHA="${GITHUB_SHA}"
@@ -72,3 +77,27 @@ jobs:
         file: ./os/${{matrix.os}}/Dockerfile.${{matrix.os}}
         build-args: |
           VERSION=${{ steps.prepare.outputs.version }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ secrets.ECR_AWS_ROLE }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR Public
+      id: login-ecr-public
+      uses: aws-actions/amazon-ecr-login@v1
+      with:
+        registry-type: public
+
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REPOSITORY: cloudposse/geodesic
+        IMAGE_TAG: ${{ steps.docker_build.outputs.tag }}
+      run: |
+        docker tag -t ${{steps.docker_build.outputs.imageid }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.prepare.outputs.tags }}
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        if [[ '${{ github.ref }}' == 'refs/heads/${{ steps.github.outputs.default_branch }}' ]]; then
+          docker tag  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG  $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push  $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        fi

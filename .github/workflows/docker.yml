@@ -16,6 +16,7 @@ jobs:
     env:
       IAM_ROLE_SESSION_NAME: geodesic-ci
       AWS_REGION: us-east-1
+      ECR_REGISTRY: public.ecr.aws/h1u4b2i4/
     strategy:
       matrix:
         os: ['alpine', 'debian']
@@ -63,12 +64,16 @@ jobs:
         printf "Version resolved to %s\n" "${VERSION}"
         echo ::set-output name=version::${VERSION}
         TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
+        TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
         if [[ -n $VERSION ]]; then
           TAGS="$TAGS,${{ github.repository }}:${VERSION}-${BASE_OS}"
+          TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:${VERSION}-${BASE_OS}"
         fi
         if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
           TAGS="$TAGS,${{ github.repository }}:latest-${BASE_OS}"
+          TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest-${BASE_OS}"
           LATEST_TAGS="$TAGS,${{ github.repository }}:latest"
+          LATEST_TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
         else
           LATEST_TAGS="$TAGS"
         fi
@@ -97,16 +102,3 @@ jobs:
         file: ./os/${{matrix.os}}/Dockerfile.${{matrix.os}}
         build-args: |
           VERSION=${{ steps.prepare.outputs.version }}
-
-
-    - name: Build, tag, and push image to Amazon ECR
-      env:
-        ECR_REPOSITORY: cloudposse/geodesic
-        IMAGE_TAG: ${{ steps.docker_build.outputs.tag }}
-      run: |
-        docker tag -t ${{steps.docker_build.outputs.imageid }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.prepare.outputs.tags }}
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        if [[ '${{ github.ref }}' == 'refs/heads/${{ steps.github.outputs.default_branch }}' ]]; then
-          docker tag  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG  $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push  $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        fi

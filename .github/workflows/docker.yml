@@ -50,7 +50,6 @@ jobs:
       env:
         LATEST_TAG_OS: 'alpine'
         BASE_OS: ${{matrix.os}}
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
 
       run: |
         echo ::set-output name=publish::${{ (github.event_name == 'release' && github.event.action == 'published') || (github.event.pull_request.head.repo.full_name == github.repository) }}
@@ -64,19 +63,19 @@ jobs:
         printf "Version resolved to %s\n" "${VERSION}"
         echo ::set-output name=version::${VERSION}
         TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
-        TAGS="$TAGS,${ECR_REGISTRY}${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
+        TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
         printf "TAGS: %s\n" "${TAGS}"
         if [[ -n $VERSION ]]; then
           TAGS="$TAGS,${{ github.repository }}:${VERSION}-${BASE_OS}"
-          TAGS="$TAGS,${ECR_REGISTRY}${{ github.repository }}:${VERSION}-${BASE_OS}"
+          TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:${VERSION}-${BASE_OS}"
           printf "TAGS: %s\n" "${TAGS}"
         fi
         if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
           TAGS="$TAGS,${{ github.repository }}:latest-${BASE_OS}"
-          TAGS="$TAGS,${ECR_REGISTRY}${{ github.repository }}:latest-${BASE_OS}"
+          TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest-${BASE_OS}"
           printf "TAGS: %s\n" "${TAGS}"
           LATEST_TAGS="$TAGS,${{ github.repository }}:latest"
-          LATEST_TAGS="$TAGS,${ECR_REGISTRY}${{ github.repository }}:latest"
+          LATEST_TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
         else
           LATEST_TAGS="$TAGS"
         fi

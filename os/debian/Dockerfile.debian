@@ -131,14 +131,16 @@ RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY
 RUN if [ "$(uname -m)" = 'aarch64' ] ; then \
         # Install commonly known packages from public Debian repo
         apt-get update && apt-get install -y $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E '/@(cloudposse|testing)/d' | sed -E 's/@community//g') && \
-        git clone https://github.com/cloudposse/packages.git && \
+        git clone https://github.com/SpotOnInc/packages.git -b fix-obsolete-packages && \
         cd packages && \
         # Packages with `@cloudposse` or `@testing` annotation have to be built from source
-        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -nE 's/@(cloudposse|testing)//pg'); \
+        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E '/_amd64/d' | sed -nE 's/@(cloudposse|testing)//pg') ARCH=arm64 && \
+        # # Packages ending with _amd64 have no arm64 equivalent
+        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -nE 's/[@]?[a-zA-Z0-9]*_amd64//pg') ; \
     # On any other architecture proceed as usual. Packages will come from `https://dl.cloudsmith.io/public/cloudposse/packages/deb/debian bullseye main` repo.
     else \
         apt-get update && apt-get install -y \
-            $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) ; \
+            $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing).*//g' ) ; \
     fi
 
 RUN mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \

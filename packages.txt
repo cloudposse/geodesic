@@ -1,10 +1,10 @@
 # Essential alpine packages
-awless@cloudposse
+awless@cloudposse_amd64
 aws-iam-authenticator@cloudposse
 bash
 bash-completion
 bats@community
-cfssl@cloudposse
+cfssl@cloudposse_amd64
 coreutils
 chamber@cloudposse
 curl
@@ -20,7 +20,7 @@ fuse
 fzf@cloudposse
 gettext
 git
-github-commenter@cloudposse
+github-commenter@cloudposse_amd64
 gomplate@cloudposse
 goofys@cloudposse
 gosu@cloudposse
@@ -53,10 +53,10 @@ pandoc@cloudposse
 postgresql-client
 pwgen
 python3
-rakkess@cloudposse
+rakkess@cloudposse_amd64
 rbac-lookup@cloudposse
 retry@cloudposse
-scenery@cloudposse
+scenery@cloudposse_amd64
 shellcheck@cloudposse
 shfmt@cloudposse
 sops@cloudposse
@@ -71,8 +71,8 @@ terraform@cloudposse
 # will cause problems for people who install one or the other
 terragrunt@cloudposse
 terrahelp@cloudposse
-tfenv@cloudposse
-tfmask@cloudposse
+tfenv@cloudposse_amd64
+tfmask@cloudposse_amd64
 unzip
 util-linux
 variant@cloudposse

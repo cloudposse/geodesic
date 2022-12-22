@@ -30,14 +30,14 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
         role-session-name: ${{ env.IAM_ROLE_SESSION_NAME }}
 
-    - name: Login to Amazon ECR Public
-      id: login-ecr-public
-      uses: aws-actions/amazon-ecr-login@v1
-      with:
-        registry-type: public
-#    - name: Login to Public Amazon ECR
-#      run: |
-#        aws ecr-public get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws
+#    - name: Login to Amazon ECR Public
+#      id: login-ecr-public
+#      uses: aws-actions/amazon-ecr-login@v1
+#      with:
+#        registry-type: public
+    - name: Login to Public Amazon ECR
+      run: |
+        aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
     - name: Prepare tags for Docker image
       id: prepare

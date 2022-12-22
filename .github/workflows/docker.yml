@@ -64,16 +64,13 @@ jobs:
         echo ::set-output name=version::${VERSION}
         TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
         TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
-        printf "TAGS: %s\n" "${TAGS}"
         if [[ -n $VERSION ]]; then
           TAGS="$TAGS,${{ github.repository }}:${VERSION}-${BASE_OS}"
           TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:${VERSION}-${BASE_OS}"
-          printf "TAGS: %s\n" "${TAGS}"
         fi
         if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
           TAGS="$TAGS,${{ github.repository }}:latest-${BASE_OS}"
           TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest-${BASE_OS}"
-          printf "TAGS: %s\n" "${TAGS}"
           LATEST_TAGS="$TAGS,${{ github.repository }}:latest"
           LATEST_TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
         else

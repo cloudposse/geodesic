@@ -16,7 +16,7 @@ jobs:
     env:
       IAM_ROLE_SESSION_NAME: geodesic-ci
       AWS_REGION: us-east-1
-      ECR_REGISTRY: public.ecr.aws/ # This will become `public.ecr.aws/cloudposse/$repositoryName`
+      ECR_REGISTRY: public.ecr.aws/ # Images will be published to `public.ecr.aws/cloudposse/$repositoryName`
     strategy:
       matrix:
         os: ['alpine', 'debian']

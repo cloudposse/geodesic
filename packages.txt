@@ -17,7 +17,7 @@ figlet
 figurine@cloudposse
 file
 fuse
-fzf@cloudposse
+fzf
 gettext
 git
 github-commenter@cloudposse_amd64

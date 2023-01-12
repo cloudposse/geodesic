@@ -11,6 +11,9 @@ ARG SESSION_MANAGER_PLUGIN_VERSION=latest
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Multi platform support - override this arg with `arm64` string to build for Mac m1 for example
+ARG ARCH=amd64
+
 # Helm plugins:
 # https://github.com/databus23/helm-diff/releases
 ARG HELM_DIFF_VERSION=3.6.0
@@ -28,6 +31,10 @@ ARG PYTHON_VERSION=3.10.8
 # Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
 # Recommended: LC_ALL=C.UTF-8
 ENV LC_ALL=C.UTF-8
+
+# Multi platform support - override this arg with `arm64` string to build for Mac m1 for example
+ARG ARCH=amd64
+ENV ARCH=${ARCH}
 
 # Once again, Debian is weird. Package-installed Python is system-only, and does not
 # play well with pip. See  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=765022#30
@@ -70,6 +77,10 @@ RUN find / -name __pycache__ -exec rm -rf {} \; -prune
 # Geodesic base image
 #
 FROM debian:$DEBIAN_VERSION
+
+# Multi platform support - override this arg with `arm64` string to build for Mac m1 for example
+ARG ARCH=amd64
+ENV ARCH=${ARCH}
 
 ARG VERSION
 ENV GEODESIC_VERSION=$VERSION
@@ -128,15 +139,15 @@ RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY
 
 # If runnig Dokcer build on Macos m1:
 # Since the packages are not available for arm64 let's build them using sources from Cloudposse's `package` repository
-RUN if [ "$(uname -m)" = 'aarch64' ] ; then \
+RUN if [ "$ARCH" = "arm64" ] ; then \
         # Install commonly known packages from public Debian repo
         apt-get update && apt-get install -y $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E '/@(cloudposse|testing)/d' | sed -E 's/@community//g') && \
-        git clone https://github.com/SpotOnInc/packages.git -b fix-obsolete-packages && \
+        git clone https://github.com/cloudposse/packages.git && \
         cd packages && \
         # Packages with `@cloudposse` or `@testing` annotation have to be built from source
-        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E '/_amd64/d' | sed -nE 's/@(cloudposse|testing)//pg') ARCH=arm64 && \
+        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E '/_amd64/d' | sed -nE 's/@(cloudposse|testing)//pg') && \
         # # Packages ending with _amd64 have no arm64 equivalent
-        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -nE 's/[@]?[a-zA-Z0-9]*_amd64//pg') ; \
+        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -nE 's/[@]?[a-zA-Z0-9]*_amd64//pg') ARCH=amd64 ; \
     # On any other architecture proceed as usual. Packages will come from `https://dl.cloudsmith.io/public/cloudposse/packages/deb/debian bullseye main` repo.
     else \
         apt-get update && apt-get install -y \
@@ -171,7 +182,7 @@ RUN { gcloud config set core/disable_usage_reporting true --installation && \
 # RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
 # This directory doesn't exist on arm64 I guess because the next command throws an error "Directory doesn't exist" so let's make it. 
-RUN if [ "$(uname -m)" = 'aarch64' ] ; then mkdir -p /etc/sysctl.d ; fi
+RUN if [ "$ARCH" = "arm64" ] ; then mkdir -p /etc/sysctl.d ; fi
 
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
@@ -303,12 +314,12 @@ RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
 # ARG AWS_CLI_VERSION=2.2.8
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
     # We have to use platform-specific binary
-    if [ "$(uname -m)" = 'aarch64' ] ; then \
-        export ARCH='aarch64' ; \
+    if [ "$ARCH" = "arm64" ] ; then \
+        export AWS_ARCH='aarch64' ; \
     else \
-        export ARCH='x86_64' ; \
+        export AWS_ARCH='x86_64' ; \
     fi && \
-    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
+    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
     cd $AWSTMPDIR && \
     unzip -qq awscliv2.zip && \
     ./aws/install -i /usr/share/aws/v2 -b /usr/share/aws/v2/bin && \
@@ -329,12 +340,12 @@ ENV AWS_PAGER="less -FRX"
 
 # Install AWS Session Manager Plugin
 ARG SESSION_MANAGER_PLUGIN_VERSION
-RUN if [ "$(uname -m)" = 'aarch64' ] ; then \
-        export ARCH='arm64' ; \
+RUN if [ "$ARCH" = "arm64" ] ; then \
+        export  SESSION_MANAGER_PLUGIN_ARCH='arm64' ; \
     else \
-        export ARCH='64bit' ; \
+        export SESSION_MANAGER_PLUGIN_ARCH='64bit' ; \
     fi && \
-    curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${ARCH}/session-manager-plugin.deb" \
+    curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${SESSION_MANAGER_PLUGIN_ARCH}/session-manager-plugin.deb" \
     -o "/tmp/session-manager-plugin.deb" && \
     sudo dpkg -i /tmp/session-manager-plugin.deb && \
     rm /tmp/session-manager-plugin.deb

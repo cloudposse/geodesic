@@ -147,7 +147,10 @@ RUN if [ "$ARCH" = "arm64" ] ; then \
         # Packages with `@cloudposse` or `@testing` annotation have to be built from source
         make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E '/_amd64/d' | sed -nE 's/@(cloudposse|testing)//pg') && \
         # # Packages ending with _amd64 have no arm64 equivalent
-        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -nE 's/[@]?[a-zA-Z0-9]*_amd64//pg') ARCH=amd64 ; \
+        make -C install $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -nE 's/[@]?[a-zA-Z0-9]*_amd64//pg') ARCH=amd64 && \
+        # The `-slim` version of gomplate is not available for ARM 64 so we have to alter the DOWNLOAD_URL as the one in
+        # `packages` repo is not compatible.
+        make -C install gomplate DOWNLOAD_URL='$(PACKAGE_REPO_URL)/releases/download/v$(PACKAGE_VERSION)/$(PACKAGE_NAME)_$(OS)-$(ARCH)' ; \
     # On any other architecture proceed as usual. Packages will come from `https://dl.cloudsmith.io/public/cloudposse/packages/deb/debian bullseye main` repo.
     else \
         apt-get update && apt-get install -y \
@@ -365,14 +368,7 @@ COPY docs/ /usr/share/docs/
 # Build man pages
 
 ## This throws error `#49 0.196 /bin/sh: 1: /usr/local/bin/docs: not found` on Mac m1 and I can't figure out why...
-RUN if [ "$ARCH" = "arm64" ]; then /usr/local/bin/docs update; fi
-
-# The `-slim` version of gomplate is not available for ARM 64 so we have to alter the DOWNLOAD_URL as the one in
-# `packages` repo is not compatible.
-RUN if [ "$ARCH" = "arm64" ] ; then \
-        cd packages && \
-        make -C install gomplate DOWNLOAD_URL='$(PACKAGE_REPO_URL)/releases/download/v$(PACKAGE_VERSION)/$(PACKAGE_NAME)_$(OS)-$(ARCH)' ; \
-    fi
+RUN if [ "$ARCH" != "arm64" ]; then /usr/local/bin/docs update; fi
 
 # Make sure that "user specific" directories we are sharing
 # are in fact available to all users

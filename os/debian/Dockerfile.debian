@@ -365,8 +365,14 @@ COPY docs/ /usr/share/docs/
 # Build man pages
 
 ## This throws error `#49 0.196 /bin/sh: 1: /usr/local/bin/docs: not found` on Mac m1 and I can't figure out why...
-RUN if [ "$(uname- m)" != 'aarch64']; then /usr/local/bin/docs update; fi
+RUN if [ "$ARCH" = "arm64" ]; then /usr/local/bin/docs update; fi
 
+# The `-slim` version of gomplate is not available for ARM 64 so we have to alter the DOWNLOAD_URL as the one in
+# `packages` repo is not compatible.
+RUN if [ "$ARCH" = "arm64" ] ; then \
+        cd packages && \
+        make -C install gomplate DOWNLOAD_URL='$(PACKAGE_REPO_URL)/releases/download/v$(PACKAGE_VERSION)/$(PACKAGE_NAME)_$(OS)-$(ARCH)' ; \
+    fi
 
 # Make sure that "user specific" directories we are sharing
 # are in fact available to all users

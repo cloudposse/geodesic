@@ -10,12 +10,32 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      IAM_ROLE_SESSION_NAME: geodesic-ci
+      AWS_REGION: us-east-1
+      ECR_REGISTRY: public.ecr.aws/ # Images will be published to `public.ecr.aws/cloudposse/$repositoryName`
     strategy:
       matrix:
         os: ['alpine', 'debian']
     steps:
     - name: "Checkout source code at current commit"
       uses: actions/checkout@v2
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ secrets.ECR_AWS_ROLE }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-session-name: ${{ env.IAM_ROLE_SESSION_NAME }}
+
+    - name: Login to Public Amazon ECR
+      run: |
+        docker logout public.ecr.aws
+        aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+
     - name: Prepare tags for Docker image
       id: prepare
       # Even though we are no longer releasing plain numbered version tags like "0.111.0"
@@ -25,7 +45,8 @@ jobs:
       # as the one to get the "latest" tag. Initially that will be Alpine.
       env:
         LATEST_TAG_OS: 'alpine'
-        BASE_OS: ${{matrix.os}} 
+        BASE_OS: ${{matrix.os}}
+
       run: |
         echo ::set-output name=publish::${{ (github.event_name == 'release' && github.event.action == 'published') || (github.event.pull_request.head.repo.full_name == github.repository) }}
         COMMIT_SHA="${GITHUB_SHA}"
@@ -38,12 +59,16 @@ jobs:
         printf "Version resolved to %s\n" "${VERSION}"
         echo ::set-output name=version::${VERSION}
         TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
+        TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
         if [[ -n $VERSION ]]; then
           TAGS="$TAGS,${{ github.repository }}:${VERSION}-${BASE_OS}"
+          TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:${VERSION}-${BASE_OS}"
         fi
         if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
           TAGS="$TAGS,${{ github.repository }}:latest-${BASE_OS}"
+          TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest-${BASE_OS}"
           LATEST_TAGS="$TAGS,${{ github.repository }}:latest"
+          LATEST_TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
         else
           LATEST_TAGS="$TAGS"
         fi

@@ -1,10 +1,10 @@
-# Essential alpine packages
-awless@cloudposse
+# Essential packages
+# no arm64 awless@cloudposse
 aws-iam-authenticator@cloudposse
 bash
 bash-completion
 bats@community
-cfssl@cloudposse
+# no arm64 cfssl@cloudposse
 coreutils
 chamber@cloudposse
 curl
@@ -20,7 +20,7 @@ fuse
 fzf@cloudposse
 gettext
 git
-github-commenter@cloudposse
+# no arm64 github-commenter@cloudposse
 gomplate@cloudposse
 goofys@cloudposse
 gosu@cloudposse
@@ -29,7 +29,6 @@ helm@cloudposse
 helm3@cloudposse
 helmfile@cloudposse
 jq
-kops@cloudposse
 # The latest version of kubectl is wrong for most of our customers, but the
 # version-specific packages are organized to automatically configure the latest
 # installed version as the default, meaning if we install a version and a user
@@ -53,10 +52,10 @@ pandoc@cloudposse
 postgresql-client
 pwgen
 python3
-rakkess@cloudposse
+# no arm64 rakkess@cloudposse
 rbac-lookup@cloudposse
 retry@cloudposse
-scenery@cloudposse
+# abandoned 2021-03-08 scenery@cloudposse
 shellcheck@cloudposse
 shfmt@cloudposse
 sops@cloudposse
@@ -71,8 +70,8 @@ terraform@cloudposse
 # will cause problems for people who install one or the other
 terragrunt@cloudposse
 terrahelp@cloudposse
-tfenv@cloudposse
-tfmask@cloudposse
+# no arm64 tfenv@cloudposse
+# no arm64 tfmask@cloudposse
 unzip
 util-linux
 variant@cloudposse

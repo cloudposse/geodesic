@@ -1,7 +1,7 @@
 # https://alpinelinux.org/
 ARG ALPINE_VERSION=3.17.2
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=410.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=422.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.4
 # https://github.com/jonmosco/kube-ps1/releases
@@ -16,7 +16,7 @@ ARG HELM_DIFF_VERSION=3.6.0
 # We had issues with helm-diff 3.1.3 + helm-git 0.9.0,
 # previous workaround was to pin helm-git to version 0.8.1.
 # We expect this has been fixed now with helm-diff 3.3.2 + helm-git 0.11.1
-ARG HELM_GIT_VERSION=0.14.0
+ARG HELM_GIT_VERSION=0.15.1
 
 #
 # Python Dependencies

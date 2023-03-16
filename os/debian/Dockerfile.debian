@@ -1,7 +1,10 @@
 # https://www.debian.org/releases/
 ARG DEBIAN_VERSION=11.6-slim
+# Find the current version of Python at https://www.python.org/downloads/source/
+ARG PYTHON_VERSION=3.10.10
+
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=410.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=422.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.4
 # https://github.com/jonmosco/kube-ps1/releases
@@ -16,12 +19,10 @@ ARG HELM_DIFF_VERSION=3.6.0
 # We had issues with helm-diff 3.1.3 + helm-git 0.9.0,
 # previous workaround was to pin helm-git to version 0.8.1.
 # We expect this has been fixed now with helm-diff 3.3.2 + helm-git 0.11.1
-ARG HELM_GIT_VERSION=0.14.0
+ARG HELM_GIT_VERSION=0.15.1
 
 
-FROM debian:$DEBIAN_VERSION as python
-# Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.10.8
+FROM python:$PYTHON_VERSION-slim-bullseye as python
 
 # Debian comes with minimal Locale support. See https://github.com/docker-library/docs/pull/703/files
 # Recommended: LC_ALL=C.UTF-8
@@ -30,39 +31,22 @@ ENV LC_ALL=C.UTF-8
 # Once again, Debian is weird. Package-installed Python is system-only, and does not
 # play well with pip. See  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=765022#30
 #
-# So we cannot install the packages: RUN apt-get update && apt-get install -y python3 python3-pip python3-dev
-# and instead we have to build Python ourselves and install it in /usr/local/bin (by Debian design).
-
-# Also bad is the fact that python, being an interpreted language, installs a lot of shell scripts
+# So we copy python from the Docker "Official Image" for python, (not to be confused with
+# any official python image provided by python upstream). See https://hub.docker.com/_/python/ for details.
+#
+# Bad is the fact that python, being an interpreted language, installs a lot of shell scripts
 # that specifically reference the location of the python interpreter or other things, those
 # locations being baked in at install time. So it does not work to install python in `/dist`
 # and then later copy `/dist` to `/usr/local`: The installed scripts would have `!#/dist/bin/python`
-# baked in and fail. So we take the somewhat unorthodox approach of deleting /usr/local entirely,
-# then installing python in /usr/local, and then copying /usr/local over.
+# baked in and fail. So the official image starts with a basically empty /usr/local/,
+# installs python into /usr/local, and then we copy /usr/local over.
 #
 
-RUN rm -rf /usr/local && mkdir /usr/local
-
-# Preload apt-utils
-RUN apt-get update && apt-get install -y apt-utils
-
-# Install the packages that are needed to build python3
-RUN apt-get update && apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
-    libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev
-
-# Download the Python source code
-RUN curl -1sLfO https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz && \
-    tar -xf Python-${PYTHON_VERSION}.tar.xz
-
-# Build Python to be installed in /usr/local/bin
-WORKDIR Python-${PYTHON_VERSION}
-RUN ./configure --enable-optimizations --prefix=/usr/local && make -j $(nproc) && make install
-
-# Build the Python packages, configured to use /usr/local/bin/python3, and install them under /dist
+# Build the Python packages, configured to use /usr/local/bin/python3, and install them under /usr/local
 COPY requirements.txt /requirements.txt
 
 RUN python3 -m pip install --upgrade --progress-bar off pip setuptools wheel && \
-    pip install --progress-bar off -r /requirements.txt --ignore-installed --prefix=/usr/local --no-build-isolation
+    pip install --progress-bar off -r /requirements.txt --prefix=/usr/local --no-build-isolation
 
 # Remove Python cache files
 RUN find / -name __pycache__ -exec rm -rf {} \; -prune
@@ -132,8 +116,28 @@ RUN apt-get update && apt-get install -y \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
+# Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)
+
+# Using the en_US.UTF-8 local breaks our login setup because it changes the sort order,
+# and therefore the order of execution, of our profile files. We use locale C.UTF-8 instead,
+# which is widely supported (more widely than en_US.UTF-8). However, if
+# we had a compelling reason to need en_US.UTF-8, we could install the
+# "locales" package and run the following command:
+# RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+# Not sure why we were disabling IPv6, but we should not do that anymore, as IPv6 is stable and useful
+# RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
+
+# Disable vim from reading a swapfile (incompatible with goofys)
+RUN echo 'set noswapfile' >> /etc/vim/vimrc
+
+WORKDIR /tmp
+
+# Copy python dependencies
+COPY --from=python /usr/local/ /usr/local/
+
 #
-# Install Google Cloud SDK
+# Install Google Cloud SDK (requires Python)
 # This is separate so that updating it does not invalidate the Docker cache layer with all the packages installed above
 # https://cloud.google.com/sdk/docs/release-notes
 ARG GOOGLE_CLOUD_SDK_VERSION
@@ -146,25 +150,6 @@ RUN apt-get update && apt-get install -y google-cloud-sdk=${GOOGLE_CLOUD_SDK_VER
 RUN { gcloud config set core/disable_usage_reporting true --installation && \
       gcloud config set component_manager/disable_update_check true --installation && \
       gcloud config set metrics/environment github_docker_image --installation; } 2>&1
-
-# Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)
-
-# Using the en_US.UTF-8 local breaks our login setup because it changes the sort order,
-# and therefore the order of execution, of our profile files. We use locale C.UTF-8 instead,
-# which is widely supported (more widely than en_US.UTF-8). However, if
-# we had a compelling reason to need en_US.UTF-8, we could install the
-# "locales" package and run the following command:
-# RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-
-RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
-
-# Disable vim from reading a swapfile (incompatible with goofys)
-RUN echo 'set noswapfile' >> /etc/vim/vimrc
-
-WORKDIR /tmp
-
-# Copy python dependencies
-COPY --from=python /usr/local/ /usr/local/
 
 # Explicitly set  KUBECONFIG to enable kube_ps1 prompt
 ENV KUBECONFIG=/conf/.kube/config
@@ -274,6 +259,9 @@ ENV MAKEFLAGS="--no-print-directory"
 COPY rootfs/ /
 COPY os/debian/rootfs/ /
 
+
+ARG TARGETARCH
+
 # Move AWS CLI v1 aside and install AWS CLI v2 as default, leaving both available as alternatives.
 # We do this at the end because we need cache busting from above to get us the latest AWS CLI v2
 
@@ -285,7 +273,9 @@ RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
 # but it is updated several times a week, so we choose to just get the latest.
 # ARG AWS_CLI_VERSION=2.2.8
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
-    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+      AWS_ARCH=x86_64; else AWS_ARCH=aarch64; fi && \
+    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
     cd $AWSTMPDIR && \
     unzip -qq awscliv2.zip && \
     ./aws/install -i /usr/share/aws/v2 -b /usr/share/aws/v2/bin && \
@@ -306,7 +296,9 @@ ENV AWS_PAGER="less -FRX"
 
 # Install AWS Session Manager Plugin
 ARG SESSION_MANAGER_PLUGIN_VERSION
-RUN curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_64bit/session-manager-plugin.deb" \
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      AWS_ARCH=64bit; else AWS_ARCH="$TARGETARCH"; fi && \
+    curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${AWS_ARCH}/session-manager-plugin.deb" \
     -o "/tmp/session-manager-plugin.deb" && \
     sudo dpkg -i /tmp/session-manager-plugin.deb && \
     rm /tmp/session-manager-plugin.deb

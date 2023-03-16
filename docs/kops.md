@@ -7,10 +7,17 @@ date: May 2019
 
 ## NAME
 
-kops - Kubernetes Operations (kops)
+kops - (Deprecated) Kubernetes Operations (kops)
 
 ## SYNOPSIS 
 
+***Deprecation notice*** CloudPosse no longer supports `kops` for managing Kubernetes clusters.
+This document is retained for historical reference, but should not be used for new clusters.
+Some binaries, such as `kops` itself, used to be shipped pre-installed in Geodesic, and
+some, such as `direnv` and `tfenv` had special support as well. Some of these are no 
+longer installed, and some may not work as advertised due to bit rot.
+
+***Historical synopsis***
 Kops is one of the easiest ways to get a production grade Kubernetes cluster up and running. The `kops` command line tool (cli) is like `kubectl` for clusters. It handles all the standard CRUD operations necessary to manage the complete life cycle of a cluster.
 
 It is possible to run any number of [kops clusters](http://github.com/kubernetes/kops) within an account. Our 

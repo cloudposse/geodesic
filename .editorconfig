@@ -13,6 +13,7 @@ indent_size = 4
 [*.yaml]
 intent_style = space
 indent_size = 2
+trim_trailing_whitespace = true
 
 [*.sh]
 indent_style = tab

@@ -99,7 +99,7 @@ USER root
 # Keep dpkg quiet about running non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-COPY packages.txt os/debian/packages-debian.txt /etc/apt/
+COPY packages.txt packages-amd64-only.txt os/debian/packages-debian.txt /etc/apt/
 
 ## Here is where we would copy in the repo checksum in an attempt to ensure updates bust the Docker build cache
 
@@ -261,6 +261,18 @@ COPY os/debian/rootfs/ /
 
 
 ARG TARGETARCH
+
+# For certain pagkage we like to have but are not available on arm64,
+# install them on amd64, and link to a stub script on arm64.
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      apt-get update && apt-get install -y \
+      $(grep -h -v '^#' /etc/apt/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); \
+    else \
+      for pkg in $(grep -h -v '^#' /etc/apt/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); do \
+        ln  -s /usr/local/bin/no-arm64-support /usr/local/bin/$pkg; \
+      done; \
+    fi
+
 
 # Move AWS CLI v1 aside and install AWS CLI v2 as default, leaving both available as alternatives.
 # We do this at the end because we need cache busting from above to get us the latest AWS CLI v2

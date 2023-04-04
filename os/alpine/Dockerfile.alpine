@@ -112,7 +112,9 @@ USER root
 RUN apk add --no-cache bash curl && \
   curl -1sLf \
   'https://dl.cloudsmith.io/public/cloudposse/packages/setup.alpine.sh' \
-  | bash
+  | bash && \
+  printf "@cloudposse %s\n\n" "$(grep -h -v '^[@#]' /etc/apk/repositories | grep -F "public/cloudposse/packages" | head -1)" \
+  >> /etc/apk/repositories
 
 
 ##########################################################################################

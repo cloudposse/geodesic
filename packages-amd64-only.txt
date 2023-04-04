@@ -1,0 +1,9 @@
+# These are packages that are only supported on amd64,
+# typically because they have not been updated since 2021.
+awless@cloudposse
+cfssl@cloudposse
+emailcli@cloudposse
+goofys@cloudposse
+rakkess@cloudposse
+tfenv@cloudposse
+tfmask@cloudposse

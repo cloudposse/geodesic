@@ -12,7 +12,7 @@ direnv@community
 dumb-init
 emacs-nox
 fetch@cloudposse
-emailcli@cloudposse
+# no arm64 emailcli@cloudposse
 figlet
 figurine@cloudposse
 file
@@ -20,9 +20,9 @@ fuse
 fzf@cloudposse
 gettext
 git
-# no arm64 github-commenter@cloudposse
+github-commenter@cloudposse
 gomplate@cloudposse
-goofys@cloudposse
+#no arm64 support goofys@cloudposse
 gosu@cloudposse
 groff
 helm@cloudposse

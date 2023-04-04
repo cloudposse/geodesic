@@ -116,6 +116,12 @@ RUN apk add --no-cache bash curl && \
   printf "@cloudposse %s\n\n" "$(grep -h -v '^[@#]' /etc/apk/repositories | grep -F "public/cloudposse/packages" | head -1)" \
   >> /etc/apk/repositories
 
+# Install the @community repo tag (community repo is already installed, but not tagged as @community)
+RUN printf "@community %s\n" "$(grep -E 'alpine/v[^/]+/community' /etc/apk/repositories | head -1)" >> /etc/apk/repositories
+
+# Install the @testing repo tag
+RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
 
 ##########################################################################################
 # See Dockerfile.options for how to install `glibc` for greater compatibility, including #

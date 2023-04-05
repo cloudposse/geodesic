@@ -73,7 +73,7 @@ jobs:
           TAGS="$TAGS,${{ github.repository }}:latest-${BASE_OS}"
           TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest-${BASE_OS}"
           LATEST_TAGS="$TAGS,${{ github.repository }}:latest"
-          LATEST_TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
+          LATEST_TAGS="$LATEST_TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
         else
           LATEST_TAGS="$TAGS"
         fi

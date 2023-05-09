@@ -1,5 +1,5 @@
 # https://www.debian.org/releases/
-ARG DEBIAN_VERSION=11.6-slim
+ARG DEBIAN_VERSION=11.7-slim
 # Find the current version of Python at https://www.python.org/downloads/source/
 ARG PYTHON_VERSION=3.10.10
 

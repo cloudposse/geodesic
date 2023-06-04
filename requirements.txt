@@ -1,4 +1,4 @@
-cryptography==41.0.0
+cryptography==41.0.1
 PyYAML==5.4.1
 awscli==1.27.137
 boto3==1.26.137

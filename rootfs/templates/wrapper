@@ -196,8 +196,8 @@ function use() {
 		)
 
 	trap run_exit_hooks EXIT
-	# the extra curly braces around .ID are because this file goes through go template substitution local before being installed as a shell script
-	container_id=$(docker ps --quiet --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
+	# the extra curly braces around .ID are because this file goes through go template substitution locally before being installed as a shell script
+	container_id=$(docker ps --filter name="^/${DOCKER_NAME}\$" --format '{{`{{ .ID }}`}}')
 	if [ -n "$container_id" ]; then
 		echo "# Attaching to existing ${DOCKER_NAME} session ($container_id)"
 		if [ $# -eq 0 ]; then

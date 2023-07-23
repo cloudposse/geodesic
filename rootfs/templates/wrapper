@@ -96,7 +96,7 @@ function use() {
 				--env GEODESIC_HOST_GID="${GROUP_ID}"
 				--env GEODESIC_LOCALHOST="${GEODESIC_LOCALHOST:=/localhost.bindfs}"
 				--env GEODESIC_BINDFS_OPTIONS
-				)
+			)
 		fi
 	fi
 
@@ -117,6 +117,10 @@ function use() {
 	fi
 
 	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} == false ]]; then
+		if [ -n "${GEODESIC_TRACE}" ]; then
+			DOCKER_ARGS+=(--env GEODESIC_TRACE)
+		fi
+
 		if [ -n "${ENV_FILE}" ]; then
 			DOCKER_ARGS+=(--env-file ${ENV_FILE})
 		fi
@@ -178,8 +182,8 @@ function use() {
 			echo "# Mounting ${local_home} into container with workdir ${GEODESIC_HOST_CWD}"
 		fi
 		DOCKER_ARGS+=(
-		--volume="${local_home}:${GEODESIC_LOCALHOST:-/localhost}"
-		--env LOCAL_HOME="${local_home}"
+			--volume="${local_home}:${GEODESIC_LOCALHOST:-/localhost}"
+			--env LOCAL_HOME="${local_home}"
 		)
 	fi
 
@@ -193,7 +197,7 @@ function use() {
 		--env DOCKER_NAME="${DOCKER_NAME}"
 		--env DOCKER_TAG="${DOCKER_TAG}"
 		--env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}"
-		)
+	)
 
 	trap run_exit_hooks EXIT
 	# the extra curly braces around .ID are because this file goes through go template substitution locally before being installed as a shell script

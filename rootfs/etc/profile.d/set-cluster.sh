@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Usage:
-#   set-cluster <cluster-short-name>|off
+#  set-cluster <cluster-short-name> [role-short-name]
+#  set-cluster off
 #
 #   With <cluster-short-name> updates the kubecfg file for the cluster with that short name (e.g. "corp")
 #   and updates KUBECONFIG to point to that file.

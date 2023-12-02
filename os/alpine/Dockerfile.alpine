@@ -45,7 +45,7 @@ COPY requirements.txt /requirements.txt
 # so we have to install it on the "host" (which builds a wheel) before installing for the distribution.
 # As of 2022-05-15 PyYAML also requires the installation of Cython for some reason, although
 # it does not appear to actually use it. Seems like a build tool configuration issue,
-# so we were not pinning Cython or putting it in requrements.txt because Debian does not need it.
+# so we were not pinning Cython or putting it in requirements.txt because Debian does not need it.
 # As of 2023-07-21, we must pin Cython<3 for PyYaml <6
 # See https://github.com/yaml/pyyaml/issues/724
 # However, as of AWS CLI v1.29.4, we can use PyYaml 6.0.1, which solves the problem, and lets us remove Cython.

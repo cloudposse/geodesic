@@ -16,7 +16,7 @@ fetch@cloudposse
 figlet
 figurine@cloudposse
 file
-fuse
+fuse3
 fzf@cloudposse
 gettext
 git

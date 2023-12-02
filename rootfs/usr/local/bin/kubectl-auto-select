@@ -29,7 +29,7 @@ function usage() {
 # Output the normalized major and minor version number
 # 1. Remove any leading "v"
 # 2. If no dots, assume it is minor version with major version "1"
-function normalize_version() {
+function _normalize_version() {
 	[[ -n $1 ]] || return
 	if [[ $1 == "null" ]]; then
 		red "Unable to determine Kubernetes (kubectl) version"
@@ -45,13 +45,22 @@ function normalize_version() {
 	echo "$version"
 }
 
-function install() {
-	apk add -u kubectl-$(normalize_version "$1")@cloudposse
+function _install() {
+  if command -v apk >/dev/null 2>&1; then
+    apk update
+    apk add -u kubectl-$(_normalize_version "$1")@cloudposse
+  elif command -v apt-get >/dev/null 2>&1; then
+    apt-get update
+    apt-get install -y kubectl-$(_normalize_version "$1")-\*
+  else
+    red "Unable to install kubectl version $1"
+    exit 1
+  fi
 }
 
 # Output the major.minor version of the kubectl client
 function kubectl_mm_version() {
-	normalize_version $(kubectl version --client -o json 2>/dev/null | jq -r .clientVersion.minor)
+	_normalize_version $(kubectl version --client -o json 2>/dev/null | jq -r .clientVersion.minor)
 }
 
 # Output the git version of the kubectl client
@@ -65,7 +74,7 @@ function set_alternatives() {
 
 	if [[ ! -x /usr/share/kubectl/"${version}"/bin/kubectl-"${version}" ]]; then
 		if [[ $INSTALL == "true" ]]; then
-			apk add -u kubectl-${version}@cloudposse
+			_install "${version}"
 		else
 			red "kubectl version ${version} not installed."
 			red "Install it with $0 --install $@"
@@ -97,7 +106,7 @@ function set_from_server() {
 	fi
 
 	if versions=$(kubectl version -o json 2>/dev/null) &&
-		serverVersion=$(normalize_version $(jq -r '.serverVersion.minor' <<<$versions)) &&
+		serverVersion=$(_normalize_version $(jq -r '.serverVersion.minor' <<<$versions)) &&
 		[[ $serverVersion != "null" ]]; then
 
 		green "Detected server version $serverVersion"
@@ -119,7 +128,7 @@ if [[ $1 =~ ^- ]]; then
 fi
 
 if [[ -n $1 ]]; then
-	set_alternatives $(normalize_version "$1")
+	set_alternatives $(_normalize_version "$1")
 else
 	set_from_server
 fi

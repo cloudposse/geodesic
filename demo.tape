@@ -2,7 +2,7 @@ Output docs/gifs/demo.gif
 Output docs/mp4/demo.mp4
 Output docs/webm/demo.webm
 
-Set FontSize 46
+Set FontSize 10
 Set Width 1200
 Set Height 600
 Set PlaybackSpeed 2

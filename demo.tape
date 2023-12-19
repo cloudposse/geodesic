@@ -13,17 +13,25 @@ Set Shell zsh
 Sleep 1.5s
 Type "make all"
 Enter
+
 Sleep 6.5s
+
 Type "terraform -help"
 Enter
+
 Sleep 3s
+
 Type "aws help"
 Enter
+
 Sleep 3s
+
 Type "q"
 Sleep 500ms
+
 Type "quit"
 Enter
+
 Type "exit"
 Enter
 Ctrl+D

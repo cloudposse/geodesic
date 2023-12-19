@@ -1,8 +1,9 @@
 name: vhs
 on:
-  push:
+  pull_request:
     paths:
       - '*.tape'
+
 jobs:
   vhs:
     runs-on: ubuntu-latest

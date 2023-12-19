@@ -9,7 +9,8 @@ Set Width 1200
 Set Height 600
 Set PlaybackSpeed 2
 
-Set Shell zsh
+Set Shell bash
+
 Sleep 1.5s
 Type "make all"
 Enter

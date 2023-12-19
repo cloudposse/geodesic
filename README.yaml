@@ -25,8 +25,8 @@ badges:
 # Screenshots
 screenshots:
   - name: "Demo"
-    description: "<br/>[Example of running a shell](https://github.com/cloudposse/testing.cloudposse.co) based on the `cloudposse/geodesic` base docker image."
-    url: "https://sweetops.com/wp-content/uploads/2019/03/termtosvg_fmnxoium.svg"
+    description: "<br/>Example of running a shell based on the `cloudposse/geodesic` base docker image."
+    url: "docs/gifs/demo.gif"
 
 related:
   - name: "Packages"

@@ -25,7 +25,8 @@ jobs:
         with: 
           token: ${{ secrets.GITHUB_TOKEN }}
           path: demo.tape
-
+        env:
+         TERM: xterm-256color
       - uses: stefanzweifel/git-auto-commit-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -43,4 +43,8 @@ jobs:
         run: |
           echo "## Demo GIF" >> $GITHUB_STEP_SUMMARY
           echo "![Demo GIF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/docs/gifs/demo.gif?raw=true)" >> $GITHUB_STEP_SUMMARY
+      - name: No changes
+        if: steps.auto-commit.outputs.changes_detected == 'false'
+        run: |
+          echo "No changes to demo" >> $GITHUB_STEP_SUMMARY
 

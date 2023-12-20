@@ -6,7 +6,7 @@ Output docs/webm/demo.webm
 
 Set Theme "Builtin Solarized Dark"
 
-Set FontFamily "Menlo"
+Set FontFamily "Fira Code"
 Set FontSize 12
 
 Set WindowBar Colorful
@@ -41,7 +41,7 @@ Enter
 Sleep 3s
 
 Type "q"
-Sleep 500ms
+Sleep 5s
 
 Type "quit"
 Enter

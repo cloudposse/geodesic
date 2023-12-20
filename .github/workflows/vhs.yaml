@@ -18,8 +18,8 @@ jobs:
       - name: "make all"
         run: make all
 
-      - name: "Install fonts"
-        run: curl -L https://github.com/hbin/top-programming-fonts/raw/master/install.sh | bash
+      - name: "Install font"
+        run: "sudo apt install fonts-firacode"
 
       - uses: charmbracelet/vhs-action@v1
         with: 

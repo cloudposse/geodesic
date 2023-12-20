@@ -28,6 +28,7 @@ jobs:
           install-fonts: true
 
       - uses: stefanzweifel/git-auto-commit-action@v4
+        id: auto-commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -38,8 +39,8 @@ jobs:
           file_pattern: '*.gif *.mp4 *.webm'
 
       - name: Add Image to Job Summary
-        if: steps.auto-commit-action.outputs.changes_detected == 'true'
+        if: steps.auto-commit.outputs.changes_detected == 'true'
         run: |
           echo "## Demo GIF" >> $GITHUB_STEP_SUMMARY
-          echo "![Demo GIF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit-action.outputs.commit_hash }}/docs/gifs/demo.gif?raw=true)" >> $GITHUB_STEP_SUMMARY
+          echo "![Demo GIF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/docs/gifs/demo.gif?raw=true)" >> $GITHUB_STEP_SUMMARY
 

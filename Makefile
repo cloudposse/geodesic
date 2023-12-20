@@ -86,9 +86,9 @@ demo-deps:
 	# Update packages and install necessary locale packages
 	sudo apt-get update && sudo apt-get install tzdata locales -y
 	# Generate the en_US.UTF-8 locale
-	sudo locale-gen ${{ env.LANG }}
+	sudo locale-gen $(LANG)
 	# Set the system-wide locale settings
-	sudo update-locale LANG=${{ env.LANG }}
+	sudo update-locale LANG=$(LANG)
 	# Verify the available locales
 	locale -a
 	# Display the current locale settings
@@ -97,8 +97,6 @@ demo-deps:
 	# Display the current numeric settings
 	echo "Actual numeric settings"
 	locale -c -k LC_NUMERIC
-	# Display the LANG environment variable
-	echo "LANG=$LANG"
 	# Display the current system locale settings
 	localectl status
 

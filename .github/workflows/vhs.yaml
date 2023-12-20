@@ -18,13 +18,11 @@ jobs:
       - name: "make all"
         run: make all
 
-      - name: "Install font"
-        run: "sudo apt install fonts-firacode"
-
       - uses: charmbracelet/vhs-action@v1
         with: 
           token: ${{ secrets.GITHUB_TOKEN }}
           path: demo.tape
+          install-fonts: true
         env:
          TERM: xterm-256color
       - uses: stefanzweifel/git-auto-commit-action@v4

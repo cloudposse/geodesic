@@ -6,7 +6,7 @@ Output docs/webm/demo.webm
 
 Set Theme "Builtin Solarized Dark"
 
-Set FontFamily "DejaVu Sans Mono"
+Set FontFamily "Menlo"
 Set FontSize 12
 
 Set WindowBar Colorful

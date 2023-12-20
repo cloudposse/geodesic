@@ -6,7 +6,8 @@ Output docs/webm/demo.webm
 
 Set Theme "Builtin Solarized Dark"
 
-Set FontFamily "Monoflow"
+Set FontFamily "DejaVu Sans Mono"
+Set FontSize 12
 
 Set WindowBar Colorful
 
@@ -16,10 +17,10 @@ Set BorderRadius 10
 
 Set Padding 5
 
-Set FontSize 20
 Set Width 1200
 Set Height 600
-Set PlaybackSpeed 1.2
+
+Set PlaybackSpeed 0.75
 
 Set Shell bash
 

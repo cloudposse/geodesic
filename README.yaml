@@ -26,7 +26,7 @@ badges:
 screenshots:
   - name: "Demo"
     description: "<br/>Example of running a shell based on the `cloudposse/geodesic` base docker image."
-    url: "docs/mp4/demo.mp4"
+    url: "docs/gifs/demo.gif"
 
 related:
   - name: "Packages"

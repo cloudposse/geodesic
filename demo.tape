@@ -14,7 +14,7 @@ Set CursorBlink true
 
 Set BorderRadius 10
 
-Set Padding 20
+Set Padding 5
 
 Set FontSize 20
 Set Width 1200
@@ -27,7 +27,7 @@ Sleep 1.5s
 Type "make all"
 Enter
 
-Sleep 6.5s
+Sleep 10s
 
 Type "terraform -help"
 Enter

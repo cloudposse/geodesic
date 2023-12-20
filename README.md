@@ -61,7 +61,7 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 ## Screenshots
 
 
-![Demo](docs/mp4/demo.mp4)
+![Demo](docs/gifs/demo.gif)
 *<br/>Example of running a shell based on the `cloudposse/geodesic` base docker image.*
 
 

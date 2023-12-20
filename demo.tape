@@ -4,10 +4,20 @@ Output docs/gifs/demo.gif
 Output docs/mp4/demo.mp4
 Output docs/webm/demo.webm
 
+Set Theme "Catppuccin Frappe"
+
+Set WindowBar Colorful
+
+Set CursorBlink true
+
+Set BorderRadius 10
+
+Set Padding 20
+
 Set FontSize 12
 Set Width 1200
 Set Height 600
-Set PlaybackSpeed 2
+Set PlaybackSpeed 1.2
 
 Set Shell bash
 

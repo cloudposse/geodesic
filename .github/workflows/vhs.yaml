@@ -28,6 +28,9 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LANGUAGE: C.UTF-8
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
         with:
           commit_message: "chore: update demo gif"
           commit_user_name: vhs-action 📼

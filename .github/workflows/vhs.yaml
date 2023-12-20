@@ -24,7 +24,7 @@ jobs:
           path: demo.tape
           install-fonts: true
         env:
-         TERM: xterm-256color
+          TERM: xterm-256color
       - uses: stefanzweifel/git-auto-commit-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

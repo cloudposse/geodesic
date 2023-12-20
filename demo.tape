@@ -25,10 +25,10 @@ Set PlaybackSpeed 0.75
 Set Shell bash
 
 Sleep 1.5s
-Type "make all"
+Type "geodesic"
 Enter
 
-Sleep 10s
+Sleep 5s
 
 Type "terraform -help"
 Enter

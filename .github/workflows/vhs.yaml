@@ -18,6 +18,9 @@ jobs:
       - name: "make all"
         run: make all
 
+      - name: "Install fonts"
+        run: curl -L https://github.com/hbin/top-programming-fonts/raw/master/install.sh | bash
+
       - uses: charmbracelet/vhs-action@v1
         with: 
           token: ${{ secrets.GITHUB_TOKEN }}

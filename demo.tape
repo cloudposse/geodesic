@@ -20,9 +20,17 @@ Set Padding 5
 Set Width 1200
 Set Height 600
 
-Set PlaybackSpeed 0.75
+Set PlaybackSpeed 0.50
 
 Set Shell bash
+
+# Test glyph rendering
+Type "echo ' ⧉  geodesic'"
+Enter
+Sleep 1s
+Type "echo ' ✗ . [none] (HOST) geodesic ⨠ "
+Enter
+Sleep 5s
 
 Sleep 1.5s
 Type "geodesic"

@@ -2,7 +2,6 @@
 bindfs
 default-mysql-client
 dnsutils
-fonts-firacode
 inetutils-ftp
 inetutils-ping
 inetutils-telnet

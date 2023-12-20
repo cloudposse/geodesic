@@ -24,6 +24,10 @@ Set PlaybackSpeed 0.50
 
 Set Shell bash
 
+Type "make demo-deps"
+Enter
+Sleep 10s
+
 # Test glyph rendering
 Type "echo ' ⧉  geodesic'"
 Enter

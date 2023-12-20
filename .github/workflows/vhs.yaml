@@ -65,3 +65,10 @@ jobs:
           commit_user_email: actions@github.com
           commit_author: vhs-action 📼 <actions@github.com>
           file_pattern: '*.gif *.mp4 *.webm'
+
+      - name: Add Image to Job Summary
+        if: steps.auto-commit-action.outputs.changes_detected == 'true'
+        run: |
+          echo "## Demo GIF" >> $GITHUB_STEP_SUMMARY
+          echo "![Demo GIF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit-action.outputs.commit_hash }}/docs/gifs/demo.gif?raw=true)" >> $GITHUB_STEP_SUMMARY
+

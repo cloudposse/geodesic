@@ -40,7 +40,7 @@ Type "export > env.txt" Enter
 Sleep 100ms
 Show
 
-Type "# ⧉  ✗ ⨠ " Enter
+Type "# Test gylphs: ⧉  ✗ ⨠ " Enter
 Sleep 5s
 
 Sleep 1.5s

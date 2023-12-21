@@ -30,7 +30,6 @@ jobs:
           install-fonts: true
 
       - name: Show environment
-        if: steps.auto-commit.outputs.changes_detected == 'false'
         run: |
           echo "## Environment" >> $GITHUB_STEP_SUMMARY
           echo "```$(cat env.txt)```" >> $GITHUB_STEP_SUMMARY

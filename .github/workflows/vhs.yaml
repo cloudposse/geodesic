@@ -32,7 +32,7 @@ jobs:
       - name: Show environment
         run: |
           echo "## Environment" >> $GITHUB_STEP_SUMMARY
-          echo "```$(cat env.txt)```" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`$(cat env.txt)\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         id: auto-commit

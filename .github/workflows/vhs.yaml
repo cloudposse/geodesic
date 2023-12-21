@@ -29,6 +29,12 @@ jobs:
           path: demo.tape
           install-fonts: true
 
+      - name: Show environment
+        if: steps.auto-commit.outputs.changes_detected == 'false'
+        run: |
+          echo "## Environment" >> $GITHUB_STEP_SUMMARY
+          echo "```$(cat env.txt)```" >> $GITHUB_STEP_SUMMARY
+
       - uses: stefanzweifel/git-auto-commit-action@v4
         id: auto-commit
         env:

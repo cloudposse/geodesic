@@ -7,8 +7,7 @@ Output docs/gifs/demo.gif
 #Set Theme "Builtin Solarized Dark"
 Set Theme "Monokai Vivid"
 
-#Set FontFamily "FiraCode Nerd Font"
-Set FontFamily "JetBrains Mono"
+Set FontFamily "FiraCode Nerd Font"
 Set FontSize 14
 
 Set TypingSpeed 40ms
@@ -19,10 +18,11 @@ Set WindowBar Colorful
 
 Set CursorBlink true
 
-Set BorderRadius 10
+Set BorderRadius 8
 
 Set Margin 20
-Set MarginFill "#000000"
+Set MarginFill "#674EFF"
+#Set MarginFill "#000000"
 
 Set Padding 12
 
@@ -34,8 +34,9 @@ Set PlaybackSpeed 0.50
 Set Shell bash
 
 # Test glyph rendering
-Type "export" Enter
-Sleep 3
+Type "export > env.txt" Enter
+Sleep 100ms
+
 Type "# ⧉  ✗ ⨠ " Enter
 Sleep 5s
 

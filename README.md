@@ -30,9 +30,10 @@
 
 -->
 
-<img align=right src="docs/geodesic-small.png">Geodesic is a robust Linux toolbox container, crafted to optimize DevOps workflows. This container comes fully loaded with all essential dependencies for a complete DevOps toolchain. It's designed to bring consistency and boost efficiency across development environments. It achieves this without the need for installing additional software on your workstation. Think of Geodesic as a containerized parallel to Vagrant, offering similar functionality within a Docker container context.
+Geodesic is a robust Linux toolbox container, crafted to optimize DevOps workflows. This container comes fully loaded with all essential dependencies for a complete DevOps toolchain. It's designed to bring consistency and boost efficiency across development environments. It achieves this without the need for installing additional software on your workstation. Think of Geodesic as a containerized parallel to Vagrant, offering similar functionality within a Docker container context.
 
 ## Key Features
+<img align=right src="docs/geodesic-small.png">
 
 - **Unified Toolchain**: By packaging all necessary DevOps tools and dependencies, Geodesic eliminates the "works on my machine" problem, ensuring toolchain uniformity across different machines.
 - **Consistent Environment**: Geodesic guarantees that every developer operates in a uniform OS environment with consistent tool versions, sidestepping discrepancies that often arise in diverse development setups.
@@ -40,7 +41,6 @@
 - **Cross-Platform Compatibility**: With native support for Mac OSX, Linux, and [Windows (via WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10), Geodesic extends its versatile toolchain to a wide range of operating systems, ensuring broad accessibility and functionality.
 - **Version Control for Tools**: Geodesic facilitates easy versioning of tools for different environments, enabling repeatable setups and minimizing compatibility issues.
 - **Reusable Base Image for Toolboxes**: Empower teams to create and maintain consistent toolbox images, ensuring a standardized development environment across the board.
-- **Part of SweetOps**: As a component of [Cloud Posse's SweetOps](https://docs.cloudposse.com), Geodesic integrates seamlessly into a robust, production-grade cloud platform methodology, enhancing overall operational efficiency.
 
 ---
 

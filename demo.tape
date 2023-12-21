@@ -38,7 +38,7 @@ Sleep 500ms
 Type "geodesic"
 Enter
 
-Sleep 2s
+Sleep 3s
 
 Type "# It ships with common commands like `terraform`" Enter
 Sleep 500ms
@@ -61,5 +61,6 @@ Type "# That's all folks!" Enter
 Sleep 2s
 
 Type "exit"
+Sleep 1s
 Enter
 

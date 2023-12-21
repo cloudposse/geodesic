@@ -24,7 +24,8 @@ jobs:
         run: |
           echo "PROMPT_STYLE=unicode" > ${ENV_FILE}
           echo "BANNER_MARK=🚀" >> ${ENV_FILE}
-          echo "ASSUME_ROLE_INACTIVE_MARK=  " >> ${ENV_FILE}
+          echo "ASSUME_ROLE_INACTIVE_MARK= " >> ${ENV_FILE}
+          echo "PROMPT_HOST_MARK=(demo)" >> ${ENV_FILE}
 
      # Speed up builds for demo, but pre-building
       - name: "make all"

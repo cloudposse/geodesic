@@ -4,7 +4,8 @@ Output docs/gifs/demo.gif
 Output docs/mp4/demo.mp4
 Output docs/webm/demo.webm
 
-Set Theme "Builtin Solarized Dark"
+#Set Theme "Builtin Solarized Dark"
+Set Theme "Monokai Vivid"
 
 Set FontFamily "FiraCode Nerd Font"
 Set FontSize 12
@@ -19,7 +20,7 @@ Set CursorBlink true
 
 Set BorderRadius 10
 
-Set Padding 5
+Set Padding 12
 
 Set Width 1200
 Set Height 600
@@ -76,5 +77,5 @@ Sleep 5s
 
 Type "exit"
 Enter
-Ctrl+D
+#Ctrl+D
 

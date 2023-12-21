@@ -2,7 +2,6 @@
 
 Output docs/demo.gif
 
-#Set Theme "Builtin Solarized Dark"
 Set Theme "Monokai Vivid"
 
 #Set FontFamily "FiraCode Nerd Font"
@@ -21,7 +20,6 @@ Set BorderRadius 8
 
 Set Margin 20
 Set MarginFill "#674EFF"
-#Set MarginFill "#000000"
 
 Set Padding 12
 

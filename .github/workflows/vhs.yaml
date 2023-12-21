@@ -31,7 +31,7 @@ jobs:
           echo "ASSUME_ROLE_INACTIVE_MARK= " >> ${ENV_FILE}
           echo "PROMPT_HOST_MARK=(demo)" >> ${ENV_FILE}
 
-     # Speed up builds for demo, but pre-building
+      # Speed up builds for demo by pre-building docker image
       - name: "make all"
         run: make all
 

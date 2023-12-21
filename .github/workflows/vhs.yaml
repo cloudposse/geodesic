@@ -8,7 +8,7 @@ env:
   TERM: "xterm-256color"
   COLORTERM: "truecolor"
   LANG: "en_US.UTF-8"
-  ENV_FILE: "${{ github.workspace }}/gha.env"
+  ENV_FILE: "/home/runner/gha.env"
 
 jobs:
   vhs:

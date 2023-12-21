@@ -1,6 +1,6 @@
 # Demo of Geodesic
 
-Output docs/gifs/demo.gif
+Output docs/demo.gif
 #Output docs/mp4/demo.mp4
 #Output docs/webm/demo.webm
 

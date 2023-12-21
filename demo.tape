@@ -8,7 +8,7 @@ Output docs/gifs/demo.gif
 Set Theme "Monokai Vivid"
 
 Set FontFamily "FiraCode Nerd Font"
-Set FontSize 12
+Set FontSize 14
 
 Set TypingSpeed 40ms
 
@@ -39,7 +39,7 @@ Set Shell bash
 Type "echo ' ⧉  geodesic'"
 Enter
 Sleep 1s
-Type "echo ' ✗ . [none] (HOST) geodesic ⨠ "
+Type "echo ' ✗ . [none] (HOST) geodesic ⨠ '"
 Enter
 Sleep 5s
 

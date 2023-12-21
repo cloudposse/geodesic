@@ -1,8 +1,8 @@
 # Demo of Geodesic
 
 Output docs/gifs/demo.gif
-Output docs/mp4/demo.mp4
-Output docs/webm/demo.webm
+#Output docs/mp4/demo.mp4
+#Output docs/webm/demo.webm
 
 #Set Theme "Builtin Solarized Dark"
 Set Theme "Monokai Vivid"
@@ -10,7 +10,7 @@ Set Theme "Monokai Vivid"
 Set FontFamily "FiraCode Nerd Font"
 Set FontSize 12
 
-Set TypingSpeed 400ms
+Set TypingSpeed 40ms
 
 Set Framerate 30
 
@@ -29,11 +29,11 @@ Set PlaybackSpeed 0.50
 
 Set Shell bash
 
-# Hide
-Type "make demo-deps"
-Enter
-Sleep 10s
-# Show
+#Hide
+#Type "make demo-deps"
+#Enter
+#Sleep 10s
+#Show
 
 # Test glyph rendering
 Type "echo ' ⧉  geodesic'"

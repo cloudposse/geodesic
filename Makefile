@@ -79,6 +79,3 @@ apt-update geodesic_aptindex.md5:
 	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
 	'apt-get update >/dev/null && geodesic-aptindex-md5' > os/debian/geodesic_aptindex.md5
 	@echo geodesic_aptindex.md5 new $$(cat os/debian/geodesic_aptindex.md5 || echo '<not found>')
-
-
-

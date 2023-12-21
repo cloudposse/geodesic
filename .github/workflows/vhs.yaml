@@ -8,6 +8,7 @@ env:
   TERM: "xterm-256color"
   COLORTERM: "truecolor"
   LANG: "en_US.UTF-8"
+  ENV_FILE=gha.env
 
 jobs:
   vhs:
@@ -22,6 +23,10 @@ jobs:
      # Speed up builds for demo, but pre-building
       - name: "make all"
         run: make all
+
+      - name: "Override env for Geodesic"
+        run: |
+          echo "PROMPT_STYLE=plain" > ${ENV_FILE}
 
       - uses: charmbracelet/vhs-action@v1
         with: 

@@ -30,7 +30,7 @@ Set PlaybackSpeed 1
 
 Set Shell bash
 
-Type "# After having run `make all`, simply run `geodesic` to enter the interactive shell" Enter
+Type "# After having run `make all`, simply run `make run` (or `geodesic`) to enter the interactive shell" Enter
 Sleep 500ms
 
 Type "geodesic"

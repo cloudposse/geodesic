@@ -20,13 +20,13 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v2
 
-     # Speed up builds for demo, but pre-building
-      - name: "make all"
-        run: make all
-
       - name: "Override env for Geodesic"
         run: |
           echo "PROMPT_STYLE=plain" > ${ENV_FILE}
+
+     # Speed up builds for demo, but pre-building
+      - name: "make all"
+        run: make all
 
       - uses: charmbracelet/vhs-action@v1
         with: 

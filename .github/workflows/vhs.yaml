@@ -43,7 +43,7 @@ jobs:
           commit_user_name: vhs-action 📼
           commit_user_email: actions@github.com
           commit_author: vhs-action 📼 <actions@github.com>
-          file_pattern: '*.gif *.mp4 *.webm'
+          file_pattern: '*.gif'
 
       - name: Add Image to Job Summary
         if: steps.auto-commit.outputs.changes_detected == 'true'

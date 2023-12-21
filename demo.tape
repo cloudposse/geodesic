@@ -43,6 +43,7 @@ Sleep 500ms
 
 Type "terraform -help"
 Enter
+Sleep 500ms
 
 Type "# ...and the `aws` CLI =)" Enter
 Sleep 500ms

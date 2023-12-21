@@ -6,7 +6,7 @@ Output docs/webm/demo.webm
 
 Set Theme "Builtin Solarized Dark"
 
-Set FontFamily "Fira Code"
+Set FontFamily "FiraCode Nerd Font"
 Set FontSize 12
 
 Set WindowBar Colorful

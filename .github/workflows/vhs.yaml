@@ -10,13 +10,13 @@ env:
   LANG: "en_US.UTF-8"
   ENV_FILE: "/home/runner/gha.env"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   vhs:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - uses: actions/checkout@v3
 

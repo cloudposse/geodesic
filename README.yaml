@@ -41,8 +41,7 @@ related:
 description: |-
   Geodesic is a robust Linux toolbox container, crafted to optimize DevOps workflows. This container comes fully loaded with all essential dependencies for a complete DevOps toolchain. It's designed to bring consistency and boost efficiency across development environments. It achieves this without the need for installing additional software on your workstation. Think of Geodesic as a containerized parallel to Vagrant, offering similar functionality within a Docker container context.
 
-  ## Key Features
-  <img align=right src="docs/geodesic-small.png">
+  ## Key Features <img align=right src="docs/geodesic-small.png">
 
   - **Unified Toolchain**: By packaging all necessary DevOps tools and dependencies, Geodesic eliminates the "works on my machine" problem, ensuring toolchain uniformity across different machines.
   - **Consistent Environment**: Geodesic guarantees that every developer operates in a uniform OS environment with consistent tool versions, sidestepping discrepancies that often arise in diverse development setups.

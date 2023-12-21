@@ -7,7 +7,8 @@ Output docs/gifs/demo.gif
 #Set Theme "Builtin Solarized Dark"
 Set Theme "Monokai Vivid"
 
-Set FontFamily "FiraCode Nerd Font"
+#Set FontFamily "FiraCode Nerd Font"
+Set FontFamily "Hack Nerd Font"
 Set FontSize 14
 
 Set TypingSpeed 40ms

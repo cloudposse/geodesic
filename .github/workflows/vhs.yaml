@@ -22,7 +22,7 @@ jobs:
 
       - name: "Override env for Geodesic"
         run: |
-          echo "PROMPT_STYLE=plain" > ${ENV_FILE}
+          echo "PROMPT_STYLE=unicode" > ${ENV_FILE}
 
      # Speed up builds for demo, but pre-building
       - name: "make all"
@@ -33,11 +33,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: demo.tape
           install-fonts: true
-
-      - name: Show environment
-        run: |
-          echo "## Environment" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`$(cat env.txt)\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         id: auto-commit
@@ -55,6 +50,7 @@ jobs:
         run: |
           echo "## Demo GIF" >> $GITHUB_STEP_SUMMARY
           echo "![Demo GIF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/docs/demo.gif?raw=true)" >> $GITHUB_STEP_SUMMARY
+
       - name: No changes
         if: steps.auto-commit.outputs.changes_detected == 'false'
         run: |

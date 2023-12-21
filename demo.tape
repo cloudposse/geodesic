@@ -35,8 +35,10 @@ Set PlaybackSpeed 0.50
 Set Shell bash
 
 # Test glyph rendering
+Hide
 Type "export > env.txt" Enter
 Sleep 100ms
+Show
 
 Type "# ⧉  ✗ ⨠ " Enter
 Sleep 5s

@@ -6,6 +6,7 @@ on:
 
 env:
   TERM: "xterm-256color"
+  COLORTERM: "truecolor"
   LANG: "en_US.UTF-8"
 
 jobs:

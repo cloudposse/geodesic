@@ -33,23 +33,20 @@ Set Shell bash
 Type "# After having run `make all`, simply run `make run` (or `geodesic`) to enter the interactive shell" Enter
 Sleep 500ms
 
-Type "geodesic"
-Enter
+Type "geodesic" Enter
 
 Sleep 3s
 
 Type "# It ships with common commands like `terraform`" Enter
 Sleep 500ms
 
-Type "terraform -help"
-Enter
+Type "terraform -help" Enter
 Sleep 500ms
 
 Type "# ...and the `aws` CLI =)" Enter
 Sleep 500ms
 
-Type "aws help"
-Enter
+Type "aws help" Enter
 
 Sleep 3s
 
@@ -59,7 +56,6 @@ Sleep 1s
 Type "# That's all folks!" Enter
 Sleep 2s
 
-Type "exit"
+Type "exit" Enter
 Sleep 1s
-Enter
 

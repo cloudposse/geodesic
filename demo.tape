@@ -9,6 +9,10 @@ Set Theme "Builtin Solarized Dark"
 Set FontFamily "FiraCode Nerd Font"
 Set FontSize 12
 
+Set TypingSpeed 400ms
+
+Set Framerate 30
+
 Set WindowBar Colorful
 
 Set CursorBlink true
@@ -24,9 +28,11 @@ Set PlaybackSpeed 0.50
 
 Set Shell bash
 
+# Hide
 Type "make demo-deps"
 Enter
 Sleep 10s
+# Show
 
 # Test glyph rendering
 Type "echo ' ⧉  geodesic'"
@@ -37,15 +43,25 @@ Enter
 Sleep 5s
 
 Sleep 1.5s
+
+Type "# After having run `make all`, simply run `geodesic` to enter the interactive shell" Enter
+Sleep 2
+
 Type "geodesic"
 Enter
 
 Sleep 5s
 
+Type "# It ships with common commands like `terraform`" Enter
+Sleep 2
+
 Type "terraform -help"
 Enter
 
 Sleep 3s
+
+Type "# ...and the `aws` CLI =)" Enter
+Sleep 2
 
 Type "aws help"
 Enter
@@ -53,10 +69,10 @@ Enter
 Sleep 3s
 
 Type "q"
-Sleep 5s
+Sleep 1s
 
-Type "quit"
-Enter
+Type "# That's all folks!" Enter
+Sleep 5s
 
 Type "exit"
 Enter

@@ -1,5 +1,5 @@
 # https://alpinelinux.org/
-ARG ALPINE_VERSION=3.18.5
+ARG ALPINE_VERSION=3.19.0
 # https://cloud.google.com/sdk/docs/release-notes
 ARG GOOGLE_CLOUD_SDK_VERSION=455.0.0
 # https://github.com/ahmetb/kubectx/releases

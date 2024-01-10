@@ -12,6 +12,10 @@ readonly OS=$(uname -s)
 
 export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
+# While a dot in the username or groupname is frowned upon in POSIX user/group
+# names, it is still permissible. Further more, it may help debug any oddities
+# that arise with converting of names from ActiveDirectory/SSD/LDAP/etc..
+export GROUP="$(id -gn|tr '[:blank:]-' '.')"
 
 export options=()
 export targets=()
@@ -68,6 +72,7 @@ function use() {
 					--env SSH_TTY
 					--env USER
 					--env USER_ID
+					--env GROUP
 					--env GROUP_ID)
 			elif [ "${OS}" == 'Darwin' ] && [ "${GEODESIC_MAC_FORWARD_SOCKET}" == 'true' ]; then
 				# Bind-mount SSH-agent socket (available in docker-for mac Edge 2.2 release)

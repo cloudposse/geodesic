@@ -15,7 +15,7 @@ if [[ $SHLVL == 1 ]] && [[ -n $GEODESIC_HOST_UID ]] && [[ -n $GEODESIC_HOST_GID 
 		red "#  * Verify that content under /localhost is what you expect."
 		red "#  * Report the issue at https://github.com/cloudposse/geodesic/issues"
 		red "#  * Include the output of \`env | grep GEODESIC\` and \`df -a\` in your issue description."
-	elif bindfs -o nonempty ${GEODESIC_BINDFS_OPTIONS} --create-for-user="$GEODESIC_HOST_UID" --create-for-group="$GEODESIC_HOST_GID" "${GEODESIC_LOCALHOST}" /localhost; then
+	elif bindfs -o nonempty ${GEODESIC_BINDFS_OPTIONS} "--map=${GEODESIC_HOST_UID}/0:@${GEODESIC_HOST_GID}/@0" "${GEODESIC_LOCALHOST}" /localhost; then
 		green "# BindFS mapping of ${GEODESIC_LOCALHOST} to /localhost enabled."
 		green "# Files created under /localhost will have UID:GID ${GEODESIC_HOST_UID}:${GEODESIC_HOST_GID} on host."
 		export GEODESIC_LOCALHOST_MAPPED_DEVICE="${GEODESIC_LOCALHOST}"

@@ -55,7 +55,7 @@ RUN python3 -m pip install --upgrade --progress-bar off pip setuptools wheel && 
     pip install --progress-bar off -r /requirements.txt --prefix=/usr/local --no-build-isolation
 
 # Remove Python cache files
-RUN find / -name __pycache__ -exec rm -rf {} \; -prune
+RUN find / -xdev -name __pycache__ -exec rm -rf {} \; -prune
 
 #
 # Geodesic base image

@@ -190,7 +190,7 @@ usage: |-
   document, available from within the shell via `man customization`.
 
 # Other files to include in this README from the project folder
-include:
+include: []
 
 # Contributors to this project
 contributors:

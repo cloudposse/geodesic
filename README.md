@@ -1,13 +1,9 @@
 
 <!-- markdownlint-disable -->
-# Geodesic - The Ultimate DevOps Toolbox Image
-
+[![Project Banner](.github/banner.png?raw=true)](https://cpco.io/homepage)
  [![Build Status](https://github.com/cloudposse/geodesic/workflows/docker/badge.svg)](https://github.com/cloudposse/geodesic/actions?query=workflow%3Adocker) [![Latest Release](https://img.shields.io/github/release/cloudposse/geodesic.svg)](https://github.com/cloudposse/geodesic/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com) [![Slack Archive](https://img.shields.io/badge/slack-archive-blue.svg)](https://archive.sweetops.com/geodesic)
 <!-- markdownlint-restore -->
 
-[![README Header][readme_header_img]][readme_header_link]
-
-[![Cloud Posse][logo]](https://cpco.io/homepage)
 
 <!--
 
@@ -41,27 +37,20 @@ Geodesic is a robust Linux toolbox container, crafted to optimize DevOps workflo
 - **Version Control for Tools**: Geodesic facilitates easy versioning of tools for different environments, enabling repeatable setups and minimizing compatibility issues.
 - **Reusable Base Image for Toolboxes**: Empower teams to create and maintain consistent toolbox images, ensuring a standardized development environment across the board.
 
----
-
-This project is part of our comprehensive ["SweetOps"](https://cpco.io/sweetops) approach towards DevOps.
-
-
-It's 100% Open Source and licensed under the [APACHE2](LICENSE).
-
-
-
-
-
-
-
-
-
-
 ## Screenshots
 
 
 ![Demo](docs/demo.gif)
 *<br/>Example of running a shell based on the `cloudposse/geodesic` base docker image.*
+
+---
+> [!NOTE]
+> This project is part of Cloud Posse's comprehensive ["SweetOps"](https://cpco.io/sweetops) approach towards DevOps.
+>
+> It's 100% Open Source and licensed under the [APACHE2](LICENSE).
+>
+
+[![README Header][readme_header_img]][readme_header_link]
 
 
 ## Introduction
@@ -239,7 +228,7 @@ Please use the [issue tracker](https://github.com/cloudposse/geodesic/issues) to
 
 ### 💻 Developing
 
-If you are interested in being a contributor and want to get involved in developing this project or [help out](https://cpco.io/help-out) with our other projects, we would love to hear from you! Shoot us an [email][email].
+If you are interested in being a contributor and want to get involved in developing this project or [help out](https://cpco.io/help-out) with Cloud Posse's other projects, we would love to hear from you! Shoot us an [email][email].
 
 In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
@@ -317,7 +306,7 @@ under the License.
 
 All other trademarks referenced herein are the property of their respective owners.
 ---
-Copyright © 2017-2023 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2024 [Cloud Posse, LLC](https://cpco.io/copyright)
 [![README Footer][readme_footer_img]][readme_footer_link]
 [![Beacon][beacon]][website]
 <!-- markdownlint-disable -->

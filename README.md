@@ -60,35 +60,35 @@ These days, the typical software application is distributed as a docker image an
 Geodesic is best used in one of these two ways:
 
   1. **Interactive Shell** It is optimized to work as an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools all distributed through our [packages](https://github.com/cloudposse/packages). Installation of the shell is as easy as running a docker container or using it as a base image for your own Docker toolbox.
-  2.  **Docker Base Image** You can create your own `Dockerfile` and use `cloudposse/geodesic` as the base image. This way you can rapidly bring up consistent toolboxes.
+  2. **Docker Base Image** You can create your own `Dockerfile` and use `cloudposse/geodesic` as the base image. This way you can rapidly bring up consistent toolboxes.
 
 An organization may chose to leverage all of these components, or just the parts that make their life easier.
 
 We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM cloudposse/geodesic:...` pinned to a release and base OS) in your projects.
 
-> [!IMPORTANT]  
-> **Note**: Starting with Geodesic 2.0, we distribute Geodesic as a multi-platform (`linux/amd64`, `linux/arm64`) Debian-based Docker image and a single-platform (`linux/amd64`) Alpine-based image. 
+> [!IMPORTANT]
+> **Note**: Starting with Geodesic 2.0, we distribute Geodesic as a multi-platform (`linux/amd64`, `linux/arm64`) Debian-based Docker image and a single-platform (`linux/amd64`) Alpine-based image.
 > We recommend using the Debian-based image, and the `cloudposse/geodesic:latest` image now points to it. (Previously `cloudposse/geodesic:latest` was the Alpine image.)
+> We have deprioritized support for Alpine and may drop it entirely at some point.
 
-We have deprioritized support for Alpine and may drop it entirely at some point.
+### What’s New in Geodesic 2.0
 
-Starting with Geodesic version 0.138.0, we distributed 2 versions of `linux/arm64` Geodesic Docker images,
-one based on [Alpine](https://alpinelinux.org/) and one based on [Debian](https://debian.org), tagged `VERSION-BASE_OS`, e.g. `0.138.0-alpine`.
-Prior to this, all Docker images were based on Alpine only and simply tagged `VERSION`. Prior to the release of Geodesic version 1.0,
-the Alpine version was the most thoroughly tested and best supported version, and the special Docker tag `latest` continued to point
-to the latest Alpine version.
+Geodesic 2.0 introduces support for Apple Silicon (M1 and later chips), and prioritizes Debian over Alpine as the base OS.
+New uses of Geodesic should use the Debian-based image.
 
-**Note**: Geodesic is a large collection of tools. To run on an Apple natively under Geodesic, binaries need to be compiled
-for `linux/arm64`, while to run on Apple natively on outside of Geodesic (on macOS) they need to be
-compiled for `darwin/arm64`. As such, support for the Apple M1 (or later) chip is not
-fully under Cloud Posse's control, rather it depends on each tool author updating each tool.
+In order for a tool to be included in Geodesic 2.0, it must be available as both a `linux/amd64` and `linux/arm64` binary.
+(In exceptional cases, if a tool is written in the `go` language and distributes source code only, Cloud Posse may build the needed binaries.)
+A few tools that were in Geodesic 1.0 had not yet been updated to provide `linux/arm64` binaries and were omitted from Geodesic 2.0.
+(See the Geodesic 2.0 [Release Notes](https://github.com/cloudposse/geodesic/releases/tag/2.0.0)
+for details on which tools were removed.)
 
-To be included in Geodesic and for Geodesic to support both Intel and Apple CPUs, a tool project must
-distribute both a `linux/amd64` and `linux/arm64` binary. (In exceptional cases, if a tool is written
-in the `go` language and distributes source code only, Cloud Posse may build the needed binaries.)
-As of Geodesic 2.0, all but a small number of tools have started releasing the necessary binaries,
-so we removed the ones that were not available on `linux/arm64` in order to provide a consistent
-toolkit on both platforms. (See the Geodesic 2.0 [Release Notes](https://github.com/cloudposse/geodesic/releases/tag/2.0.0) for details on which tools were removed.)
+### Docker Tags and Their Evolution
+
+Geodesic Docker images are tagged with `VERSION-BASE_OS`, e.g. `2.0.0-debian` or `2.0.0-alpine`.
+The `latest` tag points to the latest Debian-based image, although we recommend pinning to a specific version.
+
+- Prior to Geodesic 2.0, the `latest` tag pointed to the latest Alpine-based image.
+- Prior to Geodesic 0.138.0, all Docker images were based on Alpine only and simply tagged `VERSION`.
 
 Want to learn more? [Check out our getting started with Geodesic guide!](https://docs.cloudposse.com/tutorials/geodesic-getting-started/)
 

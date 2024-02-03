@@ -1,26 +1,42 @@
 direnv:
-- rootfs/etc/direnv/**
+- changed-files:
+  - any-glob-to-any-file:
+    - rootfs/etc/direnv/**
 
 docker:
-- Dockerfile.alpine
-- Dockerfile.debian
+- changed-files:
+  - any-glob-to-any-file:
+    - Dockerfile.alpine
+    - Dockerfile.debian
 
 docs:
-- docs/**
+- changed-files:
+  - any-glob-to-any-file:
+    - docs/**
 
 github:
-- .github/**
+- changed-files:
+  - any-glob-to-any-file:
+    - .github/**
 
 packages:
-- packages*.txt
-- requirements*.txt
+- changed-files:
+  - any-glob-to-any-file:
+    - packages*.txt
+    - requirements*.txt
 
 scripts:
-- rootfs/usr/local/bin/**
-- rootfs/usr/bin/**
+- changed-files:
+  - any-glob-to-any-file:
+    - rootfs/usr/local/bin/**
+    - rootfs/usr/bin/**
 
 shell:
-- rootfs/etc/profile.d/**
+- changed-files:
+  - any-glob-to-any-file:
+    - rootfs/etc/profile.d/**
 
 terraform:
-- rootfs/etc/direnv/rc.d/terraform
+- changed-files:
+  - any-glob-to-any-file:
+    - rootfs/etc/direnv/rc.d/terraform

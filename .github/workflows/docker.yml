@@ -22,10 +22,10 @@ jobs:
         os: ['alpine', 'debian']
     steps:
     - name: "Checkout source code at current commit"
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: ${{ secrets.ECR_AWS_ROLE }}
         aws-region: ${{ env.AWS_REGION }}
@@ -86,18 +86,18 @@ jobs:
           echo tags=${TAGS} >> $GITHUB_OUTPUT
         fi
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
     - name: Login to DockerHub
       if: steps.prepare.outputs.publish == 'true'
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
     - name: "Build and push docker image to DockerHub"
       id: docker_build
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       with:
         push: ${{ steps.prepare.outputs.publish == 'true' }}
         platforms: ${{ steps.prepare.outputs.platforms }}

@@ -1,5 +1,5 @@
 cryptography==42.0.2
 PyYAML==6.0.1
-awscli==1.32.34
-boto3==1.34.34
+awscli==1.32.39
+boto3==1.34.39
 crudini==0.9.5

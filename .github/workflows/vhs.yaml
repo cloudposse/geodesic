@@ -18,11 +18,11 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: "Override Env for Geodesic Demo Purposes"
         run: |
@@ -36,12 +36,12 @@ jobs:
         run: make all
 
       - uses: charmbracelet/vhs-action@v1
-        with: 
+        with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: demo.tape
           install-fonts: true
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         id: auto-commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

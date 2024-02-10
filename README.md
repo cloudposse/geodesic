@@ -68,13 +68,15 @@ We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM clo
 
 > [!IMPORTANT]
 > **Note**: Starting with Geodesic 2.0, we distribute Geodesic as a multi-platform (`linux/amd64`, `linux/arm64`) Debian-based Docker image and a single-platform (`linux/amd64`) Alpine-based image.
-> We recommend using the Debian-based image, and the `cloudposse/geodesic:latest` image now points to it. (Previously `cloudposse/geodesic:latest` was the Alpine image.)
-> We have deprioritized support for Alpine and may drop it entirely at some point.
+> We recommend the Debian-based image; consequently the `cloudposse/geodesic:latest` Docker image tag now points to it. (Previously `cloudposse/geodesic:latest` referred to the Alpine image.)
+> The Alpine version is deprecated and we make no promises about future support for it.
 
 ### What’s New in Geodesic 2.0
 
 Geodesic 2.0 introduces support for Apple Silicon (M1 and later chips), and prioritizes Debian over Alpine as the base OS.
-New uses of Geodesic should use the Debian-based image.
+Users new to Geodesic should use the Debian-based version and existing users of the Alpine-based image should switch to
+the Debian-based image as soon as is convenient. They each have nearly all the same tools pre-installed, so switching
+is mainly a matter of updating how you customize it, replacing Alpine packages with Debian packages.
 
 In order for a tool to be included in Geodesic 2.0, it must be available as both a `linux/amd64` and `linux/arm64` binary.
 (In exceptional cases, if a tool is written in the `go` language and distributes source code only, Cloud Posse may build the needed binaries.)
@@ -279,7 +281,7 @@ We deliver 10x the value for a fraction of the cost of a full-time engineer. Our
 [![README Commercial Support][readme_commercial_support_img]][readme_commercial_support_link]
 ## License
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge)](https://opensource.org/licenses/Apache-2.0)
 
 See [LICENSE](LICENSE) for full details.
 

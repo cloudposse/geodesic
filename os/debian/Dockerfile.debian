@@ -1,13 +1,13 @@
 # https://www.debian.org/releases/
 # https://hub.docker.com/_/debian
-# We use codename (bullseye) instead of version number (11) because we want to select
+# We use codename (bookworm) instead of version number (12) because we want to select
 # the matching Python Docker image, which is named after the codename only.
-# bullseye-20231120 corresponds to Debian 11.8
-ARG DEBIAN_CODENAME=bullseye
+# bookworm-20240130 corresponds to Debian 12.4
+ARG DEBIAN_CODENAME=bookworm
 # Debian codenamed images are tagged with date codes rather than minor version numbers.
-ARG DEBAIN_DATECODE=20231120
+ARG DEBAIN_DATECODE=20240130
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.11.6
+ARG PYTHON_VERSION=3.11.8
 
 # https://cloud.google.com/sdk/docs/release-notes
 ARG GOOGLE_CLOUD_SDK_VERSION=455.0.0

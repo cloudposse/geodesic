@@ -290,21 +290,17 @@ COPY os/debian/rootfs/ /
 ARG TARGETARCH
 
 # For certain pagkage we like to have but are not available on arm64,
-# install them on amd64, and link to a stub script on arm64.
-# First, check if 'amd64' is part of TARGETARCH. If so, install amd64 packages.
-# If 'amd64' is not part of TARGETARCH, then check for 'arm64' and attempt to install arm64 packages or use stubs as necessary.
-RUN if echo "$TARGETARCH" | grep -q "amd64"; then \
-      echo "Installing amd64 packages..." && \
-      apt-get update && apt-get install -y \
-      $(grep -h -v '^#' /etc/apt/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); \
-    elif echo "$TARGETARCH" | grep -q "arm64"; then \
+# reverse the logic; we can get empty, arm64, amd64, or amd64,arm64 as values
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
       echo "Attempting arm64 package installations or linking stubs for amd64-only packages..." && \
       for pkg in $(grep -h -v '^#' /etc/apt/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); do \
         # 'no-arm64-support' is a script that explains the lack of arm64 support
         ln -s /usr/local/bin/no-arm64-support /usr/local/bin/$pkg; \
       done; \
     else \
-      echo "Unsupported architecture in TARGETARCH"; \
+      echo "Installing amd64 packages..." && \
+      apt-get update && apt-get install -y \
+      $(grep -h -v '^#' /etc/apt/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); \
     fi
 
 # Move AWS CLI v1 aside and install AWS CLI v2 as default, leaving both available as alternatives.
@@ -318,8 +314,8 @@ RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
 # but it is updated several times a week, so we choose to just get the latest.
 # ARG AWS_CLI_VERSION=2.2.8
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
-    if echo "$TARGETARCH" | grep -q "amd64"; then \
-      AWS_ARCH=x86_64; else AWS_ARCH=aarch64; fi && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+      AWS_ARCH=aarch64; else AWS_ARCH=x86_64; fi && \
     curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
     cd $AWSTMPDIR && \
     unzip -qq awscliv2.zip && \
@@ -343,8 +339,8 @@ ENV AWS_PAGER="less -FRX"
 ARG SESSION_MANAGER_PLUGIN_VERSION
 # does not install both versions of session manager but the original did not either
 # start with this and refactor to handle multi-platform session-manager if needed
-RUN if echo "$TARGETARCH" | grep -q "amd64"; then \
-      AWS_ARCH=64bit; else AWS_ARCH="$TARGETARCH"; fi && \
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      AWS_ARCH="arm64"; else AWS_ARCH="64bit"; fi && \
     curl -sSL "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${AWS_ARCH}/session-manager-plugin.deb" \
     -o "/tmp/session-manager-plugin.deb" && \
     sudo dpkg -i /tmp/session-manager-plugin.deb && \
@@ -369,11 +365,6 @@ CMD ["-c", "boot"]
 ARG DEV_VERSION
 ENV GEODESIC_DEV_VERSION=$DEV_VERSION
 ENV GEODESIC_VERSION="${GEODESIC_VERSION}${GEODESIC_DEV_VERSION:+ (${GEODESIC_DEV_VERSION})}"
-
-# Additional inputs from Makefile or Github Actions
-ARG VCS_URL
-ARG VCS_REF
-ARG BUILD_DATE
 
 LABEL maintainer='hello@cloudposse.com' \
       description='Geodesic is a DevOps Linux Toolbox in Docker' \

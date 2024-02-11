@@ -9,6 +9,11 @@ export DOCKER_FILE ?= os/$(DOCKER_BASE_OS)/Dockerfile.$(DOCKER_BASE_OS)
 export DOCKER_BUILD_FLAGS = --build-arg DEV_VERSION=$(shell printf "%s/%s" $$(git describe --tags 2>/dev/null || echo "unk") $$(git branch --no-color --show-current || echo "unk"))
 export INSTALL_PATH ?= /usr/local/bin
 export APP_NAME ?= geodesic
+export BUILD_DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%S%z")
+export TARGETARCH ?= $(shell uname -m)
+export VCS_REF ?= $(shell git log -1 --format="%H" -- $(DOCKER_FILE))
+export VCS_URL ?= $(shell git config --get remote.origin.url)
+export ARGS := BUILD_DATE TARGETARCH VCS_REF VCS_URL
 
 include $(shell curl --silent -o .build-harness "https://raw.githubusercontent.com/cloudposse/build-harness/master/templates/Makefile.build-harness"; echo .build-harness)
 

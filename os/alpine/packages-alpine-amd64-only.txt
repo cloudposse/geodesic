@@ -1,0 +1,22 @@
+# These are packages that are only supported on amd64,
+# because they are not published to CloudPosse's Cloudsmith repo
+# in apk arm64 aarch64 versions
+aws-iam-authenticator@cloudposse
+chamber@cloudposse
+fetch@cloudposse
+figurine@cloudposse
+github-commenter@cloudposse
+helm3@cloudposse
+kubectl@cloudposse
+kubens@cloudposse
+rbac-lookup@cloudposse
+retry@cloudposse
+sops@cloudposse
+terragrunt@cloudposse
+terrahelp@cloudposse
+variant@cloudposse
+variant2@cloudposse
+vert@cloudposse
+gosu@cloudposse
+helmfile@cloudposse
+stern@cloudposse

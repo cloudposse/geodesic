@@ -27,6 +27,12 @@ ARG HELM_DIFF_VERSION=3.8.1
 # We expect this has been fixed now with helm-diff 3.3.2 + helm-git 0.11.1
 ARG HELM_GIT_VERSION=0.15.1
 
+ARG VERSION
+ARG VCS_URL
+ARG VCS_REF
+ARG BUILD_DATE
+ARG TARGETARCH
+
 
 FROM python:${PYTHON_VERSION}-slim-${DEBIAN_CODENAME} as python
 
@@ -62,7 +68,22 @@ RUN find / -xdev -name __pycache__ -exec rm -rf {} \; -prune
 #
 FROM debian:${DEBIAN_CODENAME}-${DEBAIN_DATECODE}-slim
 
+# Re-declare ARGs for this stage to use them in LABELs
+ARG BUILD_DATE
+ARG DEBIAN_CODENAME
+ARG DEBAIN_DATECODE
+ARG PYTHON_VERSION
+ARG GOOGLE_CLOUD_SDK_VERSION
+ARG KUBECTX_COMPLETION_VERSION
+ARG KUBE_PS1_VERSION
+ARG HELM_DIFF_VERSION
+ARG HELM_GIT_VERSION
+ARG SESSION_MANAGER_PLUGIN_VERSION
+ARG TARGETARCH
+ARG VCS_URL
+ARG VCS_REF
 ARG VERSION
+
 ENV GEODESIC_VERSION=$VERSION
 ENV GEODESIC_OS=debian
 
@@ -270,15 +291,21 @@ ARG TARGETARCH
 
 # For certain pagkage we like to have but are not available on arm64,
 # install them on amd64, and link to a stub script on arm64.
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
+# First, check if 'amd64' is part of TARGETARCH. If so, install amd64 packages.
+# If 'amd64' is not part of TARGETARCH, then check for 'arm64' and attempt to install arm64 packages or use stubs as necessary.
+RUN if echo "$TARGETARCH" | grep -q "amd64"; then \
+      echo "Installing amd64 packages..." && \
       apt-get update && apt-get install -y \
       $(grep -h -v '^#' /etc/apt/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); \
-    else \
+    elif echo "$TARGETARCH" | grep -q "arm64"; then \
+      echo "Attempting arm64 package installations or linking stubs for amd64-only packages..." && \
       for pkg in $(grep -h -v '^#' /etc/apt/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); do \
-        ln  -s /usr/local/bin/no-arm64-support /usr/local/bin/$pkg; \
+        # 'no-arm64-support' is a script that explains the lack of arm64 support
+        ln -s /usr/local/bin/no-arm64-support /usr/local/bin/$pkg; \
       done; \
+    else \
+      echo "Unsupported architecture in TARGETARCH"; \
     fi
-
 
 # Move AWS CLI v1 aside and install AWS CLI v2 as default, leaving both available as alternatives.
 # We do this at the end because we need cache busting from above to get us the latest AWS CLI v2
@@ -291,7 +318,7 @@ RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
 # but it is updated several times a week, so we choose to just get the latest.
 # ARG AWS_CLI_VERSION=2.2.8
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
-    if [ "$TARGETARCH" = "amd64" ]; then \
+    if echo "$TARGETARCH" | grep -q "amd64"; then \
       AWS_ARCH=x86_64; else AWS_ARCH=aarch64; fi && \
     curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
     cd $AWSTMPDIR && \
@@ -314,9 +341,11 @@ ENV AWS_PAGER="less -FRX"
 
 # Install AWS Session Manager Plugin
 ARG SESSION_MANAGER_PLUGIN_VERSION
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
+# does not install both versions of session manager but the original did not either
+# start with this and refactor to handle multi-platform session-manager if needed
+RUN if echo "$TARGETARCH" | grep -q "amd64"; then \
       AWS_ARCH=64bit; else AWS_ARCH="$TARGETARCH"; fi && \
-    curl -L "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${AWS_ARCH}/session-manager-plugin.deb" \
+    curl -sSL "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${AWS_ARCH}/session-manager-plugin.deb" \
     -o "/tmp/session-manager-plugin.deb" && \
     sudo dpkg -i /tmp/session-manager-plugin.deb && \
     rm /tmp/session-manager-plugin.deb
@@ -340,3 +369,26 @@ CMD ["-c", "boot"]
 ARG DEV_VERSION
 ENV GEODESIC_DEV_VERSION=$DEV_VERSION
 ENV GEODESIC_VERSION="${GEODESIC_VERSION}${GEODESIC_DEV_VERSION:+ (${GEODESIC_DEV_VERSION})}"
+
+# Additional inputs from Makefile or Github Actions
+ARG VCS_URL
+ARG VCS_REF
+ARG BUILD_DATE
+
+LABEL maintainer='hello@cloudposse.com' \
+      description='Geodesic is a DevOps Linux Toolbox in Docker' \
+      base-image=$GEODESIC_OS:$DEBIAN_CODENAME \
+      build-date=$BUILD_DATE \
+      vcs-ref=$VCS_REF \
+      vcs-url=$VCS_URL \
+      architecture=$TARGETARCH \
+      org.opencontainers.image.architecture=$TARGETARCH \
+      org.opencontainers.image.base.name=$GEODESIC_OS:$DEBIAN_CODENAME \
+      org.opencontainers.image.description='Geodesic is a DevOps Linux Toolbox in Docker' \
+      org.opencontainers.image.title='Geodesic' \
+      org.opencontainers.image.vendor='CloudPosse' \
+      org.opencontainers.image.version=$GEODESIC_VERSION \
+      org.opencontainers.image.created=$BUILD_DATE \
+      org.opencontainers.image.revision=$VCS_REF \
+      org.opencontainers.image.url='https://geodesic.tools' \
+      org.opencontainers.image.source=$VCS_URL

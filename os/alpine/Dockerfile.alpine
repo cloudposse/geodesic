@@ -20,6 +20,8 @@ ARG HELM_DIFF_VERSION=3.8.1
 # We expect this has been fixed now with helm-diff 3.3.2 + helm-git 0.11.1
 ARG HELM_GIT_VERSION=0.15.1
 
+ARG TARGETARCH
+
 #
 # Python Dependencies
 #
@@ -68,11 +70,14 @@ RUN tar zxf bindfs-${BINDFS_VERSION}.tar.gz && cd bindfs-${BINDFS_VERSION}/ && \
 FROM ubuntu:22.04 as session-manager-plugin
 
 ARG SESSION_MANAGER_PLUGIN_VERSION
-RUN apt-get update \
-    && apt-get install -y curl \
-    && curl -Lo "session-manager-plugin.deb" "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_64bit/session-manager-plugin.deb" \
-    && dpkg -i "session-manager-plugin.deb" \
-    && /usr/local/sessionmanagerplugin/bin/session-manager-plugin  --version
+# does not handle installing both arm64 and amd64 session-manager on a multiplatform docker image
+# but the original did not also, and could not handle arm64 images either
+# and we will never generate "32bit" x86 arch
+RUN if echo "$TARGETARCH" | grep -q "amd64"; then \
+       AWS_ARCH=64bit; else AWS_ARCH="arm64"; fi \
+    && apt-get update && apt-get install -y curl \
+    && curl -sSLo "session-manager-plugin.deb" "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${AWS_ARCH}/session-manager-plugin.deb" \
+    && dpkg -i "session-manager-plugin.deb"
 
 #
 # Google Cloud SDK
@@ -83,10 +88,19 @@ FROM google/cloud-sdk:$GOOGLE_CLOUD_SDK_VERSION-alpine as google-cloud-sdk
 # Geodesic base image
 #
 FROM alpine:$ALPINE_VERSION
+#COPY --from=sessionmanagerplugin /usr/local/sessionmanagerplugin/bin/session-manager-plugin /usr/local/bin/
 
 ARG VERSION
 ENV GEODESIC_VERSION=$VERSION
 ENV GEODESIC_OS=alpine
+
+# Carry over ARGs to the final stage
+ARG ALPINE_VERSION
+ARG BUILD_DATE
+ARG TARGETARCH
+ARG VCS_URL
+ARG VCS_REF
+
 
 # Set XDG environment variables per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 # This is not a "multi-user" system, so we'll use special directories under
@@ -138,11 +152,21 @@ RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/a
 ##########################################################################################
 
 # Install alpine package manifest
-COPY packages.txt os/alpine/packages-alpine.txt /etc/apk/
+COPY packages.txt packages-amd64-only.txt os/alpine/packages-alpine.txt os/alpine/packages-alpine-amd64-only.txt /etc/apk/
+RUN cat /etc/apk/packages-alpine-amd64-only.txt >> /etc/apk/packages-amd64-only.txt
 
 ## Here is where we would copy in the repo checksum in an attempt to ensure updates bust the Docker build cache
-
-RUN apk add --update $(grep -h -v '^#' /etc/apk/packages.txt /etc/apk/packages-alpine.txt) && \
+RUN if echo "$TARGETARCH" | grep -q "amd64"; then \
+      echo "Installing amd64 packages..." && \
+      apk add --update $(grep -h -v '^#' /etc/apk/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); \
+    elif echo "$TARGETARCH" | grep -q "arm64"; then \
+      echo "Attempting arm64 package installations or linking stubs for amd64-only packages..." && \
+      for pkg in $(grep -h -v '^#' /etc/apk/packages-amd64-only.txt | sed -E 's/@(cloudposse|community|testing)//g' ); do \
+        ln -s /usr/local/bin/no-arm64-support /usr/local/bin/$pkg; \
+      done; \
+    else \
+      echo "Unsupported architecture in TARGETARCH"; \
+    fi; \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
@@ -151,7 +175,9 @@ RUN apk add --update $(grep -h -v '^#' /etc/apk/packages.txt /etc/apk/packages-a
 RUN echo "net.ipv6.conf.all.disable_ipv6=0" > /etc/sysctl.d/00-ipv6.conf
 
 # Disable vim from reading a swapfile (incompatible with goofys)
-RUN echo 'set noswapfile' >> /etc/vim/vimrc
+# /etc/vim does not always exist
+RUN mkdir -p /etc/vim && \
+    echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
 
@@ -178,9 +204,10 @@ RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d
 
 # gcloud config writes successful status updates to stderr, but we want to preserve
 # stderr for real errors in need of action.
-RUN { gcloud config set core/disable_usage_reporting true --installation && \
-      gcloud config set component_manager/disable_update_check true --installation && \
-      gcloud config set metrics/environment github_docker_image --installation; } 2>&1
+# this assumes 'python' which is prob python3 and may need an alias
+#RUN { gcloud config set core/disable_usage_reporting true --installation && \
+#      gcloud config set component_manager/disable_update_check true --installation && \
+#      gcloud config set metrics/environment github_docker_image --installation; } 2>&1
 
 # Explicitly set  KUBECONFIG to enable kube_ps1 prompt
 ENV KUBECONFIG=/conf/.kube/config
@@ -194,7 +221,8 @@ RUN chmod 600 $KUBECONFIG
 #
 # Set KUBERNETES_VERSION and KOPS_BASE_IMAGE in /conf/kops/kops.envrc
 #
-RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
+# might not be present
+#RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 ARG KUBECTX_COMPLETION_VERSION
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubens.bash /etc/bash_completion.d/kubens.sh
 ADD https://raw.githubusercontent.com/ahmetb/kubectx/v${KUBECTX_COMPLETION_VERSION}/completion/kubectx.bash /etc/bash_completion.d/kubectx.sh
@@ -237,9 +265,10 @@ RUN chmod 755 /etc/bash_completion.d/kubens.sh /etc/bash_completion.d/kubectx.sh
 ARG HELM_DIFF_VERSION
 ARG HELM_GIT_VERSION
 
-RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
-    && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
-    && rm -rf $XDG_CACHE_HOME/helm
+# also not present find it
+#RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v${HELM_DIFF_VERSION} \
+#    && helm3 plugin install https://github.com/aslafy-z/helm-git.git --version ${HELM_GIT_VERSION} \
+#    && rm -rf $XDG_CACHE_HOME/helm
 
 # helm version 3 uses XDG variables set above.
 # XDG directory permissions updated at end of installs.
@@ -322,7 +351,7 @@ COPY os/alpine/rootfs/ /
 COPY docs/ /usr/share/docs/
 
 # Build man pages
-RUN /usr/local/bin/docs update
+#RUN /usr/local/bin/docs update
 
 # Make sure that "user specific" directories we are sharing
 # are in fact available to all users
@@ -337,3 +366,21 @@ CMD ["-c", "boot"]
 ARG DEV_VERSION
 ENV GEODESIC_DEV_VERSION=$DEV_VERSION
 ENV GEODESIC_VERSION="${GEODESIC_VERSION}${GEODESIC_DEV_VERSION:+ (${GEODESIC_DEV_VERSION})}"
+
+LABEL maintainer='hello@cloudposse.com' \
+      description='Geodesic is a DevOps Linux Toolbox in Docker' \
+      base-image="$GEODESIC_OS:$ALPINE_VERSION" \
+      build-date="$BUILD_DATE" \
+      vcs-ref="$VCS_REF" \
+      vcs-url="$VCS_URL" \
+      architecture="$TARGETARCH" \
+      org.opencontainers.image.architecture="$TARGETARCH" \
+      org.opencontainers.image.base.name="$GEODESIC_OS:$ALPINE_VERSION" \
+      org.opencontainers.image.description='Geodesic is a DevOps Linux Toolbox in Docker' \
+      org.opencontainers.image.title='Geodesic' \
+      org.opencontainers.image.vendor='CloudPosse' \
+      org.opencontainers.image.version="$GEODESIC_VERSION" \
+      org.opencontainers.image.created="$BUILD_DATE" \
+      org.opencontainers.image.revision="$VCS_REF" \
+      org.opencontainers.image.url='https://geodesic.tools' \
+      org.opencontainers.image.source="$VCS_URL"

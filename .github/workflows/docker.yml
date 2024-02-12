@@ -1,5 +1,7 @@
 name: "docker"
 on:
+  workflow_dispatch:
+
   pull_request:
     types: [opened, synchronize, reopened]
   release:
@@ -14,6 +16,7 @@ jobs:
       id-token: write
       contents: read
     env:
+      LATEST_TAG_OS: 'debian'
       IAM_ROLE_SESSION_NAME: geodesic-ci
       AWS_REGION: us-east-1
       ECR_REGISTRY: public.ecr.aws/ # Images will be published to `public.ecr.aws/cloudposse/$repositoryName`
@@ -44,7 +47,6 @@ jobs:
       # We therefore designate whichever base OS version we recommend as the best supported
       # as the one to get the "latest" tag. Initially that will be Alpine.
       env:
-        LATEST_TAG_OS: 'debian'
         BASE_OS: ${{matrix.os}}
 
       run: |
@@ -63,6 +65,8 @@ jobs:
         fi
         printf "Version resolved to %s\n" "${VERSION}"
         echo version=${VERSION} >> $GITHUB_OUTPUT
+        printf "Commit SHA resolved to %s\n" "${COMMIT_SHA}"
+        echo commit_sha=${COMMIT_SHA} >> $GITHUB_OUTPUT
         TAGS="${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
         TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:sha-${COMMIT_SHA:0:7}-${BASE_OS}"
         if [[ -n $VERSION ]]; then
@@ -85,6 +89,45 @@ jobs:
           printf "%s\n" "${TAGS}"
           echo tags=${TAGS} >> $GITHUB_OUTPUT
         fi
+    - name: Prepare Metadata for Docker Images
+      id: Metadata
+      uses: docker/metadata-action@v5
+      env:
+        DOCKER_METADATA_PR_HEAD_SHA: true
+        DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+      with:
+        images: |
+          cloudposse/geodesic
+          ${{ env.ECR_REGISTRY }}cloudposse/geodesic
+        flavor: |
+          suffix=-${{ matrix.os }}
+          latest=false
+        # Geodesic's original code is licensed under the Apache 2.0 License (Apache-2.0)
+        # but it contains many other components with different licenses.
+        labels: |
+          org.opencontainers.image.title=Geodesic
+          org.opencontainers.image.description=Geodesic is a DevOps Linux Toolbox in Docker
+          org.opencontainers.image.vendor=Cloud Posse, LLC
+          org.opencontainers.image.licenses=NOASSERTION
+        annotations: |
+          org.opencontainers.image.title=Geodesic
+          org.opencontainers.image.description=Geodesic is a DevOps Linux Toolbox in Docker
+          org.opencontainers.image.vendor=Cloud Posse, LLC
+          org.opencontainers.image.licenses=NOASSERTION
+        tags: |
+          type=semver,pattern={{version}}
+          type=ref,event=pr,prefix=pr-,suffix=-${{matrix.os}}
+          type=sha,prefix=sha-,suffix=-${{matrix.os}}
+          type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.action == 'published' }}
+          type=raw,value=latest,suffix=,enable=${{ github.event_name == 'release' && github.event.action == 'published' && matrix.os == env.LATEST_TAG_OS }}
+
+    - name: Show metadata
+      run: |
+        printf "Old tags for cloudposse/geodesic\n\n"
+        printf "  %s\n" $(tr , " " <<<'${{ steps.prepare.outputs.tags }}') | sort
+        printf "\n\nNew tags for cloudposse/geodesic\n\n%s\n\n" '${{ steps.Metadata.outputs.tags }}'
+
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
     - name: Set up Docker Buildx
@@ -99,9 +142,13 @@ jobs:
       id: docker_build
       uses: docker/build-push-action@v5
       with:
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         push: ${{ steps.prepare.outputs.publish == 'true' }}
         platforms: ${{ steps.prepare.outputs.platforms }}
-        tags: ${{ steps.prepare.outputs.tags }}
+        tags: ${{ steps.Metadata.outputs.tags }}
+        labels: ${{ steps.Metadata.outputs.labels }}
+        annotations: ${{ steps.Metadata.outputs.annotations }}
         file: ./os/${{matrix.os}}/Dockerfile.${{matrix.os}}
         build-args: |
           VERSION=${{ steps.prepare.outputs.version }}

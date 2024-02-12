@@ -66,6 +66,14 @@ ARG VERSION
 ENV GEODESIC_VERSION=$VERSION
 ENV GEODESIC_OS=debian
 
+# TARGETARCH and TARGETOS are defined by buildkit, but not available with other builders
+ARG TARGETARCH
+ARG TARGETOS
+RUN [ -n "$TARGETARCH" ] && [ -n "$TARGETOS" ] || (echo "Geodesic must be built with buildkit."; echo "See: https://docs.docker.com/build/buildkit/"; false)
+RUN [ "$TARGETARCH" = "amd64" ] || [ "$TARGETARCH" = "arm64" ] || (echo "Unsupported TARGETARCH: \"$TARGETARCH\"" && false)
+RUN [ "$TARGETOS" = "linux" ] || (echo "Unsupported TARGETOS: \"$TARGETOS\"" && false)
+
+
 # Set a default terminal to "dumb" (headless) to make `tput` happy when running scripts.
 # When we launch Geodesic for interactive use, we forward the host value of `TERM`
 ENV TERM=dumb
@@ -265,8 +273,6 @@ ENV MAKEFLAGS="--no-print-directory"
 COPY rootfs/ /
 COPY os/debian/rootfs/ /
 
-
-ARG TARGETARCH
 
 # For certain pagkage we like to have but are not available on arm64,
 # install them on amd64, and link to a stub script on arm64.

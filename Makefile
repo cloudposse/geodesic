@@ -6,7 +6,12 @@ export DOCKER_TAG ?= $(DOCKER_BASE_TAG)-$(DOCKER_BASE_OS)
 export DOCKER_IMAGE_NAME_BASE ?= $(DOCKER_IMAGE):$(DOCKER_BASE_TAG)
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
 export DOCKER_FILE ?= os/$(DOCKER_BASE_OS)/Dockerfile.$(DOCKER_BASE_OS)
-export DOCKER_BUILD_FLAGS = --build-arg DEV_VERSION=$(shell printf "%s/%s" $$(git describe --tags 2>/dev/null || echo "unk") $$(git branch --no-color --show-current || echo "unk"))
+export DOCKER_DEV_BUILD_FLAGS = --build-arg DEV_VERSION=$(shell printf "%s/%s" $$(git describe --tags 2>/dev/null || echo "unk") $$(git branch --no-color --show-current || echo "unk"))
+# Force Alpine build to be amd64, allow Debian build to be alternate platform by setting BUILD_ARCH
+export BUILD_ARCH ?= $(if $(subst alpine,,$(DOCKER_BASE_OS)),,amd64)
+export DOCKER_ARCH_BUILD_FLAGS = $(if $(BUILD_ARCH), --platform=linux/$(BUILD_ARCH),)
+# Set DOCKER_EXTRA_BUILD_FLAGS to add to the default build flags, set DOCKER_BUILD_FLAGS to override
+export DOCKER_BUILD_FLAGS ?= $(DOCKER_EXTRA_BUILD_FLAGS) $(DOCKER_ARCH_BUILD_FLAGS) $(DOCKER_DEV_BUILD_FLAGS)
 export INSTALL_PATH ?= /usr/local/bin
 export APP_NAME ?= geodesic
 

@@ -88,6 +88,12 @@ ARG VERSION
 ENV GEODESIC_VERSION=$VERSION
 ENV GEODESIC_OS=alpine
 
+ARG TARGETARCH
+ARG TARGETOS
+RUN [ -n "$TARGETARCH" ] && [ -n "$TARGETOS" ] || (echo "Geodesic must be built with buildkit."; echo "See: https://docs.docker.com/build/buildkit/"; false)
+RUN [ "$TARGETARCH" = "amd64" ] || (echo "Unsupported TARGETARCH: \"$TARGETARCH\"" >&2 && false)
+RUN [ "$TARGETOS" = "linux" ] || (echo "Unsupported TARGETOS: \"$TARGETOS\"" >&2 && false)
+
 # Set XDG environment variables per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 # This is not a "multi-user" system, so we'll use special directories under
 # - /etc as the global configuration dir instead of default $HOME/.config

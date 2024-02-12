@@ -123,10 +123,9 @@ jobs:
 
     - name: Show metadata
       run: |
-        printf "Old tags for cloudposse/geodesic\n\n%s\n\n" '${{ toJSON(steps.prepare.outputs.tags) }}'
-        printf "New tags for cloudposse/geodesic\n\n%s\n\n" '${{ steps.Metadata.outputs.tags }}'
-        printf "Metadata annotations for cloudposse/geodesic\n\n%s\n\n" '${{ steps.Metadata.outputs.annotations }}'
-        printf "Metadata labels for cloudposse/geodesic\n\n%s\n\n" '${{ steps.Metadata.outputs.labels }}'
+        printf "Old tags for cloudposse/geodesic\n\n"
+        printf "  %s\n" $(tr , " " <<<'${{ steps.prepare.outputs.tags }}' | sort)
+        printf "\n\nNew tags for cloudposse/geodesic\n\n%s\n\n" '${{ steps.Metadata.outputs.tags }}'
 
 
     - name: Set up QEMU

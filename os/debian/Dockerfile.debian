@@ -66,8 +66,10 @@ ARG VERSION
 ENV GEODESIC_VERSION=$VERSION
 ENV GEODESIC_OS=debian
 
+# TARGETARCH and TARGETOS are defined by buildkit, but not available with other builders
 ARG TARGETARCH
 ARG TARGETOS
+RUN [ -n "$TARGETARCH" ] && [ -n "$TARGETOS" ] || (echo "Geodesic must be built with buildkit."; echo "See: https://docs.docker.com/build/buildkit/"; false)
 RUN [ "$TARGETARCH" = "amd64" ] || [ "$TARGETARCH" = "arm64" ] || (echo "Unsupported TARGETARCH: \"$TARGETARCH\"" && false)
 RUN [ "$TARGETOS" = "linux" ] || (echo "Unsupported TARGETOS: \"$TARGETOS\"" && false)
 

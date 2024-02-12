@@ -90,6 +90,7 @@ ENV GEODESIC_OS=alpine
 
 ARG TARGETARCH
 ARG TARGETOS
+RUN [ -n "$TARGETARCH" ] && [ -n "$TARGETOS" ] || (echo "Geodesic must be built with buildkit."; echo "See: https://docs.docker.com/build/buildkit/"; false)
 RUN [ "$TARGETARCH" = "amd64" ] || (echo "Unsupported TARGETARCH: \"$TARGETARCH\"" >&2 && false)
 RUN [ "$TARGETOS" = "linux" ] || (echo "Unsupported TARGETOS: \"$TARGETOS\"" >&2 && false)
 

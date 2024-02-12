@@ -109,15 +109,11 @@ jobs:
           org.opencontainers.image.description=Geodesic is a DevOps Linux Toolbox in Docker
           org.opencontainers.image.vendor=Cloud Posse, LLC
           org.opencontainers.image.licenses=NOASSERTION
-        assertions: |
-          index:org.opencontainers.image.title=Geodesic
-          index:org.opencontainers.image.description=Geodesic is a DevOps Linux Toolbox in Docker
-          index:org.opencontainers.image.vendor=Cloud Posse, LLC
-          index:org.opencontainers.image.licenses=NOASSERTION
-          manifest:org.opencontainers.image.title=Geodesic
-          manifest:org.opencontainers.image.description=Geodesic is a DevOps Linux Toolbox in Docker
-          manifest:org.opencontainers.image.vendor=Cloud Posse, LLC
-          manifest:org.opencontainers.image.licenses=NOASSERTION
+        annotations: |
+          org.opencontainers.image.title=Geodesic
+          org.opencontainers.image.description=Geodesic is a DevOps Linux Toolbox in Docker
+          org.opencontainers.image.vendor=Cloud Posse, LLC
+          org.opencontainers.image.licenses=NOASSERTION
         tags: |
           type=semver,pattern={{version}}
           type=ref,event=pr,prefix=pr-,suffix=-${{matrix.os}}

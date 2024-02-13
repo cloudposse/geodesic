@@ -7,9 +7,24 @@ BANNER_FONT="${BANNER_FONT:-Nancyj.flf}" # " IDE parser fix
 
 if [ "${SHLVL}" == "1" ]; then
 	function _check_support() {
-		[[ $(arch) != "x86_64" ]] || grep -qsE 'GenuineIntel|AuthenticAMD' /proc/cpuinfo && return
-		yellow '# Detected Apple M1 emulating Intel CPU. Support for this configuration is evolving.'
-		yellow '# Report issues and read about solutions at https://github.com/cloudposse/geodesic/issues/719'
+		if grep -qsE 'GenuineIntel|AuthenticAMD' /proc/cpuinfo; then
+			# Running natively on Intel/AMD
+			if [ "$GEODESIC_OS" = "alpine" ]; then
+				red '# DEPRECATION NOTICE:'
+				red '# This version of Geodesic is based on Alpine Linux and is deprecated.'
+				red '# Please use the Debian-based Geodesic.'
+			fi
+		elif [[ $(arch) = "x86_64" ]]; then # Apple CPU emulating Intel CPU
+			if [ "$GEODESIC_OS" = "alpine" ]; then
+				red '# DEPRECATION NOTICE:'
+				red '# Detected Apple CPU emulating Intel CPU.'
+				red '# Alpine-based Geodesic does not have native Apple CPU support and is deprecated.'
+				red '# Please use the Debian-based Geodesic, which does have native Apple CPU support.'
+			else
+				yellow '# Detected Apple CPU emulating Intel CPU. Geodesic is available with native Apple CPU support.'
+				yellow '# Check your configuration to ensure you are pulling and building Geodesic with your native architecture.'
+			fi
+		fi
 	}
 
 	function _header() {

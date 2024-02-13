@@ -7,6 +7,8 @@
 
 if [[ $SHLVL == 1 ]] && [[ -n $GEODESIC_HOST_UID ]] && [[ -n $GEODESIC_HOST_GID ]] &&
 	[[ -n $GEODESIC_LOCALHOST ]] && df -a | grep -q " ${GEODESIC_LOCALHOST}\$"; then
+	# bindfs on Alpine does not support the `-o nonempty` option
+	[[ $GEODESIC_OS == "alpine" ]] || o_nonempty="-o nonempty"
 	if [[ $(df -a | grep ' /localhost$' | cut -f1 -d' ') == ${GEODESIC_LOCALHOST} ]]; then
 		echo "# Host file ownership mapping already configured"
 		export GEODESIC_LOCALHOST_MAPPED_DEVICE="${GEODESIC_LOCALHOST}"
@@ -15,7 +17,7 @@ if [[ $SHLVL == 1 ]] && [[ -n $GEODESIC_HOST_UID ]] && [[ -n $GEODESIC_HOST_GID 
 		red "#  * Verify that content under /localhost is what you expect."
 		red "#  * Report the issue at https://github.com/cloudposse/geodesic/issues"
 		red "#  * Include the output of \`env | grep GEODESIC\` and \`df -a\` in your issue description."
-	elif bindfs -o nonempty ${GEODESIC_BINDFS_OPTIONS} "--map=${GEODESIC_HOST_UID}/0:@${GEODESIC_HOST_GID}/@0" "${GEODESIC_LOCALHOST}" /localhost; then
+	elif bindfs $o_nonempty ${GEODESIC_BINDFS_OPTIONS} "--map=${GEODESIC_HOST_UID}/0:@${GEODESIC_HOST_GID}/@0" "${GEODESIC_LOCALHOST}" /localhost; then
 		green "# BindFS mapping of ${GEODESIC_LOCALHOST} to /localhost enabled."
 		green "# Files created under /localhost will have UID:GID ${GEODESIC_HOST_UID}:${GEODESIC_HOST_GID} on host."
 		export GEODESIC_LOCALHOST_MAPPED_DEVICE="${GEODESIC_LOCALHOST}"

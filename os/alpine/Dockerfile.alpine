@@ -1,7 +1,7 @@
 # https://alpinelinux.org/
-ARG ALPINE_VERSION=3.18.5
+ARG ALPINE_VERSION=3.18.6
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=455.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=463.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.5
 # https://github.com/jonmosco/kube-ps1/releases
@@ -13,7 +13,7 @@ ARG BINDFS_VERSION=1.17.6
 
 # Helm plugins:
 # https://github.com/databus23/helm-diff/releases
-ARG HELM_DIFF_VERSION=3.8.1
+ARG HELM_DIFF_VERSION=3.9.4
 # https://github.com/aslafy-z/helm-git/releases
 # We had issues with helm-diff 3.1.3 + helm-git 0.9.0,
 # previous workaround was to pin helm-git to version 0.8.1.
@@ -70,7 +70,7 @@ FROM ubuntu:22.04 as session-manager-plugin
 ARG SESSION_MANAGER_PLUGIN_VERSION
 RUN apt-get update \
     && apt-get install -y curl \
-    && curl -Lo "session-manager-plugin.deb" "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_64bit/session-manager-plugin.deb" \
+    && curl -sSLo "session-manager-plugin.deb" "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_64bit/session-manager-plugin.deb" \
     && dpkg -i "session-manager-plugin.deb" \
     && /usr/local/sessionmanagerplugin/bin/session-manager-plugin  --version
 

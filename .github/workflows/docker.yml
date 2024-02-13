@@ -110,6 +110,7 @@ jobs:
           org.opencontainers.image.vendor=Cloud Posse, LLC
           org.opencontainers.image.licenses=NOASSERTION
         annotations: |
+          org.opencontainers.image.authors=maintainers@cloudposse.com
           org.opencontainers.image.title=Geodesic
           org.opencontainers.image.description=Geodesic is a DevOps Linux Toolbox in Docker
           org.opencontainers.image.vendor=Cloud Posse, LLC

@@ -121,14 +121,16 @@ COPY packages.txt packages-amd64-only.txt os/debian/packages-debian.txt /etc/apt
 RUN apt-get update && apt-get install -y apt-utils curl
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/bash.deb.sh' | bash
 
-# Install Google package repo
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-
+# Install packages, but do not yet install the Google package repo because we do not want their version of kubectl
 RUN apt-get update && apt-get install -y \
     $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
+
+# Install Google package repo
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
 
 # Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)
 
@@ -291,22 +293,27 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 # We do this at the end because we need cache busting from above to get us the latest AWS CLI v2
 
 RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
-    update-alternatives --install /usr/local/bin/aws aws /usr/local/bin/aws1 1
+    mv /usr/local/bin/aws_completer /usr/local/bin/aws1_completer && \
+    update-alternatives --install /usr/local/bin/aws aws /usr/local/bin/aws1 1  \
+    --slave /usr/local/bin/aws_completer aws_completer /usr/local/bin/aws1_completer
 
 # Install AWS CLI 2
 # Get AWS CLI V2 version from https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst if you want
 # but it is updated several times a week, so we choose to just get the latest.
 # ARG AWS_CLI_VERSION=2.2.8
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
-    if [ "$TARGETARCH" = "amd64" ]; then \
-      AWS_ARCH=x86_64; else AWS_ARCH=aarch64; fi && \
-    curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
-    cd $AWSTMPDIR && \
-    unzip -qq awscliv2.zip && \
-    ./aws/install -i /usr/share/aws/v2 -b /usr/share/aws/v2/bin && \
-    update-alternatives --install /usr/local/bin/aws aws /usr/share/aws/v2/bin/aws 2 && \
-    update-alternatives --set aws /usr/share/aws/v2/bin/aws && ln -s /usr/share/aws/v2/bin/aws /usr/local/bin/aws2 && \
-    rm -rf $AWSTMPDIR
+      if [ "$TARGETARCH" = "amd64" ]; then \
+        AWS_ARCH=x86_64; else AWS_ARCH=aarch64; fi && \
+      curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}${AWS_CLI_VERSION:+-${AWS_CLI_VERSION}}.zip" -o "$AWSTMPDIR/awscliv2.zip" && \
+      savedir="$PWD" && cd $AWSTMPDIR && \
+      unzip -qq awscliv2.zip && \
+      ./aws/install -i /usr/share/aws/v2 -b /usr/share/aws/v2/bin && \
+      update-alternatives --install /usr/local/bin/aws aws /usr/share/aws/v2/bin/aws 2 \
+      --slave /usr/local/bin/aws_completer aws_completer /usr/share/aws/v2/bin/aws_completer && \
+      update-alternatives --set aws /usr/share/aws/v2/bin/aws && \
+      ln -s /usr/share/aws/v2/bin/aws /usr/local/bin/aws2 && \
+      ln -s /usr/share/aws/v2/bin/aws_completer /usr/local/bin/aws2_completer && \
+      cd "$savedir" && rm -rf $AWSTMPDIR
 
 # We recommend AWS_PAGER="less -FRX" but you can override it in your Dockerfile
 # or in your Geodesic preferences (see `man customization`).
@@ -326,7 +333,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     curl -sSL "https://s3.amazonaws.com/session-manager-downloads/plugin/${SESSION_MANAGER_PLUGIN_VERSION}/ubuntu_${AWS_ARCH}/session-manager-plugin.deb" \
     -o "/tmp/session-manager-plugin.deb" && \
     sudo dpkg -i /tmp/session-manager-plugin.deb && \
-    rm /tmp/session-manager-plugin.deb
+    rm -f /tmp/session-manager-plugin.deb
 
 # Install documentation
 COPY docs/ /usr/share/docs/

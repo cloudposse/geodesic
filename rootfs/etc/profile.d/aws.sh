@@ -20,10 +20,12 @@ if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME}/config}" ] && [ -d ${GEODESIC
 	echo '[default]' >${AWS_CONFIG_FILE}
 fi
 
-# Install autocompletion rules
-if command -v aws_completer >/dev/null; then
-	complete -C "$(command -v aws_completer)" aws
-fi
+# Install autocompletion rules for aws CLI v1 and v2
+for aws in aws aws1 aws2; do
+	if command -v ${aws}_completer >/dev/null; then
+	complete -C "$(command -v ${aws}_completer)" ${aws}
+	fi
+done
 
 # This is the default assume-role function, but it can be overridden/replaced later
 # by aws-okta or aws-vault, etc. or could have already been overridden.

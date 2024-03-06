@@ -1,4 +1,16 @@
 #!/bin/bash
 
+# If someone manages to install the real file on the system,
+# then redirect the link that is causing this script to run
+# and execute the real file. We do not remove it because that
+# causes problems with command hashing.
+if [ -x /usr/bin/$(basename "$0") ]; then
+  if [ -L "$0" ]; then
+    rm -f "$0"
+    ln -s /usr/bin/$(basename "$0") "$0"
+  fi
+  exec /usr/bin/$(basename "$0") "$@"
+fi
+
 printf "$(tput setaf 1)%s is not supported on this platform (arm64)$(tput setaf 0)\n" "$(basename "$0")" >&2
 exit 1

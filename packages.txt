@@ -52,7 +52,8 @@ pandoc@cloudposse
 postgresql-client
 pwgen
 python3
-# no arm64 rakkess@cloudposse
+# We specially custom built and packaged rakkess v0.5.1 for linux/arm64 to support EKS access entry validation 2024-03-06
+rakkess@cloudposse
 rbac-lookup@cloudposse
 retry@cloudposse
 # abandoned 2021-03-08 scenery@cloudposse

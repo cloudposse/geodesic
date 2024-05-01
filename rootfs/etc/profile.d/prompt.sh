@@ -37,6 +37,7 @@ _install_prompter
 unset -f _install_prompter
 
 function prompter() {
+	local hook
 	for hook in ${PROMPT_HOOKS[@]}; do
 		"${hook}"
 	done

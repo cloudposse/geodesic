@@ -61,11 +61,11 @@ function require_cfvars() {
 }
 
 function red() {
-	echo "$(tput setaf 1)$*$(tput sgr0)"
+	echo "$(tput setaf 1)$*$(tput op)"
 }
 
 function yellow() {
-	echo "$(tput setaf 3)$*$(tput sgr0)"
+	echo "$(tput setaf 3)$*$(tput op)"
 }
 
 echo "REQUIRE VARS: checking for presence of required variables"

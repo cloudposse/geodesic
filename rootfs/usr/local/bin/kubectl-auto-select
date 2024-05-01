@@ -5,11 +5,11 @@ set -eo pipefail
 INSTALL=false
 
 function red() {
-	echo "$(tput setaf 1)$*$(tput sgr0)" >&2
+	echo "$(tput setaf 1)$*$(tput op)" >&2
 }
 
 function green() {
-	echo "$(tput setaf 2)$*$(tput sgr0)"
+	echo "$(tput setaf 2)$*$(tput op)"
 }
 
 function usage() {

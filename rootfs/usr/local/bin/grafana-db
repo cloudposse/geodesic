@@ -170,11 +170,11 @@ function parse_grafana_response() {
 }
 
 function red() {
-	echo "$(tput setaf 1)$*$(tput sgr0)"
+	echo "$(tput setaf 1)$*$(tput op)"
 }
 
 function green() {
-	echo "$(tput setaf 2)$*$(tput sgr0)"
+	echo "$(tput setaf 2)$*$(tput op)"
 }
 
 # Keep us from exiting the shell if this file is sourced by using return instead of exit

@@ -1,25 +1,22 @@
 function update_terraform_prompt() {
-	[[ ${GEODESIC_TF_PROMPT_ENABLED:-false} == "true" ]] || return 0
-	# Test if there are any files with names ending in ".tf"
-	if compgen -G '*.tf' >/dev/null; then
-		export GEODESIC_TF_PROMPT_ACTIVE=true
-		if [[ $GEODESIC_TERRAFORM_WORKSPACE_PROMPT_ENABLED != "true" ]]; then
-			if [ ! -d ".terraform" ]; then
-				export GEODESIC_TF_PROMPT_TF_NEEDS_INIT=true
-				export GEODESIC_TF_PROMPT_LINE=" -> Run '$(green init-terraform)' to use this project"
-			else
-				export GEODESIC_TF_PROMPT_TF_NEEDS_INIT=false
-				export GEODESIC_TF_PROMPT_LINE=""
-			fi
-		else
+	if [[ ${GEODESIC_TF_PROMPT_ENABLED:-false} == "true" ]]; then
+		# Test if there are any files with names ending in ".tf"
+		if compgen -G '*.tf' >/dev/null; then
+			export GEODESIC_TF_PROMPT_ACTIVE=true
 			local terraform_workspace=$(terraform workspace show)
 			if [ "$terraform_workspace" == "default" ]; then
-				export GEODESIC_TF_PROMPT_TF_NEEDS_INIT=true
-				export GEODESIC_TF_PROMPT_LINE=" -> terraform workspace '$(red "$terraform_workspace")'. Use '$(yellow make workspace/...)' to switch terraform workspaces"
+				if [[ -d ${TF_DATA_DIR:-.terraform} ]]; then
+					export GEODESIC_TF_PROMPT_TF_NEEDS_INIT=false
+				else
+					export GEODESIC_TF_PROMPT_TF_NEEDS_INIT=true
+				fi
+				export GEODESIC_TF_PROMPT_LINE=" terraform workspace:{$(red-n default)}"
 			else
 				export GEODESIC_TF_PROMPT_TF_NEEDS_INIT=false
-				export GEODESIC_TF_PROMPT_LINE=" workspace:{"$'\x01'$(tput setaf 2)$'\x02'"$terraform_workspace"$'\x01'$(tput sgr0)$'\x02'"}"
+				export GEODESIC_TF_PROMPT_LINE=" terraform workspace:{$(green-n "$terraform_workspace")}"
 			fi
+		else
+			export GEODESIC_TF_PROMPT_ACTIVE=false
 		fi
 	else
 		export GEODESIC_TF_PROMPT_ACTIVE=false

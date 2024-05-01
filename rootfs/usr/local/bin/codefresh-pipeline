@@ -148,11 +148,11 @@ function compare_pipeline() {
 }
 
 function red() {
-	echo "$(tput setaf 1)$*$(tput sgr0)" 1>&2
+	echo "$(tput setaf 1)$*$(tput op)" 1>&2
 }
 
 function green() {
-	echo "$(tput setaf 2)$*$(tput sgr0)" 1>&2
+	echo "$(tput setaf 2)$*$(tput op)" 1>&2
 }
 
 function _check_requirements() {

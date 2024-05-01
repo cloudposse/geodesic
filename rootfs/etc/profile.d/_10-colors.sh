@@ -10,6 +10,19 @@
 # The main change is that it uses the terminal's default colors for foreground and background,
 # whereas the previous version "reset" the color by setting it to black, which fails in dark mode.
 
+function update_terminal_mode() {
+	local dark_mode=$(_is_term_dark_mode -b)
+	if [[ ! -v _geodesic_tput_cache ]] || [[ "${_geodesic_tput_cache[dark_mode]}" != "$dark_mode" ]]; then
+		_geodesic_tput_cache_init
+	else
+		local mode="light"
+		if [[ $dark_mode == "true" ]]; then
+			mode="dark"
+		fi
+		echo "Not updating terminal mode from $mode to $mode"
+	fi
+}
+
 # We call `tput` several times for every prompt, and it can add up, so we cache the results.
 function _geodesic_tput_cache_init() {
 	declare -g -A _geodesic_tput_cache
@@ -47,6 +60,7 @@ function _geodesic_tput_cache_init() {
 		_geodesic_tput_cache[yellow]=${_geodesic_tput_cache[magenta]} # yellow is too light, use magenta instead
 	fi
 
+	local key
 	for key in "${!_geodesic_tput_cache[@]}"; do
 		if [[ -n ${_geodesic_tput_cache["$key"]} ]]; then
 			# Note, we cannot use printf for "-off" because command substitution strips trailing newlines
@@ -73,6 +87,7 @@ function _geodesic_tput_cache_init() {
 
 	# Save the terminal type so we can invalidate the cache if it changes
 	_geodesic_tput_cache[TERM]="$TERM"
+	_geodesic_tput_cache[dark_mode]="$(_is_term_dark_mode -b)"
 }
 
 # Colorize text using ANSI escape codes.
@@ -114,12 +129,18 @@ function _geodesic_color() {
 # Also, "yellow" is not necessarily yellow, it varies with the terminal theme, and
 # would be better named "caution" or "info".
 
-for color in red green yellow cyan; do
-	eval "function ${color}() { _geodesic_color ${color} \"\$*\"; }"
-	eval "bold-${color}() { _geodesic_color bold-${color} \"\$*\"; }"
-	eval "function ${color}-n() { _geodesic_color ${color}-n \"\$*\"; }"
-	eval "bold-${color}-n() { _geodesic_color bold-${color}-n \"\$*\"; }"
-done
+function _generate_color_functions() {
+	local color
+	for color in red green yellow cyan; do
+		eval "function ${color}() { _geodesic_color ${color} \"\$*\"; }"
+		eval "bold-${color}() { _geodesic_color bold-${color} \"\$*\"; }"
+		eval "function ${color}-n() { _geodesic_color ${color}-n \"\$*\"; }"
+		eval "bold-${color}-n() { _geodesic_color bold-${color}-n \"\$*\"; }"
+	done
+}
+
+_generate_color_functions
+unset _generate_color_functions
 
 function bold() {
 	_geodesic_color bold "$*"

@@ -85,6 +85,7 @@ function _load_geodesic_preferences() {
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: LOADING preference files
 
 	_search_geodesic_dirs preference_list preferences
+	local file
 	for file in "${preference_list[@]}"; do
 		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: loading preference file "$file"
 		source "$file"

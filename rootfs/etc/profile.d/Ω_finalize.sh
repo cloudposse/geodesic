@@ -16,6 +16,7 @@ function _dedupe_prompt_command() {
 	local prompt_command=(${PROMPT_COMMAND//;/ })
 	PROMPT_COMMAND=
 
+	local cmd
 	for cmd in "${prompt_command[@]}"; do
 		[[ $PROMPT_COMMAND =~ $cmd ]] || PROMPT_COMMAND="${PROMPT_COMMAND}$cmd;"
 	done

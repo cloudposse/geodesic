@@ -85,6 +85,7 @@ function _expand_dir_or_file() {
 
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource" in "$dir"
 
+  local item
 	for item in "${dir}/$resource" "${dir}/${resource}.d"/*; do
 		if [[ -f $item ]]; then
 			[[ $item =~ $exclude ]] && ([[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: excluding "$item" || true) && continue

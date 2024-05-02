@@ -37,6 +37,7 @@ _install_prompter
 unset -f _install_prompter
 
 function prompter() {
+	local hook
 	for hook in ${PROMPT_HOOKS[@]}; do
 		"${hook}"
 	done
@@ -63,8 +64,7 @@ function geodesic_prompt() {
 	# Color escapes: 1=red, 2=green, 3=yellow, 6=cyan
 	plain)
 		# 8859-1 codepoints:
-		# '\[' and '\]' are bash prompt delimiters around non-printing characters
-		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK="\["$(tput bold)$(tput setab 2)"\]»\["$(tput sgr0)"\]" # green
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK="$(green-n »)"
 		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'·'
 		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'=>'
 		[[ -z $BANNER_MARK ]] && BANNER_MARK=$'§'
@@ -83,17 +83,17 @@ function geodesic_prompt() {
 		# default set, Z NOTATION SCHEMA PIPING, is from the "Supplemental Mathematical Operators" Unicode block
 		# which is not included by default in the Ubuntu terminal font.
 		# See https://github.com/cloudposse/geodesic/issues/417
-		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u221a\x01'$(tput sgr0)$'\x02'     # green bold '√'
-		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 1)$'\x02\u2717\x01'$(tput sgr0)$'\x02' # red bold '✗'
-		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4'                                                            # '➤'
-		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉'                                                                                                # \u29c9 TWO JOINED SQUARES
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK="$(bold-green-n $'\u221a')"   # bold green '√'
+		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK="$(bold-red-n $'\u2717')" # red bold '✗'
+		[[ -z $BLACK_RIGHTWARDS_ARROWHEAD ]] && BLACK_RIGHTWARDS_ARROWHEAD=$'\u27A4'               # '➤'
+		[[ -z $BANNER_MARK ]] && BANNER_MARK='⧉'                                                   # \u29c9 TWO JOINED SQUARES
 		;;
 
 	*)
 		# default
 		#	ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u2713\x01'$(tput sgr0)$'\x02'   # green bold '✓'
-		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 2)$'\x02\u221a\x01'$(tput sgr0)$'\x02'     # green bold '√'
-		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK=$'\x01'$(tput bold)$(tput setaf 1)$'\x02\u2717\x01'$(tput sgr0)$'\x02' # red bold '✗'
+		[[ -z $ASSUME_ROLE_ACTIVE_MARK ]] && ASSUME_ROLE_ACTIVE_MARK="$(bold-green-n $'\u221a')"   # bold green '√'
+		[[ -z $ASSUME_ROLE_INACTIVE_MARK ]] && ASSUME_ROLE_INACTIVE_MARK="$(bold-red-n $'\u2717')" # red bold '✗'
 		# Options for arrow per https://github.com/cloudposse/geodesic/issues/417#issuecomment-477836676
 		# '»' ($'\u00bb') RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK from the Latin-1 supplement Unicode block
 		# '≫' ($'\u226b') MUCH GREATER-THAN and
@@ -108,7 +108,7 @@ function geodesic_prompt() {
 
 	# "(HOST)" with "HOST" in bold red. Only test for unset ("-") instead of unset or null (":-") so that
 	# the feature can be suppressed by setting PROMPT_HOST_MARK to null.
-	[[ -z $PROMPT_HOST_MARK ]] && PROMPT_HOST_MARK="${PROMPT_HOST_MARK-$'(\x01'$(tput bold)$(tput setaf 1)$'\x02HOST\x01'$(tput sgr0)$'\x02)'}"
+	[[ -z $PROMPT_HOST_MARK ]] && PROMPT_HOST_MARK="${PROMPT_HOST_MARK-($(bold-red-n HOST))}"
 
 	local level_prompt
 	case $SHLVL in
@@ -117,7 +117,7 @@ function geodesic_prompt() {
 	3) level_prompt='⋮' ;; # vertical elipsis \u22ee from Mathematical Symbols
 	*) level_prompt="$SHLVL" ;;
 	esac
-	level_prompt=$'\x01'$(tput bold)$'\x02'"${level_prompt}"$'\x01'$(tput sgr0)$'\x02'
+	level_prompt=$(bold "${level_prompt}")
 
 	if [ -n "$ASSUME_ROLE" ]; then
 		STATUS=${ASSUME_ROLE_ACTIVE_MARK}
@@ -163,8 +163,8 @@ function geodesic_prompt() {
 		if [[ -n ${GEODESIC_TF_PROMPT_LINE} ]]; then
 			tf_prompt=" ${tf_mark} ${GEODESIC_TF_PROMPT_LINE}\n"
 		fi
-		if [[ $GEODESIC_TERRAFORM_WORKSPACE_PROMPT_ENABLED == "true" ]]; then
-			KUBE_PS1_PREFIX="$(yellow "cluster:")("
+		if [[ GEODESIC_TF_PROMPT_ENABLED == "true" ]]; then
+			KUBE_PS1_PREFIX="$(yellow-n "cluster:")("
 		fi
 	fi
 	if [[ $old_kube_ps1_prefix != $KUBE_PS1_PREFIX ]]; then
@@ -172,8 +172,10 @@ function geodesic_prompt() {
 	fi
 
 	if [ -n "${BANNER}" ]; then
+		local nsprompt
+		[[ $GEODESIC_PROMPT_SHOW_NAMESPACE == true ]] && [[ -n $NAMESPACE ]] && nsprompt=" ($(bold ${NAMESPACE}))"
 		# Intentional 2 spaces between banner mark and banner in order to offset it from level prompt
-		PS1=$' ${BANNER_MARK}'"  ${BANNER} $(kube_ps1)${secrets_active}\n${tf_prompt}${dir_prompt}"
+		PS1=$' ${BANNER_MARK}'"  ${BANNER}${nsprompt} $(kube_ps1)${secrets_active}\n${tf_prompt}${dir_prompt}"
 	else
 		PS1="${tf_prompt}${dir_prompt}"
 	fi

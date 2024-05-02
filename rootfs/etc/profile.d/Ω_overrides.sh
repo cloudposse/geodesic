@@ -12,6 +12,8 @@ function _load_geodesic_overrides() {
 	local override_list=()
 
 	_search_geodesic_dirs override_list overrides
+
+	local file
 	for file in "${override_list[@]}"; do
 		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: loading override file "$file"
 		source "$file"

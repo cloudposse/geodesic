@@ -4,6 +4,8 @@ aws-iam-authenticator@cloudposse
 bash
 bash-completion
 bats@community
+# bc is for doing floating point math in the shell
+bc
 # no arm64 cfssl@cloudposse
 coreutils
 chamber@cloudposse

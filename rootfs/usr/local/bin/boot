@@ -3,7 +3,7 @@
 [[ -t 1 ]] && (($# == 0)) && exec bash --login
 
 if [[ $1 == "install" ]]; then
-  function color() { echo "$(tput setaf 1)$*$(tput setaf 0)" >&2; }
+  function color() { echo "$(tput setaf 1)$*$(tput op)" >&2; }
   color "# EXIT THIS SHELL and on your host computer,"
   color "# run the following to install the script that runs "
 elif [[ $1 = "wrapper" ]]; then

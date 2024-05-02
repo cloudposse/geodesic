@@ -2,11 +2,11 @@
 
 # This script must be installed in /usr/bin, where it will be overwritten by the real docker binary.
 function red() {
-	echo "$(tput setaf 1)$*$(tput sgr0)"
+	echo "$(tput setaf 1)$*$(tput op)"
 }
 
 function green() {
-	echo "$(tput setaf 2)$*$(tput sgr0)"
+	echo "$(tput setaf 2)$*$(tput op)"
 }
 
 red docker command not found.

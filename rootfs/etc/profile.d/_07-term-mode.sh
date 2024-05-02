@@ -16,6 +16,7 @@
 
 # Normally this function produces no output, but with -b, it outputs "true" or "false",
 # with -bb it outputs "true", "false", or "unknown". (Otherwise, unknown assume light mode.)
+# With -m it outputs "dark" or "light", with -mm it outputs "dark", "light", or "unknown".
 # and always returns true. With -l it outputs integer luminance values for foreground
 # and background colors. With -ll it outputs labels on the luminance values as well.
 function _is_term_dark_mode() {
@@ -35,9 +36,11 @@ function _is_term_dark_mode() {
 			echo $(tput setaf 1)* TRACE: "Terminal did not respond to OSC 10 and 11 queries.$(tput sgr0)" >&2
 		fi
 		# If we cannot determine the color scheme, we assume light mode for historical reasons.
-		if [[ "$*" =~ -b ]]; then
-			if [[ "$*" =~ -bb ]]; then
+		if [[ "$*" =~ -b ]] || [[ "$*" =~ -m ]]; then
+			if [[ "$*" =~ -bb ]] || [[ "$*" =~ -mm ]]; then
 				echo "unknown"
+			elif [[ "$*" =~ -m ]]; then
+				echo "light"
 			else
 				echo "false"
 			fi
@@ -65,17 +68,22 @@ function _is_term_dark_mode() {
 	fi
 	# If the background luminance is less than the foreground luminance, we are in dark mode.
 	if ((bg_lum < fg_lum)); then
-		if [[ "$*" =~ -b ]]; then
+		if [[ "$*" =~ -m ]]; then
+			echo "dark"
+		elif [[ "$*" =~ -b ]]; then
 			echo "true"
 		fi
 		return 0
 	fi
-	# If we cannot determine the color scheme, we assume light mode for historical reasons.
-	if [[ "$*" =~ -b ]]; then
+	# Not in dark mode, must be in light mode.
+	if [[ "$*" =~ -m ]]; then
+		echo "light"
+
+	elif [[ "$*" =~ -b ]]; then
 		echo "false"
-		return 0 # when returning text, always return success
+	else
+		return 1
 	fi
-	return 1
 }
 
 # Converting RGB to luminance is a lot more complex than summing the values.

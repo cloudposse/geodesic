@@ -149,7 +149,7 @@ function geodesic_prompt() {
 	fi
 	dir_prompt+=$'${GEODESIC_PROMPT_GLYPHS-${BLACK_RIGHTWARDS_ARROWHEAD} }'
 
-	update_terraform_prompt
+	_update_terraform_prompt
 	local old_kube_ps1_prefix="$KUBE_PS1_PREFIX"
 	KUBE_PS1_PREFIX="("
 	local tf_prompt

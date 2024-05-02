@@ -1,4 +1,4 @@
-function update_terraform_prompt() {
+function _update_terraform_prompt() {
 	if [[ ${GEODESIC_TF_PROMPT_ENABLED:-false} == "true" ]]; then
 		# Test if there are any files with names ending in ".tf"
 		if compgen -G '*.tf' >/dev/null; then

@@ -2,15 +2,15 @@
 # https://hub.docker.com/_/debian
 # We use codename (bookworm) instead of version number (12) because we want to select
 # the matching Python Docker image, which is named after the codename only.
-# bookworm-20240130 corresponds to Debian 12.4
+# bookworm-20240423 corresponds to Debian 12.5
 ARG DEBIAN_CODENAME=bookworm
 # Debian codenamed images are tagged with date codes rather than minor version numbers.
-ARG DEBAIN_DATECODE=20240130
+ARG DEBAIN_DATECODE=20240423
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.12.2
+ARG PYTHON_VERSION=3.12.3
 
 # https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=463.0.0
+ARG GOOGLE_CLOUD_SDK_VERSION=472.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.5
 # https://github.com/jonmosco/kube-ps1/releases
@@ -113,6 +113,9 @@ USER root
 # Keep dpkg quiet about running non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
+# Make Cloud Posse repo the preference for `kubectl` because
+# the Google Cloud SDK repo uses a different versioning scheme
+COPY os/debian/rootfs/etc/apt/preferences.d/kubectl-preferences /etc/apt/preferences.d/kubectl-preferences
 COPY packages.txt packages-amd64-only.txt os/debian/packages-debian.txt /etc/apt/
 
 ## Here is where we would copy in the repo checksum in an attempt to ensure updates bust the Docker build cache
@@ -121,15 +124,24 @@ COPY packages.txt packages-amd64-only.txt os/debian/packages-debian.txt /etc/apt
 RUN apt-get update && apt-get install -y apt-utils curl
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/bash.deb.sh' | bash
 
-# Install packages, but do not yet install the Google package repo because we do not want their version of kubectl
-RUN apt-get update && apt-get install -y \
-    $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
-    mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
-    touch /conf/.gitconfig
+# Add OpenTofu package repo
+RUN curl -fsSL https://get.opentofu.org/opentofu.gpg > /etc/apt/keyrings/opentofu.gpg && \
+    curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | \
+      gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg >/dev/null && \
+    chmod a+r /etc/apt/keyrings/opentofu.gpg /etc/apt/keyrings/opentofu-repo.gpg && \
+    printf "%s [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main\n" \
+        "deb" "deb-src" > /etc/apt/sources.list.d/opentofu.list && \
+    chmod a+r /etc/apt/sources.list.d/opentofu.list
 
 # Install Google package repo
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+# Install packages
+RUN apt-get update && apt-get install -y \
+    $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
+    mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
+    touch /conf/.gitconfig
 
 
 # Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)

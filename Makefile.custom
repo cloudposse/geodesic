@@ -7,7 +7,7 @@
 # how to customize your Dockerfile.
 # Note that Geodesic supports runtime customizations that
 # do not require a custom Dockerfile: See
-#   https://github.com/cloudposse/geodesic/blob/master/docs/customization.md
+#   https://github.com/cloudposse/geodesic/blob/main/docs/customization.md
 #
 #
 # The `make` variables build up to $(DOCKER_IMAGE):$(DOCKER_TAG) being

@@ -11,7 +11,7 @@ logo - Explanation of the Geodesic Logo
 
 ## SYNOPSIS
 
-![Geodesic Logo](https://raw.githubusercontent.com/cloudposse/geodesic/master/docs/geodesic-small.png)
+![Geodesic Logo](https://raw.githubusercontent.com/cloudposse/geodesic/main/docs/geodesic-small.png)
 
 In mathematics, a geodesic line is the shortest distance between two points on a sphere. It's also a solid structure composed of geometric shapes such as hexagons.
 

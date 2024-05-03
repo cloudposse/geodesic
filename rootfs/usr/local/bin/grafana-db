@@ -23,7 +23,7 @@ Usage:
 
 Example:
   # Load the latest version of kube-prometheus standard Kubernetes Grafana dashboards, replacing any already uploaded
-  grafana-db --overwrite https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+  grafana-db --overwrite https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 
   # Load the Kubernetes Capacity dashboard with gnetId 5228 from Grafana.com
   grafana-db 5228

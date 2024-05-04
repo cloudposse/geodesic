@@ -1,7 +1,5 @@
 # https://alpinelinux.org/
 ARG ALPINE_VERSION=3.18.6
-# https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=463.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.5
 # https://github.com/jonmosco/kube-ps1/releases
@@ -9,7 +7,7 @@ ARG KUBE_PS1_VERSION=0.8.0
 # https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#plugin-version-history
 ARG SESSION_MANAGER_PLUGIN_VERSION=latest
 # https://bindfs.org/downloads/
-ARG BINDFS_VERSION=1.17.6
+ARG BINDFS_VERSION=1.17.7
 
 # Helm plugins:
 # https://github.com/databus23/helm-diff/releases
@@ -39,7 +37,9 @@ RUN apk add --update -U python3 python3-dev py3-pip libffi-dev gcc linux-headers
 #   - libxml2
 #   - libxslt
 
-COPY requirements.txt /requirements.txt
+COPY requirements.txt /requirements-global.txt
+COPY os/alpine/requirements.txt /requirements-alpine.txt
+RUN cat /requirements-alpine.txt /requirements-global.txt > /requirements.txt
 
 # The cryptography package has to be built specially for Alpine before it can be installed,
 # so we have to install it on the "host" (which builds a wheel) before installing for the distribution.
@@ -74,10 +74,6 @@ RUN apt-get update \
     && dpkg -i "session-manager-plugin.deb" \
     && /usr/local/sessionmanagerplugin/bin/session-manager-plugin  --version
 
-#
-# Google Cloud SDK
-#
-FROM google/cloud-sdk:$GOOGLE_CLOUD_SDK_VERSION-alpine as google-cloud-sdk
 
 #
 # Geodesic base image
@@ -135,6 +131,8 @@ RUN printf "@community %s\n" "$(grep -E 'alpine/v[^/]+/community' /etc/apk/repos
 # Install the @testing repo tag
 RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 
+# Install 3.19 community as @opentofu to get OpenTofu v1.6.2
+RUN echo "@opentofu https://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /etc/apk/repositories
 
 ##########################################################################################
 # See Dockerfile.options for how to install `glibc` for greater compatibility, including #
@@ -169,24 +167,6 @@ COPY --from=python /usr/local/bin/bindfs /usr/local/bin/bindfs
 
 # Install AWS CLI session manager plugin
 COPY --from=session-manager-plugin /usr/local/sessionmanagerplugin/bin/session-manager-plugin /usr/local/bin/session-manager-plugin
-
-#
-# Install Google Cloud SDK
-#
-ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
-
-COPY --from=google-cloud-sdk /google-cloud-sdk/ /usr/local/google-cloud-sdk/
-
-RUN ln -s /usr/local/google-cloud-sdk/completion.bash.inc /etc/bash_completion.d/gcloud.sh && \
-    ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/gsutil /usr/local/bin/ && \
-    ln -s /usr/local/google-cloud-sdk/bin/bq /usr/local/bin/
-
-# gcloud config writes successful status updates to stderr, but we want to preserve
-# stderr for real errors in need of action.
-RUN { gcloud config set core/disable_usage_reporting true --installation && \
-      gcloud config set component_manager/disable_update_check true --installation && \
-      gcloud config set metrics/environment github_docker_image --installation; } 2>&1
 
 # Explicitly set  KUBECONFIG to enable kube_ps1 prompt
 ENV KUBECONFIG=/conf/.kube/config

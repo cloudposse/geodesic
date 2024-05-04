@@ -1,0 +1,7 @@
+Package: kubectl
+Pin: origin "dl.cloudsmith.io"
+Pin-Priority: 900
+
+Package: kubectl
+Pin: origin "packages.cloud.google.com"
+Pin-Priority: 50

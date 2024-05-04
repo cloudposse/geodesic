@@ -31,16 +31,12 @@ helm@cloudposse
 helm3@cloudposse
 helmfile@cloudposse
 jq
-# The latest version of kubectl is wrong for most of our customers, but the
-# version-specific packages are organized to automatically configure the latest
-# installed version as the default, meaning if we install a version and a user
-# installs an earlier version, the earlier version will not be the default version
-# even though the user explicitly installed it, which is very confusing.
-# Also, we do not have a good mechanism for keeping the installed kubectl version
-# up-to-date other than referencing the latest package. So we install the latest
-# version and hope it throws appropriate errors and/or warnings when working
-# with an older version, which is a better bet than hoping an old version gives
-# appropriate error messages about working with a newer version.
+# We install the Cloud Posse kubectl package, which has the latest version of kubectl.
+# However, for Debian, we have to suppress the kubectl package from the
+# Google Cloud SDK repository, because they use an entirely different versioning scheme.
+# Also, we use the Debian "alternatives" system to manage the kubectl binary,
+# and provide `kubectl-1.x` packages for each minor version of kubectl,
+# and they automatically configure themselves to override this default version.
 kubectl@cloudposse
 kubectx@cloudposse
 kubens@cloudposse
@@ -54,7 +50,7 @@ pandoc@cloudposse
 postgresql-client
 pwgen
 python3
-# We specially custom built and packaged rakkess v0.5.1 for linux/arm64 to support EKS access entry validation 2024-03-06
+# We specially built and packaged rakkess v0.5.1 for linux/arm64 to support EKS access entry validation 2024-03-06
 rakkess@cloudposse
 rbac-lookup@cloudposse
 retry@cloudposse

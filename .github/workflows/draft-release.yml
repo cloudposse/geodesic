@@ -3,13 +3,13 @@ name: draft-release
 on:
   push:
     branches:
-    - master
+    - main
 
 jobs:
   semver:
     runs-on: ubuntu-latest
     steps:
-    # Drafts your next Release notes as Pull Requests are merged into "master"
+    # Drafts your next Release notes as Pull Requests are merged into "main"
     - uses: release-drafter/release-drafter@v6
       with:
         publish: false

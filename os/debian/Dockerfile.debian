@@ -132,8 +132,9 @@ RUN curl -fsSL https://get.opentofu.org/opentofu.gpg > /etc/apt/keyrings/opentof
     chmod a+r /etc/apt/sources.list.d/opentofu.list
 
 # Install Google package repo
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-RUN curl -1sLf 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"  \
+      > /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
 
 # Install packages
 RUN apt-get update && apt-get install -y \

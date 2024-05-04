@@ -12,9 +12,9 @@ ENV LESS=R
 # Our older Geodesic configurations relied on `direnv`, which we no longer recommend,
 # preferring YAML configuration files instead.
 ENV DIRENV_ENABLED=true
-# When using DIRENV with Terraform, you can enable special prompt support
-ENV GEODESIC_TERRAFORM_WORKSPACE_PROMPT_ENABLED=true
-ENV GEODESIC_TF_PROMPT_ACTIVE=true
+
+# When using Terraform worksapces, you can enable special prompt support
+ENV GEODESIC_TF_PROMPT_ENABLED=true
 
 # Our older Geodesic configuration uses multiple Makefiles, like Makefile.tasks
 # and depends on this setting, however this setting is set by default by `direnv`
@@ -24,6 +24,23 @@ ENV GEODESIC_TF_PROMPT_ACTIVE=true
 # it for trusted directories under `/conf` and therefore it will not affect
 # `make` outside of this directory tree.
 ENV MAKE_INCLUDES="Makefile Makefile.*"
+
+
+#
+# Install Google Cloud SDK (requires Python)
+# This is separate so that updating it does not invalidate the Docker cache layer with all the packages installed above
+# https://cloud.google.com/sdk/docs/release-notes
+ARG GOOGLE_CLOUD_CLI_VERSION
+ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
+
+RUN apt-get update && apt-get install -y google-cloud-cli=${GOOGLE_CLOUD_CLI_VERSION}-\*
+
+# gcloud config writes successful status updates to stderr, but we want to preserve
+# stderr for real errors in need of action.
+RUN { gcloud config set core/disable_usage_reporting true --installation && \
+      gcloud config set component_manager/disable_update_check true --installation && \
+      gcloud config set metrics/environment github_docker_image --installation; } 2>&1
+
 
 
 ####################################################################################

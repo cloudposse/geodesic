@@ -9,8 +9,6 @@ ARG DEBAIN_DATECODE=20240423
 # Find the current version of Python at https://www.python.org/downloads/source/
 ARG PYTHON_VERSION=3.12.3
 
-# https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION=472.0.0
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.5
 # https://github.com/jonmosco/kube-ps1/releases
@@ -164,21 +162,6 @@ WORKDIR /tmp
 # Copy python dependencies
 COPY --from=python /usr/local/ /usr/local/
 
-#
-# Install Google Cloud SDK (requires Python)
-# This is separate so that updating it does not invalidate the Docker cache layer with all the packages installed above
-# https://cloud.google.com/sdk/docs/release-notes
-ARG GOOGLE_CLOUD_SDK_VERSION
-ENV CLOUDSDK_CONFIG=/localhost/.config/gcloud/
-
-RUN apt-get update && apt-get install -y google-cloud-sdk=${GOOGLE_CLOUD_SDK_VERSION}-\*
-
-# gcloud config writes successful status updates to stderr, but we want to preserve
-# stderr for real errors in need of action.
-RUN { gcloud config set core/disable_usage_reporting true --installation && \
-      gcloud config set component_manager/disable_update_check true --installation && \
-      gcloud config set metrics/environment github_docker_image --installation; } 2>&1
-
 # Explicitly set  KUBECONFIG to enable kube_ps1 prompt
 ENV KUBECONFIG=/conf/.kube/config
 # Install an empty kubeconfig to suppress some warnings
@@ -304,10 +287,11 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 # Move AWS CLI v1 aside and install AWS CLI v2 as default, leaving both available as alternatives.
 # We do this at the end because we need cache busting from above to get us the latest AWS CLI v2
 
-RUN mv /usr/local/bin/aws /usr/local/bin/aws1 && \
+RUN if [[ -x /usr/local/bin/aws ]]; then mv /usr/local/bin/aws /usr/local/bin/aws1 && \
     mv /usr/local/bin/aws_completer /usr/local/bin/aws1_completer && \
     update-alternatives --install /usr/local/bin/aws aws /usr/local/bin/aws1 1  \
-    --slave /usr/local/bin/aws_completer aws_completer /usr/local/bin/aws1_completer
+    --slave /usr/local/bin/aws_completer aws_completer /usr/local/bin/aws1_completer; \
+    fi
 
 # Install AWS CLI 2
 # Get AWS CLI V2 version from https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst if you want

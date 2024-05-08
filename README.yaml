@@ -108,7 +108,14 @@ usage: |-
 
   In general we recommend creating a customized version of Geodesic by creating your own `Dockerfile` starting with
   ```
-  ARG VERSION=2.0.0
+  # We always recommend pinning versions to avoid surprises and breaking changes.
+  # We put the version up top here so it is easy to find and update.
+  # Find the latest version at https://github.com/cloudposse/geodesic/releases
+  ARG VERSION=2.11.0
+  # If you don't want to bothered with updating the version, you can use `latest` instead,
+  # but keep in mind that as long as you have a local image with the `latest` tag,
+  # it will not be updated by `docker run`. You will have to explicitly pull the latest image.
+  # ARG VERSION=latest
   ARG OS=debian
   FROM cloudposse/geodesic:$VERSION-$OS
 

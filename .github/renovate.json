@@ -14,7 +14,11 @@
   "github-actions": {
     "enabled": false
   },
-  "docker": {
-    "ignorePaths": ["rootfs/**"]
+  "dockerfile": {
+    "ignorePaths": [
+      "rootfs/**",
+      "Dockerfile.custom",
+      "Dockerfile.options"
+    ]
   }
 }

@@ -46,7 +46,7 @@ Sleep 3s
 Type "# ...and `kubectl`" Enter
 Sleep 500ms
 
-Type "kubectl" Enter@3s 2
+Type "kubectl" Enter@3s
 
 Type "# That's all folks!" Enter
 Sleep 2s

@@ -46,7 +46,7 @@ function prompter() {
 PROMPT_HOOKS+=("reload")
 function reload() {
 	local current_screen_size="${LINES}x${COLUMNS}"
-	# Detect changes in screensize
+	# Detect changes in screen size
 	if [ "${current_screen_size}" != "${SCREEN_SIZE}" ]; then
 		echo "* Screen resized to ${current_screen_size}"
 		export SCREEN_SIZE=${current_screen_size}
@@ -179,4 +179,31 @@ function geodesic_prompt() {
 	else
 		PS1="${tf_prompt}${dir_prompt}"
 	fi
+}
+
+function geodesic_prompt_style() {
+	unset ASSUME_ROLE_ACTIVE_MARK
+	unset ASSUME_ROLE_INACTIVE_MARK
+	unset BLACK_RIGHTWARDS_ARROWHEAD
+	unset BANNER_MARK
+	[[ -n $PROMPT_HOST_MARK ]] && unset PROMPT_HOST_MARK
+	case ${1:-$PROMPT_STYLE} in
+	# Color escapes: 1=red, 2=green, 3=yellow, 6=cyan
+	plain)
+		PROMPT_STYLE=plain
+		;;
+
+	unicode)
+		PROMPT_STYLE=plain
+		;;
+
+	fancy)
+		PROMPT_STYLE=fancy
+
+		;;
+
+	*)
+		unset PROMPT_STYLE
+		;;
+	esac
 }

@@ -16,7 +16,7 @@ function update-terminal-mode() {
 	dark | light) ;;
 
 	"")
-		new_mode=$(_is_term_dark_mode -m)
+		new_mode=$(_is_term_dark_mode -mm)
 		;;
 
 	*)
@@ -25,8 +25,19 @@ function update-terminal-mode() {
 		;;
 	esac
 
+	if [[ $new_mode == "unknown" ]]; then
+		if ! tty -s; then
+			echo "No terminal detected." >&2
+		elif [[ -z "$(tput op 2>/dev/null)" ]]; then
+			echo "Terminal does not appear to support color." >&2
+		fi
+		new_mode="light"
+	fi
+
 	# See comments in _geodesic_color() below for why we test ${_geodesic_tput_cache@a}
-	if [[ ${_geodesic_tput_cache@a} != "A" ]] || [[ "${_geodesic_tput_cache[dark_mode]}" != "$new_mode" ]]; then
+	if [[ ${_geodesic_tput_cache@a} != "A" ]] ||
+		[[ "${_geodesic_tput_cache[dark_mode]}" != "$new_mode" ]] ||
+		[[ "${_geodesic_tput_cache[TERM]}" != "$TERM" ]]; then
 		_geodesic_tput_cache_init "$1"
 	else
 		echo "Not updating terminal mode from $new_mode to $new_mode"
@@ -36,17 +47,38 @@ function update-terminal-mode() {
 # We call `tput` several times for every prompt, and it can add up, so we cache the results.
 function _geodesic_tput_cache_init() {
 	declare -g -A _geodesic_tput_cache
+	local old_term=${_geodesic_tput_cache[TERM]}
+	# Save the terminal type so we can invalidate the cache if it changes
+	_geodesic_tput_cache[TERM]="$TERM"
+
+	local color_off=$(tput op 2>/dev/null) # reset foreground and background colors to defaults
+
+	if ! tty -s || [[ -z $color_off ]]; then
+		if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
+			if ! tty -s; then
+				echo '* TERMINAL TRACE: Not running in a terminal, not attempting to colorize output' >&2
+			elif [[ -z $color_off ]]; then
+				echo '* TERMINAL TRACE: `tput` did not output anything for "op", not attempting to colorize output' >&2
+			else
+				echo '* TERMINAL TRACE: Unknown error (script bug), not attempting to colorize output' >&2
+			fi
+		fi
+		if [[ $old_term != ${_geodesic_tput_cache[TERM]} ]]; then
+			_geodesic_generate_color_functions dummy
+			command -V geodesic_prompt_style &>/dev/null && geodesic_prompt_style
+		fi
+		return 1
+	fi
 
 	# If we are here, we have lost the terminal mode settings.
 	# If we are not in a subshell, we are fixing them now.
 	# However, if we are in a subshell, we cannot fix them in the main shell
 	# from here, so we need to tell the user to run the command to fix them.
 	if [[ $BASH_SUBSHELL != 0 ]]; then
-		printf "\n* Terminal mode settings have been lost.\n" >&2
+		printf "\n* Terminal mode settings have been lost (%s,%s).\n" "$SHLVL" "$BASH_SUBSHELL" >&2
 		printf "* Please run: update-terminal-mode \n\n" >&2
 	fi
 
-	local color_off=$(tput op) # reset foreground and background colors to defaults
 	local bold=$(tput bold)
 	local bold_off
 
@@ -61,6 +93,7 @@ function _geodesic_tput_cache_init() {
 
 	# Set up normal colors for light mode
 	_geodesic_tput_cache=(
+		[TERM]="$TERM"
 		[black]=$(tput setaf 0)
 		[red]=$(tput setaf 1)
 		[green]=$(tput setaf 2)
@@ -120,9 +153,11 @@ function _geodesic_tput_cache_init() {
 		_geodesic_tput_cache["bold-off"]=$(printf "\x01%s\x02" "$bold_off")
 	fi
 
-	# Save the terminal type so we can invalidate the cache if it changes
-	_geodesic_tput_cache[TERM]="$TERM"
 	_geodesic_tput_cache[dark_mode]="$new_mode"
+	if [[ $old_term != ${_geodesic_tput_cache[TERM]} ]]; then
+		_geodesic_generate_color_functions color
+		command -V geodesic_prompt_style &>/dev/null && geodesic_prompt_style
+	fi
 }
 
 # Colorize text using ANSI escape codes.
@@ -212,18 +247,26 @@ function _geodesic_color() {
 # Also, "yellow" is not necessarily yellow, it varies with the terminal theme, and
 # would be better named "caution" or "info".
 
-function _generate_color_functions() {
-	local color
-	for color in red green yellow cyan; do
-		eval "function ${color}() { _geodesic_color ${color} \"\$*\"; }"
-		eval "bold-${color}() { _geodesic_color bold-${color} \"\$*\"; }"
-		eval "function ${color}-n() { _geodesic_color ${color}-n \"\$*\"; }"
-		eval "bold-${color}-n() { _geodesic_color bold-${color}-n \"\$*\"; }"
-	done
-}
+function _geodesic_generate_color_functions() {
+	local color colors
+	colors=(red green yellow cyan)
 
-_generate_color_functions
-unset _generate_color_functions
+	if [[ "$1" != "dummy" ]]; then
+		for color in "${colors[@]}"; do
+			eval "function ${color}() { _geodesic_color ${color} \"\$*\"; }"
+			eval "bold-${color}() { _geodesic_color bold-${color} \"\$*\"; }"
+			eval "function ${color}-n() { _geodesic_color ${color}-n \"\$*\"; }"
+			eval "bold-${color}-n() { _geodesic_color bold-${color}-n \"\$*\"; }"
+		done
+	else
+		for color in "${colors[@]}"; do
+			eval "function ${color}() { printf -- '%s\n' \"\$*\"; }"
+			eval "bold-${color}() { printf -- '%s\n' \"\$*\"; }"
+			eval "function ${color}-n() { printf -- '%s\n' \"\$*\"; }"
+			eval "bold-${color}-n() { printf -- '%s\n' \"\$*\"; }"
+		done
+	fi
+}
 
 function bold() {
 	_geodesic_color bold "$*"
@@ -233,3 +276,5 @@ function bold() {
 function reset_terminal_colors() {
 	tput sgr0
 }
+
+_geodesic_tput_cache_init

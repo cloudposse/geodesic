@@ -1,3 +1,5 @@
+
+
 <!-- markdownlint-disable -->
 <a href="https://cpco.io/homepage"><img src=".github/banner.png?raw=true" alt="Project Banner"/></a><br/>
     <p align="right">
@@ -41,16 +43,6 @@ Geodesic is a robust Linux toolbox container, crafted to optimize DevOps workflo
 <img src="docs/demo.gif" alt="Demo" />*<br/>Example of running a shell based on the `cloudposse/geodesic` base docker image.*
 
 
----
-> [!NOTE]
-> This project is part of Cloud Posse's comprehensive ["SweetOps"](https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=) approach towards DevOps.
-> <details><summary><strong>Learn More</strong></summary>
->
-> It's 100% Open Source and licensed under the [APACHE2](LICENSE).
->
-> </details>
-
-<a href="https://cloudposse.com/readme/header/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=readme_header_link"><img src="https://cloudposse.com/readme/header/img"/></a>
 
 
 ## Introduction
@@ -96,9 +88,8 @@ Want to learn more? [Check out our getting started with Geodesic guide!](https:/
 
 
 
+
 ## Usage
-
-
 
 ### Quickstart
 
@@ -117,7 +108,14 @@ geodesic
 
 In general we recommend creating a customized version of Geodesic by creating your own `Dockerfile` starting with
 ```
-ARG VERSION=2.0.0
+# We always recommend pinning versions to avoid surprises and breaking changes.
+# We put the version up top here so it is easy to find and update.
+# Find the latest version at https://github.com/cloudposse/geodesic/releases
+ARG VERSION=2.11.0
+# If you don't want to bothered with updating the version, you can use `latest` instead,
+# but keep in mind that as long as you have a local image with the `latest` tag,
+# it will not be updated by `docker run`. You will have to explicitly pull the latest image.
+# ARG VERSION=latest
 ARG OS=debian
 FROM cloudposse/geodesic:$VERSION-$OS
 
@@ -215,23 +213,21 @@ Check out these related projects.
 - [Build Harness](https://github.com/cloudposse/dev) - Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more
 - [terraform-aws-components](https://github.com/cloudposse/terraform-aws-components) - Catalog of reusable Terraform components and blueprints for provisioning reference architectures
 
+
+
 ## ✨ Contributing
 
 This project is under active development, and we encourage contributions from our community.
+
+
+
 Many thanks to our outstanding contributors:
 
 <a href="https://github.com/cloudposse/geodesic/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=cloudposse/geodesic&max=24" />
 </a>
 
-### 🐛 Bug Reports & Feature Requests
-
-Please use the [issue tracker](https://github.com/cloudposse/geodesic/issues) to report any bugs or file feature requests.
-
-### 💻 Developing
-
-If you are interested in being a contributor and want to get involved in developing this project or help out with Cloud Posse's other projects, we would love to hear from you! 
-Hit us up in [Slack](https://cpco.io/slack?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=slack), in the `#cloudposse` channel.
+For 🐛 bug reports & feature requests, please use the [issue tracker](https://github.com/cloudposse/geodesic/issues).
 
 In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
  1. Review our [Code of Conduct](https://github.com/cloudposse/geodesic/?tab=coc-ov-file#code-of-conduct) and [Contributor Guidelines](https://github.com/cloudposse/.github/blob/main/CONTRIBUTING.md).
@@ -256,38 +252,6 @@ Dropped straight into your Inbox every week — and usually a 5-minute read.
 
 [Join us every Wednesday via Zoom](https://cloudposse.com/office-hours?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=office_hours) for your weekly dose of insider DevOps trends, AWS news and Terraform insights, all sourced from our SweetOps community, plus a _live Q&A_ that you can’t find anywhere else.
 It's **FREE** for everyone!
-
-## About
-
-This project is maintained by <a href="https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=">Cloud Posse, LLC</a>.
-<a href="https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content="><img src="https://cloudposse.com/logo-300x69.svg" align="right" /></a>
-
-We are a [**DevOps Accelerator**](https://cpco.io/commercial-support?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=commercial_support) for funded startups and enterprises.
-Use our ready-to-go terraform architecture blueprints for AWS to get up and running quickly.
-We build it with you. You own everything. Your team wins. Plus, we stick around until you succeed.
-
-<a href="https://cpco.io/commercial-support?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=commercial_support"><img alt="Learn More" src="https://img.shields.io/badge/learn%20more-success.svg?style=for-the-badge"/></a>
-
-*Your team can operate like a pro today.*
-
-Ensure that your team succeeds by using our proven process and turnkey blueprints. Plus, we stick around until you succeed.
-
-<details>
-  <summary>📚 <strong>See What's Included</strong></summary>
-
-- **Reference Architecture.** You'll get everything you need from the ground up built using 100% infrastructure as code.
-- **Deployment Strategy.** You'll have a battle-tested deployment strategy using GitHub Actions that's automated and repeatable.
-- **Site Reliability Engineering.** You'll have total visibility into your apps and microservices.
-- **Security Baseline.** You'll have built-in governance with accountability and audit logs for all changes.
-- **GitOps.** You'll be able to operate your infrastructure via Pull Requests.
-- **Training.** You'll receive hands-on training so your team can operate what we build.
-- **Questions.** You'll have a direct line of communication between our teams via a Shared Slack channel.
-- **Troubleshooting.** You'll get help to triage when things aren't working.
-- **Code Reviews.** You'll receive constructive feedback on Pull Requests.
-- **Bug Fixes.** We'll rapidly work with you to fix any bugs in our projects.
-</details>
-
-<a href="https://cloudposse.com/readme/commercial-support/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=readme_commercial_support_link"><img src="https://cloudposse.com/readme/commercial-support/img"/></a>
 ## License
 
 <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="License"></a>
@@ -296,7 +260,9 @@ Ensure that your team succeeds by using our proven process and turnkey blueprint
 <summary>Preamble to the Apache License, Version 2.0</summary>
 <br/>
 <br/>
+
 Complete license is available in the [`LICENSE`](LICENSE) file.
+
 ```text
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -320,6 +286,8 @@ under the License.
 ## Trademarks
 
 All other trademarks referenced herein are the property of their respective owners.
+
+
 ---
 Copyright © 2017-2024 [Cloud Posse, LLC](https://cpco.io/copyright)
 

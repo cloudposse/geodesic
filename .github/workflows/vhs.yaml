@@ -12,8 +12,7 @@ env:
 
 jobs:
   vhs:
-    # pin versions to try to work around https://github.com/charmbracelet/vhs-action/issues/264
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
@@ -36,13 +35,11 @@ jobs:
       - name: "make all"
         run: make all
 
-      # pin versions to try to work around https://github.com/charmbracelet/vhs-action/issues/264
-      - uses: charmbracelet/vhs-action@v1
+      - uses: charmbracelet/vhs-action@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: demo.tape
           install-fonts: true
-          version: v0.7.1
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: auto-commit

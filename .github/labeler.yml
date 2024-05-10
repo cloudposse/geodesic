@@ -1,3 +1,12 @@
+# We are going to exclude alpine-only PRs from the draft release,
+# so we do not apply the label if the Alpine Dockerfile is changed,
+# even though the PR is technically Alpine-only.
+alpine-only:
+- changed-files:
+  - all-globs-to-all-files:
+    - os/alpine/**
+    - !os/alpine/Dockerfile.alpine
+
 direnv:
 - changed-files:
   - any-glob-to-any-file:
@@ -6,8 +15,8 @@ direnv:
 docker:
 - changed-files:
   - any-glob-to-any-file:
-    - Dockerfile.alpine
-    - Dockerfile.debian
+    - os/alpine/Dockerfile.alpine
+    - os/debian/Dockerfile.debian
 
 docs:
 - changed-files:
@@ -22,8 +31,8 @@ github:
 packages:
 - changed-files:
   - any-glob-to-any-file:
-    - packages*.txt
-    - requirements*.txt
+    - "**/packages*.txt"
+    - "**/requirements*.txt"
 
 scripts:
 - changed-files:

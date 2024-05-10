@@ -23,6 +23,9 @@ version-resolver:
     - 'github'
   default: 'minor'
 
+exclude-labels:
+  - 'alpine-only'
+
 categories:
 - title: '🚀 Enhancements'
   labels:
@@ -57,6 +60,14 @@ change-template: |
 
 template: |
   $CHANGES
+
+  ## Every Release
+  
+  In every release, we update all [unpinned packages](https://github.com/cloudposse/geodesic/blob/main/packages.txt) to their latest packaged versions.
+  
+  On a regular basis (roughly weekly), on Alpine only, we update the AWS CLI v1 and its dependencies to the latest versions. Debian does not have AWS CLI v1 installed, only v2.
+  
+  These changes are not detailed here.
 
 replacers:
 # Remove irrelevant information from Renovate bot

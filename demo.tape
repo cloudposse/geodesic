@@ -35,23 +35,18 @@ Sleep 500ms
 
 Type "geodesic" Enter
 
+Sleep 4s
+
+Type "# It ships with common commands like `jq`" Enter
+Sleep 1500ms
+
+Type "jq" Enter
 Sleep 3s
 
-Type "# It ships with common commands like `terraform`" Enter
-Sleep 500ms
+Type "# ...and `kubectl`" Enter
+Sleep 1500ms
 
-Type "terraform -help" Enter
-Sleep 500ms
-
-Type "# ...and the `aws` CLI =)" Enter
-Sleep 500ms
-
-Type "aws help" Enter
-
-Sleep 3s
-
-Type "q"
-Sleep 1s
+Type "kubectl" Enter@3s
 
 Type "# That's all folks!" Enter
 Sleep 2s

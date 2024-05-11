@@ -5,7 +5,7 @@ alpine-only:
 - changed-files:
   - all-globs-to-all-files:
     - os/alpine/**
-    - !os/alpine/Dockerfile.alpine
+    - '!os/alpine/Dockerfile.alpine'
 
 direnv:
 - changed-files:

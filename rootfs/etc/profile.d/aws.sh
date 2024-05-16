@@ -100,7 +100,7 @@ function export_current_aws_role() {
 		fi
 		echo "* $(red Profile is set to $profile_target but current role does not match:)"
 		echo "*   $(red $current_role)"
-		export ASSUME_ROLE=$(red '!mixed!')
+		export ASSUME_ROLE=$(red-n '!mixed!')
 		return
 	fi
 

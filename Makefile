@@ -26,9 +26,11 @@ all: init deps lint build install run/new
 %.build %.install %.all: DOCKER_BASE_OS = $*
 
 lint: deps
-	@LINT=true \
-	 find rootfs/usr/local/include -type f '!' -name '*.sample' -exec \
-			 /bin/sh -c 'echo "==> {}">/dev/stderr; make --include-dir=rootfs/usr/local/include/ --just-print --dry-run --recon --no-print-directory --quiet --silent -f {}' \; > /dev/null
+	@if [ -d rootfs/usr/local/include ]; then \
+	  LINT=true \
+		find rootfs/usr/local/include -type f '!' -name '*.sample' -exec \
+		/bin/sh -c 'echo "==> {}">/dev/stderr; make --include-dir=rootfs/usr/local/include/ --just-print --dry-run --recon --no-print-directory --quiet --silent -f {}' \; > /dev/null; \
+	fi
 
 deps: init
 	@exit 0
@@ -69,18 +71,4 @@ bash/fmt:
 bash/fmt/check:
 	shfmt -d $(PWD)/rootfs
 
-.PHONY: geodesic_apkindex.md5 geodesic_aptindex.md5 all %.all build %.build install %.install run %.run run/new run/check
-
-apk-update geodesic_apkindex.md5: DOCKER_BASE_OS = alpine
-apk-update geodesic_apkindex.md5:
-	@echo geodesic_apkindex.md5 old $$(cat os/alpine/geodesic_apkindex.md5 || echo '<not found>')
-	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
-	'apk update >/dev/null && geodesic-apkindex-md5' > os/alpine/geodesic_apkindex.md5
-	@echo geodesic_apkindex.md5 new $$(cat os/alpine/geodesic_apkindex.md5 || echo '<not found>')
-
-apt-update geodesic_aptindex: DOCKER_BASE_OS = debian
-apt-update geodesic_aptindex.md5:
-	@echo geodesic_aptindex.md5 old $$(cat os/debian/geodesic_aptindex.md5 || echo '<not found>')
-	@docker run --rm $(DOCKER_IMAGE_NAME) -c \
-	'apt-get update >/dev/null && geodesic-aptindex-md5' > os/debian/geodesic_aptindex.md5
-	@echo geodesic_aptindex.md5 new $$(cat os/debian/geodesic_aptindex.md5 || echo '<not found>')
+.PHONY:  all %.all build %.build install %.install run %.run run/new run/check

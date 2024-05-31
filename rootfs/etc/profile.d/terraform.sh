@@ -48,3 +48,4 @@ done
 # Set default plugin cache dir (must not be one of the mirror directories)
 # https://www.terraform.io/docs/commands/cli-config.html#implied-local-mirror-directories)
 export TF_PLUGIN_CACHE_DIR="${TF_PLUGIN_CACHE_DIR:-/localhost/.terraform.d/plugin-cache}"
+mkdir -p "$TF_PLUGIN_CACHE_DIR" || unset TF_PLUGIN_CACHE_DIR

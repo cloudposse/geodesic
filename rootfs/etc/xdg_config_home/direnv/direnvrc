@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-# This file extends the `direnv` stdlib.
-# Read more: <https://direnv.net/#man/direnv-stdlib.1>
-
-for i in /etc/direnv/rc.d/*; do
-	source $i
-done

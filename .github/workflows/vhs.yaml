@@ -35,25 +35,10 @@ jobs:
       - name: "make all"
         run: make all
 
-      # We need to install the Hack Nerd Font for the demo
-      # but vhs-action will not install it for us due to issue 264
-      - name: Install Hack Nerd Font
-        run: |
-          curl -sSLO https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Hack.zip
-          unzip -d hack_nerd_font Hack.zip
-          mv hack_nerd_font/ /usr/share/fonts/
-          fc-cache -fv
-
       - uses: charmbracelet/vhs-action@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          path: demo.tape
-          # Cannot use `install-fonts`: https://github.com/charmbracelet/vhs-action/issues/264
-          # install-fonts: true
-          install-fonts: false
-          # Cannot use v0.7.2: https://github.com/charmbracelet/vhs-action/issues/256
-          version: v0.7.1
-
+          install-fonts: true
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: auto-commit

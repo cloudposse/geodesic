@@ -186,6 +186,10 @@ function use() {
 		)
 	fi
 
+	if [ -n "${XDG_CONFIG_HOME}" ]; then
+		DOCKER_ARGS+=(--env XDG_CONFIG_HOME)
+	fi
+
 	DOCKER_ARGS+=(
 		--privileged
 		--publish ${GEODESIC_PORT}:${GEODESIC_PORT}

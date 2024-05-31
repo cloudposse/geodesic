@@ -44,8 +44,7 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v5
         id: auto-commit
         env:
-          # Need to use PUBLIC_REPO_ACCESS_TOKEN to trigger status checks
-          GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           commit_message: "chore: update demo gif"
           commit_user_name: vhs-action 📼

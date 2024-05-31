@@ -37,20 +37,35 @@ Type "geodesic" Enter
 
 Sleep 4s
 
-Type "# It ships with common commands like `jq`" Enter
+Type "#  Open Tofu is pre-installed:" Enter
+Hide
+Type@1ms "stty -echo" Enter
+Type@1ms "printf 'Tofu Version as of when we recorded this demo:\n'; printf '    %s\n' $(tofu version | sed 's/ / /g') && stty echo"
+Show
+Enter
+Sleep 3s
+
+Type "#  Geodesic ships with common commands like `jq`" Enter
 Sleep 1500ms
 
 Type "jq" Enter
 Sleep 3s
 
-Type "# ...and `kubectl`" Enter
+Type "#  ...and `kubectl`" Enter
 Sleep 1500ms
 
 Type "kubectl" Enter@3s
 
-Type "# That's all folks!" Enter
+Type "#  ...and many other added packages" Enter
+Hide
+Type@1ms "stty -echo" Enter
+Show
+Type@1ms "printf '\n\nPackages installed by Geodesic:\n\n'; apt list --manual-installed=true 2>/dev/null | tail -n +2 | cut -f1 -d/ | pr -4 -t -a -w 100 && stty echo" Enter
+Sleep 20s
+
+Type "#  That's all folks!" Enter
 Sleep 2s
 
 Type "exit" Enter
-Sleep 1s
+Sleep 3s
 

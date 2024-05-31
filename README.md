@@ -1,7 +1,7 @@
 
 
 <!-- markdownlint-disable -->
-<a href="https://cpco.io/homepage"><img src=".github/banner.png?raw=true" alt="Project Banner"/></a><br/>
+<a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/geodesic/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
     <p align="right">
 <a href="https://github.com/cloudposse/geodesic/actions?query=workflow%3Adocker"><img src="https://github.com/cloudposse/geodesic/workflows/docker/badge.svg" alt="Build Status"/></a><a href="https://github.com/cloudposse/geodesic/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/geodesic.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a><a href="https://archive.sweetops.com/geodesic"><img src="https://img.shields.io/badge/slack-archive-blue.svg" alt="Slack Archive"/></a></p>
 <!-- markdownlint-restore -->
@@ -27,7 +27,16 @@
 
 -->
 
-Geodesic is a robust Linux toolbox container, crafted to optimize DevOps workflows. This container comes fully loaded with all essential dependencies for a complete DevOps toolchain. It's designed to bring consistency and boost efficiency across development environments. It achieves this without the need for installing additional software on your workstation. Think of Geodesic as a containerized parallel to Vagrant, offering similar functionality within a Docker container context.  <img align=right src="docs/geodesic-small.png">
+Geodesic is a robust Linux toolbox container, crafted to optimize DevOps workflows.
+This container comes loaded with essential dependencies for a DevOps toolchain.
+It's designed to bring consistency and boost efficiency across development environments.
+It achieves this without the need for installing additional software on your workstation.
+Think of Geodesic as a containerized parallel to Vagrant, offering similar functionality within a Docker container context.
+
+Although Geodesic is packed with essentials, it is designed to be extended and customized to suit your specific needs.
+Create your own Dockerfile based on Geodesic and add your favorite tools to the mix.
+Then share the resulting container with everyone on your team to ensure everyone is working in the same environment.
+<img align=right src="docs/geodesic-small.png">
 
 ## Key Features
 
@@ -51,17 +60,53 @@ These days, the typical software application is distributed as a docker image an
 
 Geodesic is best used in one of these two ways:
 
-  1. **Interactive Shell** It is optimized to work as an interactive command-line shell. The shell includes the *ultimate* mashup of cloud orchestration tools all distributed through our [packages](https://github.com/cloudposse/packages). Installation of the shell is as easy as running a docker container or using it as a base image for your own Docker toolbox.
-  2. **Docker Base Image** You can create your own `Dockerfile` and use `cloudposse/geodesic` as the base image. This way you can rapidly bring up consistent toolboxes.
+  1. **Interactive Shell** It is optimized to work as an interactive command-line shell.
+     The shell includes a powerful set of tools for the DevOps practitioner, with many more available through our [packages](https://github.com/cloudposse/packages). Installation of the shell is as easy as running a docker container or using it as a base image for your own Docker toolbox.
+  2. **Docker Base Image** You can create your own `Dockerfile` and use `cloudposse/geodesic` as the base image.
+     This way, all you need to add are the few of your favorite tools not already installed, and then you have a consistent toolbox for everyone to share.
 
 An organization may chose to leverage all of these components, or just the parts that make their life easier.
 
 We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM cloudposse/geodesic:...` pinned to a release and base OS) in your projects.
 
 > [!IMPORTANT]
-> **Note**: Starting with Geodesic 2.0, we distribute Geodesic as a multi-platform (`linux/amd64`, `linux/arm64`) Debian-based Docker image and a single-platform (`linux/amd64`) Alpine-based image.
-> We recommend the Debian-based image; consequently the `cloudposse/geodesic:latest` Docker image tag now points to it. (Previously `cloudposse/geodesic:latest` referred to the Alpine image.)
-> The Alpine version is deprecated and we make no promises about future support for it.
+> **Note**: Starting with Geodesic 3.0, we distribute Geodesic as a multi-platform (`linux/amd64`, `linux/arm64`) Debian-based Docker image only.
+> We no longer publish an Alpine version, but continue to include the `debian` labels for compatibility. As with Geodesic 2.0, the `latest` tag points to the Debian image.
+>
+> Starting with Geodesic 2.0, we distributed Geodesic as a multi-platform (`linux/amd64`, `linux/arm64`) Debian-based Docker image and a single-platform (`linux/amd64`) Alpine-based image.
+> We moved the `cloudposse/geodesic:latest` Docker image tag from the Alpine version to the Debian version at that time.
+
+### What’s Changed in Geodesic 3.0
+
+Rather than bringing new features, Geodesic 3.0 is focused on slimming down the Docker image and removing outdated tools.
+Geodesic 3.0 is approximately half the size of Geodesic 2.10!
+See the [v3.0.0 release notes](https://github.com/cloudposse/geodesic/releases/tag/3.0.0)
+for details on what was removed, but for most users, we expect the impact to be minimal.
+
+This release is intended to set the stage for future improvements, so although we cannot announce a time frame,
+be on the lookout for Geodesic 4.0, which will bring many long-requested new features.
+
+Want to learn more? [Check out our getting started with Geodesic guide!](https://docs.cloudposse.com/tutorials/geodesic-getting-started/)
+
+#### Alpine and Terraform dropped
+
+The biggest impacts are that the Alpine-based image has been dropped, and Terraform has been replaced with OpenTofu.
+
+- OpenTofu is installed as a `terraform` alternative using the [Debian alternatives system](https://wiki.debian.org/DebianAlternatives),
+  so `terraform` commands will still work without modification.
+- We have been encouraging users to switch from Alpine to Debian for years, so we hope most people have already done so.
+  For the rest, switching to Debian should be straightforward, and brings the added advantage of support for Apple Silicon.
+
+#### Highlights from Geodesic 2.11
+
+Since the release of Geodesic 2.0, we have been continuing to improve the Geodesic experience.
+
+- We have added preliminary support for "dark mode" terminals. Your terminal mode should be detected automatically,
+  but you can force it by running `update-terminal-mode {dark|light}`.
+- The `GEODESIC_TF_PROMPT_ENABLED` environment variable has been revived. Set it to `true` and when in a Terraform
+  or Tofu directory, the prompt will display the currently selected workspace. (We had, for a time, incorrectly suggested
+  you control this feature via `GEODESIC_TF_PROMPT_ACTIVE`. That environment variable is for internal use and you should
+  never set it.)
 
 ### What’s New in Geodesic 2.0
 
@@ -83,8 +128,6 @@ The `latest` tag points to the latest Debian-based image, although we recommend 
 
 - Prior to Geodesic 2.0, the `latest` tag pointed to the latest Alpine-based image.
 - Prior to Geodesic 0.138.0, all Docker images were based on Alpine only and simply tagged `VERSION`.
-
-Want to learn more? [Check out our getting started with Geodesic guide!](https://docs.cloudposse.com/tutorials/geodesic-getting-started/)
 
 
 
@@ -111,7 +154,7 @@ In general we recommend creating a customized version of Geodesic by creating yo
 # We always recommend pinning versions to avoid surprises and breaking changes.
 # We put the version up top here so it is easy to find and update.
 # Find the latest version at https://github.com/cloudposse/geodesic/releases
-ARG VERSION=2.11.0
+ARG VERSION=3.0.0
 # If you don't want to bothered with updating the version, you can use `latest` instead,
 # but keep in mind that as long as you have a local image with the `latest` tag,
 # it will not be updated by `docker run`. You will have to explicitly pull the latest image.
@@ -140,54 +183,46 @@ you install are properly installed for both architectures. Package managers hand
 automatically, but if you are downloading files directly, you need to be careful to select the right one.
 See the use of `TARGETARCH` in [Dockerfile.debian](./os/debian/Dockerfile.debian) for some examples.
 
-#### Adding packages
+#### Installing extra packages
 
-You can also add extra commands by installing "packages". Both Debian and Alpine have a large selection
-of packages to choose from. Cloud Posse also provides a large set of packages for installing common DevOps commands
-and utilities via [cloudposse/packages](https://github.com/cloudposse/packages), but `linux/arm64` packages
-are only provided for Debian, not Alpine. The package repositories are pre-installed in Geodesic,
-all you need to do is add the packages you want via `RUN` commands in your Dockerfile. Debian
-will automatically select the correct architecture for the package.
+You can also add extra commands by installing "packages".
+- Debian has a large selection of packages to choose from.
+- Cloud Posse also provides a large set of packages for installing common DevOps commands
+and utilities via [cloudposse/packages](https://github.com/cloudposse/packages).
+- Google Cloud provides a set of packages for working with GCP
+- OpenTofu provides a packge for installing it, too.
 
-#### Installing packages in Debian
+Those package repositories are pre-installed in Geodesic, so
+all you need to do is add the packages you want via
+
+```Dockerfile
+RUN apt-get update && apt-get install -y` commands in your Dockerfile.
+```
+
+The package manager will automatically select the correct architecture for the package.
+
+#### Pinning package versions in Debian
 
 Debian uses [`apt`](https://wiki.debian.org/Apt) for package management and we generally recommend using
 the [`apt-get`](https://www.debian.org/doc/manuals/apt-guide/ch2.en.html) command to install packages.
-In addition to the default repositories, Geodesic pre-installs the Cloud Posse [package](https://github.com/cloudposse/packages) repository
-and the Google Cloud SDK package repository. Unlike with `apk`, you do not need to specify a package repository when
-installing a package because all repositories will be searched for it.
-Also unlike `apk`, `apt-get` does not let you specify a version range on the command line, but they do
+However, `apt-get` does not let you specify a version range on the command line, but it does
 allow wildcards. Package versions include a release number (typically "1") at the end, to allow for
 updated packages when there is a bug in the package itself. Therefore, best practice is to use a wildcard
 for the release number when specifying a package version. For example,
 to install the Google Cloud SDK at a version 300.0.0:
 
-```
-RUN apt-get update && apt-get install -y google-cloud-sdk="300.0.0-*"
+```dockerfile
+RUN apt-get update && apt-get install -y google-cloud-sdk="400.0.0-*"
 ```
 
 Note the `-y` flag to `apt-get install`. That is required for scripted installation, otherwise the command
 will ask for confirmation from the keyboard before installing a package.
 
-#### Installing packages in Alpine
+Unfortunately, OpenTofu does not follow this convention, so you will need to specify the exact version number
+(only) when installing OpenTofu. For example, to install OpenTofu version 1.6.2:
 
-Under Alpine, you install a package by specifying a package name and a repository label (if not the default repository).
-(You can also specify a version, see [the Alpine documentation](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management#Advanced_APK_Usage)
-for details). In addition to the default package repository, Geodesic installs 3 others:
-
-| Repository Label | Repository Name|
-|------------------|----------------|
-| @testing | edge/testing |
-| @community | edge/community |
-| @cloudposse | cloudposse/packages |
-
-As always, because of Docker layer caching, you should start your command line by updating the repo indexes,
-and then add your packages. Alpine uses [`apk`](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management).
-So, to install [Teleport](https://gravitational.com/teleport) support from the Cloud Posse package repository,
-pinned to version 4.2.x (which is the last to support Alpine), we can add this to our Dockerfile:
-
-```
-RUN apk update && apk add -u teleport@cloudposse=~4.2
+```dockerfile
+RUN apt-get update && apt-get install -y tofu=1.6.2
 ```
 
 ### Customizing your shell at launch time
@@ -209,8 +244,8 @@ document, available from within the shell via `man customization`.
 
 Check out these related projects.
 
+- [Atmos](https://atmos.tools/) - Cloud Posse's FOSS DevOps Automation Tool
 - [Packages](https://github.com/cloudposse/packages) - Cloud Posse installer and distribution of native apps
-- [Build Harness](https://github.com/cloudposse/dev) - Collection of Makefiles to facilitate building Golang projects, Dockerfiles, Helm charts, and more
 - [terraform-aws-components](https://github.com/cloudposse/terraform-aws-components) - Catalog of reusable Terraform components and blueprints for provisioning reference architectures
 
 

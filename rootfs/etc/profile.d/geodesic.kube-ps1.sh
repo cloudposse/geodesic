@@ -28,9 +28,9 @@
 function short_cluster_name_from_eks() {
 	# hide the prompt if no cluster is configured
 	if [[ $1 == "N/A" ]]; then
-  	echo ""
-  	return 0
-  fi
+		echo ""
+		return 0
+	fi
 
 	# If it is not a cluster ARN, leave it alone
 	if ! [[ $1 =~ ^arn:.*:cluster/ ]]; then

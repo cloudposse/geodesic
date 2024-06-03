@@ -32,7 +32,7 @@ fi
 # Install autocompletion rules for aws CLI v1 and v2
 for __aws in aws aws1 aws2; do
 	if command -v ${__aws}_completer >/dev/null; then
-	complete -C "$(command -v ${__aws}_completer)" ${__aws}
+		complete -C "$(command -v ${__aws}_completer)" ${__aws}
 	fi
 done
 unset __aws

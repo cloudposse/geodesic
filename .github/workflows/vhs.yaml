@@ -30,7 +30,7 @@ jobs:
           echo "BANNER_MARK=🚀" >> ${ENV_FILE}
           echo "ASSUME_ROLE_INACTIVE_MARK= " >> ${ENV_FILE}
           echo "PROMPT_HOST_MARK=(demo)" >> ${ENV_FILE}
-          mkdir -f .geodesic
+          mkdir .geodesic
           cat > preferences <<-'EOF'
 
           function demo-tofu-version() {

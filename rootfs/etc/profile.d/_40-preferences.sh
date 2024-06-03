@@ -2,7 +2,7 @@
 # This file is named _40-preferences.sh. The leading underscore is needed to ensure this file
 # executes before other files that depend on the functions defined here.
 # The number portion is to ensure proper ordering among the high-priority scripts.
-# This file has depends on colors.sh, geodesic-config.sh, and localhost.sh and should come after them.
+# This file depends on colors.sh, geodesic-config.sh, and localhost.sh and should come after them.
 # This file loads user preferences/customizations and must load before any user-visible configuration takes place.
 
 # In case this output is being piped into a shell, print a warning message
@@ -98,7 +98,7 @@ else
 	_load_geodesic_preferences
 fi
 
-unset -f _load_geodesic_preferences
+[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] || unset -f _load_geodesic_preferences
 
 ## Append rather than overwrite history file
 shopt -s histappend
@@ -123,4 +123,5 @@ function _geodesic_set_histfile() {
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: HISTFILE set to "${HISTFILE}"
 }
 _geodesic_set_histfile
-unset -f _geodesic_set_histfile
+
+[[ $GEODESIC_TRACE =~ hist ]] || unset -f _geodesic_set_histfile

@@ -22,9 +22,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
       - name: "Check commit message for flags"
         id: check
         run: |
+          set -x
           magic_words='\[skip vhs\]'
           if [[ $(git log --format=%B -n 1 --no-merges) =~ $magic_words ]]; then
             echo "skip=true" >> $GITHUB_OUTPUT

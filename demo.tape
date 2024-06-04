@@ -37,20 +37,28 @@ Type "geodesic" Enter
 
 Sleep 4s
 
-Type "# It ships with common commands like `jq`" Enter
+Type "#  Open Tofu is pre-installed:" Enter
+Type "demo-tofu-version" Enter
+Sleep 3s
+
+Type "#  Geodesic ships with common commands like `jq`" Enter
 Sleep 1500ms
 
 Type "jq" Enter
 Sleep 3s
 
-Type "# ...and `kubectl`" Enter
+Type "#  ...and `kubectl`" Enter
 Sleep 1500ms
 
 Type "kubectl" Enter@3s
 
-Type "# That's all folks!" Enter
+Type "#  ...and many other added packages" Enter
+Type "demo-list-packages" Enter
+Sleep 20s
+
+Type "#  That's all folks!" Enter
 Sleep 2s
 
 Type "exit" Enter
-Sleep 1s
+Sleep 3s
 

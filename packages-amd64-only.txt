@@ -3,7 +3,6 @@
 awless@cloudposse
 cfssl@cloudposse
 emailcli@cloudposse
-goofys@cloudposse
 # We specially custom built and packaged rakkess v0.5.1 for linux/arm64 to support EKS access entry validation
 # rakkess@cloudposse
 tfenv@cloudposse

@@ -10,7 +10,6 @@ bc
 coreutils
 chamber@cloudposse
 curl
-direnv@community
 dumb-init
 emacs-nox
 fetch@cloudposse
@@ -18,15 +17,15 @@ fetch@cloudposse
 figlet
 figurine@cloudposse
 file
-fuse3
 fzf@cloudposse
 gettext
 git
 github-commenter@cloudposse
 gomplate@cloudposse
-#no arm64 support goofys@cloudposse
 gosu@cloudposse
-groff
+# groff pulls in a lot of X11 dependencies, so we use the groff-base package instead
+# groff
+groff-base
 helm@cloudposse
 helm3@cloudposse
 helmfile@cloudposse
@@ -43,13 +42,15 @@ kubens@cloudposse
 less
 make
 man-db
-musl-dev
 openssh-client
 openssl
-pandoc@cloudposse
+# pandoc is huge and only needed at build time
+# pandoc@cloudposse
 postgresql-client
 pwgen
-python3
+# The Debian python3 package installs a system-only version of Python, which we do not need.
+# We separately install a user/local version of Python.
+# python3
 # We specially built and packaged rakkess v0.5.1 for linux/arm64 to support EKS access entry validation 2024-03-06
 rakkess@cloudposse
 rbac-lookup@cloudposse
@@ -63,18 +64,15 @@ stern@cloudposse
 sudo
 syslog-ng
 tar
-terraform@cloudposse
+tofu
 # Do not install terraform-* or terraform_* by default
 # because they are incompatible with each other and
 # will cause problems for people who install one or the other
-terragrunt@cloudposse
 terrahelp@cloudposse
 # no arm64 tfenv@cloudposse
 # no arm64 tfmask@cloudposse
 unzip
 util-linux
-variant@cloudposse
-variant2@cloudposse
 vert@cloudposse
 vim
 yq@cloudposse

@@ -2,10 +2,10 @@
 # https://hub.docker.com/_/debian
 # We use codename (bookworm) instead of version number (12) because we want to select
 # the matching Python Docker image, which is named after the codename only.
-# bookworm-20240423 corresponds to Debian 12.5
+# bookworm-20240513 corresponds to Debian 12.5
 ARG DEBIAN_CODENAME=bookworm
 # Debian codenamed images are tagged with date codes rather than minor version numbers.
-ARG DEBAIN_DATECODE=20240423
+ARG DEBAIN_DATECODE=20240513
 # Find the current version of Python at https://www.python.org/downloads/source/
 ARG PYTHON_VERSION=3.12.3
 
@@ -34,6 +34,7 @@ ENV LC_ALL=C.UTF-8
 
 # Once again, Debian is weird. Package-installed Python is system-only, and does not
 # play well with pip. See  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=765022#30
+# and https://wiki.debian.org/Python#Deviations_from_upstream
 #
 # So we copy python from the Docker "Official Image" for python, (not to be confused with
 # any official python image provided by python upstream). See https://hub.docker.com/_/python/ for details.
@@ -101,9 +102,6 @@ ENV BANNER "geodesic"
 
 ENV MOTD_URL=http://geodesic.sh/motd
 ENV HOME=/conf
-# Leaving KOPS_CLUSTER_NAME unset can cause problems when kops gets the cluster
-# name from somewhere else and it is wrong, so we set it to make it obvious.
-ENV KOPS_CLUSTER_NAME=example.foo.bar
 
 # Install all packages as root
 USER root
@@ -136,12 +134,16 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
       > /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
 
-# Install packages
-RUN apt-get update && apt-get install -y \
+# Install packages (but only explicitly listed ones)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
     mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
     touch /conf/.gitconfig
 
+# Install `tofu` as an alternative to `terraform`, if it is available.
+# Set priority to 5, which is lower than any other Cloud Posse Terraform package,
+# so that it is available, if Terraform is not installed, but does not interfere with Terraform installations.
+RUN command -v tofu >/dev/null && update-alternatives --install /usr/bin/terraform terraform $(command -v tofu) 5
 
 # Here is where we would confirm that the package repo checksum is what we expect (not mismatched due to Docker layer cache)
 
@@ -251,22 +253,6 @@ ENV MANOPT=--no-hyphenation
 # See rootfs/etc/profile.d/ssh-agent.sh
 ENV SSH_AGENT_CONFIG=/var/tmp/.ssh-agent
 
-# Our older Geodesic configurations relied on `direnv`, which we no longer recommend,
-# preferring YAML configuration files instead.
-ENV DIRENV_ENABLED=false
-# Our older Geodesic configuration uses multiple Makefiles, like Makefile.tasks
-# and depends on setting
-# ENV MAKE_INCLUDES="Makefile Makefile.*"
-# but that setting causes problems in other situations, so we no longer set it by default.
-# We encourage you to use https://github.com/cloudposse/atmos instead of `make` for running commands.
-# If you are using (and therefore enable) `direnv`, consider the advantage
-# of using `direnv` to set MAKE_INCLUDES, which is that it will only set
-# it for trusted directories under `/conf` and therefore it will not affect
-# `make` outside of this directory tree.
-
-# Reduce `make` verbosity
-ENV MAKEFLAGS="--no-print-directory"
-
 # Install "root" filesystem
 # Debian, starting with v12 (bookworm), has symbolic links for /bin, /sbin, and /lib
 # so we cannot have those directories under rootfs and copy the whole directory.
@@ -285,7 +271,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     fi
 
 
-# Move AWS CLI v1 aside and install AWS CLI v2 as default, leaving both available as alternatives.
+# Move AWS CLI v1 aside (if installed) and install AWS CLI v2 as default, leaving both available as alternatives.
 # We do this at the end because we need cache busting from above to get us the latest AWS CLI v2
 
 RUN if [[ -x /usr/local/bin/aws ]]; then mv /usr/local/bin/aws /usr/local/bin/aws1 && \
@@ -297,7 +283,8 @@ RUN if [[ -x /usr/local/bin/aws ]]; then mv /usr/local/bin/aws /usr/local/bin/aw
 # Install AWS CLI 2
 # Get AWS CLI V2 version from https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst if you want
 # but it is updated several times a week, so we choose to just get the latest.
-# ARG AWS_CLI_VERSION=2.2.8
+# It is available in a Debain package `awscli`, but that can be very out of date.
+# ARG AWS_CLI_VERSION=2.15.48
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
       if [ "$TARGETARCH" = "amd64" ]; then \
         AWS_ARCH=x86_64; else AWS_ARCH=aarch64; fi && \
@@ -336,7 +323,10 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 COPY docs/ /usr/share/docs/
 
 # Build man pages
-RUN /usr/local/bin/docs update
+# `pandoc` is huge, so we only install it temporarily
+RUN apt-get update && apt-get install -y --no-install-recommends pandoc && \
+    /usr/local/bin/docs update; \
+    apt-get remove -y pandoc && apt-get autoremove -y
 
 # Make sure that "user specific" directories we are sharing
 # are in fact available to all users

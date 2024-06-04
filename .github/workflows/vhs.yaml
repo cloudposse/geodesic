@@ -1,8 +1,13 @@
 name: vhs
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     paths:
       - '*.tape'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   TERM: "xterm-256color"
@@ -13,49 +18,63 @@ env:
 jobs:
   vhs:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
-
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: "Check commit message for flags"
+        id: check
+        run: |
+          set -x
+          magic_words='\[skip vhs\]'
+          if [[ $(git log --format=%B -n 1 --no-merges) =~ $magic_words ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up Docker Buildx
+        if: steps.check.outputs.skip != 'true'
         id: buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: "Override Env for Geodesic Demo Purposes"
+      - name: "Override Env and Define Commands for Geodesic Demo Purposes"
+        if: steps.check.outputs.skip != 'true'
         run: |
           echo "PROMPT_STYLE=unicode" > ${ENV_FILE}
           echo "BANNER_MARK=🚀" >> ${ENV_FILE}
           echo "ASSUME_ROLE_INACTIVE_MARK= " >> ${ENV_FILE}
           echo "PROMPT_HOST_MARK=(demo)" >> ${ENV_FILE}
+          mkdir -p "$HOME/.geodesic"
+          cat > "$HOME/.geodesic/preferences" <<-'EOF'
+
+          function demo-tofu-version() {
+            printf '\nTofu Version as of when we recorded this demo:\n'
+            printf '    %s\n\n' $(tofu version | sed 's/ / /g')
+          }
+
+          function demo-list-packages() {
+            printf '\nPackages installed by Geodesic:\n\n'; apt list --manual-installed=true 2>/dev/null | tail -n +2 | cut -f1 -d/ | pr -4 -t -a -w 100
+            echo
+          }
+          EOF
+
 
       # Speed up builds for demo by pre-building docker image
       - name: "make all"
+        if: steps.check.outputs.skip != 'true'
         run: make all
 
-      # We need to install the Hack Nerd Font for the demo
-      # but vhs-action will not install it for us due to issue 264
-      - name: Install Hack Nerd Font
-        run: |
-          curl -sSLO https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Hack.zip
-          unzip -d hack_nerd_font Hack.zip
-          mv hack_nerd_font/ /usr/share/fonts/
-          fc-cache -fv
-
       - uses: charmbracelet/vhs-action@v2
+        if: steps.check.outputs.skip != 'true'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: demo.tape
-          # Cannot use `install-fonts`: https://github.com/charmbracelet/vhs-action/issues/264
-          # install-fonts: true
-          install-fonts: false
-          # Cannot use v0.7.2: https://github.com/charmbracelet/vhs-action/issues/256
-          version: v0.7.1
-
+          install-fonts: true
 
       - uses: stefanzweifel/git-auto-commit-action@v5
+        if: steps.check.outputs.skip != 'true'
         id: auto-commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -67,13 +86,19 @@ jobs:
           file_pattern: '*.gif'
 
       - name: Add Image to Job Summary
-        if: steps.auto-commit.outputs.changes_detected == 'true'
+        if: steps.auto-commit.outputs.changes_detected == 'true' && steps.check.outputs.skip != 'true'
         run: |
           echo "## Demo GIF" >> $GITHUB_STEP_SUMMARY
           echo "![Demo GIF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/docs/demo.gif?raw=true)" >> $GITHUB_STEP_SUMMARY
 
       - name: No changes
-        if: steps.auto-commit.outputs.changes_detected == 'false'
+        if: steps.auto-commit.outputs.changes_detected == 'false' || steps.check.outputs.skip == 'true'
+        env:
+          SKIPPED: ${{ steps.check.outputs.skip }}
         run: |
-          echo "No changes to demo" >> $GITHUB_STEP_SUMMARY
+          if [[ "${SKIPPED}" == "true" ]]; then
+            echo "Demo update skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No changes to demo" >> $GITHUB_STEP_SUMMARY
+          fi
 

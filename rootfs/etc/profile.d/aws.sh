@@ -9,21 +9,30 @@ if [ ! -e "${HOME}/.aws" ]; then
 	# -e fails if the target is a link to a non-existent file, remove dead link if it exists
 	[ -L "${HOME}/.aws" ] && rm -f "${HOME}/.aws"
 	if [ ! -d "${GEODESIC_AWS_HOME}" ]; then
-		mkdir ${GEODESIC_AWS_HOME} && chmod 700 ${GEODESIC_AWS_HOME}
+		if mkdir ${GEODESIC_AWS_HOME}; then # allow error message to be printed
+			ln -s "${GEODESIC_AWS_HOME}" "${HOME}/.aws"
+		else
+			export GEODESIC_AWS_HOME="${HOME}/.aws"
+			mkdir ${GEODESIC_AWS_HOME}
+			if [ -n "${AWS_CONFIG_FILE}" ] && [ ! -f "${AWS_CONFIG_FILE}" ]; then
+				AWS_CONFIG_FILE="${GEODESIC_AWS_HOME}/config"
+			fi
+		fi
+		chmod 700 ${GEODESIC_AWS_HOME}
 	fi
-	ln -s "${GEODESIC_AWS_HOME}" "${HOME}/.aws"
 fi
 
 if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME}/config}" ] && [ -d ${GEODESIC_AWS_HOME} ]; then
 	echo "# Initializing ${AWS_CONFIG_FILE}"
 	# Required for AWS_PROFILE=default
-	echo '[default]' >${AWS_CONFIG_FILE}
+	echo '[default]' >"${AWS_CONFIG_FILE}"
+	chmod 600 "${AWS_CONFIG_FILE}"
 fi
 
 # Install autocompletion rules for aws CLI v1 and v2
 for __aws in aws aws1 aws2; do
 	if command -v ${__aws}_completer >/dev/null; then
-	complete -C "$(command -v ${__aws}_completer)" ${__aws}
+		complete -C "$(command -v ${__aws}_completer)" ${__aws}
 	fi
 done
 unset __aws

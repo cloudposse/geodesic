@@ -43,6 +43,7 @@ function _search_geodesic_dirs() {
 	if [[ -d $base/defaults ]]; then
 		_expand_dir_or_file search_list "${resource}" "${base}/defaults"
 	else
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo "trace: SKIPPING $base/defaults (bad directory)"
 		_expand_dir_or_file search_list "${resource}" "${base}"
 	fi
 
@@ -50,22 +51,29 @@ function _search_geodesic_dirs() {
 	local stage=$(basename "${DOCKER_IMAGE}")
 
 	if [[ $company != "." && -d $base/$company ]]; then
-		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for company-level resources in "$base/$company"
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: LOOKING for company-level resources in "$base/$company"
 		if [[ -d $base/$company/defaults ]]; then
 			_expand_dir_or_file search_list "${resource}" "${base}/${company}/defaults"
 		else
+			[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo "trace: SKIPPING ${base}/${company}/defaults (bad directory)"
 			_expand_dir_or_file search_list "${resource}" "${base}/${company}"
 		fi
+	elif [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]]; then
+		echo 'trace: NOT LOOKING for company-level resources in '"$base/$company (bad directory)"
 	fi
 
 	if [[ -n $stage && ($stage != $company) && -d $base/$stage ]]; then
-		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for repo-level resources in "$base/$stage"
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: LOOKING for repo-level resources in "$base/$stage"
 		_expand_dir_or_file search_list "${resource}" "${base}/${stage}"
+	elif [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]]; then
+		echo trace: SKIPPING LOOKING for repo-level resources in "$base/$stage" '(bad or duplicate directory)'
 	fi
 
 	if [[ -n $DOCKER_IMAGE && ($DOCKER_IMAGE != $stage) && -d $base/$DOCKER_IMAGE ]]; then
-		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for image-specific resources in "$base/$DOCKER_IMAGE"
+		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: LOOKING for image-specific resources in "$base/$DOCKER_IMAGE"
 		_expand_dir_or_file search_list "${resource}" "${base}/${DOCKER_IMAGE}"
+	elif [[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]]; then
+		echo trace: SKIPPING LOOKING for image-specific resources in "$base/$DOCKER_IMAGE" '(bad or duplicate directory)'
 	fi
 }
 
@@ -83,9 +91,9 @@ function _expand_dir_or_file() {
 	local default_exclusion_pattern="(~|.bak|.log|.old|.orig|.txt|.md|.disabled)$"
 	local exclude="${GEODESIC_AUTO_LOAD_EXCLUSIONS:-$default_exclusion_pattern}"
 
-	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: looking for resources of type "$resource" in "$dir"
+	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: LOOKING for resources of type "$resource" in "$dir"
 
-  local item
+	local item
 	for item in "${dir}/$resource" "${dir}/${resource}.d"/*; do
 		if [[ -f $item ]]; then
 			[[ $item =~ $exclude ]] && ([[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo trace: excluding "$item" || true) && continue

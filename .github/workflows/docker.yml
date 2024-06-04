@@ -1,4 +1,9 @@
 name: "docker"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
 
@@ -22,7 +27,7 @@ jobs:
       ECR_REGISTRY: public.ecr.aws/ # Images will be published to `public.ecr.aws/cloudposse/$repositoryName`
     strategy:
       matrix:
-        os: ['alpine', 'debian']
+        os: ['debian']
     steps:
     - name: "Checkout source code at current commit"
       uses: actions/checkout@v4

@@ -5,17 +5,18 @@ alpine-only:
 - changed-files:
   - all-globs-to-all-files:
     - os/alpine/**
-    - '!os/alpine/Dockerfile.alpine'
+    # We are not publishing Alpine anymore, so changes to the Alpine Dockerfile do not matter anymore
+    # - '!os/alpine/Dockerfile.alpine'
 
-direnv:
-- changed-files:
-  - any-glob-to-any-file:
-    - rootfs/etc/direnv/**
+#direnv:
+#- changed-files:
+#  - any-glob-to-any-file:
+#    - rootfs/etc/direnv/**
 
 docker:
 - changed-files:
   - any-glob-to-any-file:
-    - os/alpine/Dockerfile.alpine
+    # - os/alpine/Dockerfile.alpine
     - os/debian/Dockerfile.debian
 
 docs:
@@ -31,8 +32,10 @@ github:
 packages:
 - changed-files:
   - any-glob-to-any-file:
-    - "**/packages*.txt"
-    - "**/requirements*.txt"
+    - "packages*.txt"
+    - "requirements*.txt"
+    - "os/debian/packages*.txt"
+    - "os/debian/requirements*.txt"
 
 scripts:
 - changed-files:
@@ -44,8 +47,3 @@ shell:
 - changed-files:
   - any-glob-to-any-file:
     - rootfs/etc/profile.d/**
-
-terraform:
-- changed-files:
-  - any-glob-to-any-file:
-    - rootfs/etc/direnv/rc.d/terraform

@@ -21,6 +21,8 @@ function _load_geodesic_overrides() {
 }
 
 [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} != false ]] || _load_geodesic_overrides
-unset -f _load_geodesic_overrides
 
-unset _GEODESIC_TRACE_CUSTOMIZATION
+if [[ -z $_GEODESIC_TRACE_CUSTOMIZATION ]]; then
+	unset -f _load_geodesic_overrides
+	unset _GEODESIC_TRACE_CUSTOMIZATION
+fi

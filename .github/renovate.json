@@ -16,6 +16,7 @@
   },
   "dockerfile": {
     "ignorePaths": [
+      "os/alpine/**",
       "rootfs/**",
       "Dockerfile.custom",
       "Dockerfile.options"

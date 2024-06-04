@@ -5,6 +5,10 @@ on:
     paths:
       - '*.tape'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   TERM: "xterm-256color"
   COLORTERM: "truecolor"
@@ -13,20 +17,28 @@ env:
 
 jobs:
   vhs:
-    if: "! contains(github.event.head_commit.message, '[skip vhs]')"
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
-
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: "Check commit message for flags"
+        id: check
+        run: |
+          magic_words='\[skip vhs\]'
+          if [[ $(git log --format=%B -n 1 --no-merges) =~ $magic_words ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up Docker Buildx
+        if: steps.check.outputs.skip != 'true'
         id: buildx
         uses: docker/setup-buildx-action@v3
 
       - name: "Override Env and Define Commands for Geodesic Demo Purposes"
+        if: steps.check.outputs.skip != 'true'
         run: |
           echo "PROMPT_STYLE=unicode" > ${ENV_FILE}
           echo "BANNER_MARK=🚀" >> ${ENV_FILE}
@@ -49,15 +61,18 @@ jobs:
 
       # Speed up builds for demo by pre-building docker image
       - name: "make all"
+        if: steps.check.outputs.skip != 'true'
         run: make all
 
       - uses: charmbracelet/vhs-action@v2
+        if: steps.check.outputs.skip != 'true'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: demo.tape
           install-fonts: true
 
       - uses: stefanzweifel/git-auto-commit-action@v5
+        if: steps.check.outputs.skip != 'true'
         id: auto-commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,13 +84,19 @@ jobs:
           file_pattern: '*.gif'
 
       - name: Add Image to Job Summary
-        if: steps.auto-commit.outputs.changes_detected == 'true'
+        if: steps.auto-commit.outputs.changes_detected == 'true' && steps.check.outputs.skip != 'true'
         run: |
           echo "## Demo GIF" >> $GITHUB_STEP_SUMMARY
           echo "![Demo GIF](https://github.com/${{ github.repository }}/blob/${{ steps.auto-commit.outputs.commit_hash }}/docs/demo.gif?raw=true)" >> $GITHUB_STEP_SUMMARY
 
       - name: No changes
-        if: steps.auto-commit.outputs.changes_detected == 'false'
+        if: steps.auto-commit.outputs.changes_detected == 'false' || steps.check.outputs.skip == 'true'
+        env:
+          SKIPPED: ${{ steps.check.outputs.skip }}
         run: |
-          echo "No changes to demo" >> $GITHUB_STEP_SUMMARY
+          if [[ "${SKIPPED}" == "true" ]]; then
+            echo "Demo update skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No changes to demo" >> $GITHUB_STEP_SUMMARY
+          fi
 

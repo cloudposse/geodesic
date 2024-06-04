@@ -1,6 +1,7 @@
 name: vhs
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     paths:
       - '*.tape'
 
@@ -12,6 +13,7 @@ env:
 
 jobs:
   vhs:
+    if: "! contains(github.event.head_commit.message, '[skip vhs]')"
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

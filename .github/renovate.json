@@ -1,14 +1,23 @@
 {
   "timezone": "America/Los_Angeles",
   "extends": [
-    "config:base",
+    "config:recommended",
     "docker:disableMajor"
+  ],
+  "ignorePaths": [
+    "os/alpine/**",
+    "rootfs/**"
   ],
   "packageRules": [
     {
-      "packageNames": ["awscli","boto3"],
-      "groupName": ["AWS CLI packages"],
-      "schedule": ["after 4pm on friday"]
+      "matchPackageNames": [
+        "awscli",
+        "boto3"
+      ],
+      "groupName": "AWS CLI packages",
+      "schedule": [
+        "after 4pm on friday"
+      ]
     }
   ],
   "github-actions": {

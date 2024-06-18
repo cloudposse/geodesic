@@ -61,6 +61,8 @@ function aws_choose_role() {
 			--preview "$_preview"
 }
 
+# Usage: aws_sdk_assume_role <role> [command...]
+# If no command is given, a subshell is started with the role.
 function aws_sdk_assume_role() {
 	local role=$1
 	shift

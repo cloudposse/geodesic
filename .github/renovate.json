@@ -5,8 +5,8 @@
     "docker:disableMajor"
   ],
   "ignorePaths": [
-    "os/alpine/**",
-    "rootfs/**"
+    "**/os/alpine/**",
+    "**/rootfs/**"
   ],
   "packageRules": [
     {
@@ -25,6 +25,8 @@
   },
   "dockerfile": {
     "ignorePaths": [
+      "**/os/alpine/**",
+      "**/rootfs/**",
       "Dockerfile.custom",
       "Dockerfile.options"
     ]

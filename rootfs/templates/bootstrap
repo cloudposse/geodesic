@@ -1,6 +1,6 @@
 #!/bin/bash
 export DOCKER_IMAGE="{{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}"
-export DOCKER_TAG="{{- getenv "DOCKER_TAG" (printf "${1:-%s-%s}" ((index (split (getenv "GEODESIC_VERSION") " ") 0) | default "dev") (getenv "GEODESIC_OS" "alpine")) -}}"
+export DOCKER_TAG="{{- getenv "DOCKER_TAG" (printf "${1:-%s-%s}" ((index (strings.Split (getenv "GEODESIC_VERSION") " ") 0) | default "dev") (getenv "GEODESIC_OS" "alpine")) -}}"
 export APP_NAME=${APP_NAME:-$(basename $DOCKER_IMAGE)}
 export INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 export SAFE_INSTALL_PATH="$HOME/.local/bin" # per XDG recommendations

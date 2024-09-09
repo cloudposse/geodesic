@@ -40,8 +40,13 @@ function short_cluster_name_from_eks() {
 	local full_name=$(printf "%s" "$1" | cut -d/ -f2)
 	# remove namespace prefix if present
 	full_name=${full_name#${NAMESPACE}-}
-	# remove eks and everything after it, if present
-	full_name=${full_name%-eks-*}
+	# remove "-eks" and "-cluster" if present, leave the rest
+	full_name=${full_name/-eks-/-}
+	if [[ "$full_name" =~ -cluster(-.*)?$ ]]; then
+		# If true, remove '-cluster'
+		full_name="${full_name/-cluster/}"
+	fi
+
 	printf "%s" "${full_name}"
 	# If NAMESPACE is unset, delete everything before and including the first dash
 	# printf "%s" "$1" | sed -e 's%arn.*:cluster/'"${NAMESPACE:-[^-]\+}"'-\([^-]\+\)-eks-.*$%\1%'

@@ -2,12 +2,12 @@
 # https://hub.docker.com/_/debian
 # We use codename (bookworm) instead of version number (12) because we want to select
 # the matching Python Docker image, which is named after the codename only.
-# bookworm-20240722 corresponds to Debian 12.6
+# bookworm-20241016 corresponds to Debian 12.7
 ARG DEBIAN_CODENAME=bookworm
 # Debian codenamed images are tagged with date codes rather than minor version numbers.
-ARG DEBAIN_DATECODE=20240812
+ARG DEBAIN_DATECODE=20241016
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.12.5
+ARG PYTHON_VERSION=3.12.7
 
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.5
@@ -18,7 +18,7 @@ ARG SESSION_MANAGER_PLUGIN_VERSION=latest
 
 # Helm plugins:
 # https://github.com/databus23/helm-diff/releases
-ARG HELM_DIFF_VERSION=3.9.9
+ARG HELM_DIFF_VERSION=3.9.11
 # https://github.com/aslafy-z/helm-git/releases
 ARG HELM_GIT_VERSION=1.3.0
 

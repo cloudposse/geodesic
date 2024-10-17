@@ -20,6 +20,7 @@ if [ ! -e "${HOME}/.aws" ]; then
 		fi
 		chmod 700 ${GEODESIC_AWS_HOME}
 	fi
+	ln -s "${GEODESIC_AWS_HOME}" "${HOME}/.aws"
 fi
 
 if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME}/config}" ] && [ -d ${GEODESIC_AWS_HOME} ]; then

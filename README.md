@@ -47,12 +47,17 @@ Then share the resulting container with everyone on your team to ensure everyone
 - **Version Control for Tools**: Geodesic facilitates easy versioning of tools for different environments, enabling repeatable setups and minimizing compatibility issues.
 - **Reusable Base Image for Toolboxes**: Empower teams to create and maintain consistent toolbox images, ensuring a standardized development environment across the board.
 
+> [!TIP]
+> ### You can try out `geodesic` directly in your browser using GitHub Codespaces
+>
+> [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=cloudposse/geodesic&skip_quickstart=true)
+>
+> <i>Already start one? Find it [here](https://github.com/codespaces).</i>
+>
+
 ## Screenshots
 
 <img src="docs/demo.gif" alt="Demo" />*<br/>Example of running a shell based on the `cloudposse/geodesic` base docker image.*
-
-
-
 
 ## Introduction
 
@@ -330,3 +335,4 @@ Copyright © 2017-2024 [Cloud Posse, LLC](https://cpco.io/copyright)
 <a href="https://cloudposse.com/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=readme_footer_link"><img alt="README footer" src="https://cloudposse.com/readme/footer/img"/></a>
 
 <img alt="Beacon" width="0" src="https://ga-beacon.cloudposse.com/UA-76589703-4/cloudposse/geodesic?pixel&cs=github&cm=readme&an=geodesic"/>
+

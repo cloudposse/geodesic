@@ -98,10 +98,11 @@ RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 ENV BANNER "geodesic"
 
 ENV MOTD_URL=http://geodesic.sh/motd
-ENV HOME=/conf
 
 # Install all packages as root
 USER root
+# We used to override user home directory to /conf, but we no longer do that.
+ENV HOME=/root
 
 # Keep dpkg quiet about running non-interactively
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
@@ -134,8 +135,9 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
 # Install packages (but only explicitly listed ones)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
-    mkdir -p /etc/bash_completion.d/ /etc/profile.d/ /conf && \
-    touch /conf/.gitconfig
+    mkdir -p /etc/bash_completion.d/ /etc/profile.d/  # \
+    # /conf && \
+    # touch /conf/.gitconfig
 
 # Install `tofu` as an alternative to `terraform`, if it is available.
 # Set priority to 5, which is lower than any other Cloud Posse Terraform package,
@@ -163,16 +165,14 @@ WORKDIR /tmp
 COPY --from=python /usr/local/ /usr/local/
 
 # Explicitly set  KUBECONFIG to enable kube_ps1 prompt
-ENV KUBECONFIG=/conf/.kube/config
+ENV KUBECONFIG="${HOME}/.kube/config"
 # Install an empty kubeconfig to suppress some warnings
-COPY rootfs/conf/.kube/config /conf/.kube/config
+COPY rootfs/etc/kubeconfig "${KUBECONFIG}"
 # Set mode on kubeconfig to suppress some warnings while installing tools
 RUN chmod 600 $KUBECONFIG
 
 #
 # Install kubectl
-#
-# Set KUBERNETES_VERSION and KOPS_BASE_IMAGE in /conf/kops/kops.envrc
 #
 RUN kubectl completion bash > /etc/bash_completion.d/kubectl.sh
 
@@ -230,8 +230,8 @@ RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v$
 # Configure host AWS configuration to be available from inside Docker image
 #
 # AWS_DATA_PATH is a PATH-like variable for configuring the AWS botocore library to
-# load additional modules. Do not set it. ENV AWS_DATA_PATH=/localhost/.aws
-ARG GEODESIC_AWS_HOME=/localhost/.aws
+# load additional modules. Do not set it.
+ARG GEODESIC_AWS_HOME=${HOME}/.aws
 ENV AWS_CONFIG_FILE=${GEODESIC_AWS_HOME}/config
 ENV AWS_SHARED_CREDENTIALS_FILE=${GEODESIC_AWS_HOME}/credentials
 # Region abbreviation types are "fixed" (always 3 chars), "short" (4-5 chars), or "long" (the full AWS string)
@@ -330,7 +330,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends pandoc && \
 RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 	chmod -R a+rwX $dir; done
 
-WORKDIR /conf
+RUN mkdir /workspace
+WORKDIR /workspace
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c", "boot"]
@@ -338,3 +339,4 @@ CMD ["-c", "boot"]
 ARG DEV_VERSION
 ENV GEODESIC_DEV_VERSION=$DEV_VERSION
 ENV GEODESIC_VERSION="${GEODESIC_VERSION}${GEODESIC_DEV_VERSION:+ (${GEODESIC_DEV_VERSION})}"
+

@@ -47,10 +47,10 @@ build: $(DOCKER_BASE_OS).build
 install: $(DOCKER_BASE_OS).install
 
 run:
-	@geodesic
+	@$(APP_NAME)
 
 %.run: %.build %.install
-	@geodesic
+	@$(APP_NAME)
 
 run/check:
 	@if [[ -n "$$(docker ps --format '{{ .Names }}' --filter name="^/$(APP_NAME)\$$")" ]]; then \

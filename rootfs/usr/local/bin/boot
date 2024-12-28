@@ -11,25 +11,26 @@ elif [[ $1 = "wrapper" ]]; then
   color
   color "########################################################################################"
   color "# This is the end of the script that installs Geodesic. You should not be seeing this."
-  color "# This should have been piped into bash. Use the following to install the script that runs"
+  color "# This should have been piped into bash. Use the following to install the script that"
+  color "# runs Geodesic with all its features (the recommended way to use Geodesic):"
 elif [[ -n $DOCKER_IMAGE ]] && [[ -n $DOCKER_TAG ]]; then
   exec /usr/local/bin/init
 else
   function color() { echo "$*"  >&2; }
   color "########################################################################################"
   color "# Attach a terminal (docker run --rm --it ...) if you want to run a shell."
-  color "# Run the following to install the script that runs "
+  color "# Run the following to install the script that runs Geodesic "
+  color "# with all its features (the recommended way to use Geodesic):"
 fi
 
 source /etc/os-release || true # ignore exit code
 
-color "# Geodesic with all its features (the recommended way to use Geodesic):"
 color "#"
-color "#   docker run --rm ${DOCKER_IMAGE:-cloudposse/geodesic}:${DOCKER_TAG:-latest${ID:+-$ID}} init | bash"
+color "#   docker run --rm ${DOCKER_IMAGE:-cloudposse/geodesic}:${DOCKER_TAG:-dev${ID:+-$ID}} init | bash"
 color "#"
 color "# After that, you should be able to launch Geodesic just by typing"
 color "#"
-color "#   geodesic"
+color "#   $(basename ${DOCKER_IMAGE:-geodesic})"
 color "#"
 color "########################################################################################"
 echo

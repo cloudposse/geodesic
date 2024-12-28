@@ -241,7 +241,7 @@ RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v$
 # Configure host AWS configuration to be available from inside Docker image
 #
 # AWS_DATA_PATH is a PATH-like variable for configuring the AWS botocore library to
-# load additional modules. Do not set it. ENV AWS_DATA_PATH=/localhost/.aws
+# load additional modules. Do not set it.
 ARG GEODESIC_AWS_HOME=/localhost/.aws
 ENV AWS_CONFIG_FILE=${GEODESIC_AWS_HOME}/config
 ENV AWS_SHARED_CREDENTIALS_FILE=${GEODESIC_AWS_HOME}/credentials

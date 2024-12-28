@@ -13,7 +13,6 @@ ldnsutils
 # locales
 net-tools
 netcat-openbsd
-oathtool
 procps
 wget
 

@@ -20,7 +20,7 @@
 # and always returns true. With -l it outputs integer luminance values for foreground
 # and background colors. With -ll it outputs labels on the luminance values as well.
 function _is_term_dark_mode() {
-	local x fg_rgb bg_rgb fg_lum bg_lum
+	local x fg_rgb bg_rgb fg_lum bg_lum exit_code
 
 	# Do not try to auto-detect if we are not in a terminal
 	# or if termcap does not think we are in a color terminal
@@ -28,18 +28,35 @@ function _is_term_dark_mode() {
 		# Extract the RGB values of the foreground and background colors via OSC 10 and 11.
 		# Redirect output to `/dev/tty` in case we are in a subshell where output is a pipe,
 		# because this output has to go directly to the terminal.
+		local saved_state=$(stty -g)
+		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking terminal color scheme...$(tput sgr0)" >&2
 		stty -echo
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
-		IFS=: read -t 0.1 -d $'\a' x fg_rgb
-		IFS=: read -t 0.1 -d $'\a' x bg_rgb
-		stty echo
+		# Timeout of 2 was not enough when waking for sleep.
+		# The second read should be part of the first response, should not need much time at all regardless.
+		IFS=: read -s -t 1 -d $'\a' x fg_rgb
+		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]]; then
+			IFS=: read -s -t 30 -d $'\a' x fg_rgb
+			exit_code=$?
+			[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
+		fi
+		[[ $exit_code -gt 128 ]] || exit_code=0
+		IFS=: read -s -t 0.5 -d $'\a' x bg_rgb
+		((exit_code += $?))
+		stty "$saved_state"
 	else
 		if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
 			echo "* TERMINAL TRACE: ${FUNCNAME[0]} called, but not running in a color terminal." >&2
 		fi
 	fi
 
-	if [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
+	if [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]]; then
+		printf "\n\n\tTerminal light/dark mode detection failed from signal handler. Disabling automatic detection.\n" >&2
+		printf "\tYou can manually change modes with\n\n\tupdate-terminal-color-mode [dark|light]\n\n" >&2
+		printf "\tYou can re-enable automatic detection with\n\n\tunset GEODESIC_TERM_COLOR_AUTO\n\n" >&2
+	fi
+
+	if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
 		if [[ $GEODESIC_TRACE =~ "terminal" ]] && tty -s; then
 			echo "$(tput setaf 1)* TERMINAL TRACE: Terminal did not respond to OSC 10 and 11 queries.$(tput sgr0)" >&2
 		fi

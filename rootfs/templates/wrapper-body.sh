@@ -1,5 +1,5 @@
 # Default directory mounts for the user's home directory
-homedir_default_mounts=".aws,.config,.emacs.d,.geodesic,.gitconfig,.kube,.ssh,.terraform.d"
+homedir_default_mounts=".aws,.config,.emacs.d,.geodesic,.kube,.ssh,.terraform.d"
 
 function require_installed() {
 	if ! command -v $1 >/dev/null 2>&1; then
@@ -184,7 +184,8 @@ function _on_shell_exit() {
 }
 
 function _on_container_exit() {
-	export GEODESIC_CONTAINER_EXITING="${CONTAINER_ID:0:12}"
+	export GEODESIC_EXITING_CONTAINER_ID="${CONTAINER_ID:0:12}"
+	export GEODESIC_EXITING_CONTAINER_NAME="${DOCKER_NAME}"
 	_on_shell_exit
 	[ -n "${ON_CONTAINER_EXIT}" ] && command -v "${ON_CONTAINER_EXIT}" >/dev/null && "${ON_CONTAINER_EXIT}"
 }

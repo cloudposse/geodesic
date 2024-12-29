@@ -4,16 +4,27 @@
 
 #### Better Shell Management
 
+##### Equal Treatment for Multiple Shells in a Single Container
+
 A much requested feature, Geodesic no longer exits the container when the first shell exits.
 Instead, the container runs until all shells have exited. This means you can now run multiple shells
 inside the container, and exit them in any order; you no longer have to keep track of which
 shell was the first one launched. Unfortunately, this also means that you can no longer 
 detach and reattach to a shell.
 
+A side benefit of this is that previously, if did something like `trap handler EXIT` in your
+top-level shell, there was a good chance the handler would not run because the shell will
+be killed (SIGKILL, `kill -9`) rather than shut down cleanly. Now, there is a much greater
+likelihood that the shells will shut down in an orderly manner and run their exit hooks.
+
+##### New Capability for Multiple Shells with One Container per Shell
+
 However, Geodesic now supports another much requested feature: launching a new container
 each time you run Geodesic. This is done by setting the `ONE_SHELL` environment variable to "true"
 or passing `--one-shell` on the command line. This allows you to run multiple versions of Geodesic,
 and also allows you to detach from a shell and reattach to it later.
+
+##### External Command to Stop Geodesic
 
 Not a new feature, but one that many people were not aware of: you can kill the running
 Geodesic container with the command `geodesic stop`. This will stop the container, and it
@@ -22,26 +33,41 @@ there is the possibility you will have several running containers. If this is th
 `geodesic stop` will list the running containers by name. You can then pass the
 name as an argument to `geodesic stop` and it will stop that one.
 
+##### Cleanup Commands on Shell Exit and Container Exit
+
 Another old feature few people knew about: you can have Geodesic automatically
 run a command when a shell exits. This was done by creating an executable command named
 `geodesic_on_exit` and putting it in your `$PATH`. This feature has been enhanced
 in 2 ways:
 
-1. Now, you can set the name of the command to run when the shell exits via `ON_SHELL_EXIT`
-   (defaults to `geodesic_on_exit`). Also new: the `ON_SHELL_EXIT` command will have available to it the short ID of the container in which it was running, via the
-    environment variable `GEODESIC_CONTAINER_EXITING`.
+1. Now you can set the name of the command to run when the shell exits via `ON_SHELL_EXIT`
+   (defaults to `geodesic_on_exit`). Also new: the `ON_SHELL_EXIT` command will have available 
+   to it the short ID and name of the container in which it was running, via the
+   environment variables `GEODESIC_EXITING_CONTAINER_ID` and `GEODESIC_EXITING_CONTAINER_NAME`,
+   respectively.
 2. You can use the new environment variable `ON_CONTAINER_EXIT` to configure a different
-   command to run only when the container exits. 
+   command to run only when the container exits. It will also have the container ID and name
+   available to it via the same environment variables.
 
 Be aware that the commands are called on a best-effort basis when the Geodesic
 launch wrapper exits. If you detach from a shell, the wrapper will run then and
 call `ON_SHELL_EXIT`. If you reattach to the shell, the wrapper is not involved,
 so quitting the shell or container will not run the cleanup command.
 
-Alternately, if you quit 2 shells at nearly the same time, the `ON_CONTAINER_EXIT`
-command may be called twice. This is because the wrapper does not know which shell
-is the last one to exit; it calls the command when the container has stopped
-before shell exit processing has finished.
+Alternately, if you quit 2 shells at nearly the same time, for example by 
+running `geodesic stop`, the `ON_CONTAINER_EXIT` command may be called twice. 
+This is because the wrapper calls the command when the container has stopped
+before shell exit processing has finished, and both shells fit the criterion.
+
+Now that shells normally exit cleanly (pretty much as long as you do not
+run `docker kill geodesic`), you may find that you get more reliable behavior 
+out of 
+
+```bash
+trap exit_handler EXIT
+```
+
+to run on each shell completion.
 
 #### Better Configuration Management
 
@@ -202,21 +228,22 @@ both of which are described after this section.
 These directories are specified as a comma-separated list of directories (or files) relative to the host user's home directory.
 If items in the list are not present on the host, they will be silently ignored.
 
-- `HOMEDIR_MOUNTS` is a list of directories to mount. It is set by default to `".aws,.config,.emacs.d,.geodesic,.gitconfig,.kube,.ssh,.terraform.d"`. 
+- `HOMEDIR_MOUNTS` is a list of directories to mount. It is set by default to `".aws,.config,.emacs.d,.geodesic,.kube,.ssh,.terraform.d"`. 
   If you set it to something else, it will replace the default list. Ensure that your Geodesic configuration directory
   (default is `$HOME/.config/geodesic`) is mounted.
 - `HOMEDIR_ADDITIONAL_MOUNTS` is a list of additional directories to mount. It is appended to the
   `HOMEDIR_MOUNTS` list of directories to mount. This allows you to add to the defaults without overriding them.
 
-Note that you can mount files this way, but it will be difficult to know inside of Geodesic if
-the files are on the host or private to the container. When you mount directories, the default
-Geodesic prompt will tell you whether the current directory is on the host or not.
+Note that you can mount files this way, but there are issues with that, especially when mapping file ownership.
+
 
 Many files that used to be placed directly in the `/conf` directory can now be placed in subdirectories.
 Many applications now support the `XDG Base Directory Specification`, which specifies that configuration
 files should be placed in `$XDG_CONFIG_HOME` (defaults to `~/.config/`). This directory is mounted by default.
 
-- `~/.gitconfig` can be moved to `~/.config/git/config`.
+- `~/.gitconfig` can be moved to `~/.config/git/config`. If you mount `~/.gitconfig` directly, and have file ownership
+  mapping enabled, `git config` will not be able to modify the file. Instead, you should mount `~/.config/` and the
+  `git/config` inside will work as expected.
 - `~/.bash_profile` can be moved to `~/.bash_profile.d/` and sourced from there. however, we do not recommend this, and we do not
   mount `~/.bash_profile.d` by default. Instead, we recommend you put scripts you want to run inside Geodesic in
   `~/.config/geodesic/defaults/preferences.d/` where they will be sourced automatically. If you want to share

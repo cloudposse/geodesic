@@ -36,7 +36,12 @@ function update-terminal-color-mode() {
 			[[ "$quiet" == "true" ]] || echo "No terminal detected." >&2
 		elif [[ -z "$(tput op 2>/dev/null)" ]]; then
 			[[ "$quiet" == "true" ]] || echo "Terminal does not appear to support color." >&2
+		elif [[ ${GEODESIC_TERM_COLOR_AUTO} == "unsupported" ]]; then
+			[[ "$quiet" == "true" ]] || echo "Terminal does not support color mode detection." >&2
+		else
+			[[ "$quiet" == "true" ]] || echo "Terminal did not respond to color queries." >&2
 		fi
+		# "light" is historical default for unknown terminals.
 		new_mode="light"
 	fi
 
@@ -312,8 +317,8 @@ function _update-terminal-color-mode-sigwinch() {
 	unset GEODESIC_TERM_COLOR_SIGNAL
 }
 
-if _is_color_term; then
-	# We install the trap handler whether GEODESIC_TERM_COLOR_AUTO is set or not,
+if [[ ${GEODESIC_TERM_COLOR_AUTO} != "unsupported" ]] && _is_color_term; then
+	# We install the trap handler whether GEODESIC_TERM_COLOR_AUTO is set to "disabled" or "false",
 	# because we will not be able to detect the change in that variable if
 	# it started out disabled and then someone enables it.
 

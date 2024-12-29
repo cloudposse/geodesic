@@ -11,11 +11,49 @@
 # Specifically, this guards against:
 #   docker run -it cloudposse/geodesic:latest-debian  | bash
 
-printf 'printf "\\nIf piping Geodesic output into a shell, do not attach a terminal (-t flag)\\n\\r" >&2; exit 8;'
-# In case this output is not being piped into a shell, hide the warning message.
-# Use backspaces, because carriage returns may be ignored or translated into newlines.
-printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
-printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
-printf '                                                                                                      '
-printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
-printf '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b'
+# If the warning message is longer than the terminal width,
+# on some terminals the message may be truncated. In that case,
+# all the erasure characters will not be printed, and the message will not be erased.
+# So we take pains to make the printed message appear short on the terminal.
+# We do that in part by using backspaces to erase the message one character at a time,
+# so the cursor never advances. Then we eval the message with backspaces removed.
+# We have to then add some extra characters to erase the eval command.
+function warn_if_piped() {
+	local saved_stty=$(stty -g)
+	stty -echo -opost
+
+	local mesg cmd xb m fx bx feval beval
+	mesg='printf "\\n\\rIf piping Geodesic output into a shell, do not attach a terminal (-t flag)\\n\\n\\r" >&2; exit 8; '
+	cmd="printf \"m='\$m'; eval \\\${m//\$'\\b'/}\""
+
+	xb=0
+	m=""
+	for i in $(seq 1 ${#mesg}); do
+		m+="${mesg:$i-1:1}"
+		[[ "${mesg:$i-1:1}" == '\' ]] && xb=$((xb + 1)) || m+=$'\b'
+	done
+
+	fx=""
+	bx=""
+	for i in $(seq 1 $xb); do
+		bx+=$'\b'
+		fx+=" "
+	done
+	m+=$bx
+	m+=$fx
+	m+=$bx
+
+	# Cover the eval command itself. Tough to compute the exact number of backspaces needed,
+	# due to escapes and non-printing characters. So we just add a few extra, because
+	# extra backspaces are ignored.
+	feval=$(printf "%*s" 18)
+	beval="${feval// /$'\b'}"
+
+	eval "$cmd"
+	echo -n "$beval$feval$beval"
+
+	stty "$saved_stty"
+}
+
+warn_if_piped
+unset -f warn_if_piped

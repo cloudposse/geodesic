@@ -14,12 +14,49 @@
 #
 # At some point we may introduce other methods to determine the terminal's color scheme.
 
+# First, at startup, let's try an OSC query. If we get no response, we will assume light mode
+# and disable further queries.
+
+function _verify_terminal_queries_are_supported() {
+	if tty -s && [[ -n "$(tput setaf 1 2>/dev/null)" ]]; then
+		local saved_state=$(stty -g)
+		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking if terminal responds to color queries...$(tput sgr0)" >&2
+		stty -echo
+		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
+		# If 2 seconds is not enough at startup, then the terminal is either non-responsive or too slow.
+		IFS=: read -s -t 2 -d $'\a' x fg_rgb
+		exit_code=$?
+		[[ $exit_code -gt 128 ]] || exit_code=0
+		IFS=: read -s -t 0.5 -d $'\a' x bg_rgb
+		((exit_code += $?))
+		stty "$saved_state"
+		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
+			if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
+				echo "$(tput setaf 1)* TERMINAL TRACE: Terminal did not respond to OSC 10 and 11 queries. Disabling color mode detection.$(tput sgr0)" >&2
+			fi
+			export GEODESIC_TERM_COLOR_AUTO=unsupported
+		fi
+	fi
+}
+
+_verify_terminal_queries_are_supported
+
 # Normally this function produces no output, but with -b, it outputs "true" or "false",
 # with -bb it outputs "true", "false", or "unknown". (Otherwise, unknown assume light mode.)
 # With -m it outputs "dark" or "light", with -mm it outputs "dark", "light", or "unknown".
 # and always returns true. With -l it outputs integer luminance values for foreground
 # and background colors. With -ll it outputs labels on the luminance values as well.
 function _is_term_dark_mode() {
+	[[ ${GEODESIC_TERM_COLOR_AUTO} == "unsupported" ]] && case "$1" in
+	-b) echo "false" ;;
+	-bb) echo "unknown" ;;
+	-m) echo "light" ;;
+	-mm) echo "unknown" ;;
+	-l) echo "0 1000000000" ;;
+	-ll) echo "Foreground luminance: 0, Background luminance: 1000000000" ;;
+	*) return 1 ;;
+	esac && return 0
+
 	local x fg_rgb bg_rgb fg_lum bg_lum exit_code
 
 	# Do not try to auto-detect if we are not in a terminal
@@ -35,6 +72,7 @@ function _is_term_dark_mode() {
 		# Timeout of 2 was not enough when waking for sleep.
 		# The second read should be part of the first response, should not need much time at all regardless.
 		IFS=: read -s -t 1 -d $'\a' x fg_rgb
+		exit_code=$?
 		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]]; then
 			IFS=: read -s -t 30 -d $'\a' x fg_rgb
 			exit_code=$?

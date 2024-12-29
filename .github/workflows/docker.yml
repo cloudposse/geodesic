@@ -83,8 +83,10 @@ jobs:
           TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest-${BASE_OS}"
           LATEST_TAGS="$TAGS,${{ github.repository }}:latest"
           LATEST_TAGS="$LATEST_TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
+          echo is_production=true >> $GITHUB_OUTPUT
         else
           LATEST_TAGS="$TAGS"
+          echo is_production=false >> $GITHUB_OUTPUT
         fi
         printf "Tagging %s with " "${BASE_OS}"
         if [[ "${BASE_OS}" == "$LATEST_TAG_OS" ]]; then
@@ -124,8 +126,8 @@ jobs:
           type=semver,pattern={{version}}
           type=ref,event=pr,prefix=pr-,suffix=-${{matrix.os}}
           type=sha,prefix=sha-,suffix=-${{matrix.os}}
-          type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.action == 'published' }}
-          type=raw,value=latest,suffix=,enable=${{ github.event_name == 'release' && github.event.action == 'published' && matrix.os == env.LATEST_TAG_OS }}
+          type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false && steps.prepare.outputs.is_production == 'yes' }}
+          type=raw,value=latest,suffix=,enable=${{ github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false  && steps.prepare.outputs.is_production == 'yes' && matrix.os == env.LATEST_TAG_OS }}
 
     - name: Show metadata
       run: |

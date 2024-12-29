@@ -135,9 +135,8 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
 # Install packages (but only explicitly listed ones)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     $(grep -h -v '^#' /etc/apt/packages.txt /etc/apt/packages-debian.txt | sed -E 's/@(cloudposse|community|testing)//g' ) && \
-    mkdir -p /etc/bash_completion.d/ /etc/profile.d/  # \
-    # /conf && \
-    # touch /conf/.gitconfig
+    mkdir -p /etc/bash_completion.d/ /etc/profile.d/
+    # touch ${HOME}/.gitconfig ??
 
 # Install `tofu` as an alternative to `terraform`, if it is available.
 # Set priority to 5, which is lower than any other Cloud Posse Terraform package,

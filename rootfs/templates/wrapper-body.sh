@@ -273,7 +273,7 @@ function use() {
 			echo "# Not enabling BindFS host filesystem mapping because host user is root, same as container user."
 		else
 			echo "# Enabling explicit mapping of file owner and group ID between container and host."
-			mount_dir="/.BINDFS"
+			mount_dir="/.FS_HOST"
 			DOCKER_ARGS+=(
 				--env GEODESIC_HOST_UID="${USER_ID}"
 				--env GEODESIC_HOST_GID="${GROUP_ID}"

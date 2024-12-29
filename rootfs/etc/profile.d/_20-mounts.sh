@@ -13,33 +13,65 @@ function _map_mounts() {
 		return 9
 	fi
 
+	# If the user has set the `MAP_FILE_OWNERSHIP` environment variable to "true",
+	# we will have host mounts with host ownership under /.FS_HOST and
+	# and have the same mounts with ownership translation under /.FS_CONT (CONT = container).
+	# Otherwise, all host mounts will be mounted directly at their host paths.
+	local map=""
 	export GEODESIC_HOST_PATHS=()
-	local bindfs_opts=(-o nonempty ${GEODESIC_BINDFS_OPTIONS})
 	if [[ "$MAP_FILE_OWNERSHIP" == "true" ]]; then
-		GEODESIC_HOST_PATHS+=("/.BINDFS/")
+		local src="/.FS_HOST"
+		local dest="/.FS_CONT"
+		if
+			map="${dest}"
+			[[ -d "${src}" ]]
+		then
+			mkdir -p "${dest}"
+		else
+			red "# ERROR: Supposed host mount directory ${src} does not exist. Fatal error."
+			return 9
+		fi
+		GEODESIC_HOST_PATHS+=("${src}/" "${dest}/")
 		if [[ -z $GEODESIC_HOST_UID ]] || [[ -z $GEODESIC_HOST_GID ]]; then
 			red '# ERROR: `$MAP_FILE_OWNERSHIP` is set to "true" but `$GEODESIC_HOST_UID` and `$GEODESIC_HOST_GID` are not set.'
 			red '# File ownership mapping will not be enabled.'
+			findmnt -fn "${dest}" >/dev/null ||
+				mount --rbind "${src}" "${dest}"
 		else
 			green "# File ownership mapping enabled."
 			green "# Files created on host will have UID:GID ${GEODESIC_HOST_UID}:${GEODESIC_HOST_GID} on host."
-			bindfs_opts+=("--map=${GEODESIC_HOST_UID}/0:@${GEODESIC_HOST_GID}/@0")
+			local bindfs_opts=(-o nonempty ${GEODESIC_BINDFS_OPTIONS} "--map=${GEODESIC_HOST_UID}/0:@${GEODESIC_HOST_GID}/@0")
+			# use bindfs to map all the host mounts, under `/.FS_HOST` to a container mounts under `/.FS_CONT`.
+			# Accessing the container mounts will show the files with the mapped UID:GID.
+			# This single mounting is best because it correctly handles individual file mounts, not just directories.
+			findmnt -fn "${dest}" >/dev/null ||
+				bindfs "${bindfs_opts[@]}" "${src}" "${dest}" && GEODESIC_HOST_PATHS+=("${src}/" "${dest}/")
 		fi
 	fi
 
+	# All the map functions (bindfs and mount --rbind) require that the target already exists before
+	# the mount is attempted. This function ensures that the source exists and is the correct type,
+	# and, if so, creates the target if it does not exist.
 	function _ensure_dest() {
 		local src="$1"
 		local dest="$2"
 		local type
 
+		# Skip if the target is the same inode as the source
 		if [[ "${src}" -ef "${dest}" ]]; then
 			type="same"
+		# Skip if the source is a symlink, as this should never happen,
+		# because we take no care to be sure the target of the symlink is also mounted.
 		elif [[ -L "${src}" ]]; then
 			red "# ERROR: Supposedly mounted '${src}' is a symlink. Skipping."
 			type="symlink"
+		# Make the target directory if the source is a directory
 		elif [[ -d "${src}" ]]; then
 			mkdir -p "${dest}"
 			type="dir"
+		# Make the target file if the source is a file,
+		# which requires making the directory the target file will be in,
+		# if it does not already exist.
 		elif [[ -f "${src}" ]]; then
 			if ! [[ -f "${dest}" ]]; then
 				mkdir -p "$(dirname "${dest}")"
@@ -47,24 +79,13 @@ function _map_mounts() {
 			fi
 			type="file"
 		else
-			red "# ERROR: Supposedly mounted '${src}' does not exist. Skipping."
+			red "# ERROR: Supposedly mounted '${src}' is not a directory or file. Skipping."
 			type="missing"
 		fi
 		echo "${type}"
 	}
 
-	function _map_owner() {
-		[[ "$MAP_FILE_OWNERSHIP" == "true" ]] || return 0
-		local dest="$1"
-		local src="/.BINDFS${dest}"
-
-		local type="$(_ensure_dest "${src}" "${dest}")"
-		if [[ "$type" == "dir" ]] || [[ "$type" = "file" ]]; then
-			findmnt -fn "${dest}" >/dev/null ||
-				bindfs "${bindfs_opts[@]}" "${src}" "${dest}"
-		fi
-	}
-
+	# Map a directory or file from the host path to the container path
 	function _map_host() {
 		local src="$1"
 		local dest="$2"
@@ -74,28 +95,44 @@ function _map_mounts() {
 
 		if [[ "$type" == "dir" ]] || [[ "$type" = "file" ]]; then
 			findmnt -fn "${dest}" >/dev/null ||
-				mount --bind "${src}" "${dest}"
+				mount --rbind "${src}" "${dest}"
 		fi
 	}
 
-	# Host mounts are already mounted at the desired path, no need to alias them
+	# If file ownership mapping is enabled, map the ownership translated mounts
+	# to the host files system paths. Otherwise do nothing.
+	function _map_owner_mapped() {
+		[[ -n "${map}" ]] || return 0
+		local dest="$1"
+		local src="${map}${dest}"
+
+		local type="$(_ensure_dest "${src}" "${dest}")"
+		if [[ "$type" == "dir" ]] || [[ "$type" = "file" ]]; then
+			findmnt -fn "${dest}" >/dev/null ||
+				mount --rbind "${src}" "${dest}"
+		fi
+	}
+
+	# Host mounts are already mounted at the desired path, no need to alias them,
+	# but we may need to handle file ownership mapping.
 	IFS='|' read -ra paths <<<"${GEODESIC_HOST_MOUNTS}"
 	for p in "${paths[@]}"; do
-		_map_owner "$p"
+		_map_owner_mapped "$p"
 		[[ -d "$p" ]] && GEODESIC_HOST_PATHS+=("${p}/")
 	done
 
 	# Map the workspace mount
+	# If Geodesic was started without the wrapper (e.g. `docker run ... geodesic`), the workspace
+	# will not be mounted. In that case, we will not map the workspace.
 	if [[ -z "${WORKSPACE_MOUNT_HOST_DIR}" ]] || [[ "${WORKSPACE_MOUNT_HOST_DIR}" == "${WORKSPACE_MOUNT}" ]]; then
 		WORKSPACE_MOUNT_HOST_DIR="${WORKSPACE_MOUNT}"
 		yellow "# No host mapping found for Workspace."
 	else
-		_map_owner "${WORKSPACE_MOUNT_HOST_DIR}"
+		_map_owner_mapped "${WORKSPACE_MOUNT_HOST_DIR}"
 		_map_host "${WORKSPACE_MOUNT_HOST_DIR}" "${WORKSPACE_MOUNT}"
 	fi
 
-	# Map the home directory subdirectories
-
+	# Map the user's home directory subdirectories and files from the host ($LOCAL_HOME) to the container ($HOME)
 	# although we call it "dirs", it can be files too
 	local dirs
 	IFS='|' read -ra dirs <<<"${GEODESIC_HOMEDIR_MOUNTS}"
@@ -111,11 +148,11 @@ function _map_mounts() {
 
 	# Set up file ownership mapping for the LOCAL_HOME directory
 	for d in "${dirs[@]}"; do
-		_map_owner "${LOCAL_HOME}/$d"
+		_map_owner_mapped "${LOCAL_HOME}/$d"
 	done
 
 	if [[ "${LOCAL_HOME}" == "${HOME}" ]]; then
-		yellow "# LOCAL_HOME is the same as HOME. No need to map directories to ."
+		yellow "# LOCAL_HOME is the same as HOME. No need to map directories."
 		return 0
 	fi
 

@@ -5,9 +5,9 @@
 # bookworm-20241016 corresponds to Debian 12.7
 ARG DEBIAN_CODENAME=bookworm
 # Debian codenamed images are tagged with date codes rather than minor version numbers.
-ARG DEBAIN_DATECODE=20241016
+ARG DEBAIN_DATECODE=20241223
 # Find the current version of Python at https://www.python.org/downloads/source/
-ARG PYTHON_VERSION=3.12.7
+ARG PYTHON_VERSION=3.12.8
 
 # https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_COMPLETION_VERSION=0.9.5
@@ -18,7 +18,7 @@ ARG SESSION_MANAGER_PLUGIN_VERSION=latest
 
 # Helm plugins:
 # https://github.com/databus23/helm-diff/releases
-ARG HELM_DIFF_VERSION=3.9.11
+ARG HELM_DIFF_VERSION=3.9.13
 # https://github.com/aslafy-z/helm-git/releases
 ARG HELM_GIT_VERSION=1.3.0
 

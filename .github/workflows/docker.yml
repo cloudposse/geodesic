@@ -83,10 +83,10 @@ jobs:
           TAGS="$TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest-${BASE_OS}"
           LATEST_TAGS="$TAGS,${{ github.repository }}:latest"
           LATEST_TAGS="$LATEST_TAGS,${{ env.ECR_REGISTRY }}${{ github.repository }}:latest"
-          echo is_production=true >> $GITHUB_OUTPUT
+          echo is_production=yes >> $GITHUB_OUTPUT
         else
           LATEST_TAGS="$TAGS"
-          echo is_production=false >> $GITHUB_OUTPUT
+          echo is_production=yes >> $GITHUB_OUTPUT
         fi
         printf "Tagging %s with " "${BASE_OS}"
         if [[ "${BASE_OS}" == "$LATEST_TAG_OS" ]]; then

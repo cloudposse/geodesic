@@ -86,7 +86,7 @@ jobs:
           echo is_production=yes >> $GITHUB_OUTPUT
         else
           LATEST_TAGS="$TAGS"
-          echo is_production=yes >> $GITHUB_OUTPUT
+          echo is_production=no >> $GITHUB_OUTPUT
         fi
         printf "Tagging %s with " "${BASE_OS}"
         if [[ "${BASE_OS}" == "$LATEST_TAG_OS" ]]; then

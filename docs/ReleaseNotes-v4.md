@@ -21,7 +21,7 @@ likelihood that the shells will shut down in an orderly manner and run their exi
 
 However, Geodesic now supports another much requested feature: launching a new container
 each time you run Geodesic. This is done by setting the `ONE_SHELL` environment variable to "true"
-or passing `--one-shell` on the command line. This allows you to run multiple versions of Geodesic,
+or passing `--solo` on the command line. This allows you to run multiple versions of Geodesic,
 and also allows you to detach from a shell and reattach to it later.
 
 ##### External Command to Stop Geodesic
@@ -135,6 +135,11 @@ in the container as on the host.
   `.geodesic`, `.kube`, `.ssh`, and `.terraform.d`. You can add additional directories by setting
   the `HOMEDIR_ADDITIONAL_MOUNTS` environment variable. See [The Home Directory](#the-home-directory) below
   for more details.
+
+- Previously, preferences and overrides files could be placed directly in the `$GEODESIC_CONFIG_HOME`
+  directory. Now they must be placed in `$GEODESIC_CONFIG_HOME/defaults` or a 
+  Docker image-specific subdirectory. Only the `history` file can be placed directly in the
+  `$GEODESIC_CONFIG_HOME` directory.
 
 - Previously, environment variables inside the container could be set in the `~/.geodesic/env` file,
   which was passed to Docker via `--env-file`. This file is now ignored. Instead, you should
@@ -327,8 +332,8 @@ What has always been true, but never clearly spelled out, is that the options th
 apply to the launch script can also be set as command-line options. Convert the 
 environment variable to lower case, optionally replace the `_` with `-`, and prefix
 it with `--` and you have the command line option. For example, `ONE_SHELL=false` becomes
-`--one-shell=false`. For boolean options, you can leave out the value, so `ONE_SHELL=true`
-becomes `--one-shell`.
+`--solo=false`. For boolean options, you can leave out the value, so `ONE_SHELL=true`
+becomes `--solo`.
 
 To avoid tedious redundancy, we will not usually repeat the command-line options in the
 documentation. Instead, we will refer to the environment variable, and you can
@@ -363,7 +368,7 @@ the shell by setting an unusual string for the `detachKeys`.
 
 An alternative to this new default behavior is to launch a new container each time you run Geodesic.
 This is done by setting the `ONE_SHELL` environment variable to "true" in your
-`launch-options.sh` file, or using `--one-shell` on the command line. This will cause the wrapper
+`launch-options.sh` file, or using `--solo` on the command line. This will cause the wrapper
 to launch a new container each time you run it.
 
 The 2 main advantages of this are:
@@ -387,7 +392,7 @@ when the shell or container exits. This means that if you detach from a shell, t
 will run `$ON_SHELL_EXIT`. If you reattach to the shell, the wrapper is not involved,
 so quitting the shell or container will not run the cleanup script. 
 
-### New location for Geodesic configuration files
+### New Location for Geodesic Configuration Files
 
 Previously, all Geodesic configuration was stored in the `~/.geodesic` directory. 
 This has been changed to `$XDG_CONFIG_HOME/geodesic` which defaults to `~/.config/geodesic`. 
@@ -547,3 +552,46 @@ dark mode support.
   We therefore discourage using magenta as it will not be distinguished from yellow in light mode.
 - In dark mode, blue is problematic, so it is replaced with cyan. Also, white and black are swapped.
 
+### Updated Documentation
+
+The [customization](/docs/customization.md) documentation has been updated to reflect the new 
+features and changes in Geodesic v4.0.0.
+
+The [environment variables](/docs/environment.md) documentation has been added to document to
+shell environment variables Geodesic uses for customization and operation.
+
+The [wrapper](/docs/wrapper.md) documentation has been added to explain what is meant
+when other documentation refers to "the wrapper".
+
+
+### Environment Variable Changes
+
+For full documentation of environment variables, see the [Environment Variables](/docs/environment.md) document.
+
+V4 changes:
+
+- `GEODESIC_LOCALHOST` prefixed variables have been removed.
+- `HOME` has changed from `/conf` to the container user's home directory as configured in `/etc/passwd`. For the 
+  default user of `root`, this is `/root`.
+- Variables that had defaults referencing `/localhost` now generally reference `$HOME` instead.
+- .
+- `HOMEDIR_MOUNTS` and `HOMEDIR_ADDITIONAL_MOUNTS` are lists of directories relative to the home directory on the host
+  to mount into the container under the container user's home directory.
+- `HOST_MOUNTS` is a list of mounts from the host to the container. It has the format
+  `host_path[:container_path]`. If the container_path is not specified, it is assumed to be the same as the host_path.
+  This list excludes the home directory, which is handled separately.
+-
+- `WORKSPACE_MOUNT_HOST_DIR` is the host directory where the project will be mounted. Analogous to the source of Dev Container's
+  `workspaceMount`. Typically, this is a Git repository root.
+- `WORKSPACE_MOUNT` is the container path where `WORKSPACE_MOUNT_HOST_DIR` will be mounted. Analogous to the target of Dev Container's
+  `workspaceMount`. Defaults to `/workspace`, which is the default for a Dev Container, but you may want to set it to
+  something like your project name or git repository name for visibility in the container.
+- `WORKSPACE_FOLDER_HOST_DIR` is the base directory of the project on the host. Analogous to the target of Dev Container's
+  `workspaceFolder`. Typically, this is the same as `WORKSPACE_MOUNT`, but may be a subdirectory if the Git repository is
+  a "monorepo" containing multiple projects. It must be an absolute path either equal to or a subdirectory of `WORKSPACE_MOUNT_HOST_DIR`.
+  - Setting `WORKSPACE_FOLDER_HOST_DIR` in your Docker-image-specific `launch-options.sh` will allow you to launch your project's
+    Geodesic app from any working directory and have the correct configuration inside Geodesic.
+- `WORKSPACE_FOLDER` is the base directory of the project inside the container. Analogous to the target of Dev Container's
+  `workspaceFolder`. Typically, this is the same as `WORKSPACE_MOUNT`, but may be a subdirectory if, for example, the Git repository is
+  a "monorepo" containing multiple projects. It must be an absolute path either equal to or a subdirectory of `WORKSPACE_FOLDER_HOST_DIR`.
+- `GEODESIC_TERM_COLOR_AUTO` is normally unset. Set it to "false" to disable attempts at automatic terminal light/dark mode detection.

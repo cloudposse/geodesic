@@ -17,7 +17,7 @@
 #
 # Several directories are searched for resources, in this order:
 # * $base/defaults/ ($base itself defaults to ${HOME}/.config/geodesic, can be set via GEODESIC_CONFIG_HOME)
-# * $base/ if and only if there is no $base/defaults/ directory
+# * Prior to v4, but no longer: $base/ if and only if there is no $base/defaults/ directory
 # * $base/$(dirname $DOCKER_IMAGE)/defaults/
 # * $base/$(dirname $DOCKER_IMAGE)/ if and only if there is no $base/$(dirname $DOCKER_IMAGE)/defaults/ directory
 # * $base/$(base $DOCKER_IMAGE)/
@@ -44,7 +44,7 @@ function _search_geodesic_dirs() {
 		_expand_dir_or_file search_list "${resource}" "${base}/defaults"
 	else
 		[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo "trace: SKIPPING $base/defaults (bad directory)"
-		_expand_dir_or_file search_list "${resource}" "${base}"
+		# Removed in v4: _expand_dir_or_file search_list "${resource}" "${base}"
 	fi
 
 	local company=$(dirname "${DOCKER_IMAGE}")

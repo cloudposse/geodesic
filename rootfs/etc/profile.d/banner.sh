@@ -55,6 +55,7 @@ if [ "${SHLVL}" == "1" ]; then
 			else
 				${BANNER_COMMAND}
 			fi
+			printf "\n\n"
 		fi
 	}
 	_check_support

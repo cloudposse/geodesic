@@ -33,6 +33,7 @@ elif [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 		red "# GEODESIC_CONFIG_HOME is set to a non-existent directory: ${GEODESIC_CONFIG_HOME}" >&2
 		red "# No Geodesic configuration will be loaded." >&2
 	fi
+	mkdir -p "${GEODESIC_CONFIG_HOME}"
 fi
 
 [[ -n ${WORKSPACE_MOUNT} ]] || export WORKSPACE_MOUNT=/workspace
@@ -81,7 +82,7 @@ function _geodesic_set_histfile() {
 	local histfile_list=(${HISTFILE:-${GEODESIC_CONFIG_HOME}/history})
 	_search_geodesic_dirs histfile_list history
 	export HISTFILE="${histfile_list[-1]}"
-	[[ -n $HISTFILE ]] || HISTFILE="${HOME}/.bash_history"
+	[[ -n $HISTFILE ]] || HISTFILE="${GEODESIC_CONFIG_HOME}/history"
 	[[ -n $_GEODESIC_TRACE_CUSTOMIZATION ]] && echo 'trace: HISTFILE set to "'"${HISTFILE}"'"'
 }
 _geodesic_set_histfile

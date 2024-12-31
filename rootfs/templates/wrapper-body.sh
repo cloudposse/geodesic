@@ -111,6 +111,9 @@ function parse_args() {
 		-v | --verbose)
 			export VERBOSE=true
 			;;
+	  --solo)
+      export ONE_SHELL=true
+      ;;
 		--trace)
 			export GEODESIC_TRACE=custom
 			;;
@@ -142,6 +145,31 @@ function parse_args() {
 		esac
 	done
 }
+
+function help() {
+	echo "Usage: $0 [target] [options] [ARGS]"
+	echo ""
+	echo "  Targets:"
+	echo "    <empty> | use              Enter into a shell, passing ARGS to the shell"
+	echo "    help                       Show this help"
+	echo "    stop [container-name]      Stop a running Geodesic container"
+	echo ""
+	echo "  Options when starting a shell:"
+	echo "    --no-custom           Disable loading of custom configuration"
+	echo "    --no-motd             Disable the MOTD"
+	echo "    --solo                Launch a new container exclusively for this shell"
+	echo "    --trace               Enable tracing of shell customization within Geodesic"
+	echo "    --trace=<options>     Enable tracing of specific parts of shell configuration"
+	echo "    -v --verbose          Enable verbose output of launch configuration"
+	echo ""
+	echo "    trace options can be any of:"
+	echo "      custom              Trace the loading of custom configuration in Geodesic"
+	echo "      hist                Trace the determination of which shell history file to use"
+  echo "      terminal            Trace the terminal color mode detection"
+  echo "    You can specify multiple modes, separated by commas, e.g. --trace=custom,hist"
+	echo ""
+}
+
 
 function options_to_env() {
 	local kv
@@ -244,6 +272,7 @@ function run_exit_hooks() {
 }
 
 function use() {
+	[ "$1" = "use" ] && shift
 	DOCKER_ARGS=()
 	if [ -t 1 ]; then
 		# Running in terminal
@@ -492,8 +521,10 @@ function stop() {
 	fi
 }
 
-if [ "${targets[0]}" == "stop" ]; then
+if [ "${targets[0]}" = "stop" ]; then
 	stop
+elif [ -z "${targets[0]}" ] || [ "${targets[0]}" = "use" ]; then
+	use "${targets[@]}"
 else
-	use
+	help
 fi

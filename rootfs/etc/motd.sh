@@ -14,5 +14,4 @@ IMPORTANT:
 #  * you can interactively select AWS profiles via the \`assume-role\` command,
 #  * which will launch a subshell with your selected profile set.
 
-
 EOF

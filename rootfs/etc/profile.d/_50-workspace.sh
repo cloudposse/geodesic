@@ -22,9 +22,8 @@ function file_on_host() {
 }
 
 if [[ $SHLVL == 1 ]]; then
-	if [[ -d ${WORKSPACE_FOLDER:=${WORKSPACE_MOUNT}} ]]; then
+	if [[ -d ${WORKSPACE_FOLDER:=${WORKSPACE_MOUNT}} ]] && cd "${WORKSPACE_FOLDER}"; then
 		green "# Initial working directory configured as ${WORKSPACE_FOLDER}"
-		cd "${WORKSPACE_FOLDER}"
 	else
 		red "# Configured work directory ${WORKSPACE_FOLDER} does not appear to be accessible from this container"
 	fi

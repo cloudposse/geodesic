@@ -19,7 +19,9 @@
 
 function _verify_terminal_queries_are_supported() {
 	if tty -s && [[ -n "$(tput setaf 1 2>/dev/null)" ]]; then
-		local saved_state=$(stty -g)
+		local saved_state x fg_rgb bg_rgb exit_code
+		saved_state=$(stty -g)
+		trap 'stty "$saved_state"' EXIT
 		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking if terminal responds to color queries...$(tput sgr0)" >&2
 		stty -echo
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
@@ -30,6 +32,7 @@ function _verify_terminal_queries_are_supported() {
 		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
 		((exit_code += $?))
 		stty "$saved_state"
+		trap - EXIT
 		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
 			if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
 				echo "$(tput setaf 1)* TERMINAL TRACE: Terminal did not respond to OSC 10 and 11 queries. Disabling color mode detection.$(tput sgr0)" >&2
@@ -66,6 +69,7 @@ function _is_term_dark_mode() {
 		# Redirect output to `/dev/tty` in case we are in a subshell where output is a pipe,
 		# because this output has to go directly to the terminal.
 		saved_state=$(stty -g)
+		trap 'stty "$saved_state"' EXIT
 		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking terminal color scheme...$(tput sgr0)" >&2
 		stty -echo
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
@@ -80,6 +84,7 @@ function _is_term_dark_mode() {
 		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
 		((exit_code += $?))
 		stty "$saved_state"
+		trap - EXIT
 	else
 		if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
 			echo "* TERMINAL TRACE: ${FUNCNAME[0]} called, but not running in a color terminal." >&2
@@ -188,10 +193,11 @@ function _srgb_to_luminance() {
 
 	# Normalize hexadecimal values to [0,1] and linearize them
 	normalize_and_linearize() {
-		local hex=${1^^} # Uppercase the hex value, because bc requires it
-		local float=$(echo "ibase=16; $hex" | bc)
-		local max=$(echo "ibase=16; 1$(printf '%0*d' ${#hex} 0)" | bc) # Accommodate the number of digits
-		local normalized=$(echo "scale=10; $float / ($max - 1)" | bc)
+		local hex float max normalized R G B luminance
+		hex=${1^^} # Uppercase the hex value, because bc requires it
+		float=$(echo "ibase=16; $hex" | bc)
+		max=$(echo "ibase=16; 1$(printf '%0*d' ${#hex} 0)" | bc) # Accommodate the number of digits
+		normalized=$(echo "scale=10; $float / ($max - 1)" | bc)
 
 		# Apply gamma correction
 		if (($(echo "$normalized <= 0.04045" | bc))); then
@@ -202,12 +208,12 @@ function _srgb_to_luminance() {
 	}
 
 	# Linearize each color component
-	local R=$(normalize_and_linearize $red)
-	local G=$(normalize_and_linearize $green)
-	local B=$(normalize_and_linearize $blue)
+	R=$(normalize_and_linearize $red)
+	G=$(normalize_and_linearize $green)
+	B=$(normalize_and_linearize $blue)
 
 	# Calculate luminance
-	local luminance=$(echo "scale=10; 0.2126 * $R + 0.7152 * $G + 0.0722 * $B" | bc)
+	luminance=$(echo "scale=10; 0.2126 * $R + 0.7152 * $G + 0.0722 * $B" | bc)
 
 	# Luminance is on a scale of 0 to 1, but we want to be able to
 	# compare integers in bash, so we multiply by a big enough value

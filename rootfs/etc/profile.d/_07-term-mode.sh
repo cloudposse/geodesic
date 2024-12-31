@@ -57,7 +57,7 @@ function _is_term_dark_mode() {
 	*) return 1 ;;
 	esac && return 0
 
-	local x fg_rgb bg_rgb fg_lum bg_lum exit_code
+	local x fg_rgb bg_rgb fg_lum bg_lum exit_code saved_state timeout_duration
 
 	# Do not try to auto-detect if we are not in a terminal
 	# or if termcap does not think we are in a color terminal
@@ -65,19 +65,17 @@ function _is_term_dark_mode() {
 		# Extract the RGB values of the foreground and background colors via OSC 10 and 11.
 		# Redirect output to `/dev/tty` in case we are in a subshell where output is a pipe,
 		# because this output has to go directly to the terminal.
-		local saved_state=$(stty -g)
+		saved_state=$(stty -g)
 		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking terminal color scheme...$(tput sgr0)" >&2
 		stty -echo
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
 		# Timeout of 2 was not enough when waking for sleep.
 		# The second read should be part of the first response, should not need much time at all regardless.
-		IFS=: read -rs -t 1 -d $'\a' x fg_rgb
+		# When in a signal handler, we might be waking from sleep or hibernation, so we give it a lot more time.
+		timeout_duration=$([[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && echo 30 || echo 1)
+		IFS=: read -rs -t "$timeout_duration" -d $'\a' x fg_rgb
 		exit_code=$?
-		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]]; then
-			IFS=: read -rs -t 30 -d $'\a' x fg_rgb
-			exit_code=$?
-			[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
-		fi
+		[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
 		[[ $exit_code -gt 128 ]] || exit_code=0
 		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
 		((exit_code += $?))

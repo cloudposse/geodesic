@@ -165,11 +165,13 @@ function _map_mounts() {
 
 if [[ $SHLVL == 1 ]]; then
 	_map_mounts
+
 	# Ensure we do not have paths that match everything
 	paths=("${GEODESIC_HOST_PATHS[@]}")
 	GEODESIC_HOST_PATHS=()
 	for p in "${paths[@]}"; do
-		if ! [[ $p =~ ^(//*)?$ ]]; then
+		# Eliminate paths that are just slashes, or completely empty, which would match everything
+		if ! [[ $p =~ ^/*$ ]]; then
 			GEODESIC_HOST_PATHS+=("$p")
 		fi
 	done

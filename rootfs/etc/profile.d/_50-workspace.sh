@@ -12,7 +12,9 @@ function file_on_host() {
 	file="$(readlink -e "$1")" || return 1
 	local path
 	for path in "${GEODESIC_HOST_PATHS[@]}"; do
-		if [[ "$path" == "${dir}/" || "$dir" == "$path"* ]]; then
+		# Skip paths that are just slashes, or completely empty, which would match everything
+		[[ "$path" =~ ^/*$ ]] && continue
+		if [[ "$path" == "${file}/" || "${file}" == "$path"* ]]; then
 			return 0
 		fi
 	done

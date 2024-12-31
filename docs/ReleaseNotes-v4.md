@@ -9,7 +9,7 @@
 A much requested feature, Geodesic no longer exits the container when the first shell exits.
 Instead, the container runs until all shells have exited. This means you can now run multiple shells
 inside the container, and exit them in any order; you no longer have to keep track of which
-shell was the first one launched. Unfortunately, this also means that you can no longer 
+shell was the first one launched. Unfortunately, this also means that you can no longer
 detach and reattach to a shell.
 
 A side benefit of this is that previously, if did something like `trap handler EXIT` in your
@@ -41,7 +41,7 @@ run a command when a shell exits. This was done by creating an executable comman
 in 2 ways:
 
 1. Now you can set the name of the command to run when the shell exits via `ON_SHELL_EXIT`
-   (defaults to `geodesic_on_exit`). Also new: the `ON_SHELL_EXIT` command will have available 
+   (defaults to `geodesic_on_exit`). Also new: the `ON_SHELL_EXIT` command will have available
    to it the short ID and name of the container in which it was running, via the
    environment variables `GEODESIC_EXITING_CONTAINER_ID` and `GEODESIC_EXITING_CONTAINER_NAME`,
    respectively.
@@ -54,14 +54,14 @@ launch wrapper exits. If you detach from a shell, the wrapper will run then and
 call `ON_SHELL_EXIT`. If you reattach to the shell, the wrapper is not involved,
 so quitting the shell or container will not run the cleanup command.
 
-Alternately, if you quit 2 shells at nearly the same time, for example by 
-running `geodesic stop`, the `ON_CONTAINER_EXIT` command may be called twice. 
+Alternately, if you quit 2 shells at nearly the same time, for example by
+running `geodesic stop`, the `ON_CONTAINER_EXIT` command may be called twice.
 This is because the wrapper calls the command when the container has stopped
 before shell exit processing has finished, and both shells fit the criterion.
 
 Now that shells normally exit cleanly (pretty much as long as you do not
-run `docker kill geodesic`), you may find that you get more reliable behavior 
-out of 
+run `docker kill geodesic`), you may find that you get more reliable behavior
+out of
 
 ```bash
 trap exit_handler EXIT
@@ -72,11 +72,11 @@ to run on each shell completion.
 #### Better Configuration Management
 
 Geodesic now supports configuration files for customizing the launch of the Geodesic container.
-Although Geodesic has for a while been [customizable](https://github.com/cloudposse/geodesic/blob/main/docs/customization.md), 
-the customization you could configure via files were limited to customizations of the 
+Although Geodesic has for a while been [customizable](https://github.com/cloudposse/geodesic/blob/main/docs/customization.md),
+the customization you could configure via files were limited to customizations of the
 running Docker container. Previously, customizations regarding how Geodesic is launched were difficult to manage.
 Now, you can create a `launch-options.sh` file in the Geodesic configuration directories
-to customize the launch of the Geodesic container. The directory search path and the 
+to customize the launch of the Geodesic container. The directory search path and the
 priority of the files are the same as for the other Geodesic customization files.
 
 #### Better File System Layout
@@ -101,17 +101,17 @@ The `/conf` directory has been removed, and the container user's home directory
 `root` user, so the default `$HOME` is `/root`.
 
 As before, the host user's home directory path is available in the container as
-`$LOCAL_HOME`, and mounted files and directories are available at the same paths 
+`$LOCAL_HOME`, and mounted files and directories are available at the same paths
 in the container as on the host.
 
 ### Breaking Changes
 
-- Previously, `$HOME` was set to `/conf` in the container. This is no longer the case. 
+- Previously, `$HOME` was set to `/conf` in the container. This is no longer the case.
   `$HOME` is now set to the shell user's home directory. By default, this is `/root`.
   If you launch Geodesic as a non-root user, `$HOME` will be set to that user's home directory,
   provided you have properly created the user with `adduser`. By default, the
   container user will share configuration with the host user by mounting the host user's
-  configuration directories into the container user's home directory, allowing 
+  configuration directories into the container user's home directory, allowing
   bidirectional updates.
 
 - The `/conf` directory no longer exists. Generally, what used to be in `/conf`
@@ -124,12 +124,12 @@ in the container as on the host.
 - Previously, if you exited the shell that launched Geodesic, the container would exit,
   killing any other running shells. Now, the container will not exit until all shells have exited.
   As a side effect, you can no longer reattach to a shell that you have detached from.
-  You can get something closer to the old behavior by setting `ONE_SHELL=true`. 
+  You can get something closer to the old behavior by setting `ONE_SHELL=true`.
   See [New Default Behavior for Multiple Shells](#new-default-behavior-for-multiple-shells) below
   for more details.
 
 - Previously, the entire host user's home directory was mounted into the container under `/localhost`,
-  making everything in the host user's home directory available to the container. 
+  making everything in the host user's home directory available to the container.
   Now, only specific directories are mounted, and they are mounted in the container user's
   `$HOME` directory. The default directories are `.aws`, `.config`, `.emacs.d`,
   `.geodesic`, `.kube`, `.ssh`, and `.terraform.d`. You can add additional directories by setting
@@ -137,7 +137,7 @@ in the container as on the host.
   for more details.
 
 - Previously, preferences and overrides files could be placed directly in the `$GEODESIC_CONFIG_HOME`
-  directory. Now they must be placed in `$GEODESIC_CONFIG_HOME/defaults` or a 
+  directory. Now they must be placed in `$GEODESIC_CONFIG_HOME/defaults` or a
   Docker image-specific subdirectory. Only the `history` file can be placed directly in the
   `$GEODESIC_CONFIG_HOME` directory.
 
@@ -148,7 +148,7 @@ in the container as on the host.
 - The `/localhost` directory no longer exists. This used to be the single mount point
   for the host filesystem, and the host user's entire `$HOME` directory was mounted there.
   Now, we no longer mount the entire `$HOME` directory tree into the container. Instead,
-  we mount specific directories from the host to the container. 
+  we mount specific directories from the host to the container.
   - Configuration directories directly under the host user's `$HOME` directory
     (such as `.aws` or `.config`) are mounted to the container user's `$HOME`
     directory.
@@ -179,7 +179,7 @@ Docker container will have access to the SSH agent socket.
 
 ##### Automatic MFA Support Removed
 
-The `mfa` command and `oathtool` were removed.  The `mfa` command was a wrapper around `oathtool` 
+The `mfa` command and `oathtool` were removed.  The `mfa` command was a wrapper around `oathtool`
 to generate TOTP codes. It was removed because:
 
 - We did not have a secure place to store the TOTP key.
@@ -211,12 +211,12 @@ under `/localhost`. This was done to allow the container to access the host user
 configuration files, such as `.aws` and `.ssh`. However, this had some major drawbacks,
 the main one being that Docker had to map all of the user's files and directories into the
 container, including, on macOS, Docker's own virtual disk and other dynamic files.
-This caused major performance problems in some cases. 
+This caused major performance problems in some cases.
 
 Previously the home directory for the container user was forced to be `/conf`, and files
 and directories were linked from `/localhost` to `/conf`. This was done to allow for a single
 host mount, back when host mounts were expensive. This was also problematic, as `/conf` was
-owned by `root`, and if you wanted to run the Geodesic image as a non-root user, you 
+owned by `root`, and if you wanted to run the Geodesic image as a non-root user, you
 had to take extra steps to manage the permissions of `/conf` and its contents.
 
 #### The New Layout
@@ -233,14 +233,13 @@ both of which are described after this section.
 These directories are specified as a comma-separated list of directories (or files) relative to the host user's home directory.
 If items in the list are not present on the host, they will be silently ignored.
 
-- `HOMEDIR_MOUNTS` is a list of directories to mount. It is set by default to `".aws,.config,.emacs.d,.geodesic,.kube,.ssh,.terraform.d"`. 
+- `HOMEDIR_MOUNTS` is a list of directories to mount. It is set by default to `".aws,.config,.emacs.d,.geodesic,.kube,.ssh,.terraform.d"`.
   If you set it to something else, it will replace the default list. Ensure that your Geodesic configuration directory
   (default is `$HOME/.config/geodesic`) is mounted.
 - `HOMEDIR_ADDITIONAL_MOUNTS` is a list of additional directories to mount. It is appended to the
   `HOMEDIR_MOUNTS` list of directories to mount. This allows you to add to the defaults without overriding them.
 
 Note that you can mount files this way, but there are issues with that, especially when mapping file ownership.
-
 
 Many files that used to be placed directly in the `/conf` directory can now be placed in subdirectories.
 Many applications now support the `XDG Base Directory Specification`, which specifies that configuration
@@ -266,13 +265,13 @@ it will be the same as the host path. The host path name must be absolute, and `
 If you want to place directories under the container user's home directory, use `HOMEDIR_ADDITIONAL_MOUNTS`
 as described above.
 
-Unfortunately, since the colon (`:`) is meaningful to Docker, you cannot mount directories with colons in their names, 
+Unfortunately, since the colon (`:`) is meaningful to Docker, you cannot mount directories with colons in their names,
 and you cannot separate directories with colons. This list must be separated with commas.
 
 ##### The Workspace
 
-The workspace is where the code on the host lives, and is mounted into the container. 
-This is controlled by several environment variables, all of which have defaults 
+The workspace is where the code on the host lives, and is mounted into the container.
+This is controlled by several environment variables, all of which have defaults
 settings that can be overridden.
 
 tl;dr: Either launch Geodesic from the root of your project, or set `WORKSPACE_FOLDER_HOST_DIR` in your `launch-options.sh` file
@@ -289,7 +288,7 @@ If you do this, you can launch Geodesic from any directory and have the correct 
 The variables are set as follows:
 
 - If you set `WORKSPACE_FOLDER_HOST_DIR` in the environment, that directory will be used as the working directory. It must be an
-  absolute path: `$HOME/path` is acceptable, `~/path` is not. You can set this in the `launch-options.sh` file for 
+  absolute path: `$HOME/path` is acceptable, `~/path` is not. You can set this in the `launch-options.sh` file for
   each image you use, and then you can launch Geodesic from any directory and have the correct directory be the workspace.
   If not set, `WORKSPACE_FOLDER_HOST_DIR` defaults to the current working directory, from where Geodesic was launched.
 
@@ -298,12 +297,11 @@ The variables are set as follows:
 
   - If `WORKSPACE_FOLDER_HOST_DIR` is inside a Git repository, `WORKSPACE_MOUNT_HOST_DIR` will be set to the root of that repository
   - If `WORKSPACE_FOLDER_HOST_DIR` is not inside a Git repository, `WORKSPACE_MOUNT_HOST_DIR` will be set to `WORKSPACE_FOLDER_HOST_DIR`
-  
+
 - Unless explicitly set (not recommended), `WORKSPACE_FOLDER_HOST_DIR`, relative to the parent of `WORKSPACE_MOUNT_HOST_DIR`, will be communicated
   to the container as `WORKSPACE_FOLDER` and considered the working directory for the container.
 - A symbolic link will be created in the container, so that the host value of `WORKSPACE_FOLDER_HOST_DIR` will
   reference the `WORKSPACE_FOLDER`.
-
 
 #### Fixing File Ownership Issues
 
@@ -318,18 +316,17 @@ file ownership between the host and the container. Please note, however, that if
 file ownership, this setting will cause, rather than fix, file ownership problems, so only use it if needed.
 It is disabled by default, because current macOS and best practice Linux Docker installations do not need it.
 
-
 ### Note About Command-Line Options
 
 Geodesic documentation has shown (and for the moment, continues to show)
 Geodesic options as settings of shell environment variables. This is because Geodesic
 is launched by a `bash` script, and then runs a `bash` shell inside the container.
-In this document, we take care to differentiate between options that apply to the 
+In this document, we take care to differentiate between options that apply to the
 launch script (sometimes referred to as the "wrapper") and options that apply to the
 shell inside the container.
 
 What has always been true, but never clearly spelled out, is that the options that
-apply to the launch script can also be set as command-line options. Convert the 
+apply to the launch script can also be set as command-line options. Convert the
 environment variable to lower case, optionally replace the `_` with `-`, and prefix
 it with `--` and you have the command line option. For example, `ONE_SHELL=false` becomes
 `--solo=false`. For boolean options, you can leave out the value, so `ONE_SHELL=true`
@@ -340,13 +337,12 @@ documentation. Instead, we will refer to the environment variable, and you can
 convert it to a command-line option as described above. Just remember that they
 only apply to launch options, not to configuration of the shell inside the container.
 
-
 ### New Default Behavior for Multiple Shells
 
 Previously, when you launched Geodesic, it would launch a new shell as PID 1.
 If you tried to launch Geodesic again, it would not start a new container, but would
 instead exec into the container, launching a new shell. This was done to avoid the
-overhead of starting a new container each time you wanted a new shell, and has some 
+overhead of starting a new container each time you wanted a new shell, and has some
 advantages and disadvantages with all the shells sharing the same container.
 One disadvantage was that if you exited the first shell, the container would exit,
 killing any other shells running inside the container. Another disadvantage,
@@ -382,7 +378,7 @@ Previously, when the wrapper that launches Geodesic exited, it would run a clean
 named `geodesic_on_exit` if it existed. This name was hard coded and not configurable.
 
 Now, the name of the cleanup script is configurable, and the script makes a distinction between
-two events: 
+two events:
 
 1. ON_SHELL_EXIT: When a shell exits but the container is still running. Defaults to no script.
 2. ON_CONTAINER_EXIT: When the container exits. Defaults to `geodesic_on_exit`.
@@ -390,13 +386,13 @@ two events:
 The caveat here is that these scripts are run when the wrapper exits, not necessarily
 when the shell or container exits. This means that if you detach from a shell, the wrapper
 will run `$ON_SHELL_EXIT`. If you reattach to the shell, the wrapper is not involved,
-so quitting the shell or container will not run the cleanup script. 
+so quitting the shell or container will not run the cleanup script.
 
 ### New Location for Geodesic Configuration Files
 
-Previously, all Geodesic configuration was stored in the `~/.geodesic` directory. 
-This has been changed to `$XDG_CONFIG_HOME/geodesic` which defaults to `~/.config/geodesic`. 
-This change was made to follow the 
+Previously, all Geodesic configuration was stored in the `~/.geodesic` directory.
+This has been changed to `$XDG_CONFIG_HOME/geodesic` which defaults to `~/.config/geodesic`.
+This change was made to follow the
 [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html).
 
 If the `$XDG_CONFIG_HOME/geodesic` directory does not exist, Geodesic will
@@ -411,7 +407,7 @@ set environment variables in the customization preferences and overrides.
 
 As explained in the [Customizing Geodesic](/docs/customization.md) documentation,
 there are several ways to customize Geodesic. However, until now, most of these customizations
-only applied to customizing the shell inside the Geodesic container. Customizing the 
+only applied to customizing the shell inside the Geodesic container. Customizing the
 launch of the Geodesic container itself was more difficult.
 
 ##### Launch Options Files
@@ -422,7 +418,7 @@ Using the same directory structure as the Geodesic configuration files, you can 
 `launch-options.sh` that will be sourced by the script after the defaults are configured but before
 they are used. The searched directories depend on the name of the Docker image being launched.
 All `launch-options.sh` files are sourced in the order they are found, meaning later ones override earlier ones.
-With the configuration directory `$GEODESIC_CONFIG_HOME` (defaults to `$XDG_CONFIG_HOME/geodesic`) and 
+With the configuration directory `$GEODESIC_CONFIG_HOME` (defaults to `$XDG_CONFIG_HOME/geodesic`) and
 an image named `ghcr.io/cloudposse/geodesic:4.0.0-debian`, the directories searched, in order, are:
 
 1. `$GEODESIC_CONFIG_HOME/defaults/`
@@ -431,7 +427,6 @@ an image named `ghcr.io/cloudposse/geodesic:4.0.0-debian`, the directories searc
 4. `$GEODESIC_CONFIG_HOME/cloudposse/geodesic/`
 
 The registry (`ghcr.io/` in the example) is ignored when searching for the `launch-options.sh` file.
-
 
 If the `$GEODESIC_CONFIG_HOME/launch-options.sh` file directly changes the `DOCKER_IMAGE` variable, it will change the
 directories being searched in steps 2-4. Later changes, or setting `GEODESIC_IMAGE`, will not change
@@ -453,22 +448,22 @@ the directories being searched.
 ### Dark mode support
 
 Geodesic's limited color handling had initially assumed terminals are in light mode.
-Support for terminals being in dark mode was introduced in Geodesic v2.10.0, 
+Support for terminals being in dark mode was introduced in Geodesic v2.10.0,
 but was not previously well documented. There have also been some enhancements
 since then. The following describes the state of support as of v4.0.0.
 
 #### Switching between light and dark mode
 
-Geodesic provides basic support for terminal dark and light modes. 
+Geodesic provides basic support for terminal dark and light modes.
 Primarily, this is used to ensure Geodesic's colored output is readable in both modes,
-for example, black in light mode and white in dark mode. 
+for example, black in light mode and white in dark mode.
 
 There is no standard way to be notified of a terminal's color mode change. Geodesic
 listens for SIGWINCH and updates the color mode when receiving it. Some terminals
 send this when the color mode changes, but not all do. (For example, macOS Terminal does not.)
 
-There can be issues with the signal handler. For example, if your computer is 
-waking from sleep, the signal handler may be called multiple times, but 
+There can be issues with the signal handler. For example, if your computer is
+waking from sleep, the signal handler may be called multiple times, but
 the terminal may take several seconds to respond to the query about its color mode.
 This can result in long delays while Geodesic waits for the terminal to respond,
 and if it times out, the response may eventually be written to the terminal
@@ -485,7 +480,7 @@ Geodesic provides a shell function called `update-terminal-color-mode` that can 
 update the terminal mode. This function is called automatically when Geodesic starts, but
 if you change the terminal color mode while Geodesic is running, you can call this function
 to update the color mode. If your terminal supports calling a function when the color mode changes,
-you can call this function from there. Alternately, you can trigger the function call 
+you can call this function from there. Alternately, you can trigger the function call
 by resizing the terminal window, which triggers the SIGWINCH signal handler.
 
 The `update-terminal-color-mode` function takes one argument, which is the terminal color mode,
@@ -501,7 +496,7 @@ future output.
 
 To help you take advantage of the color mode, Geodesic provides a set of named text color helpers.
 They are defined as functions that output all their arguments in the named mode.
-The named colors are 
+The named colors are
 
 - red
 - green
@@ -512,7 +507,7 @@ Note: yellow is problematic. To begin with, "yellow" is not necessarily yellow,
 it varies with the terminal theme, and would be better named "caution" or "info".
 In addition, it is too light to be used in light mode, so we substitute magenta instead.
 
-Each of these colors has 4 variations. Using "red" as an example, they would be: 
+Each of these colors has 4 variations. Using "red" as an example, they would be:
 
 - red
 - bold-red
@@ -521,11 +516,10 @@ Each of these colors has 4 variations. Using "red" as an example, they would be:
 
 The "bold-color" version outputs text in the bold (or "emphasis") version of the color.
 
-The "-n" means no newline is output after the text. These versions also include non-printing delimiters around the 
-non-printing text, making them suitable for use in PS1 prompts. 
+The "-n" means no newline is output after the text. These versions also include non-printing delimiters around the
+non-printing text, making them suitable for use in PS1 prompts.
 
-
-Note that the newline in the plain versions is stripped if run via command substitution, so 
+Note that the newline in the plain versions is stripped if run via command substitution, so
 
 ```bash
 echo "$(red "Hello") World"
@@ -533,28 +527,27 @@ echo "$(red "Hello") World"
 
 will not have a newline between "Hello" and "World".
 
-
 The remaining ANSI colors, black, white, blue, and magenta, are not directly provided as named helpers to
-discourage their use. They are available via the `_geodesic_color` function, which takes 
+discourage their use. They are available via the `_geodesic_color` function, which takes
 the same kind of color name as the named helpers as its first argument, and then outputs
-the rest of its arguments in that color. For example, 
+the rest of its arguments in that color. For example,
 
 ```bash
 _geodesic_color bold-magenta Hello, World
 ```
 
-These colors are not provided as named helpers because they are problematic, and 
-we want to discourage their use. Nevertheless, you may prefer to use the 
-`_geodesic_color` function to color text in these colors, because of the 
+These colors are not provided as named helpers because they are problematic, and
+we want to discourage their use. Nevertheless, you may prefer to use the
+`_geodesic_color` function to color text in these colors, because of the
 dark mode support.
 
-- In light mode, yellow is too light to be used, so it is replaced with magenta. 
+- In light mode, yellow is too light to be used, so it is replaced with magenta.
   We therefore discourage using magenta as it will not be distinguished from yellow in light mode.
 - In dark mode, blue is problematic, so it is replaced with cyan. Also, white and black are swapped.
 
 ### Updated Documentation
 
-The [customization](/docs/customization.md) documentation has been updated to reflect the new 
+The [customization](/docs/customization.md) documentation has been updated to reflect the new
 features and changes in Geodesic v4.0.0.
 
 The [environment variables](/docs/environment.md) documentation has been added to document to
@@ -563,7 +556,6 @@ shell environment variables Geodesic uses for customization and operation.
 The [wrapper](/docs/wrapper.md) documentation has been added to explain what is meant
 when other documentation refers to "the wrapper".
 
-
 ### Environment Variable Changes
 
 For full documentation of environment variables, see the [Environment Variables](/docs/environment.md) document.
@@ -571,7 +563,7 @@ For full documentation of environment variables, see the [Environment Variables]
 V4 changes:
 
 - `GEODESIC_LOCALHOST` prefixed variables have been removed.
-- `HOME` has changed from `/conf` to the container user's home directory as configured in `/etc/passwd`. For the 
+- `HOME` has changed from `/conf` to the container user's home directory as configured in `/etc/passwd`. For the
   default user of `root`, this is `/root`.
 - Variables that had defaults referencing `/localhost` now generally reference `$HOME` instead.
 - .

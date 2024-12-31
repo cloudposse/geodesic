@@ -45,11 +45,11 @@ if [ "${SHLVL}" == "1" ]; then
 		fi
 		if [ -n "${BANNER}" ]; then
 			if [ "$BANNER_COMMAND" == "figlet" ]; then
-				local color_off="$(tput op 2>/dev/null)" # reset foreground and background colors to defaults
-				tty -s && [[ -n "$color_off " ]] || BANNER_COLOR=""
+				COLOR_RESET="$(tput op 2>/dev/null)" # reset foreground and background colors to defaults
+				tty -s && [[ -n "${COLOR_RESET}" ]] || BANNER_COLOR=""
 				echo "${BANNER_COLOR}"
 				${BANNER_COMMAND} -w 200 "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
-				echo "${color_off}"
+				echo "${COLOR_RESET}"
 			elif [ "$BANNER_COMMAND" == "figurine" ]; then
 				${BANNER_COMMAND} -f "${BANNER_FONT}" "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
 			else

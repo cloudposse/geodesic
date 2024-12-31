@@ -45,7 +45,8 @@ function _map_mounts() {
 			# Accessing the container mounts will show the files with the mapped UID:GID.
 			# This single mounting is best because it correctly handles individual file mounts, not just directories.
 			findmnt -fn "${dest}" >/dev/null ||
-				bindfs "${bindfs_opts[@]}" "${src}" "${dest}" && GEODESIC_HOST_PATHS+=("${src}/" "${dest}/")
+				bindfs "${bindfs_opts[@]}" "${src}" "${dest}" && GEODESIC_HOST_PATHS+=("${src}/" "${dest}/") ||
+				red "# ERROR: Failed to bindfs ${src} to ${dest} for file ownership mapping."
 		fi
 	fi
 
@@ -95,7 +96,7 @@ function _map_mounts() {
 
 		if [[ "$type" == "dir" ]] || [[ "$type" = "file" ]]; then
 			findmnt -fn "${dest}" >/dev/null ||
-				mount --rbind "${src}" "${dest}"
+				mount --rbind "${src}" "${dest}" || red "# ERROR: Failed to mount ${src} to ${dest} for container path mapping."
 		fi
 	}
 
@@ -109,7 +110,7 @@ function _map_mounts() {
 		local type="$(_ensure_dest "${src}" "${dest}")"
 		if [[ "$type" == "dir" ]] || [[ "$type" = "file" ]]; then
 			findmnt -fn "${dest}" >/dev/null ||
-				mount --rbind "${src}" "${dest}"
+				mount --rbind "${src}" "${dest}" || red "# ERROR: Failed to mount ${src} to ${dest} for host path mapping."
 		fi
 	}
 
@@ -164,6 +165,14 @@ function _map_mounts() {
 
 if [[ $SHLVL == 1 ]]; then
 	_map_mounts
+	# Ensure we do not have paths that match everything
+	paths=("${GEODESIC_HOST_PATHS[@]}")
+	GEODESIC_HOST_PATHS=()
+	for p in "${paths[@]}"; do
+		if ! [[ $p =~ ^(//*)?$ ]]; then
+			GEODESIC_HOST_PATHS+=("$p")
+		fi
+	done
 fi
 
-unset -f _map_mounts _map_owner _map_host _ensure_dest
+unset -f _map_mounts _map_owner _map_host _ensure_dest paths

@@ -121,6 +121,10 @@ function export_current_aws_role() {
 	if [[ -n $profile_target ]]; then
 		profile_arn=$(aws --profile "${profile_target}" sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
 		if [[ $profile_arn == $current_role ]]; then
+			# Extract profile name from config file:
+			# 1. For default profile, look for a better name
+			# 2. Skip identity profiles (ending with -identity), as they are too generic
+			# 3. Use the first non-default, non-identity profile found
 			if [[ $profile_target == "default" ]] || [[ $profile_target =~ -identity$ ]]; then
 				# Make some effort to find a better name for the role, but only check the config file, not credentials.
 				local config_file="${AWS_CONFIG_FILE:-\~/.aws/config}"
@@ -129,7 +133,7 @@ function export_current_aws_role() {
 					local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
 					role_name=($(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3))
 					for rn in "${role_name[@]}"; do
-						if [[ $rn == "default" ]] || [[ $rn =~ *-identity$ ]]; then
+						if [[ $rn == "default" ]] || [[ $rn =~ -identity$ ]]; then
 							continue
 						else
 							export ASSUME_ROLE=$rn

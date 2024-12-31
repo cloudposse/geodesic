@@ -24,10 +24,10 @@ function _verify_terminal_queries_are_supported() {
 		stty -echo
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
 		# If 2 seconds is not enough at startup, then the terminal is either non-responsive or too slow.
-		IFS=: read -s -t 2 -d $'\a' x fg_rgb
+		IFS=: read -rs -t 2 -d $'\a' x fg_rgb
 		exit_code=$?
 		[[ $exit_code -gt 128 ]] || exit_code=0
-		IFS=: read -s -t 0.5 -d $'\a' x bg_rgb
+		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
 		((exit_code += $?))
 		stty "$saved_state"
 		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
@@ -71,15 +71,15 @@ function _is_term_dark_mode() {
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
 		# Timeout of 2 was not enough when waking for sleep.
 		# The second read should be part of the first response, should not need much time at all regardless.
-		IFS=: read -s -t 1 -d $'\a' x fg_rgb
+		IFS=: read -rs -t 1 -d $'\a' x fg_rgb
 		exit_code=$?
 		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]]; then
-			IFS=: read -s -t 30 -d $'\a' x fg_rgb
+			IFS=: read -rs -t 30 -d $'\a' x fg_rgb
 			exit_code=$?
 			[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
 		fi
 		[[ $exit_code -gt 128 ]] || exit_code=0
-		IFS=: read -s -t 0.5 -d $'\a' x bg_rgb
+		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
 		((exit_code += $?))
 		stty "$saved_state"
 	else

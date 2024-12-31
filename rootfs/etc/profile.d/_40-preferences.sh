@@ -39,7 +39,7 @@ fi
 [[ -n ${WORKSPACE_MOUNT} ]] || export WORKSPACE_MOUNT=/workspace
 if [[ -z $(find "${WORKSPACE_MOUNT}" -mindepth 1 -maxdepth 1) ]]; then
 	red "########################################################################################" >&2
-	red "# No filesystem is mounted at $(bold ${WORKSPACE_MOUNT}) which limits Geodesic functionality." >&2
+	red "# No filesystem is mounted at $(bold "${WORKSPACE_MOUNT}") which limits Geodesic functionality." >&2
 	boot install
 fi
 

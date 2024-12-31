@@ -5,7 +5,7 @@ author:
 date: January 2025
 ---
 
-Geodesic makes extensive user of environment variables for a variety of purposes.
+Geodesic makes extensive use of environment variables for a variety of purposes.
 This document is a reference of what variables are in use and what their purpose is.
 It may be incomplete. Please update it as missing variables are found.
 
@@ -32,7 +32,7 @@ Geodesic version 4 additions and changes:
   `workspaceMount`. Typically, this is a Git repository root. If `WORKSPACE_FOLDER_HOST_DIR` is in a subdirectory of the Git repository,
   `WORKSPACE_MOUNT_HOST_DIR` defaults to the repository root. Otherwise, it defaults to `WORKSPACE_FOLDER_HOST_DIR`.
 - `WORKSPACE_MOUNT` is the container path where `WORKSPACE_MOUNT_HOST_DIR` will be mounted. Analogous to the target of Dev Container's
-  `workspaceMount`. Defaults to `/workspace`, which is the default for a Dev Container, but you may want to set it to 
+  `workspaceMount`. Defaults to `/workspace`, which is the default for a Dev Container, but you may want to set it to
   something like your project name or git repository name for visibility in the container.
 - `GEODESIC_TERM_COLOR_AUTO` is normally unset. Set it to "false" to disable attempts at automatic terminal light/dark mode detection.
 - `GEODESIC_MOTD_ENABLED` can be set to "false" to disable printing the message of the day at shell startup.
@@ -45,7 +45,7 @@ Below is a list of environment variable that may be visible in the shell and wer
 Many of these variables are only recognized if you explicitly set or export them prior to running the script.
 Others are set and read internally to control optional behaviors.
 
-They are sorted alphabetically, ignoring leading underscores for the purpose of sorting. Variables marked with an 
+They are sorted alphabetically, ignoring leading underscores for the purpose of sorting. Variables marked with an
 asterisk (*) are either deprecated or removed in Geodesic v4 and should not be relied on. The description prefix
 "Internal:" indicates that the variable is used by Geodesic itself and should not be set or relied on. Other
 description prefixes such as "AWS SDK:" or "bash:" indicate that these variables are used by the prefixed component

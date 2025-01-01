@@ -19,7 +19,10 @@
 # so the cursor never advances. Then we eval the message with backspaces removed.
 # We have to then add some extra characters to erase the eval command.
 function warn_if_piped() {
-	local saved_stty=$(stty -g)
+	local saved_stty
+	saved_stty=$(stty -g)
+	trap 'stty "$saved_stty"' EXIT
+
 	stty -echo -opost
 
 	local mesg cmd xb m fx bx feval beval
@@ -53,6 +56,7 @@ function warn_if_piped() {
 	echo -n "$beval$feval$beval"
 
 	stty "$saved_stty"
+	trap - EXIT
 }
 
 warn_if_piped

@@ -14,13 +14,53 @@
 #
 # At some point we may introduce other methods to determine the terminal's color scheme.
 
+# First, at startup, let's try an OSC query. If we get no response, we will assume light mode
+# and disable further queries.
+
+function _verify_terminal_queries_are_supported() {
+	if tty -s && [[ -n "$(tput setaf 1 2>/dev/null)" ]]; then
+		local saved_state x fg_rgb bg_rgb exit_code
+		saved_state=$(stty -g)
+		trap 'stty "$saved_state"' EXIT
+		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking if terminal responds to color queries...$(tput sgr0)" >&2
+		stty -echo
+		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
+		# If 2 seconds is not enough at startup, then the terminal is either non-responsive or too slow.
+		IFS=: read -rs -t 2 -d $'\a' x fg_rgb
+		exit_code=$?
+		[[ $exit_code -gt 128 ]] || exit_code=0
+		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
+		((exit_code += $?))
+		stty "$saved_state"
+		trap - EXIT
+		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
+			if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
+				echo "$(tput setaf 1)* TERMINAL TRACE: Terminal did not respond to OSC 10 and 11 queries. Disabling color mode detection.$(tput sgr0)" >&2
+			fi
+			export GEODESIC_TERM_COLOR_AUTO=unsupported
+		fi
+	fi
+}
+
+_verify_terminal_queries_are_supported
+
 # Normally this function produces no output, but with -b, it outputs "true" or "false",
 # with -bb it outputs "true", "false", or "unknown". (Otherwise, unknown assume light mode.)
 # With -m it outputs "dark" or "light", with -mm it outputs "dark", "light", or "unknown".
 # and always returns true. With -l it outputs integer luminance values for foreground
 # and background colors. With -ll it outputs labels on the luminance values as well.
 function _is_term_dark_mode() {
-	local x fg_rgb bg_rgb fg_lum bg_lum
+	[[ ${GEODESIC_TERM_COLOR_AUTO} == "unsupported" ]] && case "$1" in
+	-b) echo "false" ;;
+	-bb) echo "unknown" ;;
+	-m) echo "light" ;;
+	-mm) echo "unknown" ;;
+	-l) echo "0 1000000000" ;;
+	-ll) echo "Foreground luminance: 0, Background luminance: 1000000000" ;;
+	*) return 1 ;;
+	esac && return 0
+
+	local x fg_rgb bg_rgb fg_lum bg_lum exit_code saved_state timeout_duration
 
 	# Do not try to auto-detect if we are not in a terminal
 	# or if termcap does not think we are in a color terminal
@@ -28,18 +68,36 @@ function _is_term_dark_mode() {
 		# Extract the RGB values of the foreground and background colors via OSC 10 and 11.
 		# Redirect output to `/dev/tty` in case we are in a subshell where output is a pipe,
 		# because this output has to go directly to the terminal.
+		saved_state=$(stty -g)
+		trap 'stty "$saved_state"' EXIT
+		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking terminal color scheme...$(tput sgr0)" >&2
 		stty -echo
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
-		IFS=: read -t 0.1 -d $'\a' x fg_rgb
-		IFS=: read -t 0.1 -d $'\a' x bg_rgb
-		stty echo
+		# Timeout of 2 was not enough when waking for sleep.
+		# The second read should be part of the first response, should not need much time at all regardless.
+		# When in a signal handler, we might be waking from sleep or hibernation, so we give it a lot more time.
+		timeout_duration=$([[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && echo 30 || echo 1)
+		IFS=: read -rs -t "$timeout_duration" -d $'\a' x fg_rgb
+		exit_code=$?
+		[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
+		[[ $exit_code -gt 128 ]] || exit_code=0
+		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
+		((exit_code += $?))
+		stty "$saved_state"
+		trap - EXIT
 	else
 		if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
 			echo "* TERMINAL TRACE: ${FUNCNAME[0]} called, but not running in a color terminal." >&2
 		fi
 	fi
 
-	if [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
+	if [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]]; then
+		printf "\n\n\tTerminal light/dark mode detection failed from signal handler. Disabling automatic detection.\n" >&2
+		printf "\tYou can manually change modes with\n\n\tupdate-terminal-color-mode [dark|light]\n\n" >&2
+		printf "\tYou can re-enable automatic detection with\n\n\tunset GEODESIC_TERM_COLOR_AUTO\n\n" >&2
+	fi
+
+	if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
 		if [[ $GEODESIC_TRACE =~ "terminal" ]] && tty -s; then
 			echo "$(tput setaf 1)* TERMINAL TRACE: Terminal did not respond to OSC 10 and 11 queries.$(tput sgr0)" >&2
 		fi
@@ -135,10 +193,11 @@ function _srgb_to_luminance() {
 
 	# Normalize hexadecimal values to [0,1] and linearize them
 	normalize_and_linearize() {
-		local hex=${1^^} # Uppercase the hex value, because bc requires it
-		local float=$(echo "ibase=16; $hex" | bc)
-		local max=$(echo "ibase=16; 1$(printf '%0*d' ${#hex} 0)" | bc) # Accommodate the number of digits
-		local normalized=$(echo "scale=10; $float / ($max - 1)" | bc)
+		local hex float max normalized R G B luminance
+		hex=${1^^} # Uppercase the hex value, because bc requires it
+		float=$(echo "ibase=16; $hex" | bc)
+		max=$(echo "ibase=16; 1$(printf '%0*d' ${#hex} 0)" | bc) # Accommodate the number of digits
+		normalized=$(echo "scale=10; $float / ($max - 1)" | bc)
 
 		# Apply gamma correction
 		if (($(echo "$normalized <= 0.04045" | bc))); then
@@ -149,12 +208,12 @@ function _srgb_to_luminance() {
 	}
 
 	# Linearize each color component
-	local R=$(normalize_and_linearize $red)
-	local G=$(normalize_and_linearize $green)
-	local B=$(normalize_and_linearize $blue)
+	R=$(normalize_and_linearize $red)
+	G=$(normalize_and_linearize $green)
+	B=$(normalize_and_linearize $blue)
 
 	# Calculate luminance
-	local luminance=$(echo "scale=10; 0.2126 * $R + 0.7152 * $G + 0.0722 * $B" | bc)
+	luminance=$(echo "scale=10; 0.2126 * $R + 0.7152 * $G + 0.0722 * $B" | bc)
 
 	# Luminance is on a scale of 0 to 1, but we want to be able to
 	# compare integers in bash, so we multiply by a big enough value

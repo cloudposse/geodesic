@@ -76,6 +76,20 @@ We recommend starting by using `geodesic` as a Docker base image (e.g. `FROM clo
 > Starting with Geodesic 2.0, we distributed Geodesic as a multi-platform (`linux/amd64`, `linux/arm64`) Debian-based Docker image and a single-platform (`linux/amd64`) Alpine-based image.
 > We moved the `cloudposse/geodesic:latest` Docker image tag from the Alpine version to the Debian version at that time.
 
+
+### What’s Changed in Geodesic 4.0
+
+Geodesic 4.0 is a major release that brings many new features and improvements. The most notable changes are:
+
+- The first launched shell is no longer special. All shells are now equal, and you can quit them in any order.
+  The geodesic container remains running until the last shell exits.
+- The `geodesic` command now has a `--solo` option that allows you to launch a new Geodesic container for just that one shell.
+- Geodesic no longer mounts the host user's entire home directory into the container. Instead, it mounts only selected directories.
+- The `geodesic stop` command has been enhanced to shut down the Geodesic container gracefully, rather than forcefully, allowing
+  among other things, shell scripts to run their exit handlers.
+
+See extensive release notes for Geodesic 4.0 [here](/docs/ReleaseNotes-v4.md).
+
 ### What’s Changed in Geodesic 3.0
 
 Rather than bringing new features, Geodesic 3.0 is focused on slimming down the Docker image and removing outdated tools.
@@ -136,9 +150,9 @@ The `latest` tag points to the latest Debian-based image, although we recommend 
 
 ### Quickstart
 
-#### docker run
+#### Installing Geodesic
 
-Launching Gedoesic is a bit complex, so we recommend you install a launch script by running
+Launching Geodesic is a bit complex, so we recommend you install a launch script by running
 ```
 docker run --rm cloudposse/geodesic:latest-debian init | bash
 ```
@@ -147,6 +161,20 @@ After that, you should be able to launch Geodesic just by typing
 geodesic
 ```
 
+Alternately, customize the Makefile as described below and use `make install` to build your custom image
+and install the launch script.
+
+#### Running Geodesic
+
+Geodesic has only a few commands and command-line options. The most important command is `geodesic`, which launches the Geodesic shell.
+The only other command you might normally use is `geodesic stop`, which stops the Geodesic container, but
+Geodesic automatically quits (and removes the Docker container) when you exit the last shell, so you should rarely need to use `geodesic stop`.
+
+Run `geodesic help` for a list of command-line options.
+
+See [customization](/docs/customization.md) documentation for information on how to customize your Geodesic environment.
+Geodesic has many customization options, but they are most commonly set in configuration files, not on the command line.
+
 ### Customizing your Docker image
 
 In general we recommend creating a customized version of Geodesic by creating your own `Dockerfile` starting with
@@ -154,7 +182,7 @@ In general we recommend creating a customized version of Geodesic by creating yo
 # We always recommend pinning versions to avoid surprises and breaking changes.
 # We put the version up top here so it is easy to find and update.
 # Find the latest version at https://github.com/cloudposse/geodesic/releases
-ARG VERSION=3.0.0
+ARG VERSION=4.0.0
 # If you don't want to bothered with updating the version, you can use `latest` instead,
 # but keep in mind that as long as you have a local image with the `latest` tag,
 # it will not be updated by `docker run`. You will have to explicitly pull the latest image.
@@ -169,6 +197,17 @@ ENV BANNER="my-custom-geodesic"
 ```
 
 You can see some example configuration options to include in [Dockerfile.options](./Dockerfile.options).
+
+#### Makefile customizations
+
+We also recommend creating a `Makefile` to simplify building and running your custom image.
+You can use the [Makefile](/Makefile) in this repository with minimal modifications.
+
+- Update `DOCKER_ORG` and `DOCKER_IMAGE` to match your Docker Hub username and the name of your custom image.
+- Update `DOCKER_FILE` to match the path to your custom `Dockerfile`.
+- Update `APP_NAME` to give the command to launch your custom image a custom name.
+
+Then you can build your custom image with `make build` and run it with `make run`.
 
 #### Multi-platform gotchas
 

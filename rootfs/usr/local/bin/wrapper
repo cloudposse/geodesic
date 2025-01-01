@@ -1,3 +1,4 @@
 #!/bin/bash
 export DOCKER_INSTALL_PROMPT=" ($(install-docker-command))" || unset DOCKER_INSTALL_PROMPT
-gomplate -f /templates/wrapper
+gomplate -f /templates/wrapper-header.sh.tmpl
+cat /templates/wrapper-body.sh

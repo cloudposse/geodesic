@@ -8,18 +8,18 @@
 
 A much requested feature, Geodesic no longer exits the container when the first shell exits.
 Instead, the container runs until all shells have exited. This means you can now run multiple shells
-inside the container, and exit them in any order; you no longer have to keep track of which
+inside the container and exit them in any order; you no longer have to keep track of which
 shell was the first one launched. Unfortunately, this also means that you can no longer
 detach and reattach to a shell.
 
-A side benefit of this is that previously, if did something like `trap handler EXIT` in your
+A side benefit of this is that previously, if you had something like `trap handler EXIT` in your
 top-level shell, there was a good chance the handler would not run because the shell will
 be killed (SIGKILL, `kill -9`) rather than shut down cleanly. Now, there is a much greater
 likelihood that the shells will shut down in an orderly manner and run their exit hooks.
 
 ##### New Capability for Multiple Shells with One Container per Shell
 
-However, Geodesic now supports another much requested feature: launching a new container
+However, Geodesic now supports another much-requested feature: launching a new container
 each time you run Geodesic. This is done by setting the `ONE_SHELL` environment variable to "true"
 or passing `--solo` on the command line. This allows you to run multiple versions of Geodesic,
 and also allows you to detach from a shell and reattach to it later.
@@ -29,7 +29,7 @@ and also allows you to detach from a shell and reattach to it later.
 Not a new feature, but one that many people were not aware of: you can kill the running
 Geodesic container with the command `geodesic stop`. This will stop the container, and it
 will be automatically removed (assuming you started it with `geodesic`). Now, however,
-there is the possibility you will have several running containers. If this is the case
+there is the possibility that you will have several running containers. If this is the case,
 `geodesic stop` will list the running containers by name. You can then pass the
 name as an argument to `geodesic stop` and it will stop that one.
 
@@ -38,7 +38,7 @@ name as an argument to `geodesic stop` and it will stop that one.
 Another old feature few people knew about: you can have Geodesic automatically
 run a command when a shell exits. This was done by creating an executable command named
 `geodesic_on_exit` and putting it in your `$PATH`. This feature has been enhanced
-in 2 ways:
+in two ways:
 
 1. Now you can set the name of the command to run when the shell exits via `ON_SHELL_EXIT`
    (defaults to `geodesic_on_exit`). Also new: the `ON_SHELL_EXIT` command will have available
@@ -54,14 +54,14 @@ launch wrapper exits. If you detach from a shell, the wrapper will run then and
 call `ON_SHELL_EXIT`. If you reattach to the shell, the wrapper is not involved,
 so quitting the shell or container will not run the cleanup command.
 
-Alternately, if you quit 2 shells at nearly the same time, for example by
+Alternately, if you quit two shells at nearly the same time, for example by
 running `geodesic stop`, the `ON_CONTAINER_EXIT` command may be called twice.
 This is because the wrapper calls the command when the container has stopped
 before shell exit processing has finished, and both shells fit the criterion.
 
 Now that shells normally exit cleanly (pretty much as long as you do not
 run `docker kill geodesic`), you may find that you get more reliable behavior
-out of
+out of:
 
 ```bash
 trap exit_handler EXIT

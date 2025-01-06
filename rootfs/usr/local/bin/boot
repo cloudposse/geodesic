@@ -5,7 +5,7 @@
 if [[ $1 == "install" ]]; then
   function color() { echo "$(tput setaf 1)$*$(tput op)" >&2; }
   color "# EXIT THIS SHELL and on your host computer,"
-  color "# run the following to install the script that runs "
+  color "# run the following to install the script that runs ${APP_NAME:-$(basename ${DOCKER_IMAGE:-Geodesic})}:"
 elif [[ $1 = "wrapper" ]]; then
   function color() { echo "$*"; }
   color
@@ -19,14 +19,23 @@ else
   function color() { echo "$*"  >&2; }
   color "########################################################################################"
   color "# Attach a terminal (docker run --rm --it ...) if you want to run a shell."
-  color "# Run the following to install the script that runs Geodesic "
+  color "# Run the following to install the script that runs ${APP_NAME:-$(basename ${DOCKER_IMAGE:-Geodesic})} "
   color "# with all its features (the recommended way to use Geodesic):"
 fi
 
 source /etc/os-release || true # ignore exit code
 
+version="${DOCKER_TAG}"
+if [[ -z $version ]]; then
+  if [[ -n ${GEODESIC_VERSION% *} ]]; then
+    version="${GEODESIC_VERSION% *}${ID:+-$ID}"
+  else
+    version="dev${ID:+-$ID}"
+  fi
+fi
+
 color "#"
-color "#   docker run --rm ${DOCKER_IMAGE:-cloudposse/geodesic}:${DOCKER_TAG:-dev${ID:+-$ID}} init | bash"
+color "#   docker run --rm ${DOCKER_IMAGE:-cloudposse/geodesic}:${version} init | bash"
 color "#"
 color "# After that, you should be able to launch Geodesic just by typing"
 color "#"

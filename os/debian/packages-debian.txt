@@ -13,7 +13,9 @@ ldnsutils
 # locales
 net-tools
 netcat-openbsd
+psmisc
 procps
+tmate
 wget
 
 # Not installing keybase

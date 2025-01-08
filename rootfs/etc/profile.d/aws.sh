@@ -2,33 +2,47 @@
 
 export AWS_REGION_ABBREVIATION_TYPE=${AWS_REGION_ABBREVIATION_TYPE:-fixed}
 export AWS_DEFAULT_SHORT_REGION=${AWS_DEFAULT_SHORT_REGION:-$(aws-region --${AWS_REGION_ABBREVIATION_TYPE} ${AWS_DEFAULT_REGION:-us-west-2})}
-export GEODESIC_AWS_HOME="${GEODESIC_AWS_HOME:-/localhost/.aws}"
+export GEODESIC_AWS_HOME
 
-# `aws configure` does not respect ENVs
-if [ ! -e "${HOME}/.aws" ]; then
-	# -e fails if the target is a link to a non-existent file, remove dead link if it exists
-	[ -L "${HOME}/.aws" ] && rm -f "${HOME}/.aws"
+function _aws_config_home() {
+	for dir in "${GEODESIC_AWS_HOME}" "${LOCAL_HOME}/.aws" "${HOME}/.aws"; do
+		if [ -d "${dir}" ]; then
+			GEODESIC_AWS_HOME="${dir}"
+			break
+		fi
+	done
+
+	if [ -z "${GEODESIC_AWS_HOME}" ]; then
+		yellow "# No AWS configuration directory found, using ${HOME}/.aws"
+		GEODESIC_AWS_HOME="${HOME}/.aws"
+	fi
+
 	if [ ! -d "${GEODESIC_AWS_HOME}" ]; then
-		if mkdir ${GEODESIC_AWS_HOME}; then # allow error message to be printed
-			ln -s "${GEODESIC_AWS_HOME}" "${HOME}/.aws"
-		else
+		if ! mkdir "${GEODESIC_AWS_HOME}"; then # allow error message to be printed
+			local first_try="${GEODESIC_AWS_HOME}"
 			export GEODESIC_AWS_HOME="${HOME}/.aws"
-			mkdir ${GEODESIC_AWS_HOME}
-			if [ -n "${AWS_CONFIG_FILE}" ] && [ ! -f "${AWS_CONFIG_FILE}" ]; then
-				AWS_CONFIG_FILE="${GEODESIC_AWS_HOME}/config"
+			if mkdir "${GEODESIC_AWS_HOME}"; then
+				if [ -n "${AWS_CONFIG_FILE}" ] && [ ! -f "${AWS_CONFIG_FILE}" ]; then
+					AWS_CONFIG_FILE="${GEODESIC_AWS_HOME}/config"
+				fi
+			else
+				red "# Could not use ${first_try}, or ${GEODESIC_AWS_HOME} for AWS configuration, giving up."
+				return 1
 			fi
 		fi
-		chmod 700 ${GEODESIC_AWS_HOME}
+		chmod 700 "${GEODESIC_AWS_HOME}"
 	fi
-	ln -s "${GEODESIC_AWS_HOME}" "${HOME}/.aws"
-fi
 
-if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME}/config}" ] && [ -d ${GEODESIC_AWS_HOME} ]; then
-	echo "# Initializing ${AWS_CONFIG_FILE}"
-	# Required for AWS_PROFILE=default
-	echo '[default]' >"${AWS_CONFIG_FILE}"
-	chmod 600 "${AWS_CONFIG_FILE}"
-fi
+	if [ ! -f "${AWS_CONFIG_FILE:=${GEODESIC_AWS_HOME}/config}" ] && [ -d "${GEODESIC_AWS_HOME}" ]; then
+		echo "# Initializing ${AWS_CONFIG_FILE}"
+		# Required for AWS_PROFILE=default
+		echo '[default]' >"${AWS_CONFIG_FILE}"
+		chmod 600 "${AWS_CONFIG_FILE}"
+	fi
+}
+
+_aws_config_home
+unset -f _aws_config_home
 
 # Install autocompletion rules for aws CLI v1 and v2
 for __aws in aws aws1 aws2; do
@@ -107,8 +121,30 @@ function export_current_aws_role() {
 	if [[ -n $profile_target ]]; then
 		profile_arn=$(aws --profile "${profile_target}" sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
 		if [[ $profile_arn == $current_role ]]; then
-			export ASSUME_ROLE="$profile_target"
-			return
+			# Extract profile name from config file:
+			# 1. For default profile, look for a better name
+			# 2. Skip identity profiles (ending with -identity), as they are too generic
+			# 3. Use the first non-default, non-identity profile found
+			if [[ $profile_target == "default" ]] || [[ $profile_target =~ -identity$ ]]; then
+				# Make some effort to find a better name for the role, but only check the config file, not credentials.
+				local config_file="${AWS_CONFIG_FILE:-\~/.aws/config}"
+				if [[ -r $config_file ]]; then
+					# Assumed roles in AWS config file use the role ARN, not the assumed role ARN, so adjust accordingly.
+					local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
+					role_name=($(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3))
+					for rn in "${role_name[@]}"; do
+						if [[ $rn == "default" ]] || [[ $rn =~ -identity$ ]]; then
+							continue
+						else
+							export ASSUME_ROLE=$rn
+							return
+						fi
+					done
+				fi
+			else
+				export ASSUME_ROLE="$profile_target"
+				return
+			fi
 		fi
 		echo "* $(red Profile is set to $profile_target but current role does not match:)"
 		echo "*   $(red $current_role)"

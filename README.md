@@ -85,10 +85,10 @@ Geodesic 4.0 is a major release that brings many new features and improvements. 
   The geodesic container remains running until the last shell exits.
 - The `geodesic` command now has a `--solo` option that allows you to launch a new Geodesic container for just that one shell.
 - Geodesic no longer mounts the host user's entire home directory into the container. Instead, it mounts only selected directories.
-- The `geodesic stop` command has been enhanced to shut down the Geodesic container gracefully, rather than forcefully, allowing
+- The `geodesic stop` command has been enhanced to shut down the Geodesic container gracefully, rather than forcefully, allowing,
   among other things, shell scripts to run their exit handlers.
 
-See extensive release notes for Geodesic 4.0 [here](/docs/ReleaseNotes-v4.md).
+See extensive release notes for Geodesic 4.0 [here](ReleaseNotes-v4.md).
 
 ### What’s Changed in Geodesic 3.0
 
@@ -363,7 +363,7 @@ All other trademarks referenced herein are the property of their respective owne
 
 
 ---
-Copyright © 2017-2024 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2025 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 <a href="https://cloudposse.com/readme/footer/link?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=readme_footer_link"><img alt="README footer" src="https://cloudposse.com/readme/footer/img"/></a>

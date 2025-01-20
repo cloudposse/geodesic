@@ -27,6 +27,13 @@ fi
 
 ## Set up the default configuration
 
+# We use `WORKSPACE` as a shorthand, but it is too generic to be used as an environment variable.
+# So we cache and unset it here to see if it otherwise would have been used.
+# The user can set it in their launch_options.sh if they want to use it, or they can use GEODESIC_WORKSPACE.
+# If the only setting comes from the inherited environment, then we print a warning later.
+exported_workspace="${WORKSPACE}"
+unset WORKSPACE
+
 ### Geodesic Settings
 export GEODESIC_PORT=${GEODESIC_PORT:-$((30000 + $$ % 30000))}
 
@@ -111,9 +118,9 @@ function parse_args() {
 		-v | --verbose)
 			export VERBOSE=true
 			;;
-	  --solo)
-      export ONE_SHELL=true
-      ;;
+		--solo)
+			export ONE_SHELL=true
+			;;
 		--trace)
 			export GEODESIC_TRACE=custom
 			;;
@@ -126,6 +133,9 @@ function parse_args() {
 		--no-motd*)
 			export GEODESIC_MOTD_ENABLED=false
 			;;
+		--workspace=*)
+			unset WORKSPACE_FOLDER_HOST_DIR
+			;& # fall through
 		--*)
 			options+=("${arg}")
 			;;
@@ -154,6 +164,9 @@ function help() {
 	echo "    help                       Show this help"
 	echo "    stop [container-name]      Stop a running Geodesic container"
 	echo ""
+	echo "  Options when starting a container:"
+	echo "    --workspace           Set which host directory is used as the working directory in the container "
+	echo ""
 	echo "  Options when starting a shell:"
 	echo "    --no-custom           Disable loading of custom configuration"
 	echo "    --no-motd             Disable the MOTD"
@@ -165,11 +178,10 @@ function help() {
 	echo "    trace options can be any of:"
 	echo "      custom              Trace the loading of custom configuration in Geodesic"
 	echo "      hist                Trace the determination of which shell history file to use"
-  echo "      terminal            Trace the terminal color mode detection"
-  echo "    You can specify multiple modes, separated by commas, e.g. --trace=custom,hist"
+	echo "      terminal            Trace the terminal color mode detection"
+	echo "    You can specify multiple modes, separated by commas, e.g. --trace=custom,hist"
 	echo ""
 }
-
 
 function options_to_env() {
 	local kv
@@ -284,33 +296,11 @@ function use() {
 		# Some settings from the host environment need to propagate into the container
 		# Set them explicitly so they do not have to be exported in `launch-options.sh`
 		for v in GEODESIC_CONFIG_HOME GEODESIC_MOTD_ENABLED GEODESIC_TERM_COLOR_AUTO; do
+			# Test if variable is set in a way that works on bash 3.2, which is what macOS has.
 			if [ -n "${!v+x}" ]; then
 				DOCKER_ARGS+=(--env "$v=${!v}")
 			fi
 		done
-	fi
-
-	mount_dir=""
-	if [ -n "${GEODESIC_HOST_BINDFS_ENABLED+x}" ]; then
-		echo "# WARNING: GEODESIC_HOST_BINDFS_ENABLED is deprecated. Use MAP_FILE_OWNERSHIP instead."
-		export MAP_FILE_OWNERSHIP="${GEODESIC_HOST_BINDFS_ENABLED}"
-	fi
-	if [ "${MAP_FILE_OWNERSHIP}" = "true" ]; then
-		if [ "${USER_ID}" = 0 ]; then
-			echo "# WARNING: Host user is root. This is DANGEROUS."
-			echo "  * Geodesic should not be launched by the host root user."
-			echo "  * Use \"rootless\" mode instead. See https://docs.docker.com/engine/security/rootless/"
-			echo "# Not enabling BindFS host filesystem mapping because host user is root, same as container user."
-		else
-			echo "# Enabling explicit mapping of file owner and group ID between container and host."
-			mount_dir="/.FS_HOST"
-			DOCKER_ARGS+=(
-				--env GEODESIC_HOST_UID="${USER_ID}"
-				--env GEODESIC_HOST_GID="${GROUP_ID}"
-				--env GEODESIC_BINDFS_OPTIONS
-				--env MAP_FILE_OWNERSHIP=true
-			)
-		fi
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
@@ -350,6 +340,49 @@ function use() {
 		local_home=${HOME}
 	fi
 
+	## Directory/file mounting plan:
+	##
+	##   Host directory/file -> Container directory/file
+	##   * Normal case, Docker handles mapping of file ownership between host and container.
+	##     Mount the host directory into the container at the same path.
+	##   * If Docker is not properly mapping file ownership, we set up explicit mapping using `bindfs`.
+	##     * This is enabled by the user setting MAP_FILE_OWNERSHIP=true.
+	##     * In this case, we mount the host directory into the container under /.FS_HOST, but again
+	##       using the same host path. Example: /home/user -> /.FS_HOST/home/user
+	##     * We then (inside the container as part of login) bind mount /.FS_HOST into /.FS_CONT
+	##       using `bindfs` to do explicit file ownership mapping. Example: /.FS_HOST/home/user -> /.FS_CONT/home/user
+	##     * This allows the user to access the files with the correct ownership. More importantly,
+	##       it correctly manages individual file mounts, not just directories.
+	##     * Still inside the container, we then mount the mounts under /.FS_CONT into the
+	##       host path, but now with the correct ownership. Example: /.FS_CONT/home/user -> /home/user
+	##
+	##    Container host path to container path:
+	##    Most of the mounted directories need to appear at a different path in the container than on
+	##    the host. After the above mappings setting up the host paths, we then mount the host paths
+	##    into the container at the correct container path.
+	mount_dir=""
+	if [ -n "${GEODESIC_HOST_BINDFS_ENABLED+x}" ]; then
+		echo "# WARNING: GEODESIC_HOST_BINDFS_ENABLED is deprecated. Use MAP_FILE_OWNERSHIP instead."
+		export MAP_FILE_OWNERSHIP="${GEODESIC_HOST_BINDFS_ENABLED}"
+	fi
+	if [ "${MAP_FILE_OWNERSHIP}" = "true" ]; then
+		if [ "${USER_ID}" = 0 ]; then
+			echo "# WARNING: Host user is root. This is DANGEROUS."
+			echo "  * Geodesic should not be launched by the host root user."
+			echo "  * Use \"rootless\" mode instead. See https://docs.docker.com/engine/security/rootless/"
+			echo "# Not enabling BindFS host filesystem mapping because host user is root, same as default container user."
+		else
+			echo "# Enabling explicit mapping of file owner and group ID between container and host."
+			mount_dir="/.FS_HOST"
+			DOCKER_ARGS+=(
+				--env GEODESIC_HOST_UID="${USER_ID}"
+				--env GEODESIC_HOST_GID="${GROUP_ID}"
+				--env GEODESIC_BINDFS_OPTIONS
+				--env MAP_FILE_OWNERSHIP=true
+			)
+		fi
+	fi
+
 	# Although we call it "dirs", it can be files too
 	export GEODESIC_HOMEDIR_MOUNTS=""
 	DOCKER_ARGS+=(--env GEODESIC_HOMEDIR_MOUNTS --env LOCAL_HOME="${local_home}")
@@ -369,8 +402,27 @@ function use() {
 	# WORKSPACE_MOUNT is the directory in the container that is to be the mount point for the host filesystem
 	WORKSPACE_MOUNT="${WORKSPACE_MOUNT:-/workspace}"
 	# WORKSPACE_HOST_DIR is the directory on the host that is to be the working directory
-	WORKSPACE_FOLDER_HOST_DIR="${WORKSPACE_FOLDER_HOST_DIR:-${GEODESIC_HOST_CWD}}"
-	git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+	if [ -n "$WORKSPACE" ] && [ -n "$WORKSPACE_FOLDER_HOST_DIR" ] && [ "$WORKSPACE" != "$WORKSPACE_FOLDER_HOST_DIR" ]; then
+		echo "# WORKSPACE is set to '${WORKSPACE}'."
+		echo "# WORKSPACE_FOLDER_HOST_DIR is set to '${WORKSPACE_FOLDER_HOST_DIR}'."
+		echo "# Ignoring WORKSPACE and using WORKSPACE_FOLDER_HOST_DIR as the workspace folder/work directory."
+		unset exported_workspace
+	fi
+	WORKSPACE_FOLDER_HOST_DIR="${WORKSPACE_FOLDER_HOST_DIR:-${WORKSPACE:-${GEODESIC_HOST_CWD}}}"
+	if [ -n "$exported_workspace" ] && [ "$exported_workspace" != "$WORKSPACE" ]; then
+		echo "# Ignoring exported WORKSPACE setting of '$exported_workspace'." >&2
+		echo "# Export GEODESIC_WORKSPACE or set WORKSPACE in 'launch-config.sh' or via '--workspace' if you want Geodesic to use it." >&2
+		echo "# Using '$WORKSPACE' as the workspace folder/work directory." >&2
+	fi
+	git_root=$(
+		cd "${WORKSPACE_FOLDER_HOST_DIR}" || {
+			echo Cannot change to workspace folder directory "'${WORKSPACE_FOLDER_HOST_DIR}'", quitting >&2
+			echo "WORKSPACE or WORKSPACE_FOLDER_HOST_DIR, if set, must be set to an accessible directory" >&2
+			exit 33
+		} &&
+			git rev-parse --show-toplevel 2>/dev/null
+	)
+	[ "$?" -eq 33 ] && exit 33 # do not abort if git rev-parse fails
 	if [ -z "${git_root}" ] || [ "$git_root" = "${WORKSPACE_FOLDER_HOST_DIR}" ]; then
 		# WORKSPACE_HOST_PATH is the directory on the host that is to be mounted into the container
 		WORKSPACE_MOUNT_HOST_DIR="${WORKSPACE_FOLDER_HOST_DIR}"
@@ -389,23 +441,13 @@ function use() {
 		--env WORKSPACE_MOUNT_HOST_DIR="${WORKSPACE_MOUNT_HOST_DIR}"
 		--env WORKSPACE_MOUNT="${WORKSPACE_MOUNT}"
 		--env WORKSPACE_FOLDER="${WORKSPACE_FOLDER}"
-		## TODO: Remove legacy vars
-		#		--env GEODESIC_LOCALHOST="${WORKSPACE_MOUNT}"
-		#		--env GEODESIC_WORKDIR="${WORKSPACE_FOLDER}"
-		#		--env HOME="/root"
 	)
 
-	###### TODO
-	## Need to distinguish from mount point, which could be bindfs, from read point
-	##
-	## Everything under $HOME is mounted under $GEODESIC_LOCALHOST
-	## Everything not under $HOME is mounted under $GEODESIC_LOCALHOST/_HOST
-	##
-	## ln -s /workspace $HOME
-	## for d in $GEODESIC_LOCALHOST/_HOST/*
-	## for d in $(shopt -s nullglob; $GEODESIC_LOCALHOST/_HOST/*); do ln $x; done
-
-	# Mount the host mounts wherever the users asks for them to be mounted
+	# Mount the host mounts wherever the users asks for them to be mounted.
+	# However, if file ownership mapping is enabled,
+	# we still need to mount them under /.FS_HOST first.
+	# To enable final mapping, Geodesic needs to know what is mounted from the host,
+	# so we provide that information in GEODESIC_HOST_MOUNTS.
 	export GEODESIC_HOST_MOUNTS=""
 	IFS=, read -ra HOST_MOUNTS <<<"${HOST_MOUNTS}"
 	for dir in "${HOST_MOUNTS[@]}"; do

@@ -89,10 +89,10 @@ introduction: |-
     The geodesic container remains running until the last shell exits.
   - The `geodesic` command now has a `--solo` option that allows you to launch a new Geodesic container for just that one shell.
   - Geodesic no longer mounts the host user's entire home directory into the container. Instead, it mounts only selected directories.
-  - The `geodesic stop` command has been enhanced to shut down the Geodesic container gracefully, rather than forcefully, allowing
+  - The `geodesic stop` command has been enhanced to shut down the Geodesic container gracefully, rather than forcefully, allowing,
     among other things, shell scripts to run their exit handlers.
 
-  See extensive release notes for Geodesic 4.0 [here](/docs/ReleaseNotes-v4.md).
+  See extensive release notes for Geodesic 4.0 [here](ReleaseNotes-v4.md).
 
   ### What’s Changed in Geodesic 3.0
 

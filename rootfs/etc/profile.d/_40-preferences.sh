@@ -36,11 +36,24 @@ elif [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 	mkdir -p "${GEODESIC_CONFIG_HOME}"
 fi
 
+function _term_fold() {
+    	local cols
+    	cols=$(tput cols 2>/dev/null || echo "80")
+    	[ -z "$cols" ] || [ "$cols" = "0" ] && cols=80
+    	fold -w "$cols" -s
+}
+
 [[ -n ${WORKSPACE_MOUNT} ]] || export WORKSPACE_MOUNT=/workspace
-if [[ -z $(find "${WORKSPACE_MOUNT}" -mindepth 1 -maxdepth 1) ]]; then
+if ! findmnt "${WORKSPACE_MOUNT}" >/dev/null 2>&1; then
 	red "########################################################################################" >&2
-	red "# No filesystem is mounted at $(bold "${WORKSPACE_MOUNT}") which limits Geodesic functionality." >&2
+	red "# No filesystem is mounted at $(bold "${WORKSPACE_MOUNT}") which limits Geodesic functionality." | _term_fold >&2
 	boot install
+elif [[ -z $(find "${WORKSPACE_MOUNT}" -mindepth 1 -maxdepth 1) ]]; then
+	red "###############################################################################################" >&2
+	red "# No files found under $(bold "${WORKSPACE_MOUNT}"). Run Geodesic from your source directory." | _term_fold >&2
+	red "# Change (\`cd\`) to your source directory (in your git repo) and run ${APP_NAME:-Geodesic} from there." | _term_fold >&2
+	red "################################################################################################" >&2
+	echo
 fi
 
 unset _GEODESIC_CONFIG_HOME_DEFAULT

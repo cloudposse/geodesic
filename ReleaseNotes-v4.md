@@ -59,7 +59,7 @@ running `geodesic stop`, the `ON_CONTAINER_EXIT` command may be called twice.
 This is because the wrapper calls the command when the container has stopped
 before shell exit processing has finished, and both shells fit the criterion.
 
-Now that shells normally exit cleanly (pretty much as long as you do not
+Now that shells normally exit cleanly (provided you do not
 run `docker kill geodesic`), you may find that you get more reliable behavior
 out of:
 

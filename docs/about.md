@@ -30,7 +30,6 @@ At its core, Geodesic is a framework for provisioning cloud infrastructure and t
 * [`terraform`](https://github.com/hashicorp/terraform/) for provisioning miscellaneous resources on pretty much any cloud
 * [`tmate`](https://tmate.io) for remote terminal sharing with other engineers (pairing) and collaborative debugging
 
-
 ## SEE MORE
 
 Extensive documentation is provided on our [Documentation Hub](https://docs.cloudposse.com/resources/legacy/fundamentals/geodesic/).

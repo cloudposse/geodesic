@@ -19,8 +19,7 @@ require_installed tr
 require_installed grep
 require_installed docker
 
-docker ps >/dev/null 2>&1
-if [ $? -ne 0 ]; then
+if ! docker ps >/dev/null 2>&1; then
 	echo "Unable to communicate with docker daemon. Make sure your environment is properly configured and then try again."
 	exit 1
 fi
@@ -188,15 +187,15 @@ function options_to_env() {
 	local k
 	local v
 
-	for option in ${options[@]}; do
+	for option in "${options[@]}"; do
 		kv=(${option/=/ })
 		k=${kv[0]}                                # Take first element as key
 		k=${k#--}                                 # Strip leading --
 		k=${k//-/_}                               # Convert dashes to underscores
 		k=$(echo $k | tr '[:lower:]' '[:upper:]') # Convert to uppercase (bash3 compat)
 
-		v=${kv[1]}   # Treat second element as value
-		v=${v:-true} # Set it to true for boolean flags
+		v="${kv[@]:1}"   # Treat remaining elements as value
+		v="${v:-true}" # Set it to true for boolean flags
 
 		export $k="$v"
 	done
@@ -423,6 +422,10 @@ function use() {
 			git rev-parse --show-toplevel 2>/dev/null
 	)
 	[ "$?" -eq 33 ] && exit 33 # do not abort if git rev-parse fails
+	# Resolve symbolic links to get the actual path
+	local configured_wfhd
+	configured_wfhd="$WORKSPACE_FOLDER_HOST_DIR"
+	WORKSPACE_FOLDER_HOST_DIR="$(cd "${WORKSPACE_FOLDER_HOST_DIR}" && pwd -P || echo "${WORKSPACE_FOLDER_HOST_DIR}")"
 	if [ -z "${git_root}" ] || [ "$git_root" = "${WORKSPACE_FOLDER_HOST_DIR}" ]; then
 		# WORKSPACE_HOST_PATH is the directory on the host that is to be mounted into the container
 		WORKSPACE_MOUNT_HOST_DIR="${WORKSPACE_FOLDER_HOST_DIR}"
@@ -431,6 +434,9 @@ function use() {
 		# If we are in a git repo, mount the git root into the container at /workspace
 		WORKSPACE_MOUNT_HOST_DIR="${git_root}"
 		WORKSPACE_FOLDER="${WORKSPACE_FOLDER:-${WORKSPACE_MOUNT}/${WORKSPACE_FOLDER_HOST_DIR#${git_root}/}}"
+	fi
+	if [ "$configured_wfhd" != "$WORKSPACE_FOLDER_HOST_DIR" ]; then
+		echo "# Resolved ${configured_wfhd} to '${WORKSPACE_FOLDER_HOST_DIR}'"
 	fi
 
 	echo "# Mounting '${WORKSPACE_MOUNT_HOST_DIR}' into container at '${WORKSPACE_MOUNT}'"

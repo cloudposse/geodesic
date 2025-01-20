@@ -163,8 +163,29 @@ function _map_mounts() {
 	done
 }
 
+function _add_symlinks() {
+	local links dest src
+	IFS='|' read -ra links <<<"${GEODESIC_HOST_SYMLINK}"
+	for l in "${links[@]}"; do
+		[[ -z "$l" ]] && continue
+		local src dest
+		IFS='>' read -r dest src <<<"$l"
+		if [[ -z $src ]] || [[ -z $dest ]]; then
+			red "# ERROR: Invalid symlink definition: $l"
+			continue
+		fi
+		mkdir -p "$(dirname "$dest")"
+		if [[ -e $dest ]]; then
+			red "# ERROR: Symlink destination already exists: '$dest'"
+			continue
+		fi
+		ln -sT "$src" "$dest" && yellow symlinking "'$src' -> '$dest'" || red "# ERROR: Failed to create symlink: '$src' -> '$dest'"
+	done
+}
+
 if [[ $SHLVL == 1 ]]; then
 	_map_mounts
+  _add_symlinks
 
 	# Ensure we do not have paths that match everything
 	paths=("${GEODESIC_HOST_PATHS[@]}")
@@ -177,4 +198,4 @@ if [[ $SHLVL == 1 ]]; then
 	done
 fi
 
-unset -f _map_mounts _map_owner _map_host _ensure_dest paths
+unset -f _map_mounts _map_owner _map_host _ensure_dest paths _add_symlinks

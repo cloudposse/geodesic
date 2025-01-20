@@ -2,8 +2,8 @@
 homedir_default_mounts=".aws,.config,.emacs.d,.geodesic,.kube,.ssh,.terraform.d"
 
 function require_installed() {
-	if ! command -v $1 >/dev/null 2>&1; then
-		echo "Cannot find $1 installed on this system. Please install and try again."
+	if ! command -v "$1" >/dev/null 2>&1; then
+		echo "Cannot find '$1' installed on this system. Please install and try again."
 		exit 1
 	fi
 }
@@ -188,13 +188,15 @@ function options_to_env() {
 	local v
 
 	for option in "${options[@]}"; do
-		kv=(${option/=/ })
-		k=${kv[0]}                                # Take first element as key
-		k=${k#--}                                 # Strip leading --
-		k=${k//-/_}                               # Convert dashes to underscores
-		k=$(echo $k | tr '[:lower:]' '[:upper:]') # Convert to uppercase (bash3 compat)
-
-		v="${kv[@]:1}"   # Treat remaining elements as value
+		# Safely split on '='
+		IFS='=' read -r -a kv <<< "$option"
+		k=${kv[0]}                                  # Take first element as key
+		k=${k#--}                                   # Strip leading --
+		k=${k//-/_}                                 # Convert dashes to underscores
+		k=$(echo "$k" | tr '[:lower:]' '[:upper:]') # Convert to uppercase (bash3 compat)
+		# Treat remaining elements as value, restoring the '=' separator
+		# This preserves multiple consecutive whitespace characters
+		v="$(IFS='='; echo "${kv[*]:1}")"
 		v="${v:-true}" # Set it to true for boolean flags
 
 		export $k="$v"
@@ -437,6 +439,7 @@ function use() {
 	fi
 	if [ "$configured_wfhd" != "$WORKSPACE_FOLDER_HOST_DIR" ]; then
 		echo "# Resolved ${configured_wfhd} to '${WORKSPACE_FOLDER_HOST_DIR}'"
+		export GEODESIC_HOST_SYMLINK+="${configured_wfhd}>${WORKSPACE_FOLDER_HOST_DIR}|"
 	fi
 
 	echo "# Mounting '${WORKSPACE_MOUNT_HOST_DIR}' into container at '${WORKSPACE_MOUNT}'"
@@ -448,6 +451,7 @@ function use() {
 		--env WORKSPACE_MOUNT="${WORKSPACE_MOUNT}"
 		--env WORKSPACE_FOLDER="${WORKSPACE_FOLDER}"
 	)
+	[ -n "${GEODESIC_HOST_SYMLINK}" ] && DOCKER_ARGS+=(--env GEODESIC_HOST_SYMLINK)
 
 	# Mount the host mounts wherever the users asks for them to be mounted.
 	# However, if file ownership mapping is enabled,
@@ -526,17 +530,17 @@ _polite_stop() {
 		return
 	fi
 
-	printf "# Signalling ${name} to stop..."
+	printf "# Signalling '%s' to stop..." "${name}"
 	docker kill -s TERM "${name}" >/dev/null
 	for i in {1..9}; do
 		if [ $i -eq 9 ] || [ $(docker ps -q --filter "name=${name}" | wc -l | tr -d " ") -eq 0 ]; then
-			printf " ${name} stopped gracefully.\n\n"
+			printf " '%s' stopped gracefully.\n\n" "${name}"
 			return 0
 		fi
 		[ $i -lt 8 ] && sleep 1
 	done
 
-	printf " ${name} did not stop gracefully. Killing it.\n\n"
+	printf " '%s' did not stop gracefully. Killing it.\n\n" "${name}"
 	docker kill -s TERM "${name}" >/dev/null
 	return 138
 }

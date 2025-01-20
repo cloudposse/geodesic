@@ -1,4 +1,4 @@
-## Geodesic v4.0.0 Release Notes
+# Geodesic v4.0.0 Release Notes
 
 ### Highlights
 

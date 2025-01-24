@@ -45,14 +45,19 @@ function _term_fold() {
 
 [[ -n ${WORKSPACE_MOUNT} ]] || export WORKSPACE_MOUNT=/workspace
 if ! findmnt "${WORKSPACE_MOUNT}" >/dev/null 2>&1; then
-	red "########################################################################################" >&2
-	red "# No filesystem is mounted at $(bold "${WORKSPACE_MOUNT}") which limits Geodesic functionality." | _term_fold >&2
+	# Keep the lines short, because some terminals will truncate them rather than wrap them,
+	# which causes important information to be lost.
+	red "############################################################" >&2
+	red "# No filesystem is mounted at $(bold "${WORKSPACE_MOUNT}")" | _term_fold >&2
+	red "# which limits Geodesic functionality." | _term_fold >&2
 	boot install
 elif [[ -z $(find "${WORKSPACE_MOUNT}" -mindepth 1 -maxdepth 1) ]]; then
-	red "###############################################################################################" >&2
-	red "# No files found under $(bold "${WORKSPACE_MOUNT}"). Run Geodesic from your source directory." | _term_fold >&2
-	red "# Change (\`cd\`) to your source directory (in your git repo) and run ${APP_NAME:-Geodesic} from there." | _term_fold >&2
-	red "################################################################################################" >&2
+	red "################################################################" >&2
+	red "# No files found under $(bold "${WORKSPACE_MOUNT}")." | _term_fold >&2
+	red "# Run Geodesic from your source directory." | _term_fold >&2
+	red "# Change (\`cd\`) to your source directory (in your git repo)" | _term_fold >&2
+	red "# and run ${APP_NAME:-Geodesic} from there." | _term_fold >&2
+	red "################################################################" >&2
 	echo
 fi
 

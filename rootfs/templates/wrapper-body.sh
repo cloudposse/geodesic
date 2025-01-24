@@ -120,6 +120,9 @@ function parse_args() {
 		--solo)
 			export ONE_SHELL=true
 			;;
+		--no-solo|--no-one-shell)
+			export ONE_SHELL=false
+			;;
 		--trace)
 			export GEODESIC_TRACE=custom
 			;;
@@ -163,13 +166,11 @@ function help() {
 	echo "    help                       Show this help"
 	echo "    stop [container-name]      Stop a running Geodesic container"
 	echo ""
-	echo "  Options when starting a container:"
-	echo "    --workspace           Set which host directory is used as the working directory in the container "
-	echo ""
-	echo "  Options when starting a shell:"
+	echo "  Options:"
 	echo "    --no-custom           Disable loading of custom configuration"
 	echo "    --no-motd             Disable the MOTD"
 	echo "    --solo                Launch a new container exclusively for this shell"
+	echo "    --no-solo             Override the 'solo/ONE_SHELL' setting in your configuration"
 	echo "    --trace               Enable tracing of shell customization within Geodesic"
 	echo "    --trace=<options>     Enable tracing of specific parts of shell configuration"
 	echo "    -v --verbose          Enable verbose output of launch configuration"
@@ -180,6 +181,9 @@ function help() {
 	echo "      terminal            Trace the terminal color mode detection"
 	echo "    You can specify multiple modes, separated by commas, e.g. --trace=custom,hist"
 	echo ""
+	echo "  Options that only take effect when starting a container:"
+	echo "    --workspace           Set which host directory is used as the working directory in the container "
+	echo ""
 }
 
 function options_to_env() {
@@ -189,17 +193,17 @@ function options_to_env() {
 
 	for option in "${options[@]}"; do
 		# Safely split on '='
-		IFS='=' read -r -a kv <<< "$option"
+		IFS='=' read -r -a kv <<<"$option"
 		k=${kv[0]}                                  # Take first element as key
 		k=${k#--}                                   # Strip leading --
 		k=${k//-/_}                                 # Convert dashes to underscores
 		k=$(echo "$k" | tr '[:lower:]' '[:upper:]') # Convert to uppercase (bash3 compat)
 		# Treat remaining elements as value, restoring the '=' separator
 		# This preserves multiple consecutive whitespace characters
-		v="$(IFS='='; echo "${kv[*]:1}")"
+		v="$(IFS='=' echo "${kv[*]:1}")"
 		v="${v:-true}" # Set it to true for boolean flags
 
-		export $k="$v"
+		export "$k"="$v"
 	done
 }
 
@@ -286,6 +290,22 @@ function run_exit_hooks() {
 
 function use() {
 	[ "$1" = "use" ] && shift
+	trap run_exit_hooks EXIT
+
+	if [ "$ONE_SHELL" != "true" ]; then
+		CONTAINER_ID=$(docker ps --filter name="^/${DOCKER_NAME}\$" --format '{{ .ID }}')
+		if [ -n "$CONTAINER_ID" ]; then
+			echo "# Starting shell in already running ${DOCKER_NAME} container ($CONTAINER_ID)"
+			if [ $# -eq 0 ]; then
+				set -- "/bin/bash" "-l" "$@"
+			fi
+			# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
+			# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
+			docker exec -it --detach-keys "ctrl-^,ctrl-[,ctrl-@" --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
+			return 0
+		fi
+	fi
+
 	DOCKER_ARGS=()
 	if [ -t 1 ]; then
 		# Running in terminal
@@ -491,7 +511,6 @@ function use() {
 		--env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}"
 	)
 
-	trap run_exit_hooks EXIT
 	if [ "$ONE_SHELL" = "true" ]; then
 		DOCKER_NAME="${DOCKER_NAME}-$(date +%d%H%M%S)"
 		echo "# Starting single shell ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
@@ -499,25 +518,13 @@ function use() {
 		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
 		docker run --name "${DOCKER_NAME}" "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
 	else
-		# the extra curly braces around .ID are because this file goes through go template substitution locally before being installed as a shell script
-		CONTAINER_ID=$(docker ps --filter name="^/${DOCKER_NAME}\$" --format '{{ .ID }}')
-		if [ -n "$CONTAINER_ID" ]; then
-			echo "# Starting shell in already running ${DOCKER_NAME} container ($CONTAINER_ID)"
-			if [ $# -eq 0 ]; then
-				set -- "/bin/bash" "-l" "$@"
-			fi
-			# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
-			# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
-			docker exec -it --detach-keys "ctrl-^,ctrl-[,ctrl-@" --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
-		else
-			echo "# Running new ${DOCKER_NAME} container from ${DOCKER_IMAGE}"
-			echo "# Exposing port ${GEODESIC_PORT}"
-			[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-			# docker run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
-			CONTAINER_ID=$(docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} /usr/local/sbin/shell-monitor)
-			echo "# Started session ${CONTAINER_ID:0:12}. Starting shell via \`docker exec\`..."
-			docker exec -it --detach-keys "ctrl-^,ctrl-[,ctrl-@" --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" /bin/bash -l $*
-		fi
+		echo "# Running new ${DOCKER_NAME} container from ${DOCKER_IMAGE}"
+		echo "# Exposing port ${GEODESIC_PORT}"
+		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
+		# docker run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
+		CONTAINER_ID=$(docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} /usr/local/sbin/shell-monitor)
+		echo "# Started session ${CONTAINER_ID:0:12}. Starting shell via \`docker exec\`..."
+		docker exec -it --detach-keys "ctrl-^,ctrl-[,ctrl-@" --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" /bin/bash -l $*
 	fi
 	true
 }

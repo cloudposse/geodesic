@@ -22,10 +22,8 @@ function _map_mounts() {
 	if [[ "$MAP_FILE_OWNERSHIP" == "true" ]]; then
 		local src="/.FS_HOST"
 		local dest="/.FS_CONT"
-		if
+		if [[ -d "${src}" ]]; then
 			map="${dest}"
-			[[ -d "${src}" ]]
-		then
 			mkdir -p "${dest}"
 		else
 			red "# ERROR: Supposed host mount directory ${src} does not exist. Fatal error."
@@ -183,9 +181,13 @@ function _add_symlinks() {
 	done
 }
 
-if [[ $SHLVL == 1 ]]; then
+# Ensure we only run this once per container
+if [[ -f "${GEODESIC_HOST_PATHS_CACHE:=/tmp/geodesic-host-paths}" ]]; then
+	# Source the cached paths
+	. "${GEODESIC_HOST_PATHS_CACHE}"
+else
 	_map_mounts
-  _add_symlinks
+	_add_symlinks
 
 	# Ensure we do not have paths that match everything
 	paths=("${GEODESIC_HOST_PATHS[@]}")
@@ -196,6 +198,9 @@ if [[ $SHLVL == 1 ]]; then
 			GEODESIC_HOST_PATHS+=("$p")
 		fi
 	done
+	declare -p GEODESIC_HOST_PATHS >"${GEODESIC_HOST_PATHS_CACHE}"
+	chmod 644 "${GEODESIC_HOST_PATHS_CACHE}"
 fi
 
+unset GEODESIC_HOST_PATHS_CACHE
 unset -f _map_mounts _map_owner _map_host _ensure_dest paths _add_symlinks

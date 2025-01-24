@@ -79,6 +79,13 @@ Now, you can create a `launch-options.sh` file in the Geodesic configuration dir
 to customize the launch of the Geodesic container. The directory search path and the
 priority of the files are the same as for the other Geodesic customization files.
 
+Note that most of the launch options configure the launching of the Docker container,
+and therefore have no effect when you run `geodesic` to start a new shell
+inside an already running container. However, you can use the `--solo` option to
+force Geodesic to start a new container to pick up the new launch options. You
+can also add `ONE_SHELL=true` to the `launch-options.sh` file to force Geodesic to
+start a new container each time you run it.
+
 #### Better File System Layout
 
 Geodesic no longer mounts the entire host user's home directory into the container.

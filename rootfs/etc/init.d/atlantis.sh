@@ -52,7 +52,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	# Set some defaults if none provided
 	export ATLANTIS_USER=${ATLANTIS_USER:-atlantis}
 	export ATLANTIS_GROUP=${ATLANTIS_GROUP:-atlantis}
-	export ATLANTIS_HOME=${ATLANTIS_HOME:-/conf/atlantis}
+	export ATLANTIS_HOME=${ATLANTIS_HOME:-/home/atlantis}
 
 	# create atlantis user & group
 	(getent group ${ATLANTIS_GROUP} || addgroup ${ATLANTIS_GROUP}) >/dev/null

@@ -40,8 +40,8 @@ reviews:
   tools:
     shellcheck:
       enabled: true
-    ruff:
-      enabled: true
+    ruff: # for Python
+      enabled: false
     markdownlint:
       enabled: true
     github-checks:
@@ -51,43 +51,43 @@ reviews:
       enabled: true
       enabled_only: false
       level: default
-    biome:
-      enabled: true
+    biome: # For JavaScript/TypeScript
+      enabled: false
     hadolint:
       enabled: true
-    swiftlint:
-      enabled: true
-    phpstan:
-      enabled: true
+    swiftlint: # For Swift
+      enabled: false
+    phpstan: # For PHP
+      enabled: false
       level: default
-    golangci-lint:
-      enabled: true
+    golangci-lint: # For Go
+      enabled: false
     yamllint:
       enabled: true
     gitleaks:
       enabled: true
     checkov:
       enabled: true
-    detekt:
-      enabled: true
-    eslint:
-      enabled: true
-    rubocop:
-      enabled: true
-    buf:
-      enabled: true
-    regal:
-      enabled: true
+    detekt: # For Kotlin
+      enabled: false
+    eslint: # For JavaScript/TypeScript
+      enabled: false
+    rubocop: # For Ruby
+      enabled: false
+    buf: # For Protobuf
+      enabled: false
+    regal: # For Rego
+      enabled: false
     actionlint:
       enabled: true
-    pmd:
-      enabled: true
-    cppcheck:
-      enabled: true
-    semgrep:
-      enabled: true
-    circleci:
-      enabled: true
+    pmd: # For Java
+      enabled: false
+    cppcheck: # For C/C++
+      enabled: false
+    semgrep: # Static analysis. CodeRabbit recommends disabling this tool unless you configure specific rules for it.
+      enabled: false
+    circleci: # For CircleCI
+      enabled: false
 chat:
   auto_reply: true
   integrations:

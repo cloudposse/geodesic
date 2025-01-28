@@ -260,13 +260,13 @@ function run_exit_hooks() {
 			return 0
 		fi
 	else # 1 or zero shells. The 1 might be ours, so we wait for it to quit.
-		for i in {1..9}; do
-			if [ $i -eq 9 ] || [ $(docker ps -q --filter "id=${CONTAINER_ID:0:12}" | wc -l | tr -d " ") -eq 0 ]; then
+		for i in {1..6}; do
+			if [ $i -eq 6 ] || [ $(docker ps -q --filter "id=${CONTAINER_ID:0:12}" | wc -l | tr -d " ") -eq 0 ]; then
 				break
 			fi
-			[ $i -lt 8 ] && sleep 1
+			[ $i -lt 5 ] && sleep 1
 		done
-		if [ $i -eq 9 ]; then
+		if [ $i -eq 6 ]; then
 			shells=$(_running_shell_count)
 			if [ "$shells" -eq 0 ]; then
 				printf 'All shells terminated, but docker container still running.\n' >&2
@@ -482,7 +482,7 @@ function use() {
 	IFS=, read -ra HOST_MOUNTS <<<"${HOST_MOUNTS}"
 	for dir in "${HOST_MOUNTS[@]}"; do
 		d="${dir%%:*}"
-		if [ -d "${d}" ]; then
+		if [ -d "${d}" ] || [ -f "${d}" ]; then
 			if [ "${dir}" != "${d}" ]; then
 				DOCKER_ARGS+=(--volume="${d}:${mount_dir}${dir#*:}")
 				debug "Mounting ${d} into container at ${dir#*:}"
@@ -492,6 +492,8 @@ function use() {
 				debug "Mounting ${d} into container at ${d}"
 				GEODESIC_HOST_MOUNTS+="${d}|"
 			fi
+		else # not a directory or file
+			debug "Not mounting ${d} into container because it is not a directory or file"
 		fi
 	done
 

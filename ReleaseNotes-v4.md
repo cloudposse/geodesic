@@ -116,10 +116,33 @@ in the container as on the host.
 - Previously, `$HOME` was set to `/conf` in the container. This is no longer the case.
   `$HOME` is now set to the shell user's home directory. By default, this is `/root`.
   If you launch Geodesic as a non-root user, `$HOME` will be set to that user's home directory,
-  provided you have properly created the user with `adduser`. By default, the
-  container user will share configuration with the host user by mounting the host user's
+  provided you have properly created the user with `adduser`. **By default, the
+  container user will share configuration with the host user by mounting selected host user's
   configuration directories into the container user's home directory, allowing
-  bidirectional updates.
+  bidirectional updates.**
+
+> [!IMPORTANT]
+> It is important to be aware that any files from the host directory that are mounted into the container
+> will be modifiable by the container user, and those modifications will propagate to the host.
+> This includes any files that are implicitly modified by programs running in the container.
+> If you need separate configurations for the host and container, you should not use
+> `HOMEDIR_MOUNTS` or `HOMEDIR_ADDITIONAL_MOUNTS` to directly mount them into the container's
+> home directory. Instead, you use `HOST_MOUNTS` to mount them elsewhere in the container,
+> and then use a preferences or override script to copy the files to the appropriate location
+> and then modify them if needed. See [docs/customization.md](docs/customization.md) and
+> [docs/environment.md](docs/environment.md) for more details.
+
+- Global Git configuration can be in either of 2 places:
+  - `~/.config/git/config` - Starting with `git` v2.41 or so, it is the newly preferred location for the global Git configuration.
+  - `~/.gitconfig` - This is the old location for the global Git configuration.
+
+  If you have a `~/.gitconfig` file, it will not be accessible to the container by default.
+  This may be advantageous if you want to keep your global Git configuration separate from the container.
+  If you have a `~/.config/git/config` file, it will be accessible to the container by default,
+  and it will be modified if you run `git config --global` from within Geodesic,
+  provided you are using a recent enough version of `git`. The version of `git`
+  that ships with Debian 12 and Geodesic 4.0.0 is 2.39.5 and does not yet
+  appear to support `~/.config/git/config`, but this could change without notice.
 
 - The `/conf` directory no longer exists. Generally, what used to be in `/conf`
   is now in `/root` if it was created in the Geodesic Dockerfile.debian, or in

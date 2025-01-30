@@ -282,13 +282,16 @@ function run_exit_hooks() {
 	fi
 
 	# If we get here, container is still running and shells != 0
-	echo Docker container still running
-	[ "$shells" -eq 1 ] && echo -n "Quit 1 other shell " || echo -n "Quit $shells other shells "
-	echo 'to terminate, or force quit with `docker kill '"${DOCKER_NAME}"'`'
+	printf "Docker container still running. " >&2
+	[ "$shells" -eq 1 ] && echo -n "Quit 1 other shell " >&2 || echo -n "Quit $shells other shells " >&2
+	printf 'to terminate.\n  Use `%s stop` to stop gracefully, or\n  force quit with `docker kill %s`\n' "$(basename $0)" "${DOCKER_NAME}" >&2
 	_on_shell_exit
 }
 
 function use() {
+	# TODO: Mark each shell with the wrapper's PID, so we can tell which shell is which.
+	# Then, when exiting, we can distinguish between this wrapper's shell still running
+	# and other shells still running, and be more efficient and informative in the exit message.
 	[ "$1" = "use" ] && shift
 	trap run_exit_hooks EXIT
 

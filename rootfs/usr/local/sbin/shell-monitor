@@ -1,24 +1,28 @@
 #!/bin/bash
 
-# Function to count active shell sessions
+# Function to count active shell sessions launched by wrapper
+# Far from perfect:
+#   Does not account for shells with detached sessions which cannot be resumed
+#   Does not account for shells launched without -l flag in the first position
+#   Does not account for alternative shells like rbash or dash
 count_shells() {
-	pgrep -f "^/bin/(ba)?sh -l" | wc -l
+	pgrep -f "^(/(usr/)?bin/)?(ba)?sh -l" | wc -l
 }
 
 kill_shells() {
-	pkill -HUP -f "^/bin/(ba)?sh -l"
+	pkill -HUP -f "^(/(usr/)?bin/)?(ba)?sh -l"
 	for i in {1..4}; do
 		[ $(count_shells) -eq 0 ] && return 0
 		sleep 1
 	done
 
-	pkill -TERM -f "^/bin/(ba)?sh -l"
+	pkill -TERM -f "^(/(usr/)?bin/)?(ba)?sh -l"
 
 	for i in {1..3}; do
 		[ $(count_shells) -eq 0 ] && return 0
 		sleep 1
 	done
-	pkill -KILL -f "^/bin/(ba)?sh -l"
+	pkill -KILL -f "^(/(usr/)?bin/)?(ba)?sh -l"
 	return 137
 }
 

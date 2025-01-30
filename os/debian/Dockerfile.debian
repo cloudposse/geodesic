@@ -97,8 +97,6 @@ RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 
 ENV BANNER "geodesic"
 
-ENV MOTD_URL=http://geodesic.sh/motd
-
 # Install all packages as root
 USER root
 # We used to override user home directory to /conf, but we no longer do that.

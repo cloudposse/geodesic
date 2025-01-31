@@ -9,21 +9,21 @@ function atmos_configure_base_path() {
 		return
 	fi
 
-	# If $GEODESIC_WORKDIR contains both a "stacks" and "components" directory,
+	# If $WORKSPACE_FOLDER contains both a "stacks" and "components" directory,
 	# use it as the $ATMOS_BASE_PATH
-	if [[ -d "${GEODESIC_WORKDIR}/stacks" ]] && [[ -d "${GEODESIC_WORKDIR}/components" ]]; then
-		export ATMOS_BASE_PATH="${GEODESIC_WORKDIR}"
-		green "# Setting ATMOS_BASE_PATH to \"$ATMOS_BASE_PATH\" based on children of workdir"
+	if [[ -d "${WORKSPACE_FOLDER}/stacks" ]] && [[ -d "${WORKSPACE_FOLDER}/components" ]]; then
+		export ATMOS_BASE_PATH="${WORKSPACE_FOLDER}"
+		green "# Setting ATMOS_BASE_PATH to \"$ATMOS_BASE_PATH\" based on children of workspace folder"
 		return
 	fi
 
-	# If $GEODESIC_WORKDIR is a descendent of either a "stacks" or "components" directory,
+	# If $WORKSPACE_FOLDER is a descendent of either a "stacks" or "components" directory,
 	# use the parent of that directory as ATMOS_BASE_PATH
-	if [[ "${GEODESIC_WORKDIR}" =~ /(stacks|components)/ ]]; then
-		if [[ "${GEODESIC_WORKDIR}" =~ /stacks/ ]]; then
-			export ATMOS_BASE_PATH="${GEODESIC_WORKDIR%/stacks/*}"
+	if [[ "${WORKSPACE_FOLDER}" =~ /(stacks|components)/ ]]; then
+		if [[ "${WORKSPACE_FOLDER}" =~ /stacks/ ]]; then
+			export ATMOS_BASE_PATH="${WORKSPACE_FOLDER%/stacks/*}"
 		else
-			export ATMOS_BASE_PATH="${GEODESIC_WORKDIR%/components/*}"
+			export ATMOS_BASE_PATH="${WORKSPACE_FOLDER%/components/*}"
 		fi
 		green "# Setting ATMOS_BASE_PATH to \"$ATMOS_BASE_PATH\" based on parent of workdir"
 		return

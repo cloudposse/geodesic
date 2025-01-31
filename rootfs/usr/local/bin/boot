@@ -5,31 +5,41 @@
 if [[ $1 == "install" ]]; then
   function color() { echo "$(tput setaf 1)$*$(tput op)" >&2; }
   color "# EXIT THIS SHELL and on your host computer,"
-  color "# run the following to install the script that runs "
+  color "# run the following to install the script that runs ${APP_NAME:-$(basename ${DOCKER_IMAGE:-Geodesic})}:"
 elif [[ $1 = "wrapper" ]]; then
   function color() { echo "$*"; }
   color
   color "########################################################################################"
   color "# This is the end of the script that installs Geodesic. You should not be seeing this."
-  color "# This should have been piped into bash. Use the following to install the script that runs"
+  color "# This should have been piped into bash. Use the following to install the script that"
+  color "# runs Geodesic with all its features (the recommended way to use Geodesic):"
 elif [[ -n $DOCKER_IMAGE ]] && [[ -n $DOCKER_TAG ]]; then
   exec /usr/local/bin/init
 else
   function color() { echo "$*"  >&2; }
   color "########################################################################################"
   color "# Attach a terminal (docker run --rm --it ...) if you want to run a shell."
-  color "# Run the following to install the script that runs "
+  color "# Run the following to install the script that runs ${APP_NAME:-$(basename ${DOCKER_IMAGE:-Geodesic})} "
+  color "# with all its features (the recommended way to use Geodesic):"
 fi
 
 source /etc/os-release || true # ignore exit code
 
-color "# Geodesic with all its features (the recommended way to use Geodesic):"
+version="${DOCKER_TAG}"
+if [[ -z $version ]]; then
+  if [[ -n ${GEODESIC_VERSION% *} ]]; then
+    version="${GEODESIC_VERSION% *}${ID:+-$ID}"
+  else
+    version="dev${ID:+-$ID}"
+  fi
+fi
+
 color "#"
-color "#   docker run --rm ${DOCKER_IMAGE:-cloudposse/geodesic}:${DOCKER_TAG:-latest${ID:+-$ID}} init | bash"
+color "#   docker run --rm ${DOCKER_IMAGE:-cloudposse/geodesic}:${version} init | bash"
 color "#"
 color "# After that, you should be able to launch Geodesic just by typing"
 color "#"
-color "#   geodesic"
+color "#   $(basename ${DOCKER_IMAGE:-geodesic})"
 color "#"
 color "########################################################################################"
 echo

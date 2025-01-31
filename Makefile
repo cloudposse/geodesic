@@ -47,17 +47,22 @@ build: $(DOCKER_BASE_OS).build
 install: $(DOCKER_BASE_OS).install
 
 run:
-	@geodesic
+	@$(APP_NAME)
+
+run/solo:
+	@$(APP_NAME) --solo
 
 %.run: %.build %.install
-	@geodesic
+	@$(APP_NAME)
 
 run/check:
 	@if [[ -n "$$(docker ps --format '{{ .Names }}' --filter name="^/$(APP_NAME)\$$")" ]]; then \
 		printf "**************************************************************************\n" ; \
 		printf "Not launching new container because old container is still running.\n"; \
-		printf "Exit all running container shells gracefully or kill the container with\n\n"; \
-		printf "  docker kill %s\n\n" "$(APP_NAME)" ; \
+		printf "Exit all running container shells gracefully or quit the container with\n\n"; \
+		printf "  %s stop\n\n" "$(APP_NAME)" ; \
+		printf "Then, all new shells will be running in the same new container.\n\n" ; \
+		printf "Alternately, run \`make run/solo\` or \`$(APP_NAME) --solo\` to start a new container.\n" ; \
 		printf "**************************************************************************\n" ; \
 		exit 9 ; \
 	fi

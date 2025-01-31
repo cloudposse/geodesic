@@ -1,0 +1,24 @@
+{{/*
+   *  This is the templated part of the wrapper script.
+   *  It includes the entire header so that we only need 2 files, not 3.
+   *  The bulk of the wrapper script is in the `wrapper-body.sh` file.
+   */ -}}
+#!/usr/bin/env bash
+
+# Geodesic Wrapper Script
+# We keep this compatible with bash 3.2 because that is what macOS ships with.
+# Among other things, this means we cannot use [ -v var ] to check if a variable is set,
+# so we use [ -n "${var+x}" ] instead.
+
+set -o pipefail
+
+# Customized launch settings for this installation
+
+export DOCKER_IMAGE="{{ getenv "DOCKER_IMAGE" "cloudposse/geodesic" }}"
+export DOCKER_TAG="{{ getenv "DOCKER_TAG" "${DOCKER_TAG:-dev}" }}"
+export DOCKER_NAME="{{ getenv "APP_NAME" "${DOCKER_NAME:-$(basename $DOCKER_IMAGE)}" }}"
+
+# Per OS settings
+docker_install_prompt="{{ getenv "DOCKER_INSTALL_PROMPT" }}"
+
+## End of installation configuration

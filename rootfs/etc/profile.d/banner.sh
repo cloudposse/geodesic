@@ -1,10 +1,3 @@
-COLOR_RESET="[0m"
-BANNER_COMMAND="${BANNER_COMMAND:-figurine}"
-BANNER_COLOR="${BANNER_COLOR:-[36m}"
-BANNER_INDENT="${BANNER_INDENT:-    }"
-# See font examples at http://www.figlet.org/examples.html
-BANNER_FONT="${BANNER_FONT:-Nancyj.flf}" # " IDE parser fix
-
 if [ "${SHLVL}" == "1" ]; then
 	function _check_support() {
 		if grep -qsE 'GenuineIntel|AuthenticAMD' /proc/cpuinfo; then
@@ -28,6 +21,15 @@ if [ "${SHLVL}" == "1" ]; then
 	}
 
 	function _header() {
+		local ESC=$'\e'
+		local CYAN="${ESC}[36m"
+		local COLOR_RESET # Have to be careful because of dark mode
+		local BANNER_COMMAND="${BANNER_COMMAND:-figurine}"
+		local BANNER_COLOR="${BANNER_COLOR:-${CYAN}}"
+		local BANNER_INDENT="${BANNER_INDENT:-    }"
+		# See font examples at http://www.figlet.org/examples.html
+		local BANNER_FONT="${BANNER_FONT:-Nancyj.flf}"
+
 		local vstring
 		local debian_version="/etc/debian_version"
 
@@ -43,6 +45,8 @@ if [ "${SHLVL}" == "1" ]; then
 		fi
 		if [ -n "${BANNER}" ]; then
 			if [ "$BANNER_COMMAND" == "figlet" ]; then
+				COLOR_RESET="$(tput op 2>/dev/null)" # reset foreground and background colors to defaults
+				tty -s && [[ -n "${COLOR_RESET}" ]] || BANNER_COLOR=""
 				echo "${BANNER_COLOR}"
 				${BANNER_COMMAND} -w 200 "${BANNER}" | sed "s/^/${BANNER_INDENT}/"
 				echo "${COLOR_RESET}"
@@ -51,6 +55,7 @@ if [ "${SHLVL}" == "1" ]; then
 			else
 				${BANNER_COMMAND}
 			fi
+			printf "\n\n"
 		fi
 	}
 	_check_support

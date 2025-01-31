@@ -111,7 +111,7 @@ As before, the host user's home directory path is available in the container as
 `$LOCAL_HOME`, and mounted files and directories are available at the same paths
 in the container as on the host.
 
-### Breaking Changes
+## Breaking Changes
 
 - Previously, `$HOME` was set to `/conf` in the container. This is no longer the case.
   `$HOME` is now set to the shell user's home directory. By default, this is `/root`.
@@ -121,7 +121,7 @@ in the container as on the host.
   configuration directories into the container user's home directory, allowing
   bidirectional updates.**
 
-> [!IMPORTANT]
+> [!WARNING]
 > It is important to be aware that any files from the host directory that are mounted into the container
 > will be modifiable by the container user, and those modifications will propagate to the host.
 > This includes any files that are implicitly modified by programs running in the container.
@@ -159,7 +159,7 @@ in the container as on the host.
   `/root/.kube/config`, but this is now expected to be hidden by mounting the
   host user's `$HOME/.kube` directory over `/root/.kube`.
 
-<details><summary>Special notes for Spacelift Users</summary>
+<details><summary>Special notes for Spacelift Users (click to reveal)</summary>
 
 If you are using Geodesic with Spacelift, you may need to make some changes to your Dockerfile.
 The `spacelift` user is required by Spacelift if you want to run this image as a Spacelift runner image.
@@ -251,9 +251,9 @@ or you can replace it with the following, which works with both Geodesic v3 and 
   See [Files Written to Mounted Host Home Directory Owned by Root User](https://github.com/cloudposse/geodesic/issues/594)
   for more details.
 
-#### Obsolete and Deprecated Features
+### Obsolete and Deprecated Features
 
-##### Custom SSH Support Removed
+#### Custom SSH Support Removed
 
 When Geodesic was first created, there was no way to share the SSH agent socket between the host and the container.
 As a result, Geodesic provided custom SSH support, launching an SSH agent and reading configuration and keys from the host.
@@ -266,7 +266,7 @@ and configuration, giving you a choice of how to manage your SSH keys.
 We recommend you use the host's security mechanisms to secure your SSH keys, and add them to the host's
 SSH agent to make them accessible to the container.
 
-##### Automatic MFA Support Removed
+#### Automatic MFA Support Removed
 
 The `mfa` command and `oathtool` were removed.  The `mfa` command was a wrapper around `oathtool`
 to generate TOTP codes. It was removed because:
@@ -280,7 +280,7 @@ to generate TOTP codes. It was removed because:
 - We believe there are better ways to manage MFA, such as 1Password.
 - If you still want to use `oathtool`, you can install it yourself. It is very easy to use.
 
-#### Internal changes less likely to affect users
+### Internal changes less likely to affect users
 
 - Previously, Geodesic attempted to duplicate host file paths inside the container
   using symbolic links. Now Geodesic uses bind mounts instead. This should not affect
@@ -288,12 +288,12 @@ to generate TOTP codes. It was removed because:
   Geodesic has always run with the `--privileged` flag, which includes `SYS_ADMIN`, so
   this only affects people who had removed the `--privileged` flag somehow.
 
-### New Container File System Layout
+## New Container File System Layout
 
 Geodesic v4.0.0 introduces a new file system layout for the Geodesic container,
 inspired by the [Dev Container](https://containers.dev/) standard.
 
-#### The Old Layout
+### The Old Layout
 
 Previously, the host user's entire home directory was mounted into the container
 under `/localhost`. This was done to allow the container to access the host user's
@@ -308,9 +308,9 @@ host mount, back when host mounts were expensive. This was also problematic, as 
 owned by `root`, and if you wanted to run the Geodesic image as a non-root user, you
 had to take extra steps to manage the permissions of `/conf` and its contents.
 
-#### The New Layout
+### The New Layout
 
-##### The Home Directory
+#### The Home Directory
 
 A set of directories are mounted from the user's home directory on the host to the container user's
 home directory. These are meant to be directories that contain configuration files that the container's
@@ -346,7 +346,7 @@ files should be placed in `$XDG_CONFIG_HOME` (defaults to `~/.config/`). This di
 - `~/.bashrc` can be moved to `~/.bashrc.d/` and sourced from there. The same caveats apply as for `~/.bash_profile`.
 - `~/.emacs` can be moved into its current preferred location, `~/.emacs.d/init.el`.
 
-##### The Host Mounts
+#### The Host Mounts
 
 You can mount any additional directories from the host to the container by setting the `HOST_MOUNTS` environment variable.
 This is a comma-separated list of directories to mount, in the format `absolute_host_path[:container_path]`. If the container path is not specified,
@@ -357,7 +357,7 @@ as described above.
 Unfortunately, since the colon (`:`) is meaningful to Docker, you cannot mount directories with colons in their names,
 and you cannot separate directories with colons. This list must be separated with commas.
 
-##### The Workspace
+#### The Workspace
 
 The workspace is where the code on the host lives, and is mounted into the container.
 This is controlled by several environment variables, all of which have defaults
@@ -395,7 +395,7 @@ The variables are set as follows:
 - A symbolic link will be created in the container, so that the host value of `WORKSPACE_FOLDER_HOST_DIR` will
   reference the `WORKSPACE_FOLDER`.
 
-#### Fixing File Ownership Issues
+### Fixing File Ownership Issues
 
 Depending on the way you installed Docker, you may have file ownership issues with the files created
 from within the container on the host. The default Geodesic user is `root` and if Docker is not translating
@@ -408,7 +408,9 @@ file ownership between the host and the container. Please note, however, that if
 file ownership, this setting will cause, rather than fix, file ownership problems, so only use it if needed.
 It is disabled by default, because current macOS and best practice Linux Docker installations do not need it.
 
-### Note About Command-Line Options
+## New Features
+
+### Command-Line Options
 
 Geodesic documentation has shown (and for the moment, continues to show)
 Geodesic options as settings of shell environment variables. This is because Geodesic
@@ -452,7 +454,7 @@ One consequence of this change is that if you detach from any shell, even the fi
 reattach to it. `docker attach` will connect you to the init process, not the shell. So we semi-disable detaching from
 the shell by setting an unusual string for the `detachKeys`.
 
-#### New Option for One Container Per Shell
+### New Option for One Container Per Shell
 
 An alternative to this new default behavior is to launch a new container each time you run Geodesic.
 This is done by setting the `ONE_SHELL` environment variable to "true" in your
@@ -464,7 +466,7 @@ The 2 main advantages of this are:
 1. You can run multiple versions of Geodesic at the same time. This is useful for testing new versions.
 2. You can detach from a shell and reattach to it later.
 
-#### New Options for Cleanup Scripts
+### New Options for Cleanup Scripts
 
 Previously, when the wrapper that launches Geodesic exited, it would run a cleanup script
 named `geodesic_on_exit` if it existed. This name was hard coded and not configurable.
@@ -495,14 +497,14 @@ Previously, environment variables inside the container could be set in the `~/.g
 which was passed to Docker via `--env-file`. This file is now ignored. Instead, you should
 set environment variables in the customization preferences and overrides.
 
-#### New Customization Options
+### New Customization Options
 
 As explained in the [Customizing Geodesic](/docs/customization.md) documentation,
 there are several ways to customize Geodesic. However, until now, most of these customizations
 only applied to customizing the shell inside the Geodesic container. Customizing the
 launch of the Geodesic container itself was more difficult.
 
-##### Launch Options Files
+#### Launch Options Files
 
 Geodesic now supports launch options files that customize the launch of the Geodesic container.
 Geodesic is launched by a `bash` script and can be customized by setting environment variables.
@@ -524,7 +526,7 @@ If the `$GEODESIC_CONFIG_HOME/launch-options.sh` file directly changes the `DOCK
 directories being searched in steps 2-4. Later changes, or setting `GEODESIC_IMAGE`, will not change
 the directories being searched.
 
-##### New Customization Command-Line Options
+#### New Customization Command-Line Options
 
 3 command line options regarding customization have been added:
 
@@ -537,14 +539,14 @@ the directories being searched.
    to light and dark mode support), and determining which Bash history file to use, respectively. You can use these options
    in any combination, for example, `--trace="hist"`.
 
-### Dark mode support
+## Dark mode support
 
 Geodesic's limited color handling had initially assumed terminals are in light mode.
 Support for terminals being in dark mode was introduced in Geodesic v2.10.0,
 but was not previously well documented. There have also been some enhancements
 since then. The following describes the state of support as of v4.0.0.
 
-#### Switching between light and dark mode
+### Switching between light and dark mode
 
 Geodesic provides basic support for terminal dark and light modes.
 Primarily, this is used to ensure Geodesic's colored output is readable in both modes,
@@ -584,7 +586,7 @@ You can query Geodesic for its cached color mode setting by running `get-termina
 Changing Geodesic's color mode does not change anything already on the screen. It only affects
 future output.
 
-##### Named text color helpers
+#### Named text color helpers
 
 To help you take advantage of the color mode, Geodesic provides a set of named text color helpers.
 They are defined as functions that output all their arguments in the named mode.
@@ -637,7 +639,7 @@ dark mode support.
   We therefore discourage using magenta as it will not be distinguished from yellow in light mode.
 - In dark mode, blue is problematic, so it is replaced with cyan. Also, white and black are swapped.
 
-### Updated Documentation
+## Updated Documentation
 
 The [customization](/docs/customization.md) documentation has been updated to reflect the new
 features and changes in Geodesic v4.0.0.

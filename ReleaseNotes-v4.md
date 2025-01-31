@@ -115,7 +115,7 @@ in the container as on the host.
 
 - Previously, `$HOME` was set to `/conf` in the container. This is no longer the case.
   `$HOME` is now set to the shell user's home directory. By default, this is `/root`.
-  If you launch Geodesic as a non-root user, `$HOME` will be set to that user's home directory,
+  If you launch a shell in Geodesic as a non-root user, `$HOME` will be set to that user's home directory,
   provided you have properly created the user with `adduser`. **By default, the
   container user will share configuration with the host user by mounting selected host user's
   configuration directories into the container user's home directory, allowing
@@ -158,6 +158,52 @@ in the container as on the host.
 - `/conf/.kube/config` has been moved to `/etc/kubeconfig`. It is installed as
   `/root/.kube/config`, but this is now expected to be hidden by mounting the
   host user's `$HOME/.kube` directory over `/root/.kube`.
+
+<details><summary>Special notes for Spacelift Users</summary>
+
+If you are using Geodesic with Spacelift, you may need to make some changes to your Dockerfile.
+The `spacelift` user is required by Spacelift if you want to run this image as a Spacelift runner image.
+If you previously were installing `/rootfs/conf/.kube/config` somewhere like `$HOME/.kube/`,
+you should now be installing `/rootfs/etc/kubeconfig` instead.
+
+```dockerfile
+# `spacelift` user with uid=1983 is required by Spacelift if we want to run this image as Spacelift runner image
+# https://docs.spacelift.io/concepts/worker-pools#custom-runner-images
+# https://docs.spacelift.io/integrations/docker#customizing-the-runner-image
+RUN adduser --disabled-password --home /home/spacelift --no-create-home --uid 1983 --gecos "" spacelift
+# Spacelift running under EKS needs to be able to dynamically update its AWS configuration.
+# This includes creating temp files under /etc/aws-config/ and modifying aws-config-spacelift.
+# We create /home/spacelift separately rather than via adduser to avoid getting default files like .bashrc installed.
+# NOTE: The following assumes that Spacelift is getting its AWS configuration from /etc/aws-config/aws-config-spacelift
+# which must exist or this line will fail. If you are storing its configuration elsewhere, you will need to adjust this line.
+RUN mkdir /home/spacelift && \
+    chown spacelift:spacelift /etc/aws-config/aws-config-spacelift /home/spacelift && \
+    chgrp spacelift /etc/aws-config/ && \
+    chmod 775 /etc/aws-config/
+
+ # Give Spacelift an empty KUBECONFIG file to suppress some errors and warnings
+ RUN if [ -d /conf/.kube ]; then cp -a /conf/.kube /home/spacelift/.kube; \
+    else mkdir -p /home/spacelift/.kube && cp /etc/kubeconfig /home/spacelift/.kube/config; fi && \
+    chown -R spacelift:spacelift /home/spacelift/.kube && \
+    chmod 700 /home/spacelift/.kube && \
+    chmod 600 /home/spacelift/.kube/config
+```
+
+You may also have had a script under `rootfs/etc/profile.d` that set up `$HOME` like this:
+
+```bash
+{ [[ -z $HOME ]] || [[ $HOME == "/root" ]]; } && (( $(id -u) == 0 )) && export HOME=/conf
+```
+
+You can delete that line, as `$HOME` is now set to the shell user's home directory by default,
+or you can replace it with the following, which works with both Geodesic v3 and v4:
+
+```bash
+[[ -z $HOME ]] && HOME="$(getent passwd $(id -un) | cut -d: -f6)"
+[[ $HOME == "/root" ]] && (( $(id -u) == 0 )) && [[ -d /conf ]] && export HOME=/conf
+```
+
+</details>
 
 - Previously, if you exited the shell that launched Geodesic, the container would exit,
   killing any other running shells. Now, the container will not exit until all shells have exited.
@@ -612,13 +658,15 @@ V4 changes:
 - `HOME` has changed from `/conf` to the container user's home directory as configured in `/etc/passwd`. For the
   default user of `root`, this is `/root`.
 - Variables that had defaults referencing `/localhost` now generally reference `$HOME` instead.
-- .
-- `HOMEDIR_MOUNTS` and `HOMEDIR_ADDITIONAL_MOUNTS` are lists of directories relative to the home directory on the host
-  to mount into the container under the container user's home directory.
+
+- `HOMEDIR_MOUNTS` and `HOMEDIR_ADDITIONAL_MOUNTS` are comma-separated lists of directories relative to the host user's home directory
+  to mount into the container under the container user's home directory. `HOMEDIR_MOUNTS` has a default list of
+  directories to mount. `HOMEDIR_ADDITIONAL_MOUNTS` is appended to the `HOMEDIR_MOUNTS` list so you can easily
+  add to the defaults without overriding them.
 - `HOST_MOUNTS` is a list of mounts from the host to the container. It has the format
   `host_path[:container_path]`. If the container_path is not specified, it is assumed to be the same as the host_path.
   This list excludes the home directory, which is handled separately.
--
+
 - `WORKSPACE_MOUNT_HOST_DIR` is the host directory where the project will be mounted. Analogous to the source of Dev Container's
   `workspaceMount`. Typically, this is a Git repository root.
 - `WORKSPACE_MOUNT` is the container path where `WORKSPACE_MOUNT_HOST_DIR` will be mounted. Analogous to the target of Dev Container's

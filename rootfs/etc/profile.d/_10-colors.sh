@@ -60,7 +60,10 @@ function get-terminal-color-mode() {
 }
 
 function _is_color_term() {
-	[[ -t 1 ]] && tty -s && [[ -n "$(tput op 2 2>/dev/null)" ]]
+	local colors
+	colors=$(tput colors 2>/dev/null) || colors=0
+
+	[[ -t 0 ]] && [[ "$colors" -ge 8 ]]
 }
 
 # We call `tput` several times for every prompt, and it can add up, so we cache the results.
@@ -70,18 +73,9 @@ function _geodesic_tput_cache_init() {
 	# Save the terminal type so we can invalidate the cache if it changes
 	_geodesic_tput_cache[TERM]="$TERM"
 
-	local color_off=$(tput op 2>/dev/null) # reset foreground and background colors to defaults
+	local color_off # reset foreground and background colors to defaults
 
-	if ! tty -s || [[ -z $color_off ]]; then
-		if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
-			if ! tty -s; then
-				echo '* TERMINAL TRACE: Not running in a terminal, not attempting to colorize output' >&2
-			elif [[ -z $color_off ]]; then
-				echo '* TERMINAL TRACE: `tput` did not output anything for "op", not attempting to colorize output' >&2
-			else
-				echo '* TERMINAL TRACE: Unknown error (script bug), not attempting to colorize output' >&2
-			fi
-		fi
+	if ! { color_off=$(tput op 2>/dev/null) && _verify_terminal_queries_are_supported; }; then
 		if [[ $old_term != ${_geodesic_tput_cache[TERM]} ]]; then
 			_geodesic_generate_color_functions dummy
 			command -V geodesic_prompt_style &>/dev/null && geodesic_prompt_style

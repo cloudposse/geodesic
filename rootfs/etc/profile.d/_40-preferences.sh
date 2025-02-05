@@ -37,10 +37,10 @@ elif [[ ! -d $GEODESIC_CONFIG_HOME ]]; then
 fi
 
 function _term_fold() {
-    	local cols
-    	cols=$(tput cols 2>/dev/null || echo "80")
-    	[ -z "$cols" ] || [ "$cols" = "0" ] && cols=80
-    	fold -w "$cols" -s
+	local cols
+	cols=$(tput cols 2>/dev/null || echo "80")
+	[ -z "$cols" ] || [ "$cols" = "0" ] && cols=80
+	fold -w "$cols" -s
 }
 
 [[ -n ${WORKSPACE_MOUNT} ]] || export WORKSPACE_MOUNT=/workspace

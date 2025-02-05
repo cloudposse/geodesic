@@ -17,29 +17,33 @@
 # First, at startup, let's try an OSC query. If we get no response, we will assume light mode
 # and disable further queries.
 
-function _verify_terminal_queries_are_supported() {
-	if tty -s && [[ -n "$(tput setaf 1 2>/dev/null)" ]]; then
-		local saved_state x fg_rgb bg_rgb exit_code
-		saved_state=$(stty -g)
-		trap 'stty "$saved_state"' EXIT
-		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking if terminal responds to color queries...$(tput sgr0)" >&2
-		stty -echo
-		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
-		# If 2 seconds is not enough at startup, then the terminal is either non-responsive or too slow.
-		IFS=: read -rs -t 2 -d $'\a' x fg_rgb
-		exit_code=$?
-		[[ $exit_code -gt 128 ]] || exit_code=0
-		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
-		((exit_code += $?))
-		stty "$saved_state"
-		trap - EXIT
-		if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
-			if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
-				echo "$(tput setaf 1)* TERMINAL TRACE: Terminal did not respond to OSC 10 and 11 queries. Disabling color mode detection.$(tput sgr0)" >&2
-			fi
-			export GEODESIC_TERM_COLOR_AUTO=unsupported
-		fi
+function _terminal_trace() {
+	if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
+		# Use tput and sgr0 here because this may be early in the startup sequence and trace logging when color functions are not yet available.
+		echo "$(tput setaf 1)* TERMINAL TRACE: $*$(tput sgr0)" >&2
 	fi
+}
+
+function _verify_terminal_queries_are_supported() {
+	local colors
+	colors=$(tput colors 2>/dev/null) || colors=0
+
+	if ! { [[ -t 0 ]] && [[ "$colors" -ge 8 ]]; }; then
+		# Do not use _terminal_trace here, because it uses color codes on terminals and we have just verified that is not supported here.
+		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "* TERMINAL TRACE: Not a (color) terminal. Disabling color detection." >&2
+		export GEODESIC_TERM_COLOR_AUTO=unsupported
+		return 1
+	fi
+
+	if ! { [[ -w /dev/tty ]] && [[ -r /dev/tty ]]; }; then
+		_terminal_trace "Terminal is not writable or readable. Skipping color detection."
+		_terminal_trace "You may need to run 'chmod o+rw /dev/tty' to enable color detection."
+		_terminal_trace "You can disable color detection with 'export GEODESIC_TERM_COLOR_AUTO=disabled'."
+		return 1
+	fi
+
+	[[ "${GEODESIC_TERM_COLOR_AUTO}" == "disabled" ]] || unset GEODESIC_TERM_COLOR_AUTO
+	return 0
 }
 
 _verify_terminal_queries_are_supported
@@ -50,7 +54,7 @@ _verify_terminal_queries_are_supported
 # and always returns true. With -l it outputs integer luminance values for foreground
 # and background colors. With -ll it outputs labels on the luminance values as well.
 function _is_term_dark_mode() {
-	[[ ${GEODESIC_TERM_COLOR_AUTO} == "unsupported" ]] && case "$1" in
+	[[ ${GEODESIC_TERM_COLOR_AUTO} == "unsupported" ]] || [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]] && case "$1" in
 	-b) echo "false" ;;
 	-bb) echo "unknown" ;;
 	-m) echo "light" ;;
@@ -64,31 +68,29 @@ function _is_term_dark_mode() {
 
 	# Do not try to auto-detect if we are not in a terminal
 	# or if termcap does not think we are in a color terminal
-	if tty -s && [[ -n "$(tput setaf 1 2>/dev/null)" ]]; then
+	if _verify_terminal_queries_are_supported; then
 		# Extract the RGB values of the foreground and background colors via OSC 10 and 11.
 		# Redirect output to `/dev/tty` in case we are in a subshell where output is a pipe,
 		# because this output has to go directly to the terminal.
 		saved_state=$(stty -g)
 		trap 'stty "$saved_state"' EXIT
-		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "$(tput setaf 1)* TERMINAL TRACE: Checking terminal color scheme...$(tput sgr0)" >&2
+		_terminal_trace 'Checking terminal color scheme...'
 		stty -echo
 		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
 		# Timeout of 2 was not enough when waking for sleep.
 		# The second read should be part of the first response, should not need much time at all regardless.
 		# When in a signal handler, we might be waking from sleep or hibernation, so we give it a lot more time.
 		timeout_duration=$([[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && echo 30 || echo 1)
-		IFS=: read -rs -t "$timeout_duration" -d $'\a' x fg_rgb
+		IFS=: read -rs -t "$timeout_duration" -d $'\a' x fg_rgb </dev/tty
 		exit_code=$?
 		[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
 		[[ $exit_code -gt 128 ]] || exit_code=0
-		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb
+		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb </dev/tty
 		((exit_code += $?))
 		stty "$saved_state"
 		trap - EXIT
 	else
-		if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
-			echo "* TERMINAL TRACE: ${FUNCNAME[0]} called, but not running in a color terminal." >&2
-		fi
+		_terminal_trace "${FUNCNAME[0]} called, but not running in a color terminal."
 	fi
 
 	if [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]]; then
@@ -98,9 +100,7 @@ function _is_term_dark_mode() {
 	fi
 
 	if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
-		if [[ $GEODESIC_TRACE =~ "terminal" ]] && tty -s; then
-			echo "$(tput setaf 1)* TERMINAL TRACE: Terminal did not respond to OSC 10 and 11 queries.$(tput sgr0)" >&2
-		fi
+		_terminal_trace "Terminal did not respond to OSC 10 and 11 queries."
 		# If we cannot determine the color scheme, we assume light mode for historical reasons.
 		if [[ "$*" =~ -b ]] || [[ "$*" =~ -m ]]; then
 			if [[ "$*" =~ -bb ]] || [[ "$*" =~ -mm ]]; then
@@ -180,10 +180,7 @@ function _srgb_to_luminance() {
 	local red green blue
 
 	if [[ -z $color ]]; then
-		if [[ $GEODESIC_TRACE =~ "terminal" ]]; then
-			# Use tput and sgr0 here because this is early in the startup sequence and trace logging
-			echo "$(tput setaf 1)* TERMINAL TRACE: ${FUNCNAME[0]} called with empty or no argument.$(tput sgr0)" >&2
-		fi
+		_terminal_trace "${FUNCNAME[0]} called with empty or no argument."
 		echo "0"
 		return
 	fi

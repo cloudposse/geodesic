@@ -118,7 +118,7 @@ function _is_term_dark_mode() {
 	if [[ "${x#*;}" != "rgb" ]]; then
 		# Always output this error, because we want to hear about
 		# other color formats users want us to support.
-		echo "$(tput set bold)($tput setaf 1)Terminal reported unknown color format: ${x#*;}$(tput sgr0)" >&2
+		echo "$(tput set bold)$(tput setaf 1)Terminal reported unknown color format: ${x#*;}$(tput sgr0)" >&2
 		return 1
 	fi
 

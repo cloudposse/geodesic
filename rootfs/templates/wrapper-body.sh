@@ -120,7 +120,7 @@ function parse_args() {
 		--solo)
 			export ONE_SHELL=true
 			;;
-		--no-solo|--no-one-shell)
+		--no-solo | --no-one-shell)
 			export ONE_SHELL=false
 			;;
 		--trace)
@@ -137,7 +137,9 @@ function parse_args() {
 			;;
 		--workspace=*)
 			unset WORKSPACE_FOLDER_HOST_DIR
-			;& # fall through
+			# ;& # fall through only introduced in bash 4.0, we want to remain 3.2 compatible
+			options+=("${arg}")
+			;;
 		--*)
 			options+=("${arg}")
 			;;

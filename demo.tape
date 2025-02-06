@@ -30,12 +30,13 @@ Set PlaybackSpeed 1
 
 Set Shell bash
 
-Type "# After having run `make all`, simply run `make run` (or `geodesic`) to enter the interactive shell" Enter
+Type "# After having run `DOCKER_BASE_TAG=latest make install`," Enter
+Type "# simply run `make run` (or `geodesic`) to enter the interactive shell" Enter
 Sleep 500ms
 
 Type "geodesic" Enter
 
-Sleep 4s
+Sleep 7s
 
 Type "#  Open Tofu is pre-installed:" Enter
 Type "demo-tofu-version" Enter

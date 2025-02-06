@@ -120,7 +120,7 @@ function parse_args() {
 		--solo)
 			export ONE_SHELL=true
 			;;
-		--no-solo|--no-one-shell)
+		--no-solo | --no-one-shell)
 			export ONE_SHELL=false
 			;;
 		--trace)

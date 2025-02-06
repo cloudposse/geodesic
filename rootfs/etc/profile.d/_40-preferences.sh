@@ -56,7 +56,7 @@ elif [[ -z $(find "${WORKSPACE_MOUNT}" -mindepth 1 -maxdepth 1) ]]; then
 	red "# No files found under $(bold "${WORKSPACE_MOUNT}")." | _term_fold >&2
 	red "# Run Geodesic from your source directory." | _term_fold >&2
 	red "# Change (\`cd\`) to your source directory (in your git repo)" | _term_fold >&2
-	red "# and run ${APP_NAME:-Geodesic} from there." | _term_fold >&2
+	red "# and run ${APP_NAME:-${NAMESPACE:-$(basename ${DOCKER_IMAGE:-geodesic})}} from there." | _term_fold >&2
 	red "################################################################" >&2
 	echo
 fi

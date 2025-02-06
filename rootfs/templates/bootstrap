@@ -1,7 +1,7 @@
 #!/bin/bash
 export DOCKER_IMAGE="{{getenv "DOCKER_IMAGE" "cloudposse/geodesic"}}"
 export DOCKER_TAG="{{- getenv "DOCKER_TAG" (printf "${1:-%s-%s}" ((index (getenv "GEODESIC_VERSION" | strings.Split " ") 0) | default "dev") (getenv "GEODESIC_OS" "debian")) -}}"
-export APP_NAME=${APP_NAME:-$(basename $DOCKER_IMAGE)}
+export APP_NAME=${APP_NAME:-${NAMESPACE:-$(basename ${DOCKER_IMAGE:-geodesic})}}
 export INSTALL_PATH=${INSTALL_PATH:-/usr/local/bin}
 export SAFE_INSTALL_PATH="$HOME/.local/bin" # per XDG recommendations
 export INSTALLER_NAME="${APP_NAME}-installer"
@@ -90,7 +90,7 @@ else
 	exit 1
 fi
 
-command -v hash 2>/dev/null && hash -r  # forget hashed location of $APP_NAME
+command -v hash 2>/dev/null && hash -r # forget hashed location of $APP_NAME
 if [ ! "${INSTALL_PATH}/${APP_NAME}" -ef "$(command -v "${APP_NAME}" 2>/dev/null)" ]; then
 	if [ -x "${INSTALL_PATH}/${APP_NAME}" ]; then
 		if [ -n "$(command -v "${APP_NAME}" 2>/dev/null)" ]; then

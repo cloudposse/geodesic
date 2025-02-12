@@ -50,8 +50,13 @@ function reload() {
 	if [ "${current_screen_size}" != "${SCREEN_SIZE}" ]; then
 		echo "* Screen resized to ${current_screen_size}"
 		export SCREEN_SIZE=${current_screen_size}
+		# Use this opportunity to see if the terminal color mode has changed
+		export GEODESIC_TERM_COLOR_UPDATING="needed"
 		# Instruct shell that window size has changed to ensure lines wrap correctly
 		kill -WINCH $$
+	fi
+	if [[ $GEODESIC_TERM_COLOR_UPDATING == "needed" ]]; then
+		auto-update-terminal-color-mode
 	fi
 }
 

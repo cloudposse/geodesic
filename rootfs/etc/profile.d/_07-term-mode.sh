@@ -75,28 +75,38 @@ function _is_term_dark_mode() {
 		saved_state=$(stty -g)
 		trap 'stty "$saved_state"' EXIT
 		_terminal_trace 'Checking terminal color scheme...'
-		stty -echo
-		echo -ne '\e]10;?\a\e]11;?\a' >/dev/tty
 		# Timeout of 2 was not enough when waking for sleep.
-		# The second read should be part of the first response, should not need much time at all regardless.
 		# When in a signal handler, we might be waking from sleep or hibernation, so we give it a lot more time.
-		timeout_duration=$([[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && echo 30 || echo 1)
+		timeout_duration="0.6"
+		stty -echo
+		# Query the terminal for the foreground color. Use printf to ensure the string is output as a single block,
+		# without interference from other processes writing to the terminal.
+		printf '\e]10;?\a' >/dev/tty
 		IFS=: read -rs -t "$timeout_duration" -d $'\a' x fg_rgb </dev/tty
 		exit_code=$?
-		[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
+		[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
 		[[ $exit_code -gt 128 ]] || exit_code=0
-		IFS=: read -rs -t 0.5 -d $'\a' x bg_rgb </dev/tty
-		((exit_code += $?))
+		if [[ $exit_code -eq 0 ]] && [[ -n $fg_rgb ]]; then
+			# Query the terminal for the background color
+			printf '\e]11;?\a' >/dev/tty
+			IFS=: read -rs -t "$timeout_duration" -d $'\a' x bg_rgb </dev/tty
+			exit_code=$?
+			[[ $exit_code -gt 128 ]] || [[ -z $bg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
+		fi
 		stty "$saved_state"
 		trap - EXIT
 	else
 		_terminal_trace "${FUNCNAME[0]} called, but not running in a color terminal."
 	fi
 
-	if [[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] && [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]]; then
-		printf "\n\n\tTerminal light/dark mode detection failed from signal handler. Disabling automatic detection.\n" >&2
+	if [[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] && [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]]; then
+		printf "\n\n################# Begin Message from Geodesic ################\n\n" >&2
+		printf "\tTerminal automatic light/dark mode detection failed from shell prompt hook. Disabling automatic detection.\n" >&2
 		printf "\tYou can manually change modes with\n\n\tupdate-terminal-color-mode [dark|light]\n\n" >&2
 		printf "\tYou can re-enable automatic detection with\n\n\tunset GEODESIC_TERM_COLOR_AUTO\n\n" >&2
+		printf "################# End Message from Geodesic ##################\n\n" >&2
+		echo "auto-detect-failed"
+		return 9
 	fi
 
 	if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then

@@ -31,7 +31,15 @@ function update-terminal-color-mode() {
 		;;
 	esac
 
-	if [[ $new_mode == "unknown" ]]; then
+	if [[ "$new_mode" == "auto-detect-failed" ]]; then
+		if [[ "$quiet" == "true" ]]; then
+			return 9
+		else
+			new_mode="unknown"
+		fi
+	fi
+
+	if [[ "$new_mode" == "unknown" ]]; then
 		if ! tty -s; then
 			[[ "$quiet" == "true" ]] || echo "No terminal detected." >&2
 		elif [[ -z "$(tput op 2>/dev/null)" ]]; then
@@ -138,11 +146,13 @@ function _geodesic_tput_cache_init() {
 		;;
 	esac
 
+	# Treat any failure of color detection as historical default "light" mode
 	if [[ $new_mode == "dark" ]]; then
 		_geodesic_tput_cache[black]=$(tput setaf 7)              # swap black and white
 		_geodesic_tput_cache[white]=$(tput setaf 0)              # 0 is ANSI black, 7 is ANSI white
 		_geodesic_tput_cache[blue]=${_geodesic_tput_cache[cyan]} # blue is too dark, use cyan instead
 	else
+		new_mode="light"
 		_geodesic_tput_cache[yellow]=${_geodesic_tput_cache[magenta]} # yellow is too light, use magenta instead
 	fi
 
@@ -297,18 +307,29 @@ function reset_terminal_colors() {
 
 _geodesic_tput_cache_init
 
+function auto-update-terminal-color-mode() {
+	[[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] || [[ ${GEODESIC_TERM_COLOR_AUTO:-true} != "true" ]] && return 0
+
+	# Ignore repeated signals while a signal is being processed
+	export GEODESIC_TERM_COLOR_UPDATING=true
+	update-terminal-color-mode quiet
+	if [[ $? -eq 9 ]]; then
+		# If the color detection failed, we disable automatic detection.
+		export GEODESIC_TERM_COLOR_AUTO=disabled
+	fi
+	unset GEODESIC_TERM_COLOR_UPDATING
+}
+
 # Although SIGWINCH is a standard signal to indicate the window *size* has changed,
 # some terminals (not sure which ones) also send a SIGWINCH signal when the window colors change.
 # For the other terminals, catching SIGWINCH gives users an easy way of triggering a color update: resize the window.
 # So we catch the signal to update the terminal colors, preserving any existing signal handlers.
-
+# However, we do the actual color update in a separate function called from the shell prompt command,
+# to avoid issues with async access to the TTY and other issues with running inside a signal handler.
 function _update-terminal-color-mode-sigwinch() {
-	[[ ${GEODESIC_TERM_COLOR_SIGNAL} == "true" ]] || [[ ${GEODESIC_TERM_COLOR_AUTO:-true} != "true" ]] && return 0
-
 	# Ignore repeated signals while a signal is being processed
-	export GEODESIC_TERM_COLOR_SIGNAL=true
-	update-terminal-color-mode quiet
-	unset GEODESIC_TERM_COLOR_SIGNAL
+	[[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] || [[ ${GEODESIC_TERM_COLOR_AUTO:-true} != "true" ]] && return 0
+	export GEODESIC_TERM_COLOR_UPDATING="needed"
 }
 
 if [[ ${GEODESIC_TERM_COLOR_AUTO} != "unsupported" ]] && _is_color_term; then

@@ -235,10 +235,9 @@ Those package repositories are pre-installed in Geodesic, so
 all you need to do is add the packages you want via
 
 ```Dockerfile
-RUN apt-get update && apt-get install -y` commands in your Dockerfile.
+RUN apt-get update && apt-get install -y <package-name>...
 ```
-
-The package manager will automatically select the correct architecture for the package.
+commands in your Dockerfile. The package manager will automatically select the correct architecture for the package.
 
 #### Pinning package versions in Debian
 

@@ -95,7 +95,7 @@ ENV XDG_CACHE_HOME=/var/cache/xdg_cache_home
 RUN for dir in $XDG_DATA_HOME $XDG_CONFIG_HOME $XDG_CACHE_HOME; do \
 	mkdir -p $dir; chmod 777 $dir; done
 
-ENV BANNER "geodesic"
+ENV BANNER="geodesic"
 
 # Install all packages as root
 USER root

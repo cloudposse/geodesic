@@ -135,7 +135,19 @@ function parse_args() {
 		--no-motd*)
 			export GEODESIC_MOTD_ENABLED=false
 			;;
+		--workspace)
+			# WORKSPACE_FOLDER_HOST_DIR takes precedence over WORKSPACE, but we allow the command line option to override both
+			# So even thought the option is --workspace, we still set WORKSPACE_FOLDER_HOST_DIR
+			# We unset WORKSPACE to avoid a warning later when they are both set to different values
+			unset WORKSPACE
+			[ -n "$WORKSPACE_FOLDER_HOST_DIR" ] && echo "# Ignoring WORKSPACE_FOLDER_HOST_DIR=$WORKSPACE_FOLDER_HOST_DIR because --workspace is set" >&2
+			WORKSPACE_FOLDER_HOST_DIR="${1}"
+			shift
+			;;
 		--workspace=*)
+			# WORKSPACE_FOLDER_HOST_DIR takes precedence over WORKSPACE, but to save ourselves hassle over parsing the option,
+			# we just unset WORKSPACE_FOLDER_HOST_DIR and let normal option processing set WORKSPACE
+			[ -n "$WORKSPACE_FOLDER_HOST_DIR" ] && echo "# Ignoring WORKSPACE_FOLDER_HOST_DIR=$WORKSPACE_FOLDER_HOST_DIR because --workspace is set" >&2
 			unset WORKSPACE_FOLDER_HOST_DIR
 			# ;& # fall through only introduced in bash 4.0, we want to remain 3.2 compatible
 			options+=("${arg}")

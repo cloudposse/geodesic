@@ -34,14 +34,15 @@ Geodesic version 4 additions and changes:
 - `WORKSPACE_MOUNT` is the container path where `WORKSPACE_MOUNT_HOST_DIR` will be mounted. Analogous to the target of Dev Container's
   `workspaceMount`. Defaults to `/workspace`, which is the default for a Dev Container, but you may want to set it to
   something like your project name or git repository name for visibility in the container.
-- `GEODESIC_TERM_COLOR_AUTO` is normally unset. Set it to "false" to disable attempts at automatic terminal light/dark mode detection.
+- `GEODESIC_TERM_THEME` is normally unset. Geodesic will attempt to detect the terminal light/dark mode and default to light. Set this to "light" or "dark" to disable the automatic detection at startup and force the theme.
+- `GEODESIC_TERM_THEME_AUTO` is normally unset. Set it to "true" to enable attempts to automatically detect _changes_ in terminal light/dark theme. Use `set-terminal-theme` to manually switch between light and dark themes.
 - `GEODESIC_MOTD_ENABLED` can be set to "false" to disable printing the message of the day at shell startup.
 - `MAP_FILE_OWNERSHIP` replaces `GEODESIC_HOST_BINDFS_ENABLED`. If set to true, Geodesic will use `bindfs` to map file ownership
   between the host and container. This not normally needed, as it should be handled automatically by Docker.
 
 ### Geodesic Version 3 Environment Variables
 
-Below is a list of environment variable that may be visible in the shell and were present in Geodesic v3.
+Below is a list of environment variables that may be visible in the shell and were present in Geodesic v3.
 Many of these variables are only recognized if you explicitly set or export them prior to running the script.
 Others are set and read internally to control optional behaviors.
 
@@ -107,7 +108,7 @@ and not Geodesic itself.
 | `PROMPT_STYLE`                      | Style of the prompt: plain, fancy, or unicode.                                         |
 | `PS1`                               | `bash`: Primary prompt string (the final assembled Bash prompt).                       |
 | `SCREEN_SIZE`                       | Internal: Tracks the current terminal screen size as LINES x COLUMNS.                  |
-| `SHLVL`                             | `bash`1: Shell nesting level (1 for the main shell, higher for subshells).             |
+| `SHLVL`                             | `bash`: Shell nesting level (1 for the main shell, higher for subshells).              |
 | `SSH_AGENT_CONFIG`*                 | Obsolete: Path to the file storing SSH agent environment variables.                    |
 | `SSH_AUTH_SOCK`                     | `ssh`: Socket path for the running SSH agent.                                          |
 | `SSH_KEY`*                          | Path to private SSH key file to automatically add to the SSH agent.                    |
@@ -115,5 +116,6 @@ and not Geodesic itself.
 | `TELEPORT_LOGIN`                    | `teleport`: Username for Teleport-based SSH sessions.                                  |
 | `TELEPORT_LOGIN_BIND_ADDR`          | `teleport`: Local bind address for Teleport SAML-based login callbacks.                |
 | `TELEPORT_PROXY`                    | `teleport`: Teleport proxy host (defaults to tele.<docker-image-subdomain>).           |
+| `TF_PLUGIN_CACHE_DIR`               | `terraform`: Location for the [Terraform Provider Plugin Cache][1].                    |
 
-
+[1]: https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache

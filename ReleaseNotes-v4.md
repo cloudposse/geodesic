@@ -244,6 +244,16 @@ or you can replace it with the following, which works with both Geodesic v3 and 
   either `$HOME`, `$WORKSPACE_MOUNT`, or `$WORKSPACE_FOLDER` as appropriate. As a temporary workaround,
   you can run `ln -s "$LOCAL_HOME" /localhost` in your customizations.
 
+- By default, Geodesic automatically sets `TF_PLUGIN_CACHE_DIR` to `"${HOME}/.terraform.d/plugin-cache"`
+  to provide a location for the [Terraform Provider Plugin Cache](https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache).
+  This is a location on the host filesystem, allowing the cache to be shared between the host and the container,
+  and to persist between container runs. This is valuable saver of time and bandwidth, and we highly recommend
+  using the plugin cache, which is why we have been setting it for years.
+  However, the way this was implemented, it was difficult for users to opt-out of the plugin cache altogether.
+  To accommodate those users while maintaining backward compatibility,
+  Geodesic now checks, and if `TF_PLUGIN_CACHE_DIR` is set empty, or to "false" or "disabled",
+  Geodesic unsets the variable, allowing users to avoid having a cache directory.
+
 - Previously, you could have Geodesic perform file ownership mapping between host and container
   by setting `GEODESIC_HOST_BINDFS_ENABLED=true`; this variable is now deprecated.
   Use `MAP_FILE_OWNERSHIP=true` instead. This feature is disabled by default and can
@@ -528,7 +538,7 @@ the directories being searched.
 
 #### New Customization Command-Line Options
 
-3 command line options regarding customization have been added:
+Some line options regarding customization have been added:
 
 1. `--no-custom` (or `--no-customization`, or `--geodesic-customization-disabled`) will disable all user-specific
    customizations. This is equivalent to setting `GEODESIC_CUSTOMIZATION_DISABLED=true`. This is useful for
@@ -538,6 +548,8 @@ the directories being searched.
 3. `--trace="custom terminal hist` will enable tracing of the customizations, terminal configuration (mainly with respect
    to light and dark mode support), and determining which Bash history file to use, respectively. You can use these options
    in any combination, for example, `--trace="hist"`.
+4. `--dark` and `--light` will set the terminal theme to dark or light, respectively, disabling attempts to automatically detect it.
+   This is mainly useful if the automatic detection is not working.
 
 ## Dark mode support
 
@@ -546,49 +558,69 @@ Support for terminals being in dark mode was introduced in Geodesic v2.10.0,
 but was not previously well documented. There have also been some enhancements
 since then. The following describes the state of support as of v4.0.0.
 
-### Switching between light and dark mode
+### Switching between light and dark themes
 
-Geodesic provides basic support for terminal dark and light modes.
+Geodesic provides basic support for terminal dark and light themes.
 Primarily, this is used to ensure Geodesic's colored output is readable in both modes,
 for example, black in light mode and white in dark mode.
 
-There is no standard way to be notified of a terminal's color mode change. Geodesic
-listens for SIGWINCH and updates the color mode when receiving it. Some terminals
-send this when the color mode changes, but not all do. (For example, macOS Terminal does not.)
+While there are standard ways to detect the terminal color settings, they are not
+universally supported, and various terminals have their quirks. As a result, color
+detection is not always reliable, and you may see errors or 'garbage' output
+during startup, especially if you are not using a widely popular terminal.
 
-There can be issues with the signal handler. For example, if your computer is
-waking from sleep, the signal handler may be called multiple times, but
-the terminal may take several seconds to respond to the query about its color mode.
-This can result in long delays while Geodesic waits for the terminal to respond,
-and if it times out, the response may eventually be written to the terminal
-command line, looking something like `10;rgb:0000/0000/000011;rgb:ffff/ffff/ffff`.
-This area of Geodesic is still new and under development, so there are likely to be subtle bugs.
-If you want to disable this feature, you can set `GEODESIC_TERM_COLOR_AUTO=false`.
-If Geodesic detects a problem with the terminal color mode, it will disable this feature
-by setting `GEODESIC_TERM_COLOR_AUTO=disabled`.
+#### Initial theme detection
 
-You can report issues with this, or any Geodesic feature, via the `#geodesic`
-channel in the [Cloud Posse Slack workspace](https://cpco.io/slack?utm_source=github&utm_medium=release_notes&utm_campaign=cloudposse/geodesic&utm_content=slack).
+It is critical to detect the terminal theme when Geodesic starts. This is done
+by default, and can only be disabled by specifying the desired theme,
+"light" or "dark", via `--light` or `--dark` command line options,
+or by setting the GEODESIC_TERM_THEME environment variable to "light" or "dark". This
+must be set in the environment before Geodesic starts, e.g. in the `launch-options.sh` file.
 
-Geodesic provides a shell function called `update-terminal-color-mode` that can be used to manually
-update the terminal mode. This function is called automatically when Geodesic starts, but
-if you change the terminal color mode while Geodesic is running, you can call this function
-to update the color mode. If your terminal supports calling a function when the color mode changes,
-you can call this function from there. Alternately, you can trigger the function call
-by resizing the terminal window, which triggers the SIGWINCH signal handler.
+#### Detecting changes in theme while running (experimental)
 
-The `update-terminal-color-mode` function takes one argument, which is the terminal color mode,
-either `light` or `dark`. If you do not provide an argument, it will attempt to determine
-the terminal color mode itself.
+You may have your terminal set to automatically switch between light and dark themes
+according to the time of day, or you may manually switch between themes. Unfortunately,
+there is no standard way to be notified of a terminal's theme change. Furthermore,
+because of the general issues around detecting the terminal theme, automatic
+detection of changes in the terminal theme has too often injected disruption
+into the user's workflow. As a result, Geodesic by default does not attempt to detect changes
+in the terminal theme while running.
 
-You can query Geodesic for its cached color mode setting by running `get-terminal-color-mode`.
+If you want to manually notify Geodesic of the change, you can call
 
-Changing Geodesic's color mode does not change anything already on the screen. It only affects
+```bash
+set-terminal-theme [light|dark]
+```
+
+If you provide an argument, it will set the terminal theme to that argument. If you do not provide an argument,
+it will attempt to determine the terminal theme itself.
+
+You can query Geodesic for its cached theme setting by running
+
+```bash
+get-terminal-theme
+```
+
+Some terminals notify the shell of color changes by sending a `SIGWINCH` signal.
+Geodesic also sends this signal to its shell when it detects change in the size of the window.
+You can set the environment variable `GEODESIC_TERM_THEME_AUTO=enabled` to enable
+Geodesic to listen for this signal and update the theme when it is received.
+Beware that while updates are called from the prompt command hook, we have seen many
+instances where the terminal does not respond to the query about its color settings
+promptly, resulting in failed detection, and the response being written to the
+terminal command line. It might look something like `^[]11;rgb:fdfd/f6f5/e3e3^G`.
+
+Be aware that this is not an area where good solutions exist, which is why
+this feature is disabled by default. Unlike with the initial theme detection,
+this is not an area where we are investing effort to improve.
+
+Changing Geodesic's theme does not change anything already on the screen. It only affects
 future output.
 
 #### Named text color helpers
 
-To help you take advantage of the color mode, Geodesic provides a set of named text color helpers.
+To help you take advantage of the terminal color theme support, Geodesic provides a set of named text color helpers.
 They are defined as functions that output all their arguments in the named mode.
 The named colors are
 
@@ -600,6 +632,12 @@ The named colors are
 Note: yellow is problematic. To begin with, "yellow" is not necessarily yellow,
 it varies with the terminal theme, and would be better named "caution" or "info".
 In addition, it is too light to be used in light mode, so we substitute magenta instead.
+We intentionally avoid `blue` and `magenta` because they are problematic in dark mode,
+and because we use magenta as a substitute for yellow in light mode.
+We also avoid `black` and `white` because they are completely unsuitable for use in
+an environment where the terminal theme can switch between light and dark. Instead,
+we take care to use the terminal's stated foreground and background colors, which
+the terminal itself will change (including text already on the screen) when changing its theme.
 
 Each of these colors has 4 variations. Using "red" as an example, they would be:
 
@@ -682,4 +720,5 @@ V4 changes:
 - `WORKSPACE_FOLDER` is the base directory of the project inside the container. Analogous to the target of Dev Container's
   `workspaceFolder`. Typically, this is the same as `WORKSPACE_MOUNT`, but may be a subdirectory if, for example, the Git repository is
   a "monorepo" containing multiple projects. It must be an absolute path either equal to or a subdirectory of `WORKSPACE_FOLDER_HOST_DIR`.
-- `GEODESIC_TERM_COLOR_AUTO` is normally unset. Set it to "false" to disable attempts at automatic terminal light/dark mode detection.
+- `GEODESIC_TERM_THEME` is normally unset. Set it to "light" or "dark" _before launching Geodesic_ to disable the initial attempt at automatic terminal light/dark them detection, and use the set value instead.
+- `GEODESIC_TERM_THEME_AUTO` is normally unset. Set it to "enabled" to enable automatic attempts to detect changes in terminal light/dark them. This feature should be considered experimental and may not work as expected.

@@ -10,7 +10,7 @@
 # The main change is that it uses the terminal's default colors for foreground and background,
 # whereas the previous version "reset" the color by setting it to black, which fails in dark mode.
 
-function update-terminal-color-mode() {
+function update-terminal-theme() {
 	local new_mode="$1"
 	local quiet=false
 	case $new_mode in
@@ -26,7 +26,7 @@ function update-terminal-color-mode() {
 		;;
 
 	*)
-		echo "Usage: update-terminal-color-mode [dark|light]" >&2
+		echo "Usage: update-terminal-theme [dark|light]" >&2
 		return 1
 		;;
 	esac
@@ -50,6 +50,7 @@ function update-terminal-color-mode() {
 			[[ "$quiet" == "true" ]] || echo "Terminal did not respond to color queries." >&2
 		fi
 		# "light" is historical default for unknown terminals.
+		[[ "$quiet" == "true" ]] || echo "Terminal theme mode unknown, defaulting to \"light\"."
 		new_mode="light"
 	fi
 
@@ -63,7 +64,18 @@ function update-terminal-color-mode() {
 	fi
 }
 
-function get-terminal-color-mode() {
+# Function for user to manually update the terminal color mode.
+function set-terminal-theme() {
+	if [[ "$1" == "dark" || "$1" == "light" ]]; then
+		GEODESIC_TERM_THEME="$1"
+		[[ "$1" == "$(get-terminal-theme)" ]] || update-terminal-theme "$1"
+	else
+		unset GEODESIC_TERM_THEME
+		update-terminal-theme
+	fi
+}
+
+function get-terminal-theme() {
 	echo "${_geodesic_tput_cache[dark_mode]:-light}"
 }
 
@@ -97,7 +109,7 @@ function _geodesic_tput_cache_init() {
 	# from here, so we need to tell the user to run the command to fix them.
 	if [[ $BASH_SUBSHELL != 0 ]]; then
 		printf "\n* Terminal mode settings have been lost (%s,%s).\n" "$SHLVL" "$BASH_SUBSHELL" >&2
-		printf "* Please run: update-terminal-color-mode \n\n" >&2
+		printf "* Please run: update-terminal-theme \n\n" >&2
 	fi
 
 	local bold=$(tput bold)
@@ -307,17 +319,17 @@ function reset_terminal_colors() {
 
 _geodesic_tput_cache_init
 
-function auto-update-terminal-color-mode() {
-	[[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] || [[ ${GEODESIC_TERM_COLOR_AUTO:-true} != "true" ]] && return 0
+function auto-update-terminal-theme() {
+	[[ ${GEODESIC_TERM_THEME_UPDATING} == "true" ]] || [[ ${GEODESIC_TERM_THEME_AUTO} != "enabled" ]] && return 0
 
 	# Ignore repeated signals while a signal is being processed
-	export GEODESIC_TERM_COLOR_UPDATING=true
-	update-terminal-color-mode quiet
+	export GEODESIC_TERM_THEME_UPDATING=true
+	update-terminal-theme quiet
 	if [[ $? -eq 9 ]]; then
 		# If the color detection failed, we disable automatic detection.
-		export GEODESIC_TERM_COLOR_AUTO=disabled
+		export GEODESIC_TERM_THEME_AUTO=failed
 	fi
-	unset GEODESIC_TERM_COLOR_UPDATING
+	unset GEODESIC_TERM_THEME_UPDATING
 }
 
 # Although SIGWINCH is a standard signal to indicate the window *size* has changed,
@@ -326,27 +338,27 @@ function auto-update-terminal-color-mode() {
 # So we catch the signal to update the terminal colors, preserving any existing signal handlers.
 # However, we do the actual color update in a separate function called from the shell prompt command,
 # to avoid issues with async access to the TTY and other issues with running inside a signal handler.
-function _update-terminal-color-mode-sigwinch() {
+function _update-terminal-theme-sigwinch() {
 	# Ignore repeated signals while a signal is being processed
-	[[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] || [[ ${GEODESIC_TERM_COLOR_AUTO:-true} != "true" ]] && return 0
-	export GEODESIC_TERM_COLOR_UPDATING="needed"
+	[[ ${GEODESIC_TERM_THEME_UPDATING} == "true" ]] || [[ ${GEODESIC_TERM_THEME_AUTO} != "enabled" ]] && return 0
+	export GEODESIC_TERM_THEME_UPDATING="needed"
 }
 
-if [[ ${GEODESIC_TERM_COLOR_AUTO} != "unsupported" ]] && _is_color_term; then
-	# We install the trap handler whether GEODESIC_TERM_COLOR_AUTO is set to "disabled" or "false",
+if [[ ${GEODESIC_TERM_THEME_AUTO} != "unsupported" ]] && _is_color_term; then
+	# We install the trap handler whether or not GEODESIC_TERM_THEME_AUTO is enabled,
 	# because we will not be able to detect the change in that variable if
 	# it started out disabled and then someone enables it.
 
 	# Save existing trap (if any)
 	existing_trap=$(trap -p WINCH)
 
-	# Set up new trap that runs both the existing trap and the update-terminal-color-mode function
+	# Set up new trap that runs both the existing trap and the update-terminal-theme function
 	if [ -n "$existing_trap" ]; then
 		# Extract the existing command from the trap output
 		existing_cmd=$(echo "$existing_trap" | sed "s/trap -- '\(.*\)' SIGWINCH/\1/")
-		trap "${existing_cmd}; _update-terminal-color-mode-sigwinch" WINCH
+		trap "${existing_cmd}; _update-terminal-theme-sigwinch" WINCH
 	else
-		trap _update-terminal-color-mode-sigwinch WINCH
+		trap _update-terminal-theme-sigwinch WINCH
 	fi
 
 	unset existing_trap existing_cmd

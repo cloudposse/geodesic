@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Find all processes with PPID 0 that have HOST_PID set and print their PIDs.
+# This spawns a lot of subshells, and is too expensive to run every second.
+# With an argument, lists only the shell(s) that have the given G_HOST_PID.
+function list-wrapper-shells() {
+	local pattern
+	pattern="^G_HOST_PID=${1:-[0-9]\+}\$"
+	for pid in $(ps -eo pid,ppid | awk '$2 == 0 {print $1}'); do
+		[[ $pid -eq 1 ]] && continue # Ignore the shell monitor
+		if grep -zq "$pattern" /proc/$pid/environ 2>/dev/null; then
+			echo $pid
+		fi
+	done
+}
+
+# If this script is being sourced, do not execute the function
+# If it is being executed, run the expensive function, as it is likely to have better failure modes
+(return 0 2>/dev/null) && sourced=1 || list-wrapper-shells "$@"

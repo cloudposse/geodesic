@@ -6,13 +6,36 @@
 #
 # This file has no dependencies and should come first.
 
-# This function determines if the terminal is in dark mode.
+# These function determine if the terminal is in light or dark mode.
 
-# For now, we use OSC sequences to query the terminal's foreground and background colors.
-# See https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
-# Adapted from https://bugzilla.gnome.org/show_bug.cgi?id=733423#c2
+# We have 2 different kinds of auto-detection to consider:
 #
-# At some point we may introduce other methods to determine the terminal's color scheme.
+#   1. The initial auto-detection of the terminal color mode at startup.
+#      This is very important, because parts of the Geodesic colored prompt
+#      (among other things) can become invisible if the terminal is dark and
+#      Geodesic thinks it is light.
+#
+#   2. The auto-detection of terminal color mode changes during the session.
+#      This is less important for 2 reasons:
+#
+#      a. There is no standard way for the terminal to notify the shell that the
+#         color mode has changed. Some terminals support SIGWINCH, but most do not.
+#         So the best we can do is poll the terminal periodically, which is not ideal,
+#         especially since it can be slow and can fail, and when it fails it causes
+#         garbage characters to appear on the terminal as input.
+#
+#      b. The terminal color mode is not likely to change during a session, and if it does,
+#         the user can manually update the color mode with `update-terminal-theme`.
+#
+#
+# So, the initial detection needs to be enabled by default, and if disabled, needs to set the mode.
+#   - Disable it by setting GEODESIC_TERM_THEME=light or =dark.
+#
+# The detection of changes during the session should be disabled by default, and if enabled, should
+# be able to be disabled again.
+#
+#    - Enable it by setting GEODESIC_TERM_THEME_AUTO=enabled.
+#
 
 # First, at startup, let's try an OSC query. If we get no response, we will assume light mode
 # and disable further queries.
@@ -26,140 +49,122 @@ function _terminal_trace() {
 
 function _verify_terminal_queries_are_supported() {
 	local colors
+	# It is possible that the terminal supports color, but `tput` does not know about it.
+	# Since we rely on `tput` to modify the colors, if `tput` does not support the terminal, we have to treat it as monochome.
 	colors=$(tput colors 2>/dev/null) || colors=0
 
 	if ! { [[ -t 0 ]] && [[ "$colors" -ge 8 ]]; }; then
 		# Do not use _terminal_trace here, because it uses color codes on terminals and we have just verified that is not supported here.
 		[[ $GEODESIC_TRACE =~ "terminal" ]] && echo "* TERMINAL TRACE: Not a (color) terminal. Disabling color detection." >&2
-		export GEODESIC_TERM_COLOR_AUTO=unsupported
+		export GEODESIC_TERM_THEME_AUTO=unsupported
 		return 1
 	fi
 
-	if ! { [[ -w /dev/tty ]] && [[ -r /dev/tty ]]; }; then
-		_terminal_trace "Terminal is not writable or readable. Skipping color detection."
-		_terminal_trace "You may need to run 'chmod o+rw /dev/tty' to enable color detection."
-		_terminal_trace "You can disable color detection with 'export GEODESIC_TERM_COLOR_AUTO=disabled'."
+	if ! /usr/local/bin/terminal-theme-detector >/dev/null 2>&1; then
+		_terminal_trace "terminal-theme-detector could not determine terminal color."
+		export GEODESIC_TERM_THEME_AUTO=unsupported
 		return 1
 	fi
 
-	[[ "${GEODESIC_TERM_COLOR_AUTO}" == "disabled" ]] || unset GEODESIC_TERM_COLOR_AUTO
+	# The following test is only relevant when we are using _raw_query_term.
+	#	if ! { [[ -w /dev/tty ]] && [[ -r /dev/tty ]]; }; then
+	#		_terminal_trace "Terminal is not writable or readable. Skipping color detection."
+	#		_terminal_trace "You may need to run 'chmod o+rw /dev/tty' to enable color detection."
+	#		_terminal_trace "You can disable color detection with 'export GEODESIC_TERM_COLOR_AUTO=disabled'."
+	#		return 1
+	#	fi
+
 	return 0
 }
 
-_verify_terminal_queries_are_supported
+[[ "${GEODESIC_TERM_THEME}" == "light" ]] || [[ "${GEODESIC_TERM_THEME}" == "dark" ]] || _verify_terminal_queries_are_supported
+
+# This is the worker function that gets the terminal foreground and background colors in RGB
+# and converts them to luminance values. If unknown, it returns 0 0.
+#
+# Luminance is on a scale of 0 to 1, but we want to be able to compare integers in bash,
+# so our _srgb_to_luminance function multiplies by a big enough value to get an integer and maintain precision.
+# Specifically, it multiplies by 1 000 000 000, which is why 1000000000 is used in the forced modes.
+# If forced "light" or "dark", it returns 0 1000000000 or 1000000000 0, respectively.
+
+_get_terminal_luminance() {
+	local fg_rgb bg_rgb fg_lum bg_lum
+
+	if [[ "${GEODESIC_TERM_THEME}" == "light" ]] || [[ ${GEODESIC_TERM_THEME_AUTO} == "unsupported" ]]; then
+		if [[ "${GEODESIC_TERM_THEME}" == "light" ]]; then
+			_terminal_trace "Terminal mode forced to \"light\" by GEODESIC_TERM_THEME"
+		else
+			_terminal_trace "Terminal mode color detection is unsupported for this terminal."
+			_terminal_trace "Function stack is ${FUNCNAME[@]}."
+		fi
+		echo "0 1000000000"
+		return
+	fi
+	if [[ "${GEODESIC_TERM_THEME}" == "dark" ]]; then
+		_terminal_trace "Terminal mode forced to \"dark\" by GEODESIC_TERM_THEME"
+		echo "1000000000 0"
+		return
+	fi
+	if ! IFS=';' read -r -t 3 fg_rgb bg_rgb < <(terminal-theme-detector 2>/dev/null) || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
+		_terminal_trace "Terminal did not respond to color queries."
+		echo "0 0"
+		return
+	fi
+
+	# Convert the RGB values to luminance using colormetric formula.
+	_terminal_trace "Foreground color: $fg_rgb, Background color: $bg_rgb"
+	fg_lum=$(_srgb_to_luminance "$fg_rgb")
+	bg_lum=$(_srgb_to_luminance "$bg_rgb")
+	echo "$fg_lum $bg_lum"
+}
 
 # Normally this function produces no output, but with -b, it outputs "true" or "false",
-# with -bb it outputs "true", "false", or "unknown". (Otherwise, unknown assume light mode.)
-# With -m it outputs "dark" or "light", with -mm it outputs "dark", "light", or "unknown".
+# with -bb it outputs "true", "false", or "unknown". (Otherwise, unknown assumes light mode.)
+# With -m it outputs "dark" or "light", with -mm it outputs "dark", "light", or "unknown",
 # and always returns true. With -l it outputs integer luminance values for foreground
 # and background colors. With -ll it outputs labels on the luminance values as well.
 function _is_term_dark_mode() {
-	[[ ${GEODESIC_TERM_COLOR_AUTO} == "unsupported" ]] || [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]] && case "$1" in
-	-b) echo "false" ;;
-	-bb) echo "unknown" ;;
-	-m) echo "light" ;;
-	-mm) echo "unknown" ;;
-	-l) echo "0 1000000000" ;;
-	-ll) echo "Foreground luminance: 0, Background luminance: 1000000000" ;;
-	*) return 1 ;;
-	esac && return 0
+	local lum=($(_get_terminal_luminance))
+	local fg=${lum[0]} bg=${lum[1]}
+	local theme response
 
-	local x fg_rgb bg_rgb fg_lum bg_lum exit_code saved_state timeout_duration
-
-	# Do not try to auto-detect if we are not in a terminal
-	# or if termcap does not think we are in a color terminal
-	if _verify_terminal_queries_are_supported; then
-		# Extract the RGB values of the foreground and background colors via OSC 10 and 11.
-		# Redirect output to `/dev/tty` in case we are in a subshell where output is a pipe,
-		# because this output has to go directly to the terminal.
-		saved_state=$(stty -g)
-		trap 'stty "$saved_state"' EXIT
-		_terminal_trace 'Checking terminal color scheme...'
-		# Timeout of 2 was not enough when waking for sleep.
-		# When in a signal handler, we might be waking from sleep or hibernation, so we give it a lot more time.
-		timeout_duration="0.6"
-		stty -echo
-		# Query the terminal for the foreground color. Use printf to ensure the string is output as a single block,
-		# without interference from other processes writing to the terminal.
-		printf '\e]10;?\a' >/dev/tty
-		IFS=: read -rs -t "$timeout_duration" -d $'\a' x fg_rgb </dev/tty
-		exit_code=$?
-		[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
-		[[ $exit_code -gt 128 ]] || exit_code=0
-		if [[ $exit_code -eq 0 ]] && [[ -n $fg_rgb ]]; then
-			# Query the terminal for the background color
-			printf '\e]11;?\a' >/dev/tty
-			IFS=: read -rs -t "$timeout_duration" -d $'\a' x bg_rgb </dev/tty
-			exit_code=$?
-			[[ $exit_code -gt 128 ]] || [[ -z $bg_rgb ]] && [[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
-		fi
-		stty "$saved_state"
-		trap - EXIT
+	if [[ $fg -eq $bg ]]; then
+		theme="unknown"
+	elif [[ $fg -gt $bg ]]; then
+		theme="dark"
 	else
-		_terminal_trace "${FUNCNAME[0]} called, but not running in a color terminal."
+		theme="light"
 	fi
 
-	if [[ ${GEODESIC_TERM_COLOR_UPDATING} == "true" ]] && [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]]; then
-		printf "\n\n################# Begin Message from Geodesic ################\n\n" >&2
-		printf "\tTerminal automatic light/dark mode detection failed from shell prompt hook. Disabling automatic detection.\n" >&2
-		printf "\tYou can manually change modes with\n\n\tupdate-terminal-color-mode [dark|light]\n\n" >&2
-		printf "\tYou can re-enable automatic detection with\n\n\tunset GEODESIC_TERM_COLOR_AUTO\n\n" >&2
-		printf "################# End Message from Geodesic ##################\n\n" >&2
-		echo "auto-detect-failed"
-		return 9
-	fi
-
-	if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
-		_terminal_trace "Terminal did not respond to OSC 10 and 11 queries."
-		# If we cannot determine the color scheme, we assume light mode for historical reasons.
-		if [[ "$*" =~ -b ]] || [[ "$*" =~ -m ]]; then
-			if [[ "$*" =~ -bb ]] || [[ "$*" =~ -mm ]]; then
-				echo "unknown"
-			elif [[ "$*" =~ -m ]]; then
-				echo "light"
-			else
-				echo "false"
-			fi
-			return 0 # when returning text, always return success
-		fi
-		return 1 # Assume light mode
-	fi
-
-	if [[ "${x#*;}" != "rgb" ]]; then
-		# Always output this error, because we want to hear about
-		# other color formats users want us to support.
-		echo "$(tput set bold)$(tput setaf 1)Terminal reported unknown color format: ${x#*;}$(tput sgr0)" >&2
-		return 1
-	fi
-
-	# Convert the RGB values to luminance by summing the values.
-	fg_lum=$(_srgb_to_luminance "$fg_rgb")
-	bg_lum=$(_srgb_to_luminance "$bg_rgb")
-	if [[ "$*" =~ -l ]]; then
-		if [[ "$*" =~ -ll ]]; then
-			echo "Foreground luminance: $fg_lum, Background luminance: $bg_lum"
-		else
-			echo "$fg_lum $bg_lum"
-		fi
-	fi
-	# If the background luminance is less than the foreground luminance, we are in dark mode.
-	if ((bg_lum < fg_lum)); then
-		if [[ "$*" =~ -m ]]; then
-			echo "dark"
-		elif [[ "$*" =~ -b ]]; then
-			echo "true"
-		fi
-		return 0
-	fi
-	# Not in dark mode, must be in light mode.
-	if [[ "$*" =~ -m ]]; then
-		echo "light"
-
-	elif [[ "$*" =~ -b ]]; then
-		echo "false"
+	if [[ $theme == "light" ]]; then
+		case "$1" in
+		-b | -bb) response="false" ;;
+		-m | -mm) response="light" ;;
+		-l) response="$fg $bg" ;;
+		-ll) response="Foreground luminance: $fg, Background luminance: $bg" ;;
+		*) return 1 ;;
+		esac
+	elif [[ $theme == "dark" ]]; then
+		case "$1" in
+		-b | -bb) response="true" ;;
+		-m | -mm) response="dark" ;;
+		-l) response="$fg $bg" ;;
+		-ll) response="Foreground luminance: $fg, Background luminance: $bg" ;;
+		*) return 0 ;;
+		esac
 	else
-		return 1
+		# Default to light for historical compatibility
+		case "$1" in
+		-b) response="false" ;;
+		-bb) response="unknown" ;;
+		-m) response="light" ;;
+		-mm) response="unknown" ;;
+		-l) response="0 1000000000" ;;
+		-ll) response="Foreground luminance: 0, Background luminance: 1000000000" ;;
+		*) return 1 ;;
+		esac
 	fi
+	echo "$response"
 }
 
 # Converting RGB to luminance is a lot more complex than summing the values.
@@ -226,4 +231,76 @@ function _srgb_to_luminance() {
 	# compare integers in bash, so we multiply by a big enough value
 	# to get an integer and maintain precision.
 	echo "scale=0; ($(echo "scale=10; $luminance * 1000000000" | bc) + 0.5) / 1" | bc
+}
+
+# _raw_query_term is a helper function that queries the terminal for the foreground and background colors.
+# It uses OSC sequences to query the terminal's foreground and background colors.
+# See https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
+# Adapted from https://bugzilla.gnome.org/show_bug.cgi?id=733423#c2
+# However, many terminals do not support OSC, and there are quirks (e.g. with final delimiter character) among those that do.
+# See https://github.com/bash/terminal-colorsaurus/blob/main/doc/terminal-survey.md
+#
+# So we no longer use this, but it is here as a reference. We use the terminal-colorsaurus library
+# because it is more thorough and still being maintained.
+function _raw_query_term_mode() {
+	# Extract the RGB values of the foreground and background colors via OSC 10 and 11.
+	# Redirect output to `/dev/tty` in case we are in a subshell where output is a pipe,
+	# because this output has to go directly to the terminal.
+	saved_state=$(stty -g)
+	trap 'stty "$saved_state"' EXIT
+	_terminal_trace 'Checking terminal color scheme...'
+	# Timeout of 2 was not enough when waking for sleep and in a signal handler.
+	# We moved to the prompt hook, but IDE terminals still can be slow, so we give a generous timeout,
+	# now that is a rare event.
+	timeout_duration="2"
+	stty -echo
+	# Query the terminal for the foreground color. Use printf to ensure the string is output as a single block,
+	# without interference from other processes writing to the terminal.
+	printf '\e]10;?\a' >/dev/tty
+	IFS=: read -rs -t "$timeout_duration" -d $'\a' x fg_rgb </dev/tty
+	exit_code=$?
+	[[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] && [[ ${GEODESIC_TERM_THEME_UPDATING} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
+	[[ $exit_code -gt 128 ]] || exit_code=0
+	if [[ $exit_code -eq 0 ]] && [[ -n $fg_rgb ]]; then
+		# Query the terminal for the background color
+		printf '\e]11;?\a' >/dev/tty
+		IFS=: read -rs -t "$timeout_duration" -d $'\a' x bg_rgb </dev/tty
+		exit_code=$?
+		[[ $exit_code -gt 128 ]] || [[ -z $bg_rgb ]] && [[ ${GEODESIC_TERM_THEME_UPDATING} == "true" ]] && export GEODESIC_TERM_COLOR_AUTO=disabled
+	fi
+	stty "$saved_state"
+	trap - EXIT
+
+	if [[ ${GEODESIC_TERM_THEME_UPDATING} == "true" ]] && [[ ${GEODESIC_TERM_COLOR_AUTO} == "disabled" ]]; then
+		printf "\n\n################# Begin Message from Geodesic ################\n\n" >&2
+		printf "\tTerminal automatic light/dark mode detection failed from shell prompt hook. Disabling automatic detection.\n" >&2
+		printf "\tYou can manually change modes with\n\n\tupdate-terminal-theme [dark|light]\n\n" >&2
+		printf "\tYou can re-enable automatic detection with\n\n\tunset GEODESIC_TERM_COLOR_AUTO\n\n" >&2
+		printf "################# End Message from Geodesic ##################\n\n" >&2
+		echo "auto-detect-failed"
+		return 9
+	fi
+
+	if [[ $exit_code -gt 128 ]] || [[ -z $fg_rgb ]] || [[ -z $bg_rgb ]]; then
+		_terminal_trace "Terminal did not respond to OSC 10 and 11 queries."
+		# If we cannot determine the color scheme, we assume light mode for historical reasons.
+		if [[ "$*" =~ -b ]] || [[ "$*" =~ -m ]]; then
+			if [[ "$*" =~ -bb ]] || [[ "$*" =~ -mm ]]; then
+				echo "unknown"
+			elif [[ "$*" =~ -m ]]; then
+				echo "light"
+			else
+				echo "false"
+			fi
+			return 0 # when returning text, always return success
+		fi
+		return 1 # Assume light mode
+	fi
+
+	if [[ "${x#*;}" != "rgb" ]]; then
+		# Always output this error, because we want to hear about
+		# other color formats users want us to support.
+		echo "$(tput set bold)$(tput setaf 1)Terminal reported unknown color format: ${x#*;}$(tput sgr0)" >&2
+		return 1
+	fi
 }

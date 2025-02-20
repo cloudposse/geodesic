@@ -22,6 +22,11 @@ ARG HELM_DIFF_VERSION=3.9.13
 # https://github.com/aslafy-z/helm-git/releases
 ARG HELM_GIT_VERSION=1.3.0
 
+FROM rust:1-${DEBIAN_CODENAME} AS rust
+COPY /src/colorsaurus /src/colorsaurus
+WORKDIR /src/colorsaurus
+RUN cargo install --path . --root /usr/local
+
 
 FROM python:${PYTHON_VERSION}-slim-${DEBIAN_CODENAME} AS python
 
@@ -156,6 +161,9 @@ RUN command -v tofu >/dev/null && update-alternatives --install /usr/bin/terrafo
 RUN echo 'set noswapfile' >> /etc/vim/vimrc
 
 WORKDIR /tmp
+
+# Copy the Rust binary from the Rust build stage
+COPY --from=rust /usr/local/bin/terminal-theme-detector /usr/local/bin/terminal-theme-detector
 
 # Copy python dependencies
 COPY --from=python /usr/local/ /usr/local/

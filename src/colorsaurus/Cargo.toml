@@ -1,0 +1,7 @@
+[package]
+name = "terminal-theme-detector"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+terminal-colorsaurus = { git = "https://github.com/bash/terminal-colorsaurus", branch = "main" }

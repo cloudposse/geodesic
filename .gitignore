@@ -19,6 +19,8 @@ aws-assumed-role/
 **/*.terraform.auto.tfvars.json
 **/*.helmfile.vars.yaml
 
+src/colorsaurus/target/**
+
 # Module directory
 **/.terraform/
 **/.module/
@@ -35,4 +37,4 @@ aws-assumed-role/
 **/.DS_Store
 **/.CFUserTextEncoding
 **/.Trash/
-**/$RECYCLE.BIN/YCLE.BIN/
+**/$RECYCLE.BIN/

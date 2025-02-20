@@ -1,47 +1,93 @@
 #!/bin/bash
 
+source /usr/local/sbin/list-wrapper-shells
+
+wrapper_pids=()
+
 # Function to count active shell sessions launched by wrapper
-# Far from perfect:
-#   Does not account for shells with detached sessions which cannot be resumed
-#   Does not account for shells launched without -l flag in the first position
-#   Does not account for alternative shells like rbash or dash
+# Expensive, so run sparingly. Only needed to find new shells when they launch.
 count_shells() {
-	pgrep -f "^(/(usr/)?bin/)?(ba)?sh -l" | wc -l
+	wrapper_pids=($(list-wrapper-shells))
+	echo "${#wrapper_pids[@]}"
 }
 
+# Function to check if any registered shell has exited.
+# Super efficient, so run as often as needed.
+shell_has_exited() {
+	local pid
+
+	# If there are no shells left, then they have all exited.
+	[[ "${#wrapper_pids[@]}" -eq 0 ]] && return 0
+
+	# Check if each shell we know about is still running
+	for pid in "${wrapper_pids[@]}"; do
+		if ! [[ -d /proc/$pid ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+# Function to kill all active shell sessions launched by wrapper.
+# This is the shutdown procedure, so we do not care about hogging the CPU.
 kill_shells() {
-	pkill -HUP -f "^(/(usr/)?bin/)?(ba)?sh -l"
+	for pid in $(list_wrapper_shells); do
+		kill -HUP $pid
+	done
+
 	for i in {1..4}; do
 		[ $(count_shells) -eq 0 ] && return 0
 		sleep 1
 	done
 
-	pkill -TERM -f "^(/(usr/)?bin/)?(ba)?sh -l"
+	for pid in $(list_wrapper_shells); do
+		kill -TERM $pid
+	done
 
 	for i in {1..3}; do
 		[ $(count_shells) -eq 0 ] && return 0
 		sleep 1
 	done
-	pkill -KILL -f "^(/(usr/)?bin/)?(ba)?sh -l"
+
+	for pid in $(list_wrapper_shells); do
+		kill -KILL $pid
+	done
+
 	return 137
 }
 
 trap 'kill_shells; exit $?' TERM HUP INT QUIT EXIT
 
-# Wait up to 4 seconds for the first connection
+# Wait up to 60 seconds for the first connection
+# Since we are waiting for something to happen, we can afford burn
+# up some CPU in order to be more responsive.
 i=0
 while [ $(count_shells) -eq 0 ]; do
-	sleep 1
+	sleep 0.5
 	i=$((i + 1))
-	if [ $i -ge 4 ]; then
-		echo "No shell sessions detected after 4 seconds, exiting..."
+	if [ $i -ge 120 ]; then
+		echo "No shell sessions detected after 60 seconds, exiting..." >&2
 		exit 1
 	fi
 done
 
+# Our goal here is to stay alive as long as a shell is running,
+# but to exit as soon as all shells have exited.
+# The mistakes to avoid are quitting while a shell is still running or
+# not quitting after all shells have exited.
+# An annoyance to avoid is to take a noticeable amount of time to detect that all shells have exited.
+
+# We do not really care how many shells are running, only if there are any running.
+# Finding new shell sessions is too expensive to do every second while a shell is running,
+# so we only check for new shells after detecting a shell we know about has exited.
+#
+
 # Monitor shell sessions and exit when none remain
-while [ $(count_shells) -gt 0 ]; do
-	sleep 1
+while true; do
+	while ! shell_has_exited; do
+		sleep 0.67
+	done
+	[[ $(count_shells) -eq 0 ]] && break
 done
 
 # Clean up and exit

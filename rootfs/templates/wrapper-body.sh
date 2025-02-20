@@ -117,6 +117,12 @@ function parse_args() {
 		-v | --verbose)
 			export VERBOSE=true
 			;;
+		--dark)
+			export GEODESIC_TERM_THEME="dark"
+			;;
+		--light)
+			export GEODESIC_TERM_THEME="light"
+			;;
 		--solo)
 			export ONE_SHELL=true
 			;;
@@ -173,21 +179,24 @@ function parse_args() {
 }
 
 function help() {
-	echo "Usage: $0 [target] [options] [ARGS]"
+	echo "Usage: $0 [options | command] [ARGS]"
 	echo ""
-	echo "  Targets:"
-	echo "    <empty> | use              Enter into a shell, passing ARGS to the shell"
+	echo "  commands:"
+	echo "    <none> | use               Enter into a shell, passing ARGS to the shell"
 	echo "    help                       Show this help"
 	echo "    stop [container-name]      Stop a running Geodesic container"
 	echo ""
-	echo "  Options:"
+	echo "  Options when no command is supplied:"
+	echo "    --dark                Disable terminal color detection and set dark terminal theme"
+	echo "    --light               Disable terminal color detection and set light terminal theme"
+	echo "    -h --help             Show this help"
 	echo "    --no-custom           Disable loading of custom configuration"
 	echo "    --no-motd             Disable the MOTD"
 	echo "    --solo                Launch a new container exclusively for this shell"
 	echo "    --no-solo             Override the 'solo/ONE_SHELL' setting in your configuration"
 	echo "    --trace               Enable tracing of shell customization within Geodesic"
 	echo "    --trace=<options>     Enable tracing of specific parts of shell configuration"
-	echo "    -v --verbose          Enable verbose output of launch configuration"
+	echo "    -v --verbose          Enable tracing of launch configuration outside of Geodesic"
 	echo ""
 	echo "    trace options can be any of:"
 	echo "      custom              Trace the loading of custom configuration in Geodesic"
@@ -196,7 +205,10 @@ function help() {
 	echo "    You can specify multiple modes, separated by commas, e.g. --trace=custom,hist"
 	echo ""
 	echo "  Options that only take effect when starting a container:"
-	echo "    --workspace           Set which host directory is used as the working directory in the container "
+	echo "    --workspace           Set which host directory is used as the working directory in the container"
+	echo ""
+	echo "  You can also set environment variables with --<name>=<value>,"
+	echo "  but most are only effective when starting a container."
 	echo ""
 }
 
@@ -232,10 +244,17 @@ function debug() {
 	fi
 }
 
+function _running_shell_pids() {
+	docker exec "${DOCKER_NAME}" list-wrapper-shells 2>/dev/null
+}
+
+function _our_shell_pid() {
+	docker exec "${DOCKER_NAME}" list-wrapper-shells "$WRAPPER_PID" 2>/dev/null || true
+}
+
 function _running_shell_count() {
-	local count=$(docker exec "${DOCKER_NAME}" pgrep -f "^/bin/(ba)?sh -l" 2>/dev/null | wc -l | tr -d " " || true)
-	[ -n "${count}" ] || count=0
-	echo "${count}"
+	local count=($(_running_shell_pids || true))
+	echo "${#count[@]}"
 }
 
 function _on_shell_exit() {
@@ -247,6 +266,41 @@ function _on_container_exit() {
 	export GEODESIC_EXITING_CONTAINER_NAME="${DOCKER_NAME}"
 	_on_shell_exit
 	[ -n "${ON_CONTAINER_EXIT}" ] && command -v "${ON_CONTAINER_EXIT}" >/dev/null && "${ON_CONTAINER_EXIT}"
+}
+
+# Call this function to wait for the container to exit, after all other shells have exited.
+function wait_for_container_exit() {
+	local i n shells
+	n=15
+
+	for (( i=0; i<=n; i++ )); do
+		# Try n times to see if the container is still running, quit when it is no longer found
+		if [ -z "$(docker ps -q --filter "id=${CONTAINER_ID:0:12}")" ]; then
+			i=0
+			break
+		fi
+
+		# Wait for our shell to quit, regardless, because new shells might not be found until triggered by our shell quitting.
+		if [ -z "$(_our_shell_pid)" ] && [ "$(_running_shell_count)" -gt 0 ]; then
+			printf 'New shells started from other sources, docker container still running.\n' >&2
+			printf 'Use `%s stop` to stop container gracefully, or\n  force quit with `docker kill %s`\n' "$(basename $0)" "${DOCKER_NAME}" >&2
+			_on_shell_exit
+			return 7
+		fi
+
+		[ $i -eq $n ] && break || sleep 0.4
+	done
+
+	if [ $i -eq $n ]; then
+		printf 'All shells terminated, but docker container still running.\n' >&2
+		printf 'Forcibly kill it with:\n\n    docker kill %s\n\n' "${DOCKER_NAME}" >&2
+		_on_shell_exit
+		return 6
+	else
+		echo Docker container exited >&2
+		_on_container_exit
+		return 0
+	fi
 }
 
 function run_exit_hooks() {
@@ -261,84 +315,101 @@ function run_exit_hooks() {
 		return 0
 	fi
 
-	# Initial count of running shells
-	shells=$(_running_shell_count)
-	if [ "$shells" -gt 1 ]; then
-		# Even if our shell is included in the count, we know there are extra shells running.
-		# Wait for our shell to quit and count again
-		sleep 1
-		shells=$(_running_shell_count)
-		if [ "$shells" -eq 0 ]; then # coincidence, other shells quit too
-			echo Other shells quit, too, and Docker container exited
-			_on_container_exit
-			return 0
-		fi
-	else # 1 or zero shells. The 1 might be ours, so we wait for it to quit.
-		for i in {1..6}; do
-			if [ $i -eq 6 ] || [ $(docker ps -q --filter "id=${CONTAINER_ID:0:12}" | wc -l | tr -d " ") -eq 0 ]; then
-				break
-			fi
-			[ $i -lt 5 ] && sleep 1
-		done
-		if [ $i -eq 6 ]; then
-			shells=$(_running_shell_count)
-			if [ "$shells" -eq 0 ]; then
-				printf 'All shells terminated, but docker container still running.\n' >&2
-				printf 'Forcibly kill it with:\n\n    docker kill %s\n\n' "${DOCKER_NAME}" >&2
-				_on_shell_exit
-				return 6
-			fi
-		else
-			echo Docker container exited
-			_on_container_exit
-			return 0
-		fi
+	local our_shell_pid=$(_our_shell_pid)
+	local shell_pids=($(_running_shell_pids))
+
+	# Best case scenario: no shells running
+	if [ "${#shell_pids[@]}" -eq 0 ]; then
+		wait_for_container_exit
+		return $?
 	fi
 
-	# If we get here, container is still running and shells != 0
-	printf "Docker container still running. " >&2
-	[ "$shells" -eq 1 ] && echo -n "Quit 1 other shell " >&2 || echo -n "Quit $shells other shells " >&2
-	printf 'to terminate.\n  Use `%s stop` to stop gracefully, or\n  force quit with `docker kill %s`\n' "$(basename $0)" "${DOCKER_NAME}" >&2
-	_on_shell_exit
+	# Are other shells running?
+	if [ -n "$our_shell_pid" ]; then
+		# remove our shell from the list
+		shell_pids=($(printf "%s\n" "${shell_pids[@]}" | grep -v "^$our_shell_pid\$"))
+	fi
+
+	local shells=${#shell_pids[@]}
+	# Great, other shells running, so we do not have to track ours
+	if [ "$shells" -gt 0 ]; then
+		printf "Docker container still running. " >&2
+		[ "$shells" -eq 1 ] && echo -n "Quit 1 other shell " >&2 || echo -n "Quit $shells other shells " >&2
+		printf 'to terminate.\n  Use `%s stop` to stop gracefully, or\n  force quit with `docker kill %s`\n' "$(basename $0)" "${DOCKER_NAME}" >&2
+		_on_shell_exit
+		return 0
+	fi
+
+	# No other shells running, so we wait for our shell and the container to exit.
+	# Our shell PID will disappear when the shell exits or when the container exits.
+	local i n
+	n=15
+	if [ -n "$(_our_shell_pid)" ]; then
+		echo -n "Waiting for our shell to finish exiting..." >&2
+		i=0
+		sleep 0.3
+		while [ -n "$(_our_shell_pid)" ]; do
+			i=$((i + 1))
+			[ $i -lt $n ] && sleep 0.4 || break
+		done
+		[ $i -lt $n ] && echo " Finished." >&2 || printf "\nTimeout waiting for container shell to exit.\n" >&2
+	fi
+
+	wait_for_container_exit
+	return $?
 }
 
 function use() {
-	# TODO: Mark each shell with the wrapper's PID, so we can tell which shell is which.
-	# Then, when exiting, we can distinguish between this wrapper's shell still running
-	# and other shells still running, and be more efficient and informative in the exit message.
 	[ "$1" = "use" ] && shift
 	trap run_exit_hooks EXIT
 
+	export WRAPPER_PID=$$
+
+	DOCKER_EXEC_ARGS=(--env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
+	# Some settings from the host environment need to propagate into the container
+	# Set them explicitly so they do not have to be exported in `launch-options.sh`
+	for v in GEODESIC_HOST_CWD GEODESIC_CONFIG_HOME GEODESIC_MOTD_ENABLED GEODESIC_TERM_THEME GEODESIC_TERM_THEME_AUTO; do
+		# Test if variable is set in a way that works on bash 3.2, which is what macOS has.
+		if [ -n "${!v+x}" ]; then
+			DOCKER_EXEC_ARGS+=(--env "$v=${!v}")
+		fi
+	done
+
+	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} == false ]]; then
+		if [ -n "${GEODESIC_TRACE}" ]; then
+			DOCKER_EXEC_ARGS+=(--env GEODESIC_TRACE)
+		fi
+
+		if [ -n "${ENV_FILE}" ]; then
+			DOCKER_EXEC_ARGS+=(--env-file ${ENV_FILE})
+		fi
+	else
+		echo "# Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is set and not 'false'"
+		DOCKER_EXEC_ARGS+=(--env GEODESIC_CUSTOMIZATION_DISABLED)
+	fi
+
+	# If ONE_SHELL is false and a container is already running, exec into it with the configuration we have.
+	# We do not need the rest of the configuration, which is for launching a new container.
 	if [ "$ONE_SHELL" != "true" ]; then
 		CONTAINER_ID=$(docker ps --filter name="^/${DOCKER_NAME}\$" --format '{{ .ID }}')
 		if [ -n "$CONTAINER_ID" ]; then
 			echo "# Starting shell in already running ${DOCKER_NAME} container ($CONTAINER_ID)"
 			if [ $# -eq 0 ]; then
-				set -- "/bin/bash" "-l" "$@"
+				set -- "/bin/bash" "-l"
 			fi
+			[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
 			# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
 			# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
-			docker exec -it --detach-keys "ctrl-^,ctrl-[,ctrl-@" --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" $*
+			docker exec --env G_HOST_PID=$WRAPPER_PID --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" "$@"
 			return 0
 		fi
 	fi
 
-	DOCKER_ARGS=()
-	if [ -t 1 ]; then
-		# Running in terminal
-		DOCKER_ARGS+=(-it --rm --env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM --env GEODESIC_MOTD_ENABLED)
-		if [ -n "$SSH_AUTH_SOCK" ]; then
-			DOCKER_ARGS+=(--volume /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
-				-e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock)
-		fi
-		# Some settings from the host environment need to propagate into the container
-		# Set them explicitly so they do not have to be exported in `launch-options.sh`
-		for v in GEODESIC_CONFIG_HOME GEODESIC_MOTD_ENABLED GEODESIC_TERM_COLOR_AUTO; do
-			# Test if variable is set in a way that works on bash 3.2, which is what macOS has.
-			if [ -n "${!v+x}" ]; then
-				DOCKER_ARGS+=(--env "$v=${!v}")
-			fi
-		done
+	DOCKER_LAUNCH_ARGS=(--rm)
+
+	if [ -n "$SSH_AUTH_SOCK" ]; then
+		DOCKER_LAUNCH_ARGS+=(--volume /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock
+			-e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock)
 	fi
 
 	if [ "${WITH_DOCKER}" == "true" ]; then
@@ -348,26 +419,13 @@ function use() {
 		# socket in the Mac host OS, it is in the dockerd VM.
 		# https://docs.docker.com/docker-for-mac/osxfs/#namespaces
 		echo "# Enabling docker support. Be sure you install a docker CLI binary${docker_install_prompt}."
-		DOCKER_ARGS+=(--volume "/var/run/docker.sock:/var/run/docker.sock")
+		DOCKER_LAUNCH_ARGS+=(--volume "/var/run/docker.sock:/var/run/docker.sock")
 		# NOTE: bind mounting the docker CLI binary is no longer recommended and usually does not work.
 		# Use a docker image with a docker CLI binary installed that is appropriate to the image's OS.
 	fi
 
-	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} == false ]]; then
-		if [ -n "${GEODESIC_TRACE}" ]; then
-			DOCKER_ARGS+=(--env GEODESIC_TRACE)
-		fi
-
-		if [ -n "${ENV_FILE}" ]; then
-			DOCKER_ARGS+=(--env-file ${ENV_FILE})
-		fi
-	else
-		echo "# Disabling user customizations: GEODESIC_CUSTOMIZATION_DISABLED is set and not 'false'"
-		DOCKER_ARGS+=(--env GEODESIC_CUSTOMIZATION_DISABLED)
-	fi
-
 	if [ -n "${DOCKER_DNS}" ]; then
-		DOCKER_ARGS+=("--dns=${DOCKER_DNS}")
+		DOCKER_LAUNCH_ARGS+=("--dns=${DOCKER_DNS}")
 	fi
 
 	# Mount the user's home directory into the container
@@ -412,7 +470,7 @@ function use() {
 		else
 			echo "# Enabling explicit mapping of file owner and group ID between container and host."
 			mount_dir="/.FS_HOST"
-			DOCKER_ARGS+=(
+			DOCKER_LAUNCH_ARGS+=(
 				--env GEODESIC_HOST_UID="${USER_ID}"
 				--env GEODESIC_HOST_GID="${GROUP_ID}"
 				--env GEODESIC_BINDFS_OPTIONS
@@ -423,13 +481,13 @@ function use() {
 
 	# Although we call it "dirs", it can be files too
 	export GEODESIC_HOMEDIR_MOUNTS=""
-	DOCKER_ARGS+=(--env GEODESIC_HOMEDIR_MOUNTS --env LOCAL_HOME="${local_home}")
+	DOCKER_LAUNCH_ARGS+=(--env GEODESIC_HOMEDIR_MOUNTS --env LOCAL_HOME="${local_home}")
 	[ -z "${HOMEDIR_MOUNTS+x}" ] && HOMEDIR_MOUNTS=("${homedir_default_mounts[@]}")
 	IFS=, read -ra HOMEDIR_MOUNTS <<<"${HOMEDIR_MOUNTS}"
 	IFS=, read -ra HOMEDIR_ADDITIONAL_MOUNTS <<<"${HOMEDIR_ADDITIONAL_MOUNTS}"
 	for dir in "${HOMEDIR_MOUNTS[@]}" "${HOMEDIR_ADDITIONAL_MOUNTS[@]}"; do
 		if [ -d "${local_home}/${dir}" ] || [ -f "${local_home}/${dir}" ]; then
-			DOCKER_ARGS+=(--volume="${local_home}/${dir}:${mount_dir}${local_home}/${dir}")
+			DOCKER_LAUNCH_ARGS+=(--volume="${local_home}/${dir}:${mount_dir}${local_home}/${dir}")
 			GEODESIC_HOMEDIR_MOUNTS+="${dir}|"
 			debug "Mounting '${local_home}/${dir}' into container'"
 		else
@@ -482,13 +540,13 @@ function use() {
 	echo "# Mounting '${WORKSPACE_MOUNT_HOST_DIR}' into container at '${WORKSPACE_MOUNT}'"
 	echo "# Setting container working directory to '${WORKSPACE_FOLDER}'"
 
-	DOCKER_ARGS+=(
+	DOCKER_LAUNCH_ARGS+=(
 		--volume="${WORKSPACE_MOUNT_HOST_DIR}:${mount_dir}${WORKSPACE_MOUNT_HOST_DIR}"
 		--env WORKSPACE_MOUNT_HOST_DIR="${WORKSPACE_MOUNT_HOST_DIR}"
 		--env WORKSPACE_MOUNT="${WORKSPACE_MOUNT}"
 		--env WORKSPACE_FOLDER="${WORKSPACE_FOLDER}"
 	)
-	[ -n "${GEODESIC_HOST_SYMLINK}" ] && DOCKER_ARGS+=(--env GEODESIC_HOST_SYMLINK)
+	[ -n "${GEODESIC_HOST_SYMLINK}" ] && DOCKER_LAUNCH_ARGS+=(--env GEODESIC_HOST_SYMLINK)
 
 	# Mount the host mounts wherever the users asks for them to be mounted.
 	# However, if file ownership mapping is enabled,
@@ -501,11 +559,11 @@ function use() {
 		d="${dir%%:*}"
 		if [ -d "${d}" ] || [ -f "${d}" ]; then
 			if [ "${dir}" != "${d}" ]; then
-				DOCKER_ARGS+=(--volume="${d}:${mount_dir}${dir#*:}")
+				DOCKER_LAUNCH_ARGS+=(--volume="${d}:${mount_dir}${dir#*:}")
 				debug "Mounting ${d} into container at ${dir#*:}"
 				GEODESIC_HOST_MOUNTS+="${dir#*:}|"
 			else
-				DOCKER_ARGS+=(--volume="${d}:${mount_dir}${d}")
+				DOCKER_LAUNCH_ARGS+=(--volume="${d}:${mount_dir}${d}")
 				debug "Mounting ${d} into container at ${d}"
 				GEODESIC_HOST_MOUNTS+="${d}|"
 			fi
@@ -514,12 +572,12 @@ function use() {
 		fi
 	done
 
-	DOCKER_ARGS+=(--env GEODESIC_HOST_MOUNTS)
+	DOCKER_LAUNCH_ARGS+=(--env GEODESIC_HOST_MOUNTS)
 
-	#echo "Computed DOCKER_ARGS:"
-	#printf "   %s\n" "${DOCKER_ARGS[@]}"
+	#echo "Computed DOCKER_LAUNCH_ARGS:"
+	#printf "   %s\n" "${DOCKER_LAUNCH_ARGS[@]}"
 
-	DOCKER_ARGS+=(
+	DOCKER_LAUNCH_ARGS+=(
 		--privileged
 		--publish ${GEODESIC_PORT}:${GEODESIC_PORT}
 		--rm
@@ -527,7 +585,6 @@ function use() {
 		--env DOCKER_IMAGE="${DOCKER_IMAGE%:*}"
 		--env DOCKER_NAME="${DOCKER_NAME}"
 		--env DOCKER_TAG="${DOCKER_TAG}"
-		--env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}"
 	)
 
 	if [ "$ONE_SHELL" = "true" ]; then
@@ -535,15 +592,23 @@ function use() {
 		echo "# Starting single shell ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
 		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		docker run --name "${DOCKER_NAME}" "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
+		# GEODESIC_DOCKER_EXTRA_ARGS is not quoted because it is expected to be a list of arguments
+		docker run --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} "${DOCKER_IMAGE}" -l "$@"
 	else
 		echo "# Running new ${DOCKER_NAME} container from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
 		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		# docker run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
-		CONTAINER_ID=$(docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} /usr/local/sbin/shell-monitor)
+		# GEODESIC_DOCKER_EXTRA_ARGS is not quoted because it is expected to be a list of arguments
+		CONTAINER_ID=$(docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} "${DOCKER_IMAGE}" /usr/local/sbin/shell-monitor)
 		echo "# Started session ${CONTAINER_ID:0:12}. Starting shell via \`docker exec\`..."
-		docker exec -it --detach-keys "ctrl-^,ctrl-[,ctrl-@" --env GEODESIC_HOST_CWD="${GEODESIC_HOST_CWD}" "${DOCKER_NAME}" /bin/bash -l $*
+		if [ $# -eq 0 ]; then
+			set -- "/bin/bash" "-l"
+		fi
+
+		[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
+		# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
+		# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
+		docker exec --env G_HOST_PID=$$ --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" "$@"
 	fi
 	true
 }

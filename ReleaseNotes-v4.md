@@ -546,7 +546,7 @@ Some line options regarding customization have been added:
    customizations or in the base image. Note that this does not disable changes made by `launch-options.sh`.
 2. `--trace` will enable tracing the Geodesic script as it performs customizations. Equivalent to `--trace=custom`.
 3. `--trace="custom terminal hist` will enable tracing of the customizations, terminal configuration (mainly with respect
-   to light and dark mode support), and the determination of which Bash history file to use, respectively.
+   to light/dark mode support), and the determination of which Bash history file to use, respectively.
    You can use these options in any combination.
 4. `--dark` and `--light` will set the terminal theme to dark or light, respectively, disabling attempts to automatically detect it.
    This is mainly useful if the automatic detection is not working.
@@ -603,7 +603,7 @@ get-terminal-theme
 ```
 
 Some terminals notify the shell of color changes by sending a `SIGWINCH` signal.
-Geodesic also sends this signal to its shell when it detects change in the size of the window.
+Geodesic also sends this signal to its shell when it detects a change in the size of the window.
 You can set the environment variable `GEODESIC_TERM_THEME_AUTO=enabled` to enable
 Geodesic to listen for this signal and update the theme when it is received.
 Beware that while updates are called from the prompt command hook, we have seen many

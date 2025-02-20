@@ -395,12 +395,12 @@ function use() {
 		if [ -n "$CONTAINER_ID" ]; then
 			echo "# Starting shell in already running ${DOCKER_NAME} container ($CONTAINER_ID)"
 			if [ $# -eq 0 ]; then
-				set -- "/bin/bash" "-l" "$@"
+				set -- "/bin/bash" "-l"
 			fi
 			[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
 			# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
 			# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
-			docker exec --env G_HOST_PID=$WRAPPER_PID --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" $*
+			docker exec --env G_HOST_PID=$WRAPPER_PID --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" "$@"
 			return 0
 		fi
 	fi
@@ -592,22 +592,23 @@ function use() {
 		echo "# Starting single shell ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
 		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		docker run --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
+		# GEODESIC_DOCKER_EXTRA_ARGS is not quoted because it is expected to be a list of arguments
+		docker run --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} "${DOCKER_IMAGE}" -l "$@"
 	else
 		echo "# Running new ${DOCKER_NAME} container from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
 		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		# docker run "${DOCKER_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} -l $*
-		CONTAINER_ID=$(docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} ${DOCKER_IMAGE} /usr/local/sbin/shell-monitor)
+		# GEODESIC_DOCKER_EXTRA_ARGS is not quoted because it is expected to be a list of arguments
+		CONTAINER_ID=$(docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} "${DOCKER_IMAGE}" /usr/local/sbin/shell-monitor)
 		echo "# Started session ${CONTAINER_ID:0:12}. Starting shell via \`docker exec\`..."
 		if [ $# -eq 0 ]; then
-			set -- "/bin/bash" "-l" "$@"
+			set -- "/bin/bash" "-l"
 		fi
 
 		[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
 		# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
 		# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
-		docker exec --env G_HOST_PID=$$ --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" $*
+		docker exec --env G_HOST_PID=$$ --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" "$@"
 	fi
 	true
 }

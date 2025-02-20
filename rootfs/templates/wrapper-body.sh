@@ -273,7 +273,7 @@ function wait_for_container_exit() {
 	local i n shells
 	n=15
 
-	for i in {0..$n}; do
+	for (( i=0; i<=n; i++ )); do
 		# Try n times to see if the container is still running, quit when it is no longer found
 		if [ -z "$(docker ps -q --filter "id=${CONTAINER_ID:0:12}")" ]; then
 			i=0

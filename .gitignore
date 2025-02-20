@@ -19,6 +19,8 @@ aws-assumed-role/
 **/*.terraform.auto.tfvars.json
 **/*.helmfile.vars.yaml
 
+src/colorsaurus/target/**
+
 # Module directory
 **/.terraform/
 **/.module/

@@ -81,7 +81,12 @@ function _verify_terminal_queries_are_supported() {
 
 # This is the worker function that gets the terminal foreground and background colors in RGB
 # and converts them to luminance values. If unknown, it returns 0 0.
+#
+# Luminance is on a scale of 0 to 1, but we want to be able to compare integers in bash,
+# so our _srgb_to_luminance function multiplies by a big enough value to get an integer and maintain precision.
+# Specifically, it multiplies by 1 000 000 000, which is why 1000000000 is used in the forced modes.
 # If forced "light" or "dark", it returns 0 1000000000 or 1000000000 0, respectively.
+
 _get_terminal_luminance() {
 	local fg_rgb bg_rgb fg_lum bg_lum
 

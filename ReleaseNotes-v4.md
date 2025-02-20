@@ -247,7 +247,7 @@ or you can replace it with the following, which works with both Geodesic v3 and 
 - By default, Geodesic automatically sets `TF_PLUGIN_CACHE_DIR` to `"${HOME}/.terraform.d/plugin-cache"`
   to provide a location for the [Terraform Provider Plugin Cache](https://developer.hashicorp.com/terraform/cli/config/config-file#provider-plugin-cache).
   This is a location on the host filesystem, allowing the cache to be shared between the host and the container,
-  and to persist between container runs. This is valuable saver of time and bandwidth, and we highly recommend
+  and to persist between container runs. This saves significant time and bandwidth, and we highly recommend
   using the plugin cache, which is why we have been setting it for years.
   However, the way this was implemented, it was difficult for users to opt-out of the plugin cache altogether.
   To accommodate those users while maintaining backward compatibility,
@@ -546,8 +546,8 @@ Some line options regarding customization have been added:
    customizations or in the base image. Note that this does not disable changes made by `launch-options.sh`.
 2. `--trace` will enable tracing the Geodesic script as it performs customizations. Equivalent to `--trace=custom`.
 3. `--trace="custom terminal hist` will enable tracing of the customizations, terminal configuration (mainly with respect
-   to light and dark mode support), and determining which Bash history file to use, respectively. You can use these options
-   in any combination, for example, `--trace="hist"`.
+   to light and dark mode support), and the determination of which Bash history file to use, respectively.
+   You can use these options in any combination.
 4. `--dark` and `--light` will set the terminal theme to dark or light, respectively, disabling attempts to automatically detect it.
    This is mainly useful if the automatic detection is not working.
 
@@ -580,10 +580,10 @@ must be set in the environment before Geodesic starts, e.g. in the `launch-optio
 #### Detecting changes in theme while running (experimental)
 
 You may have your terminal set to automatically switch between light and dark themes
-according to the time of day, or you may manually switch between themes. Unfortunately,
-there is no standard way to be notified of a terminal's theme change. Furthermore,
-because of the general issues around detecting the terminal theme, automatic
-detection of changes in the terminal theme has too often injected disruption
+based on the time of day, or you may manually switch between themes. Unfortunately,
+there is no standard way for a shell to be notified when a terminal's theme changes. Furthermore,
+due to the inherent challenges of detecting terminal themes, automatic
+detection of changes in the terminal theme has too often injected disruptive characters and messages
 into the user's workflow. As a result, Geodesic by default does not attempt to detect changes
 in the terminal theme while running.
 
@@ -720,5 +720,5 @@ V4 changes:
 - `WORKSPACE_FOLDER` is the base directory of the project inside the container. Analogous to the target of Dev Container's
   `workspaceFolder`. Typically, this is the same as `WORKSPACE_MOUNT`, but may be a subdirectory if, for example, the Git repository is
   a "monorepo" containing multiple projects. It must be an absolute path either equal to or a subdirectory of `WORKSPACE_FOLDER_HOST_DIR`.
-- `GEODESIC_TERM_THEME` is normally unset. Set it to "light" or "dark" _before launching Geodesic_ to disable the initial attempt at automatic terminal light/dark them detection, and use the set value instead.
-- `GEODESIC_TERM_THEME_AUTO` is normally unset. Set it to "enabled" to enable automatic attempts to detect changes in terminal light/dark them. This feature should be considered experimental and may not work as expected.
+- `GEODESIC_TERM_THEME` is normally unset. Set it to "light" or "dark" _before launching Geodesic_ to disable the initial attempt at automatic terminal light/dark theme detection, and use the set value instead.
+- `GEODESIC_TERM_THEME_AUTO` is normally unset. Set it to "enabled" to enable automatic attempts to detect changes in terminal light/dark theme. This feature should be considered experimental and may not work as expected.

@@ -236,8 +236,7 @@ RUN helm3 plugin install https://github.com/databus23/helm-diff.git --version v$
 # AWS_DATA_PATH is a PATH-like variable for configuring the AWS botocore library to
 # load additional modules. Do not set it.
 ARG GEODESIC_AWS_HOME=${HOME}/.aws
-ENV AWS_CONFIG_FILE=${GEODESIC_AWS_HOME}/config
-ENV AWS_SHARED_CREDENTIALS_FILE=${GEODESIC_AWS_HOME}/credentials
+
 # Region abbreviation types are "fixed" (always 3 chars), "short" (4-5 chars), or "long" (the full AWS string)
 # See https://github.com/cloudposse/terraform-aws-utils#introduction
 ENV AWS_REGION_ABBREVIATION_TYPE=short
@@ -319,6 +318,14 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     -o "/tmp/session-manager-plugin.deb" && \
     sudo dpkg -i /tmp/session-manager-plugin.deb && \
     rm -f /tmp/session-manager-plugin.deb
+
+# This is a workaround for https://github.com/moby/buildkit/issues/5775
+# CHAMBER_KMS_KEY_ALIAS is used by the `chamber` CLI, but it is incorrectly
+# flagged as a secret by the SecretsUsedInArgOrEnv check. This is a false positive.
+# So, as a workaround, we allow you to set `CHAMBER_KMS_ALIAS` instead,
+# and at runtime we copy the value to `CHAMBER_KMS_KEY_ALIAS` for you.
+ENV CHAMBER_KMS_ALIAS=aws/ssm
+
 
 # Install documentation
 COPY docs/ /usr/share/docs/

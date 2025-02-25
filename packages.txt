@@ -40,6 +40,7 @@ kubectl@cloudposse
 kubectx@cloudposse
 kubens@cloudposse
 less
+lsb-release
 make
 man-db
 openssh-client

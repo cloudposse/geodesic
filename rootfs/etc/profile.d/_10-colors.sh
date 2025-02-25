@@ -10,6 +10,28 @@
 # The main change is that it uses the terminal's default colors for foreground and background,
 # whereas the previous version "reset" the color by setting it to black, which fails in dark mode.
 
+# These utilities use basic ANSI color codes (0-7) to colorize text in the terminal.
+# Besides being the most widely supported method, it also has the advantage
+# that terminals that support colored text and backgrounds as themes often
+# take responsibility for the ANSI colors being legible regardless of the theme.
+# For example, on a completely red background, the ANSI red color will be changed
+# as part of the theme to a lighter or darker shade of red to ensure it is legible.
+# This would not be the case if we tried to set the color directly using RGB values,
+# or even using extended ANSI colors.
+
+# To test a terminal manually, the following script displays all 256 ANSI colors.
+# Our color functions only use 1 through 6.
+# We indirectly support 0 and 7 (black and white), reversing them in dark mode,
+# but we do not provide direct functions for them.
+# We support a "bold" modifier, which some terminals equate to colors 8 through 15.
+#
+# for i in {0..255}; do
+#    printf "\e[38;5;${i}mcolor%-5i\e[0m" $i
+#    if [ $((($i + 1) % 8)) == 0 ]; then
+#        echo
+#    fi
+# done
+
 function update-terminal-theme() {
 	local new_mode="$1"
 	local quiet=false

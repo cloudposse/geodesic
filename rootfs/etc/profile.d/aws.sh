@@ -1,4 +1,7 @@
 #!/bin/bash
+# shellcheck disable=SC2155
+# Above directive suppresses ShellCheck SC2155: Declare and assign separately to avoid masking return values.
+# In this script, we do not care about return values, as problems are detected by the resulting empty value.
 
 export AWS_REGION_ABBREVIATION_TYPE=${AWS_REGION_ABBREVIATION_TYPE:-fixed}
 export AWS_DEFAULT_SHORT_REGION=${AWS_DEFAULT_SHORT_REGION:-$(aws-region --${AWS_REGION_ABBREVIATION_TYPE} ${AWS_DEFAULT_REGION:-us-west-2})}
@@ -252,7 +255,7 @@ function refresh_current_aws_role_if_needed() {
 	local is_exported="^declare -[^ x]*x[^ x]* "
 	local aws_profile=$(declare -p AWS_PROFILE 2>/dev/null)
 	[[ $aws_profile =~ $is_exported ]] || aws_profile=""
-	local credentials_mtime=$(stat -c "%Y" ${AWS_SHARED_CREDENTIALS_FILE:-"~/.aws/credentials"} 2>/dev/null)
+	local credentials_mtime=$(stat -c "%Y" ${AWS_SHARED_CREDENTIALS_FILE:-"${GEODESIC_AWS_HOME}/credentials"} 2>/dev/null)
 	local role_fingerprint="${aws_profile}/${credentials_mtime}/${AWS_ACCESS_KEY_ID}"
 	if [[ $role_fingerprint != $GEODESIC_AWS_ROLE_CACHE ]]; then
 		export_current_aws_role

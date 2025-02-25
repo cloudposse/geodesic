@@ -39,7 +39,7 @@ color "#   docker run --rm ${DOCKER_IMAGE:-cloudposse/geodesic}:${version} init 
 color "#"
 color "# After that, you should be able to launch Geodesic just by typing"
 color "#"
-color "#   $(basename ${DOCKER_IMAGE:-geodesic})"
+color "#   ${APP_NAME:-$(basename ${DOCKER_IMAGE:-Geodesic})}"
 color "#"
 color "########################################################################################"
 echo

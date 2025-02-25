@@ -16,7 +16,7 @@
 # and we will set the `CHAMBER_KMS_KEY_ALIAS` environment variable for you here.
 #
 
-if [[ -z $CHAMBER_KMS_KEY_ALIAS ]] && [[ -n $CHAMBER_KMS_ALIAS ]]; then
-	export CHAMBER_KMS_KEY_ALIAS=$CHAMBER_KMS_ALIAS
+if [[ -z "$CHAMBER_KMS_KEY_ALIAS" ]] && [[ -n "$CHAMBER_KMS_ALIAS" ]]; then
+	export CHAMBER_KMS_KEY_ALIAS="$CHAMBER_KMS_ALIAS"
 	unset CHAMBER_KMS_ALIAS
 fi

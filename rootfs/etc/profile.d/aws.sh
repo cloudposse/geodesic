@@ -62,7 +62,7 @@ fi
 
 function aws_choose_role() {
 	_preview="${FZF_PREVIEW:-crudini --format=ini --get "$AWS_CONFIG_FILE" 'profile {}'}"
-	cat "${AWS_SHARED_CREDENTIALS_FILE:-~/.aws/credentials}" "${AWS_CONFIG_FILE:-~/.aws/config}" 2>/dev/null |
+	cat "${AWS_SHARED_CREDENTIALS_FILE:-${GEODESIC_AWS_HOME}/.aws/credentials}" "${AWS_CONFIG_FILE:-${GEODESIC_AWS_HOME}/.aws/config}" 2>/dev/null |
 		crudini --get - | sed 's/^ *profile *//' |
 		fzf \
 			--height 30% \
@@ -115,62 +115,85 @@ function export_current_aws_role() {
 		return 0
 	fi
 
-	# Quick check, are we who we say we are?
+	# If AWS_VAULT is not enabled, clear any setting from it.
+	[[ ${AWS_VAULT_ENABLED:-false} == "true" ]] || unset AWS_VAULT
+
+	# Quick check, are we who we say we are? Does the current role match the profile?
 	local profile_arn
 	local profile_target=${AWS_PROFILE:-${AWS_VAULT:-default}}
-	if [[ -n $profile_target ]]; then
-		profile_arn=$(aws --profile "${profile_target}" sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
-		if [[ $profile_arn == $current_role ]]; then
-			# Extract profile name from config file:
-			# 1. For default profile, look for a better name
-			# 2. Skip identity profiles (ending with -identity), as they are too generic
-			# 3. Use the first non-default, non-identity profile found
-			if [[ $profile_target == "default" ]] || [[ $profile_target =~ -identity$ ]]; then
-				# Make some effort to find a better name for the role, but only check the config file, not credentials.
-				local config_file="${AWS_CONFIG_FILE:-\~/.aws/config}"
-				if [[ -r $config_file ]]; then
-					# Assumed roles in AWS config file use the role ARN, not the assumed role ARN, so adjust accordingly.
-					local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
-					role_name=($(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3))
-					for rn in "${role_name[@]}"; do
-						if [[ $rn == "default" ]] || [[ $rn =~ -identity$ ]]; then
-							continue
-						else
-							export ASSUME_ROLE=$rn
-							return
-						fi
-					done
-				fi
-			else
-				export ASSUME_ROLE="$profile_target"
-				return
+	profile_arn=$(aws --profile "${profile_target}" sts get-caller-identity --output text --query 'Arn' 2>/dev/null | cut -d/ -f1-2)
+	# The main way there would be a mismatch is if AWS_VAULT is set or there are API keys in the environment
+	if [[ $profile_arn == $current_role ]]; then
+		# If we are here, then the current role matches the assigned profile. That is a good thing.
+		# However, the profile name may not be the best name for the role. If it is too generic, try to find a better name.
+		# Extract profile name from config file:
+		# 1. For default profile, look for a better name
+		# 2. Skip identity profiles (ending with -identity), as they are too generic
+		# 3. Use the first non-default, non-identity profile found
+		if [[ $profile_target == "default" ]] || [[ $profile_target =~ -identity$ ]]; then
+			# Make some effort to find a better name for the role, but only check the config file, not credentials.
+			local config_file="${AWS_CONFIG_FILE:-${GEODESIC_AWS_HOME}/.aws/config}"
+			if [[ -r $config_file ]]; then
+				# Assumed roles in AWS config file use the role ARN, not the assumed role ARN, so adjust accordingly.
+				local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
+				role_name=($(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3))
+				for rn in "${role_name[@]}"; do
+					if [[ $rn == "default" ]] || [[ $rn =~ -identity$ ]]; then
+						continue
+					else
+						export ASSUME_ROLE=$rn
+						return
+					fi
+				done
 			fi
 		fi
-		echo "* $(red Profile is set to $profile_target but current role does not match:)"
-		echo "*   $(red $current_role)"
+		# could not find a better match, so just use the generic profile name
+		export ASSUME_ROLE="$profile_target"
+		return
+	fi
+
+	# If we are here, then the current role is not what we would expect from the AWS_PROFILE setting.
+	# If AWS_PROFILE is unset, then we forgive the current role not being the default role.
+	# Otherwise, we warn about a mismatch.
+	if [[ -n $AWS_PROFILE ]]; then
+		red "* AWS Credentials Mismatch! AWS_PROFILE is set to $AWS_PROFILE"
+		red "* That profile selects role $profile_arn"
+		red "* But STS reports current role is $current_role"
+		export ASSUME_ROLE=$(red-n '!mixed!')
+		return
+	elif [[ -n $AWS_VAULT ]]; then
+		red "* AWS Credentials Mismatch! AWS_VAULT claims to have set role to profile $AWS_VAULT"
+		red "* That profile selects role $profile_arn"
+		red "* But STS reports current role is $current_role"
+		red "* "
 		export ASSUME_ROLE=$(red-n '!mixed!')
 		return
 	fi
 
+	# If we are here, then we are not using AWS_VAULT or AWS_PROFILE, and the current role does not match the default profile.
+	# This is likely because we are using API keys directly in the environment or credentials file.
+	# Try to figure out a better name for the role.
+
 	# saml2aws will store the assumed role from sign-in as x_principal_arn in credentials file
 	# Default values from https://awscli.amazonaws.com/v2/documentation/api/latest/topic/config-vars.html
-	local creds_file="${AWS_SHARED_CREDENTIALS_FILE:-\~/.aws/credentials}"
+	local creds_file="${AWS_SHARED_CREDENTIALS_FILE:-${GEODESIC_AWS_HOME}/.aws/credentials}"
 	if [[ -r $creds_file ]]; then
 		role_name=$(crudini --get --format=lines "${creds_file}" | grep "$current_role" | head -1 | cut -d' ' -f 2)
 	fi
 
 	# Assumed roles are normally found in AWS config file, but using the role ARN,
 	# not the assumed role ARN. google2aws also puts login role in this file.
-	local config_file="${AWS_CONFIG_FILE:-\~/.aws/config}"
+	local config_file="${AWS_CONFIG_FILE:-${GEODESIC_AWS_HOME}/.aws/config}"
 	if [[ -z $role_name ]] && [[ -r $config_file ]]; then
 		local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
 		role_name=$(crudini --get --format=lines "$config_file" | grep "$role_arn" | head -1 | cut -d' ' -f 3)
 	fi
 
+	# If we still don't have a profile name, make one up.
 	if [[ -z $role_name ]]; then
 		if [[ "$role_arn" =~ "role/OrganizationAccountAccessRole" ]]; then
 			role_name="$(printf "%s" "$role_arn" | cut -d: -f 5):OrgAccess"
-			echo "* $(red "Could not find profile name for ${role_arn} ; calling it \"${role_name}\"")" >&2
+			echo "* $(green "Could not find profile name for ${role_arn} ; calling it \"${role_name}\"")" >&2
 		else
 			role_name="$(printf "%s" "$role_arn" | cut -d/ -f 2)"
 			echo "* $(green "Could not find profile name for ${role_arn} ; calling it \"${role_name}\"")" >&2

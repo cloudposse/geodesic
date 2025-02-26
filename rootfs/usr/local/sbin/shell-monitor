@@ -18,9 +18,6 @@ shells_are_running() {
 shell_has_exited() {
 	local pid
 
-	trap 'set +x' EXIT
-	set -x
-
 	# If there are no shells left, then they have all exited.
 	[[ "${#wrapper_pids[@]}" -eq 0 ]] && return 0
 

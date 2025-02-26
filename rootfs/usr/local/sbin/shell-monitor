@@ -6,9 +6,11 @@ wrapper_pids=()
 
 # Function to count active shell sessions launched by wrapper
 # Expensive, so run sparingly. Only needed to find new shells when they launch.
-count_shells() {
+shells_are_running() {
+	# As a side effect, update the list of running shells
 	wrapper_pids=($(list-wrapper-shells))
-	echo "${#wrapper_pids[@]}"
+	# Return true if there are any shells running
+	[[ "${#wrapper_pids[@]}" -gt 0 ]]
 }
 
 # Function to check if any registered shell has exited.
@@ -31,25 +33,25 @@ shell_has_exited() {
 # Function to kill all active shell sessions launched by wrapper.
 # This is the shutdown procedure, so we do not care about hogging the CPU.
 kill_shells() {
-	for pid in $(list_wrapper_shells); do
+	for pid in $(list-wrapper-shells); do
 		kill -HUP $pid
 	done
 
 	for i in {1..4}; do
-		[ $(count_shells) -eq 0 ] && return 0
+		shells_are_running || return 0
 		sleep 1
 	done
 
-	for pid in $(list_wrapper_shells); do
+	for pid in $(list-wrapper-shells); do
 		kill -TERM $pid
 	done
 
 	for i in {1..3}; do
-		[ $(count_shells) -eq 0 ] && return 0
+		shells_are_running || return 0
 		sleep 1
 	done
 
-	for pid in $(list_wrapper_shells); do
+	for pid in $(list-wrapper-shells); do
 		kill -KILL $pid
 	done
 
@@ -62,7 +64,7 @@ trap 'kill_shells; exit $?' TERM HUP INT QUIT EXIT
 # Since we are waiting for something to happen, we can afford burn
 # up some CPU in order to be more responsive.
 i=0
-while [ $(count_shells) -eq 0 ]; do
+while ! shells_are_running; do
 	sleep 0.5
 	i=$((i + 1))
 	if [ $i -ge 120 ]; then
@@ -87,7 +89,7 @@ while true; do
 	while ! shell_has_exited; do
 		sleep 0.67
 	done
-	[[ $(count_shells) -eq 0 ]] && break
+	shells_are_running || break
 done
 
 # Clean up and exit

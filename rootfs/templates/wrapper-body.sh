@@ -588,6 +588,7 @@ function use() {
 	)
 
 	if [ "$ONE_SHELL" = "true" ]; then
+		[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
 		DOCKER_NAME="${DOCKER_NAME}-$(date +%d%H%M%S)"
 		echo "# Starting single shell ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"

@@ -1,1 +1,1 @@
-crudini==0.9.5
+crudini==0.9.6

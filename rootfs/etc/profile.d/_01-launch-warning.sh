@@ -11,6 +11,11 @@
 # Specifically, this guards against:
 #   docker run -it cloudposse/geodesic:latest-debian  | bash
 
+# It works by outputting a command that will print a warning message to stderr and then exit,
+# which will be evaluated by the shell receiving the output, which will print the message.
+# It also outputs backspaces to erase the message, so the message does not appear
+# on the screen during the normal startup processing if the output is a terminal.
+
 # If the warning message is longer than the terminal width,
 # on some terminals the message may be truncated. In that case,
 # all the erasure characters will not be printed, and the message will not be erased.
@@ -59,5 +64,5 @@ function warn_if_piped() {
 	trap - EXIT
 }
 
-warn_if_piped
+[[ -t 0 ]] && warn_if_piped
 unset -f warn_if_piped

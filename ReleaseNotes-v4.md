@@ -722,3 +722,9 @@ V4 changes:
   a "monorepo" containing multiple projects. It must be an absolute path either equal to or a subdirectory of `WORKSPACE_FOLDER_HOST_DIR`.
 - `GEODESIC_TERM_THEME` is normally unset. Set it to "light" or "dark" _before launching Geodesic_ to disable the initial attempt at automatic terminal light/dark theme detection, and use the set value instead.
 - `GEODESIC_TERM_THEME_AUTO` is normally unset. Set it to "enabled" to enable automatic attempts to detect changes in terminal light/dark theme. This feature should be considered experimental and may not work as expected.
+
+Starting with Geodesic version 4.4.0:
+
+- `GEODESIC_DOCKER_EXTRA_ARGS` is deprecated. Geodesic distinguishes between options for launching a container
+  and options for exec’ing into a running one. Use `GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS` for container launch and
+  `GEODESIC_DOCKER_EXTRA_EXEC_ARGS` for exec’ing into a running container.

@@ -240,16 +240,23 @@ options_to_env
 
 function debug() {
 	if [ "${VERBOSE}" == "true" ]; then
-		echo "[DEBUG] $*"
+		printf "[DEBUG] %s\n" "$*" >&2
 	fi
 }
 
+function debug_and_run() {
+	debug '>>>'
+	debug "Running: $*"
+	debug '<<<'
+	"$@"
+}
+
 function _running_shell_pids() {
-	docker exec "${DOCKER_NAME}" list-wrapper-shells 2>/dev/null
+	debug_and_run docker exec "${DOCKER_NAME}" list-wrapper-shells 2>/dev/null
 }
 
 function _our_shell_pid() {
-	docker exec "${DOCKER_NAME}" list-wrapper-shells "$WRAPPER_PID" 2>/dev/null || true
+	debug_and_run docker exec "${DOCKER_NAME}" list-wrapper-shells "$WRAPPER_PID" 2>/dev/null || true
 }
 
 function _running_shell_count() {
@@ -258,14 +265,14 @@ function _running_shell_count() {
 }
 
 function _on_shell_exit() {
-	command -v "${ON_SHELL_EXIT:=geodesic_on_exit}" >/dev/null && "${ON_SHELL_EXIT}"
+	command -v "${ON_SHELL_EXIT:=geodesic_on_exit}" >/dev/null && debug_and_run "${ON_SHELL_EXIT}"
 }
 
 function _on_container_exit() {
 	export GEODESIC_EXITING_CONTAINER_ID="${CONTAINER_ID:0:12}"
 	export GEODESIC_EXITING_CONTAINER_NAME="${DOCKER_NAME}"
 	_on_shell_exit
-	[ -n "${ON_CONTAINER_EXIT}" ] && command -v "${ON_CONTAINER_EXIT}" >/dev/null && "${ON_CONTAINER_EXIT}"
+	[ -n "${ON_CONTAINER_EXIT}" ] && command -v "${ON_CONTAINER_EXIT}" >/dev/null && debug_and_run "${ON_CONTAINER_EXIT}"
 }
 
 # Call this function to wait for the container to exit, after all other shells have exited.
@@ -320,7 +327,7 @@ function run_exit_hooks() {
 
 	# Best case scenario: no shells running
 	if [ "${#shell_pids[@]}" -eq 0 ]; then
-		wait_for_container_exit
+		debug_and_run wait_for_container_exit
 		return $?
 	fi
 
@@ -355,8 +362,21 @@ function run_exit_hooks() {
 		[ $i -lt $n ] && echo " Finished." >&2 || printf "\nTimeout waiting for container shell to exit.\n" >&2
 	fi
 
-	wait_for_container_exit
+	debug_and_run wait_for_container_exit
 	return $?
+}
+
+function _exec_existing {
+	if [ $# -eq 0 ]; then
+		set -- "/bin/bash" "-l"
+	fi
+	[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
+	[ -z "${GEODESIC_DOCKER_EXTRA_EXEC_ARGS}" ] || echo "# Exec'ing shell with extra Docker args: ${GEODESIC_DOCKER_EXTRA_EXEC_ARGS}"
+	# GEODESIC_DOCKER_EXTRA_EXEC_ARGS is not quoted because it is expected to be a list of arguments
+
+	# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
+	# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
+	debug_and_run docker exec --env G_HOST_PID=$WRAPPER_PID --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_EXEC_ARGS} "${DOCKER_NAME}" "$@"
 }
 
 function use() {
@@ -364,6 +384,19 @@ function use() {
 	trap run_exit_hooks EXIT
 
 	export WRAPPER_PID=$$
+
+	if [ -n "${GEODESIC_DOCKER_EXTRA_ARGS+x}" ]; then
+		echo '# WARNING: $GEODESIC_DOCKER_EXTRA_ARGS is deprecated. ' >&2
+		echo '#   Use GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS to configure container launch (`docker run`)' >&2
+		echo '#   and GEODESIC_DOCKER_EXTRA_EXEC_ARGS to configure starting a new shell' >&2
+		echo '#          in a running container (`docker exec`).' >&2
+			if [ -n "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS+x}" ]; then
+				echo '# WARNING: Both $GEODESIC_DOCKER_EXTRA_ARGS and $GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS are set. ' >&2
+				echo '#   $GEODESIC_DOCKER_EXTRA_ARGS will be igored.' >&2
+			else
+				export GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS="${GEODESIC_DOCKER_EXTRA_ARGS}"
+			fi
+	fi
 
 	DOCKER_EXEC_ARGS=(--env LS_COLORS --env TERM --env TERM_COLOR --env TERM_PROGRAM)
 	# Some settings from the host environment need to propagate into the container
@@ -394,13 +427,7 @@ function use() {
 		CONTAINER_ID=$(docker ps --filter name="^/${DOCKER_NAME}\$" --format '{{ .ID }}')
 		if [ -n "$CONTAINER_ID" ]; then
 			echo "# Starting shell in already running ${DOCKER_NAME} container ($CONTAINER_ID)"
-			if [ $# -eq 0 ]; then
-				set -- "/bin/bash" "-l"
-			fi
-			[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
-			# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
-			# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
-			docker exec --env G_HOST_PID=$WRAPPER_PID --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" "$@"
+			_exec_existing "$@"
 			return 0
 		fi
 	fi
@@ -592,24 +619,17 @@ function use() {
 		DOCKER_NAME="${DOCKER_NAME}-$(date +%d%H%M%S)"
 		echo "# Starting single shell ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
-		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		# GEODESIC_DOCKER_EXTRA_ARGS is not quoted because it is expected to be a list of arguments
-		docker run --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} "${DOCKER_IMAGE}" -l "$@"
+		[ -z "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}"
+		# GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS is not quoted because it is expected to be a list of arguments
+		debug_and_run docker run --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS} "${DOCKER_IMAGE}" -l "$@"
 	else
 		echo "# Running new ${DOCKER_NAME} container from ${DOCKER_IMAGE}"
 		echo "# Exposing port ${GEODESIC_PORT}"
-		[ -z "${GEODESIC_DOCKER_EXTRA_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_ARGS}"
-		# GEODESIC_DOCKER_EXTRA_ARGS is not quoted because it is expected to be a list of arguments
-		CONTAINER_ID=$(docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_ARGS} "${DOCKER_IMAGE}" /usr/local/sbin/shell-monitor)
+		[ -z "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}"
+		# GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS is not quoted because it is expected to be a list of arguments
+		CONTAINER_ID=$(debug_and_run docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS} "${DOCKER_IMAGE}" /usr/local/sbin/shell-monitor)
 		echo "# Started session ${CONTAINER_ID:0:12}. Starting shell via \`docker exec\`..."
-		if [ $# -eq 0 ]; then
-			set -- "/bin/bash" "-l"
-		fi
-
-		[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
-		# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
-		# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
-		docker exec --env G_HOST_PID=$$ --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" "${DOCKER_NAME}" "$@"
+		_exec_existing "$@"
 	fi
 	true
 }

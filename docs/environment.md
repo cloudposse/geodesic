@@ -40,6 +40,12 @@ Geodesic version 4 additions and changes:
 - `MAP_FILE_OWNERSHIP` replaces `GEODESIC_HOST_BINDFS_ENABLED`. If set to true, Geodesic will use `bindfs` to map file ownership
   between the host and container. This not normally needed, as it should be handled automatically by Docker.
 
+Starting with Geodesic version 4.4.0:
+
+- `GEODESIC_DOCKER_EXTRA_ARGS` is deprecated. Geodesic distinguishes between options for launching a container
+  and options for exec’ing into a running one. Use `GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS` for container launch and
+  `GEODESIC_DOCKER_EXTRA_EXEC_ARGS` for exec’ing into a running container.
+
 ### Geodesic Version 3 Environment Variables
 
 Below is a list of environment variables that may be visible in the shell and were present in Geodesic v3.

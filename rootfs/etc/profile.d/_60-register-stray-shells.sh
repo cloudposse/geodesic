@@ -19,5 +19,13 @@
 
 if [[ $$ != 1 ]] && [[ $PPID == 0 ]] && [[ -z $G_HOST_PID ]]; then
 	export G_HOST_PID=0
-	[[ -t 0 ]] && yellow '# Detected shell launched by `docker exec` without wrapper info, tracking as stray shell.'
+	[[ -t 0 ]] && yellow '# Detected shell launched by `docker exec` without wrapper info, tracking as stray shell.' >&2
+fi
+
+if [[ $$ == 1 ]] && ! [[ -t 0 ]] && [[ $# -eq 0 ]]; then
+	echo >&2
+	echo "#  You have launched a login shell without a terminal and without a command." >&2
+	echo "#  This is not supported. Please run a command or attach a terminal." >&2
+	echo >&2
+	exit 1
 fi

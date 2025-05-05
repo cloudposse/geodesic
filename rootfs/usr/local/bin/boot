@@ -20,7 +20,7 @@ else
   color "########################################################################################"
   color "# Attach a terminal (docker run --rm --it ...) if you want to run a shell."
   color "#"
-  color "# Run the following to install the script that runs ${APP_NAME:-$(basename ${DOCKER_IMAGE:-Geodesic})} "
+  color "# Run the following to install the script that runs ${APP_NAME:-$(basename ${DOCKER_IMAGE:-Geodesic})}"
   color "# with all its features (the recommended way to use Geodesic):"
 fi
 

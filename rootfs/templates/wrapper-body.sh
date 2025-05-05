@@ -10,7 +10,7 @@ function require_installed() {
 
 ## Verify we have the foundations in place
 
-if [ "${GEODESIC_SHELL}" == "true" ]; then
+if [ "${GEODESIC_SHELL}" = "true" ]; then
 	echo "Cannot run while in a geodesic shell"
 	exit 1
 fi
@@ -239,24 +239,33 @@ options_to_env
 [ "$VERBOSE" = "true" ] && [ -n "$verbose_buffer" ] && printf "%s\n" "${verbose_buffer[@]}"
 
 function debug() {
-	if [ "${VERBOSE}" == "true" ]; then
+	if [ "${VERBOSE}" = "true" ]; then
 		printf "[DEBUG] %s\n" "$*" >&2
 	fi
 }
 
 function debug_and_run() {
+	local noerr
+	[ "$1" = "--noerr" ] && noerr=true && shift
 	debug '>>>'
 	debug "Running: $*"
-	debug '<<<'
-	"$@"
+	if [ "$noerr" = true ]; then
+		"$@" 2>/dev/null
+	else
+		"$@"
+	fi
+  local status=$?
+  debug "Exit status: $status"
+  debug '<<<'
+  return $status
 }
 
 function _running_shell_pids() {
-	debug_and_run docker exec "${DOCKER_NAME}" list-wrapper-shells 2>/dev/null
+	debug_and_run --noerr docker exec "${DOCKER_NAME}" list-wrapper-shells
 }
 
 function _our_shell_pid() {
-	debug_and_run docker exec "${DOCKER_NAME}" list-wrapper-shells "$WRAPPER_PID" 2>/dev/null || true
+	debug_and_run --noerr docker exec "${DOCKER_NAME}" list-wrapper-shells "$WRAPPER_PID" || true
 }
 
 function _running_shell_count() {
@@ -316,7 +325,7 @@ function run_exit_hooks() {
 	# There can then be a further delay before the container exits.
 	# So we need to build in some delays to allow for these events to occur.
 
-	if [[ ${ONE_SHELL} == "true" ]]; then
+	if [[ ${ONE_SHELL} = "true" ]]; then
 		# We can expect the Docker container to exit quickly, and do not need to report on it.
 		_on_container_exit
 		return 0
@@ -371,12 +380,12 @@ function _exec_existing {
 		set -- "/bin/bash" "-l"
 	fi
 	[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
-	[ -z "${GEODESIC_DOCKER_EXTRA_EXEC_ARGS}" ] || echo "# Exec'ing shell with extra Docker args: ${GEODESIC_DOCKER_EXTRA_EXEC_ARGS}"
+	[ -z "${GEODESIC_DOCKER_EXTRA_EXEC_ARGS}" ] || echo "# Exec'ing shell with extra Docker args: ${GEODESIC_DOCKER_EXTRA_EXEC_ARGS}" >&2
 	# GEODESIC_DOCKER_EXTRA_EXEC_ARGS is not quoted because it is expected to be a list of arguments
 
 	# We set unusual detach keys because (a) the default first char is ctrl-p, which is used for command history,
 	# and (b) if you detach from the shell, there is no way to reattach to it, so we want to effectively disable detach.
-	debug_and_run docker exec --env G_HOST_PID=$WRAPPER_PID --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_EXEC_ARGS} "${DOCKER_NAME}" "$@"
+	debug_and_run docker exec --env G_HOST_PID="${WRAPPER_PID}" --detach-keys "ctrl-^,ctrl-[,ctrl-@" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_EXEC_ARGS} "${DOCKER_NAME}" "$@"
 }
 
 function use() {
@@ -392,7 +401,7 @@ function use() {
 		echo '#          in a running container (`docker exec`).' >&2
 			if [ -n "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS+x}" ]; then
 				echo '# WARNING: Both $GEODESIC_DOCKER_EXTRA_ARGS and $GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS are set. ' >&2
-				echo '#   $GEODESIC_DOCKER_EXTRA_ARGS will be igored.' >&2
+				echo '#   $GEODESIC_DOCKER_EXTRA_ARGS will be ignored.' >&2
 			else
 				export GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS="${GEODESIC_DOCKER_EXTRA_ARGS}"
 			fi
@@ -408,7 +417,7 @@ function use() {
 		fi
 	done
 
-	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} == false ]]; then
+	if [[ ${GEODESIC_CUSTOMIZATION_DISABLED-false} = false ]]; then
 		if [ -n "${GEODESIC_TRACE}" ]; then
 			DOCKER_EXEC_ARGS+=(--env GEODESIC_TRACE)
 		fi
@@ -439,7 +448,7 @@ function use() {
 			-e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock)
 	fi
 
-	if [ "${WITH_DOCKER}" == "true" ]; then
+	if [ "${WITH_DOCKER}" = "true" ]; then
 		# Bind-mount docker socket into container
 		# Should work on Linux and Mac.
 		# Note that the mounted /var/run/docker.sock is not a file or
@@ -617,18 +626,18 @@ function use() {
 	if [ "$ONE_SHELL" = "true" ]; then
 		[ -t 0 ] && DOCKER_EXEC_ARGS+=(-it)
 		DOCKER_NAME="${DOCKER_NAME}-$(date +%d%H%M%S)"
-		echo "# Starting single shell ${DOCKER_NAME} session from ${DOCKER_IMAGE}"
-		echo "# Exposing port ${GEODESIC_PORT}"
-		[ -z "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}"
+		echo "# Starting single shell ${DOCKER_NAME} session from ${DOCKER_IMAGE}" >&2
+		echo "# Exposing port ${GEODESIC_PORT}" >&2
+		[ -z "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" >&2
 		# GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS is not quoted because it is expected to be a list of arguments
 		debug_and_run docker run --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS} "${DOCKER_IMAGE}" -l "$@"
 	else
-		echo "# Running new ${DOCKER_NAME} container from ${DOCKER_IMAGE}"
-		echo "# Exposing port ${GEODESIC_PORT}"
-		[ -z "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}"
+		echo "# Running new ${DOCKER_NAME} container from ${DOCKER_IMAGE}"  >&2
+		echo "# Exposing port ${GEODESIC_PORT}"  >&2
+		[ -z "${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" ] || echo "# Launching with extra Docker args: ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS}" >&2
 		# GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS is not quoted because it is expected to be a list of arguments
 		CONTAINER_ID=$(debug_and_run docker run --detach --init --name "${DOCKER_NAME}" "${DOCKER_LAUNCH_ARGS[@]}" "${DOCKER_EXEC_ARGS[@]}" ${GEODESIC_DOCKER_EXTRA_LAUNCH_ARGS} "${DOCKER_IMAGE}" /usr/local/sbin/shell-monitor)
-		echo "# Started session ${CONTAINER_ID:0:12}. Starting shell via \`docker exec\`..."
+		echo "# Started session ${CONTAINER_ID:0:12}. Starting shell via \`docker exec\`..." >&2
 		_exec_existing "$@"
 	fi
 	true

@@ -229,7 +229,7 @@ You can also add extra commands by installing "packages".
 - Cloud Posse also provides a large set of packages for installing common DevOps commands
 and utilities via [cloudposse/packages](https://github.com/cloudposse/packages).
 - Google Cloud provides a set of packages for working with GCP
-- OpenTofu provides a packge for installing it, too.
+- OpenTofu provides a package for installing it, too.
 
 Those package repositories are pre-installed in Geodesic, so
 all you need to do is add the packages you want via

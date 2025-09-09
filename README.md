@@ -2,8 +2,11 @@
 
 <!-- markdownlint-disable -->
 <a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/geodesic/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
-    <p align="right">
-<a href="https://github.com/cloudposse/geodesic/actions?query=workflow%3Adocker"><img src="https://github.com/cloudposse/geodesic/workflows/docker/badge.svg" alt="Build Status"/></a><a href="https://github.com/cloudposse/geodesic/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/geodesic.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a><a href="https://archive.sweetops.com/geodesic"><img src="https://img.shields.io/badge/slack-archive-blue.svg" alt="Slack Archive"/></a></p>
+
+
+<p align="right"><a href="https://github.com/cloudposse/geodesic/actions?query=workflow%3Adocker"><img src="https://github.com/cloudposse/geodesic/workflows/docker/badge.svg" alt="Build Status"/></a><a href="https://github.com/cloudposse/geodesic/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/geodesic.svg" alt="Latest Release"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/badge.svg" alt="Slack Community"/></a><a href="https://archive.sweetops.com/geodesic"><img src="https://img.shields.io/badge/slack-archive-blue.svg" alt="Slack Archive"/></a><a href="https://cloudposse.com/support/"><img src="https://img.shields.io/badge/Get_Support-success.svg?style=for-the-badge" alt="Get Support"/></a>
+
+</p>
 <!-- markdownlint-restore -->
 
 <!--
@@ -270,6 +273,10 @@ add further customization at launch time. When Geodesic starts up, it looks for 
 scripts and configuration so you can do things like add command aliases or override preconfigured options.
 Detailed information about launch-time configuration is in the [customization](./docs/customization.md)
 document, available from within the shell via `man customization`.
+
+
+
+
 
 
 

@@ -77,3 +77,8 @@ bash/fmt/check:
 	shfmt -d $(PWD)/rootfs
 
 .PHONY:  all %.all build %.build install %.install run %.run run/new run/check
+
+readme/build:
+	@atmos docs generate readme
+
+readme: readme/build

@@ -3,6 +3,7 @@ build-harness/
 aws-assumed-role/
 .idea/
 *.iml
+.atmos
 
 # Compiled or generated files
 # Compiled and auto-generated files

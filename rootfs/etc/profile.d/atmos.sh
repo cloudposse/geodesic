@@ -25,8 +25,8 @@ function use-identity() {
 			return 1
 		fi
 	else
-		# Arguments provided: pass --identity with the first argument, then any additional flags
-		if ! auth_output=$(atmos auth env --identity "$@" 2>&1); then
+		# Arguments provided: pass --identity=<value> with the first argument, then any additional flags
+		if ! auth_output=$(atmos auth env --identity="$1" "${@:2}" 2>&1); then
 			echo "Error running atmos auth: $auth_output" >&2
 			return 1
 		fi

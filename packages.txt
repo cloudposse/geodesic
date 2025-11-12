@@ -1,5 +1,4 @@
 # Essential packages
-atmos@cloudposse=1.198.0
 # no arm64 awless@cloudposse
 aws-iam-authenticator@cloudposse
 bash

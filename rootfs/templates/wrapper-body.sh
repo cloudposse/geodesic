@@ -531,6 +531,15 @@ function use() {
 		fi
 	done
 
+	# Mount Atmos-specific directories for auth support (if they exist)
+	# These are small directories specific to Atmos auth and won't impact performance
+	for dir in ".cache/atmos" ".local/share/atmos"; do
+		if [ -d "${local_home}/${dir}" ] || [ -f "${local_home}/${dir}" ]; then
+			DOCKER_LAUNCH_ARGS+=(--volume="${local_home}/${dir}:${mount_dir}${local_home}/${dir}")
+			debug "Mounting '${local_home}/${dir}' into container for Atmos auth"
+		fi
+	done
+
 	# WORKSPACE_MOUNT is the directory in the container that is to be the mount point for the host filesystem
 	WORKSPACE_MOUNT="${WORKSPACE_MOUNT:-/workspace}"
 	# WORKSPACE_HOST_DIR is the directory on the host that is to be the working directory

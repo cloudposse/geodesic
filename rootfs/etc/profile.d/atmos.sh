@@ -1,5 +1,46 @@
 #!/bin/bash
 
+# Configure Atmos XDG paths to use container's home directory
+# This is required for Atmos auth to work correctly with mounted volumes
+export ATMOS_XDG_CONFIG_HOME="${ATMOS_XDG_CONFIG_HOME:-${HOME}/.config}"
+export ATMOS_XDG_DATA_HOME="${ATMOS_XDG_DATA_HOME:-${HOME}/.local/share}"
+export ATMOS_XDG_CACHE_HOME="${ATMOS_XDG_CACHE_HOME:-${HOME}/.cache}"
+
+# Helper function for Atmos auth integration
+# Usage: use-identity [identity-name] [other atmos auth env flags]
+# This uses Atmos auth to authenticate and set credentials in the environment
+# If called with no arguments, it brings up the identity selector
+function use-identity() {
+	if ! command -v atmos >/dev/null 2>&1; then
+		echo "Error: atmos command not found. Please install atmos first." >&2
+		return 1
+	fi
+
+	# Run atmos auth env and evaluate the output to set credentials
+	local auth_output
+	if [ $# -eq 0 ]; then
+		# No arguments: bring up the selector by passing --identity with no value
+		if ! auth_output=$(atmos auth env --identity 2>&1); then
+			echo "Error running atmos auth: $auth_output" >&2
+			return 1
+		fi
+	else
+		# Arguments provided: pass --identity=<value> with the first argument, then any additional flags
+		if ! auth_output=$(atmos auth env --identity="$1" "${@:2}" 2>&1); then
+			echo "Error running atmos auth: $auth_output" >&2
+			return 1
+		fi
+	fi
+
+	# Evaluate the output to set environment variables
+	eval "$auth_output"
+
+	# If export_current_aws_role function exists (from aws.sh), refresh the AWS role display
+	if declare -f export_current_aws_role >/dev/null 2>&1; then
+		export_current_aws_role
+	fi
+}
+
 function atmos_configure_base_path() {
 	# Leave $ATMOS_BASE_PATH alone if it is already set
 	if [[ -n $ATMOS_BASE_PATH ]]; then

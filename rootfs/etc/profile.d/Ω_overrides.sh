@@ -3,7 +3,7 @@
 # other files that this function needs to be able to see.
 # This file should be the last file in profile.d to execute.
 # This loads user's overrides, which take actions based on any setup that has already occurred.
-# This must come after all setup has happened so that the final configuration is availble for inspection,
+# This must come after all setup has happened so that the final configuration is available for inspection,
 # and there must not be any configuration after this to ensure that anything set here remains set as the user intended.
 
 ## Load user's custom overrides

@@ -119,7 +119,7 @@ function geodesic_prompt() {
 	case $SHLVL in
 	1) level_prompt='.' ;;
 	2) level_prompt=':' ;;
-	3) level_prompt='⋮' ;; # vertical elipsis \u22ee from Mathematical Symbols
+	3) level_prompt='⋮' ;; # vertical ellipsis \u22ee from Mathematical Symbols
 	*) level_prompt="$SHLVL" ;;
 	esac
 	level_prompt=$(bold "${level_prompt}")

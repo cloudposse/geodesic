@@ -26,7 +26,7 @@ function require_cfvar() {
 	echo "$separator"
 	red Build variable \"$var\" has not been set >&2
 
-	# Look for docmentation of VARNAME on the rest of the args
+	# Look for documentation of VARNAME on the rest of the args
 	# First, look for trailing characters on $1 and collect them
 	local rem1=$(expr match "$1" '[^}]*}}[[:blank:]]*\(.*\)')
 
@@ -50,7 +50,7 @@ function require_cfvar() {
 #    EOF
 # Checks each variable with require_cfvar.
 # Variables must be at the start of the line, one per line, but do not need to be quoted.
-# The final EOF must be at the begining of the line.
+# The final EOF must be at the beginning of the line.
 function require_cfvars() {
 	local var
 	local status=0

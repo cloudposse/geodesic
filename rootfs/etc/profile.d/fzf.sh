@@ -34,7 +34,7 @@ function _set_fzf_default_opts() {
 	local cyan="37"
 	local green="2"
 	local olive="3"
-	local keep="-1" # Keep the exsiting terminal setting for this field
+	local keep="-1" # Keep the existing terminal setting for this field
 
 	local fzf_default_opts
 	case "$1" in

@@ -91,11 +91,11 @@ function convert_to_yaml() {
 	else
 		local subdirs="$3"
 		local pipeline=$(jq -rc '.metadata.name' <"$1")
-		# You could get project from jq .metadata.project, but we care more about the name embeded in the pipeline name
+		# You could get project from jq .metadata.project, but we care more about the name embedded in the pipeline name
 		local project=$(dirname $pipeline)
 		if [[ -z "$pipeline" ]] || [[ -z "$project" ]]; then
 			red "* Unable to find project and pipeline name from file $1"
-			reutrn 5
+			return 5
 		fi
 
 		local target="${pipeline##*/}.pip"

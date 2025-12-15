@@ -264,10 +264,12 @@ function _running_shell_pids() {
 	debug_and_run --noerr docker exec "${DOCKER_NAME}" list-wrapper-shells
 }
 
+# _our_shell_pid prints the wrapper shell PID inside the container for the current WRAPPER_PID.
 function _our_shell_pid() {
 	debug_and_run --noerr docker exec "${DOCKER_NAME}" list-wrapper-shells "$WRAPPER_PID" || true
 }
 
+# _running_shell_count echoes the number of running shell PIDs detected in the current container.
 function _running_shell_count() {
 	local count
 	mapfile -t count < <(_running_shell_pids || true)
@@ -285,7 +287,7 @@ function _on_container_exit() {
 	[ -n "${ON_CONTAINER_EXIT}" ] && command -v "${ON_CONTAINER_EXIT}" >/dev/null && debug_and_run "${ON_CONTAINER_EXIT}"
 }
 
-# Call this function to wait for the container to exit, after all other shells have exited.
+# wait_for_container_exit waits for the Docker container to exit after other shells have terminated, triggers appropriate exit hooks, and prints guidance or forces termination if the container remains running.
 function wait_for_container_exit() {
 	local i n shells
 	n=15
@@ -320,6 +322,7 @@ function wait_for_container_exit() {
 	fi
 }
 
+# run_exit_hooks coordinates shutdown after the terminal detaches: it waits for other interactive shells (if any), reports status to the user, and invokes container- and shell-exit hooks while waiting for the container to terminate.
 function run_exit_hooks() {
 	# This runs as soon as the terminal is detached. It may take moments for the shell to actually exit.
 	# It can then take at least a second for the init process to quit.
@@ -653,6 +656,7 @@ function use() {
 	true
 }
 
+# _polite_stop sends SIGTERM to the Docker container matching NAME, waits up to 8 seconds for it to exit, and re-sends SIGTERM (exiting with code 138) if the container does not stop.
 _polite_stop() {
 	name="$1"
 	[ -n "$name" ] || return 1
@@ -676,6 +680,7 @@ _polite_stop() {
 	return 138
 }
 
+# stop stops a running geodesic container: if a container name is provided as the first target it requests a graceful shutdown of that container; otherwise it finds containers matching DOCKER_NAME and stops the single match, reports none found, or returns an error when multiple matches exist.
 function stop() {
 	exec 1>&2
 	name=${targets[1]}

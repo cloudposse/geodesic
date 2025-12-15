@@ -63,6 +63,11 @@ function reload() {
 # Define our own prompt
 PROMPT_HOOKS+=("geodesic_prompt")
 KUBE_PS1_SYMBOL_ENABLE=${KUBE_PS1_SYMBOL_ENABLE:-false}
+# geodesic_prompt Constructs and installs the interactive shell prompt (PS1) using configured style, role, secrets, Terraform and Kubernetes state, and optional banner.
+# 
+# geodesic_prompt selects glyphs and marks based on PROMPT_STYLE (plain, unicode, fancy, or default), computes a level indicator from SHLVL, and sets status/role indicators based on ASSUME_ROLE.
+# It detects active secret environment variables listed in PROMPT_SECRET_ENVS and appends an indicator if any are set, integrates Terraform prompt lines when GEODESIC_TF_PROMPT_ACTIVE is enabled, and adapts the kube prompt prefix for KUBE_PS1.
+# The final PS1 includes an optional BANNER line (with namespace when configured) followed by the directory/host/role segment and prompt glyphs; when no BANNER is defined, PS1 contains only the Terraform and directory segments.
 function geodesic_prompt() {
 
 	case $PROMPT_STYLE in

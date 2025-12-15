@@ -7,6 +7,7 @@ export AWS_REGION_ABBREVIATION_TYPE=${AWS_REGION_ABBREVIATION_TYPE:-fixed}
 export AWS_DEFAULT_SHORT_REGION=${AWS_DEFAULT_SHORT_REGION:-$(aws-region --"${AWS_REGION_ABBREVIATION_TYPE}" "${AWS_DEFAULT_REGION:-us-west-2}")}
 export GEODESIC_AWS_HOME
 
+# _aws_config_home locates or creates the AWS configuration directory, exports GEODESIC_AWS_HOME (and may set AWS_CONFIG_FILE), ensures the directory and config file exist with secure permissions, and returns 1 on failure to create a usable directory.
 function _aws_config_home() {
 	for dir in "${GEODESIC_AWS_HOME}" "${LOCAL_HOME}/.aws" "${HOME}/.aws"; do
 		if [ -d "${dir}" ]; then
@@ -80,7 +81,7 @@ function aws_choose_role() {
 }
 
 # Usage: aws_sdk_assume_role <role> [command...]
-# If no command is given, a subshell is started with the role.
+# aws_sdk_assume_role sets ASSUME_ROLE and AWS_PROFILE to the specified role (or an interactively chosen role if none specified) and either launches a login subshell that preserves shell history or executes a given command with that profile, then restores the previous ASSUME_ROLE.
 function aws_sdk_assume_role() {
 	local role=$1
 	shift
@@ -108,7 +109,12 @@ function aws_sdk_assume_role() {
 }
 
 # Asks AWS what the currently active identity is and
-# sets environment variables accordingly
+# export_current_aws_role sets ASSUME_ROLE to reflect the currently active AWS identity.
+# It inspects the current STS caller identity and the active profile (AWS_PROFILE or AWS_VAULT),
+# attempts to map the active ARN to a more descriptive profile name by consulting the AWS config
+# and credentials files (handling normal IAM roles and Identity Center/SSO roles), warns and
+# exports a redacted marker when the environment profile disagrees with the active identity,
+# and unsets ASSUME_ROLE and returns when no identity can be determined.
 function export_current_aws_role() {
 	local role_name role_names
 	# Could be a primary or assumed role. If we have assumed a role, cut off the session name.
@@ -251,7 +257,9 @@ function export_current_aws_role() {
 
 # Keep track of AWS credentials and updates to AWS role environment variables.
 # When changes are noticed, update prompt with current role.
-unset GEODESIC_AWS_ROLE_CACHE # clear out value inherited from supershell
+unset GEODESIC_AWS_ROLE_CACHE # refresh_current_aws_role_if_needed checks whether the active AWS role context has changed and updates cached state if necessary.
+# 
+# It computes a fingerprint from the exported AWS_PROFILE, the modification time of the shared credentials file, and AWS_ACCESS_KEY_ID; if the fingerprint differs from GEODESIC_AWS_ROLE_CACHE it calls export_current_aws_role and updates GEODESIC_AWS_ROLE_CACHE with the new fingerprint.
 function refresh_current_aws_role_if_needed() {
 	local is_exported="^declare -[^ x]*x[^ x]* "
 	local aws_profile=$(declare -p AWS_PROFILE 2>/dev/null)

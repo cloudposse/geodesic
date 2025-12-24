@@ -17,7 +17,7 @@ fi
 #
 # Determine the base directory for all customizations.
 # We do some extra processing because GEODESIC_CONFIG_HOME needs to be set as a path in the Geodesic file system,
-# but the user may have set it as a path on the host computer system. We try to accomodate that by
+# but the user may have set it as a path on the host computer system. We try to accommodate that by
 # searching a few other places for the directory if $GEODESIC_CONFIG_HOME does point to a valid directory
 export GEODESIC_CONFIG_HOME
 _GEODESIC_CONFIG_HOME_DEFAULT="/root/.config/geodesic"

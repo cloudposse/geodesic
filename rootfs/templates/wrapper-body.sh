@@ -269,7 +269,8 @@ function _our_shell_pid() {
 }
 
 function _running_shell_count() {
-	local count=($(_running_shell_pids || true))
+	local count
+	mapfile -t count < <(_running_shell_pids || true)
 	echo "${#count[@]}"
 }
 
@@ -299,7 +300,7 @@ function wait_for_container_exit() {
 		# Wait for our shell to quit, regardless, because new shells might not be found until triggered by our shell quitting.
 		if [ -z "$(_our_shell_pid)" ] && [ "$(_running_shell_count)" -gt 0 ]; then
 			printf 'New shells started from other sources, docker container still running.\n' >&2
-			printf 'Use `%s stop` to stop container gracefully, or\n  force quit with `docker kill %s`\n' "$(basename $0)" "${DOCKER_NAME}" >&2
+			printf 'Use `%s stop` to stop container gracefully, or\n  force quit with `docker kill %s`\n' "$(basename "$0")" "${DOCKER_NAME}" >&2
 			_on_shell_exit
 			return 7
 		fi
@@ -343,7 +344,7 @@ function run_exit_hooks() {
 	# Are other shells running?
 	if [ -n "$our_shell_pid" ]; then
 		# remove our shell from the list
-		shell_pids=($(printf "%s\n" "${shell_pids[@]}" | grep -v "^$our_shell_pid\$"))
+		mapfile -t shell_pids < <(printf "%s\n" "${shell_pids[@]}" | grep -v "^$our_shell_pid\$")
 	fi
 
 	local shells=${#shell_pids[@]}
@@ -351,7 +352,7 @@ function run_exit_hooks() {
 	if [ "$shells" -gt 0 ]; then
 		printf "Docker container still running. " >&2
 		[ "$shells" -eq 1 ] && echo -n "Quit 1 other shell " >&2 || echo -n "Quit $shells other shells " >&2
-		printf 'to terminate.\n  Use `%s stop` to stop gracefully, or\n  force quit with `docker kill %s`\n' "$(basename $0)" "${DOCKER_NAME}" >&2
+		printf 'to terminate.\n  Use `%s stop` to stop gracefully, or\n  force quit with `docker kill %s`\n' "$(basename "$0")" "${DOCKER_NAME}" >&2
 		_on_shell_exit
 		return 0
 	fi
@@ -655,7 +656,7 @@ function use() {
 _polite_stop() {
 	name="$1"
 	[ -n "$name" ] || return 1
-	if [ $(docker ps -q --filter "name=${name}" | wc -l | tr -d " ") -eq 0 ]; then
+	if [ "$(docker ps -q --filter "name=${name}" | wc -l | tr -d " ")" -eq 0 ]; then
 		echo "# No running containers found for ${name}"
 		return
 	fi
@@ -663,11 +664,11 @@ _polite_stop() {
 	printf "# Signalling '%s' to stop..." "${name}"
 	docker kill -s TERM "${name}" >/dev/null
 	for i in {1..9}; do
-		if [ $i -eq 9 ] || [ $(docker ps -q --filter "name=${name}" | wc -l | tr -d " ") -eq 0 ]; then
+		if [ "$i" -eq 9 ] || [ "$(docker ps -q --filter "name=${name}" | wc -l | tr -d " ")" -eq 0 ]; then
 			printf " '%s' stopped gracefully.\n\n" "${name}"
 			return 0
 		fi
-		[ $i -lt 8 ] && sleep 1
+		[ "$i" -lt 8 ] && sleep 1
 	done
 
 	printf " '%s' did not stop gracefully. Killing it.\n\n" "${name}"
@@ -679,16 +680,17 @@ function stop() {
 	exec 1>&2
 	name=${targets[1]}
 	if [ -n "$name" ]; then
-		_polite_stop ${name}
+		_polite_stop "${name}"
 		return $?
 	fi
-	RUNNING_NAMES=($(docker ps --filter name="^/${DOCKER_NAME}(-\d{8})?\$" --format '{{ .Names }}'))
+	local RUNNING_NAMES
+	mapfile -t RUNNING_NAMES < <(docker ps --filter name="^/${DOCKER_NAME}(-\d{8})?\$" --format '{{ .Names }}')
 	if [ -z "$RUNNING_NAMES" ]; then
 		echo "# No running containers found for ${DOCKER_NAME}"
 		return
 	fi
 	if [ ${#RUNNING_NAMES[@]} -eq 1 ]; then
-		echo "# Stopping ${RUNNING_NAMES[@]}..."
+		echo "# Stopping ${RUNNING_NAMES[*]}..."
 		_polite_stop "${RUNNING_NAMES[@]}"
 		return $?
 	fi

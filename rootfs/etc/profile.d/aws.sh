@@ -4,7 +4,7 @@
 # In this script, we do not care about return values, as problems are detected by the resulting empty value.
 
 export AWS_REGION_ABBREVIATION_TYPE=${AWS_REGION_ABBREVIATION_TYPE:-fixed}
-export AWS_DEFAULT_SHORT_REGION=${AWS_DEFAULT_SHORT_REGION:-$(aws-region --${AWS_REGION_ABBREVIATION_TYPE} ${AWS_DEFAULT_REGION:-us-west-2})}
+export AWS_DEFAULT_SHORT_REGION=${AWS_DEFAULT_SHORT_REGION:-$(aws-region --"${AWS_REGION_ABBREVIATION_TYPE}" "${AWS_DEFAULT_REGION:-us-west-2}")}
 export GEODESIC_AWS_HOME
 
 function _aws_config_home() {
@@ -102,7 +102,7 @@ function aws_sdk_assume_role() {
 		history -c
 		history -r
 	else
-		AWS_PROFILE="$role" $*
+		AWS_PROFILE="$role" "$@"
 	fi
 	ASSUME_ROLE="$assume_role"
 }
@@ -154,7 +154,8 @@ function export_current_aws_role() {
 					local sso_role_name=$(echo "$role_part" | cut -d'_' -f2) # This selects the second field delimited by '_'
 
 					# Find all profiles that have matching role names
-					local profile_names=($(crudini --get --format=lines "$config_file" | grep "$sso_role_name" | cut -d' ' -f 3))
+					local profile_names
+					mapfile -t profile_names < <(crudini --get --format=lines "$config_file" | grep "$sso_role_name" | cut -d' ' -f 3)
 					local profile_name
 					for profile_name in "${profile_names[@]}"; do
 						# Skip the generic profiles
@@ -173,7 +174,7 @@ function export_current_aws_role() {
 				# Normal IAM role
 				# Assumed roles in AWS config file use the role ARN, not the assumed role ARN, so adjust accordingly.
 				local role_arn=$(printf "%s" "$current_role" | sed 's/:sts:/:iam:/g' | sed 's,:assumed-role/,:role/,')
-				role_names=($(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3))
+				mapfile -t role_names < <(crudini --get --format=lines "$config_file" | grep "$role_arn" | cut -d' ' -f 3)
 				for rn in "${role_names[@]}"; do
 					if [[ $rn == "default" ]] || [[ $rn =~ -identity$ ]]; then
 						continue
@@ -257,7 +258,7 @@ function refresh_current_aws_role_if_needed() {
 	[[ $aws_profile =~ $is_exported ]] || aws_profile=""
 	local credentials_mtime=$(stat -c "%Y" "${AWS_SHARED_CREDENTIALS_FILE:-${GEODESIC_AWS_HOME}/credentials}" 2>/dev/null)
 	local role_fingerprint="${aws_profile}/${credentials_mtime}/${AWS_ACCESS_KEY_ID}"
-	if [[ $role_fingerprint != $GEODESIC_AWS_ROLE_CACHE ]]; then
+	if [[ $role_fingerprint != "$GEODESIC_AWS_ROLE_CACHE" ]]; then
 		export_current_aws_role
 		export GEODESIC_AWS_ROLE_CACHE="${role_fingerprint}"
 	fi

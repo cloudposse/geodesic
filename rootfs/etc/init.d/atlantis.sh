@@ -2,8 +2,7 @@
 
 # Start the atlantis server
 if [ "${ATLANTIS_ENABLED}" == "true" ]; then
-	which atlantis >/dev/null
-	if [ $? -ne 0 ]; then
+	if ! which atlantis >/dev/null; then
 		echo "Atlantis is not installed"
 		exit 1
 	fi
@@ -42,7 +41,7 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	export ATLANTIS_CHAMBER_SERVICE=${ATLANTIS_CHAMBER_SERVICE:-atlantis}
 
 	# Export environment from chamber to shell
-	source <(chamber exec ${ATLANTIS_CHAMBER_SERVICE} -- sh -c "export -p")
+	source <(chamber exec "${ATLANTIS_CHAMBER_SERVICE}" -- sh -c "export -p")
 
 	if [ -n "${ATLANTIS_IAM_ROLE_ARN}" ]; then
 		# Map the Atlantis IAM Role ARN to the env we use everywhere in our root modules
@@ -55,11 +54,11 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	export ATLANTIS_HOME=${ATLANTIS_HOME:-/home/atlantis}
 
 	# create atlantis user & group
-	(getent group ${ATLANTIS_GROUP} || addgroup ${ATLANTIS_GROUP}) >/dev/null
-	(getent passwd ${ATLANTIS_USER} || adduser -h ${ATLANTIS_HOME} -S -G ${ATLANTIS_GROUP} ${ATLANTIS_USER}) >/dev/null
+	(getent group "${ATLANTIS_GROUP}" || addgroup "${ATLANTIS_GROUP}") >/dev/null
+	(getent passwd "${ATLANTIS_USER}" || adduser -h "${ATLANTIS_HOME}" -S -G "${ATLANTIS_GROUP}" "${ATLANTIS_USER}") >/dev/null
 
 	# Provision terraform cache directory
-	install --directory ${TF_PLUGIN_CACHE_DIR} --owner ${ATLANTIS_USER} --group ${ATLANTIS_GROUP}
+	install --directory "${TF_PLUGIN_CACHE_DIR}" --owner "${ATLANTIS_USER}" --group "${ATLANTIS_GROUP}"
 
 	# Allow atlantis to use /dev/shm
 	if [ -d /dev/shm ]; then
@@ -69,14 +68,14 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 
 	# Add SSH key to agent, if one is configured so we can pull from private git repos
 	if [ -n "${ATLANTIS_SSH_PRIVATE_KEY}" ]; then
-		source <(gosu ${ATLANTIS_USER} ssh-agent -s)
-		ssh-add - <<<${ATLANTIS_SSH_PRIVATE_KEY}
+		source <(gosu "${ATLANTIS_USER}" ssh-agent -s)
+		ssh-add - <<<"${ATLANTIS_SSH_PRIVATE_KEY}"
 		# Sanitize environment
 		unset ATLANTIS_SSH_PRIVATE_KEY
 	fi
 
 	if [ -n "${ATLANTIS_ALLOW_PRIVILEGED_PORTS}" ]; then
-		setcap "cap_net_bind_service=+ep" $(which atlantis)
+		setcap "cap_net_bind_service=+ep" "$(which atlantis)"
 	fi
 
 	# Do not export these as Terraform environment variables
@@ -92,18 +91,18 @@ if [ "${ATLANTIS_ENABLED}" == "true" ]; then
 	# https://gist.github.com/Kovrinic/ea5e7123ab5c97d451804ea222ecd78a
 
 	# The URL "git@github.com:" is used by `git` (e.g. `git clone`)
-	gosu ${ATLANTIS_USER} git config --global url."https://github.com/".insteadOf "git@github.com:"
+	gosu "${ATLANTIS_USER}" git config --global url."https://github.com/".insteadOf "git@github.com:"
 	# The URL "ssh://git@github.com/" is used by Terraform (e.g. `terraform init --from-module=...`)
 	# NOTE: we use `--add` to append the second URL to the config file
-	gosu ${ATLANTIS_USER} git config --global url."https://github.com/".insteadOf "ssh://git@github.com/" --add
+	gosu "${ATLANTIS_USER}" git config --global url."https://github.com/".insteadOf "ssh://git@github.com/" --add
 
 	# https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage
 	# see rootfs/usr/local/bin/git-credential-github
-	gosu ${ATLANTIS_USER} git config --global credential.helper 'github'
+	gosu "${ATLANTIS_USER}" git config --global credential.helper 'github'
 
 	# Use a primitive init handler to catch signals and handle them properly
 	# Use gosu to drop privileges
 	# Use env to setup the shell environment for atlantis
 	# Then lastly, start the atlantis server
-	exec dumb-init gosu ${ATLANTIS_USER} env BASH_ENV=/etc/direnv/bash atlantis server
+	exec dumb-init gosu "${ATLANTIS_USER}" env BASH_ENV=/etc/direnv/bash atlantis server
 fi

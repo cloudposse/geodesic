@@ -283,7 +283,7 @@ RUN if [[ -x /usr/local/bin/aws ]]; then mv /usr/local/bin/aws /usr/local/bin/aw
 # Install AWS CLI 2
 # Get AWS CLI V2 version from https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst if you want
 # but it is updated several times a week, so we choose to just get the latest.
-# It is available in a Debain package `awscli`, but that can be very out of date.
+# It is available in a Debian package `awscli`, but that can be very out of date.
 # ARG AWS_CLI_VERSION=2.15.48
 RUN AWSTMPDIR=$(mktemp -d -t aws-inst-XXXXXXXXXX) && \
       if [ "$TARGETARCH" = "amd64" ]; then \

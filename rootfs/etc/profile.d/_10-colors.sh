@@ -210,7 +210,7 @@ function _geodesic_tput_cache_init() {
 	done
 
 	# Bold is not a color, handle bold without color change separately
-	if [[ -n "$bold"} ]]; then
+	if [[ -n "$bold" ]]; then
 		_geodesic_tput_cache["bold"]=$(printf "\x01%s\x02" "$bold")
 		_geodesic_tput_cache["bold-off"]=$(printf "\x01%s\x02" "$bold_off")
 	fi

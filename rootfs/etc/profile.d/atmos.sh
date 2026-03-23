@@ -20,14 +20,14 @@ function use-identity() {
 	local auth_output
 	if [ $# -eq 0 ]; then
 		# No arguments: bring up the selector by passing --identity with no value
-		if ! auth_output=$(atmos auth env --identity 2>&1); then
-			echo "Error running atmos auth: $auth_output" >&2
+		if ! auth_output=$(atmos auth env --identity); then
+			echo "Error running atmos auth" >&2
 			return 1
 		fi
 	else
 		# Arguments provided: pass --identity=<value> with the first argument, then any additional flags
-		if ! auth_output=$(atmos auth env --identity="$1" "${@:2}" 2>&1); then
-			echo "Error running atmos auth: $auth_output" >&2
+		if ! auth_output=$(atmos auth env --identity="$1" "${@:2}"); then
+			echo "Error running atmos auth" >&2
 			return 1
 		fi
 	fi

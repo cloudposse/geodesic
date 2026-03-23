@@ -14,7 +14,7 @@ function file_on_host() {
 	for path in "${GEODESIC_HOST_PATHS[@]}"; do
 		# Skip paths that are just slashes, or completely empty, which would match everything
 		[[ "$path" =~ ^/*$ ]] && continue
-		if [[ "$path" == "${file}/" || "${file}" == "$path"* ]]; then
+		if [[ "${file}" == "${path}" || "${file}" == "$path"* ]]; then
 			return 0
 		fi
 	done

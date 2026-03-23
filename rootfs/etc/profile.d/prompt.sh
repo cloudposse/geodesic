@@ -168,7 +168,7 @@ function geodesic_prompt() {
 		if [[ -n ${GEODESIC_TF_PROMPT_LINE} ]]; then
 			tf_prompt=" ${tf_mark} ${GEODESIC_TF_PROMPT_LINE}\n"
 		fi
-		if [[ GEODESIC_TF_PROMPT_ENABLED == "true" ]]; then
+		if [[ $GEODESIC_TF_PROMPT_ENABLED == "true" ]]; then
 			KUBE_PS1_PREFIX="$(yellow-n "cluster:")("
 		fi
 	fi

@@ -5,7 +5,7 @@
 # bookworm-20241016 corresponds to Debian 12.7
 ARG DEBIAN_CODENAME=bookworm
 # Debian codenamed images are tagged with date codes rather than minor version numbers.
-ARG DEBAIN_DATECODE=20241223
+ARG DEBIAN_DATECODE=20241223
 # Find the current version of Python at https://www.python.org/downloads/source/
 ARG PYTHON_VERSION=3.12.8
 
@@ -61,7 +61,7 @@ RUN find / -xdev -name __pycache__ -exec rm -rf {} \; -prune
 #
 # Geodesic base image
 #
-FROM debian:${DEBIAN_CODENAME}-${DEBAIN_DATECODE}-slim
+FROM debian:${DEBIAN_CODENAME}-${DEBIAN_DATECODE}-slim
 
 ARG VERSION
 ENV GEODESIC_VERSION=$VERSION

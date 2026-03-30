@@ -10,7 +10,8 @@ fi
 
 # A lot of terminals (including Apple's) do not support 24-bit color and the mapping from 24-bit to 8-bit is horrible.
 # So most of the color schemes are limited to the 256 ANSI colors that nearly every terminal supports.
-# Color schemes that only render properly with 24_bit color support are suffixed with _24
+# _set_fzf_default_opts builds and exports FZF_DEFAULT_OPTS based on the given color scheme.
+# The first argument selects the color scheme (e.g., solar_24, solarized_dark, solarized_light, mild, dark, light, 16, bw); when omitted or unrecognized, a mild/default palette is used.
 
 function _set_fzf_default_opts() {
 	local gray1="232"

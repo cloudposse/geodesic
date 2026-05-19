@@ -159,6 +159,8 @@ Launching Geodesic is a bit complex, so we recommend you install a launch script
 ```
 docker run --rm cloudposse/geodesic:latest-debian init | bash
 ```
+This command installs the Geodesic launcher locally using Docker.
+
 After that, you should be able to launch Geodesic just by typing
 ```
 geodesic
@@ -322,6 +324,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 ### 🌎 Slack Community
 
 Join our [Open Source Community](https://cpco.io/slack?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/geodesic&utm_content=slack) on Slack. It's **FREE** for everyone! Our "SweetOps" community is where you get to talk with others who share a similar vision for how to rollout and manage infrastructure. This is the best place to talk shop, ask questions, solicit feedback, and work together as a community to build totally *sweet* infrastructure.
+
 
 ### 📰 Newsletter
 

@@ -21,8 +21,10 @@ ARG VERSION=4.0.0
 # Changing base OS for Geodesic is possible by changing this arg, but
 # unfortunately, the package managers are different, so it is not that simple.
 ARG OS=debian
-
+# ARG values are available during image build time only.
+# ENV values remain available inside the running container.
 FROM cloudposse/geodesic:$VERSION-$OS
+# Uses the Geodesic Docker image as the base image for customization.
 
 ENV DOCKER_IMAGE="examplecorp/infrastructure"
 ENV DOCKER_TAG="latest"
@@ -58,5 +60,7 @@ RUN apt-get update && apt-get install kubectl-${KUBECTL_VERSION}
 RUN apt-get install atmos
 
 COPY rootfs/ /
+# Copies local rootfs files into the container filesystem.
 
 WORKDIR /workspace
+# Sets /workspace as the default working directory inside the container.

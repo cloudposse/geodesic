@@ -159,6 +159,8 @@ Launching Geodesic is a bit complex, so we recommend you install a launch script
 ```
 docker run --rm cloudposse/geodesic:latest-debian init | bash
 ```
+This command installs the Geodesic launcher locally using Docker.
+
 After that, you should be able to launch Geodesic just by typing
 ```
 geodesic
